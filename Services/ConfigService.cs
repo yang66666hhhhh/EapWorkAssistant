@@ -23,6 +23,7 @@ public class ConfigService
 
     public List<string> Projects => _data.Projects;
     public List<string> WorkTypes => _data.WorkTypes;
+    public List<ContentTemplate> ContentTemplates => _data.ContentTemplates;
 
     public void Load()
     {
@@ -63,6 +64,15 @@ public class ConfigService
                     "学习",
                     "调试",
                     "文档"
+                },
+                ContentTemplates = new List<ContentTemplate>
+                {
+                    new() { Name = "晨会", Content = "1. 参加晨会，汇报昨日进展和今日计划\n2. 同步项目进度和风险" },
+                    new() { Name = "代码评审", Content = "1. 评审XX模块代码\n2. 提出优化建议\n3. 确认代码质量" },
+                    new() { Name = "Bug修复", Content = "1. 定位问题根因\n2. 修复XX功能异常\n3. 编写单元测试验证" },
+                    new() { Name = "需求分析", Content = "1. 与产品确认需求细节\n2. 编写技术方案\n3. 评估工时" },
+                    new() { Name = "文档编写", Content = "1. 编写XX接口文档\n2. 更新项目README\n3. 整理技术文档" },
+                    new() { Name = "环境部署", Content = "1. 部署测试环境\n2. 配置服务参数\n3. 验证服务状态" }
                 }
             };
             Save();
@@ -150,6 +160,44 @@ public class ConfigService
             if (index >= 0)
             {
                 _data.WorkTypes[index] = newWorkType;
+                Save();
+            }
+        }
+    }
+
+    public void AddContentTemplate(ContentTemplate template)
+    {
+        lock (_lock)
+        {
+            if (!_data.ContentTemplates.Any(t => t.Name == template.Name))
+            {
+                _data.ContentTemplates.Add(template);
+                Save();
+            }
+        }
+    }
+
+    public void RemoveContentTemplate(string name)
+    {
+        lock (_lock)
+        {
+            var template = _data.ContentTemplates.FirstOrDefault(t => t.Name == name);
+            if (template != null)
+            {
+                _data.ContentTemplates.Remove(template);
+                Save();
+            }
+        }
+    }
+
+    public void UpdateContentTemplate(string oldName, ContentTemplate newTemplate)
+    {
+        lock (_lock)
+        {
+            var index = _data.ContentTemplates.FindIndex(t => t.Name == oldName);
+            if (index >= 0)
+            {
+                _data.ContentTemplates[index] = newTemplate;
                 Save();
             }
         }

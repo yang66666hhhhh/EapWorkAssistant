@@ -4,6 +4,10 @@
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
              xmlns:views="clr-namespace:EapWorkAssistant.Views"
              FontFamily="{StaticResource DefaultFont}">
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveRecordCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding ClosePanelCommand}"/>
+    </UserControl.InputBindings>
     <Grid>
         <!-- 内层内容区域 -->
         <Grid Margin="20,16">
@@ -367,6 +371,15 @@
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <Button x:Name="TemplateBtn" Style="{StaticResource BtnGhost}" Padding="8,6"
+                                    ToolTip="使用模板填充内容">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#x1F4CB;" FontSize="12" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="模板" FontSize="12" Foreground="{StaticResource PrimaryBrush}"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                             <Button x:Name="CopyLastBtn" Click="CopyLast_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6" ToolTip="复制上一条记录的任务和类型">
                                 <TextBlock Text="复制上条" FontSize="12"
@@ -423,6 +436,25 @@
                         </Grid>
 
                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,14"/>
+
+                        <!-- 快捷模板 -->
+                        <TextBlock Text="快捷模板" Style="{StaticResource Label}"/>
+                        <ItemsControl ItemsSource="{Binding ContentTemplates}" Margin="0,0,0,10">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Name}" Style="{StaticResource BtnGhost}"
+                                            Padding="10,5" Margin="0,0,6,6" FontSize="12"
+                                            Command="{Binding DataContext.ApplyTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Foreground="{StaticResource PrimaryBrush}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                         <!-- 工作内容 -->
                         <TextBlock Text="工作内容 *" Style="{StaticResource Label}"/>

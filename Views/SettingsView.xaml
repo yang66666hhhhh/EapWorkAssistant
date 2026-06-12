@@ -11,6 +11,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- 标题 -->
@@ -132,5 +134,62 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!-- 内容模板管理 -->
+        <Border Grid.Row="4" Style="{StaticResource Card}" Padding="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="内容模板" Style="{StaticResource Heading3}"/>
+                    <Button Grid.Column="1" Content="+ 添加模板" Style="{StaticResource BtnPrimary}"
+                            Padding="14,8" FontSize="12"
+                            Command="{Binding AddTemplateCommand}"/>
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource ModernScrollViewer}">
+                    <ItemsControl ItemsSource="{Binding ContentTemplates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="8"
+                                        Padding="14,12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13"
+                                                   Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Content}" FontSize="12"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                   MaxHeight="20"/>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                            <Button Content="编辑" Style="{StaticResource BtnGhost}"
+                                                    Padding="10,5" FontSize="12"
+                                                    Command="{Binding DataContext.EditTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="删除" Style="{StaticResource BtnGhost}"
+                                                    Padding="10,5" FontSize="12"
+                                                    Foreground="{StaticResource DangerBrush}"
+                                                    Command="{Binding DataContext.DeleteTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

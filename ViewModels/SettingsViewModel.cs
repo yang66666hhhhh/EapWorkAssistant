@@ -24,6 +24,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
+    [ObservableProperty]
+    private ObservableCollection<ContentTemplate> _contentTemplates = new();
+
     public SettingsViewModel()
     {
         _ = RefreshAsync();
@@ -33,6 +36,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     {
         Projects = new ObservableCollection<string>(ConfigService.Instance.Projects);
         WorkTypes = new ObservableCollection<string>(ConfigService.Instance.WorkTypes);
+        ContentTemplates = new ObservableCollection<ContentTemplate>(ConfigService.Instance.ContentTemplates);
         return Task.CompletedTask;
     }
 
@@ -108,5 +112,60 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveWorkType(workType);
         RefreshAsync();
         StatusMessage = "类型已删除";
+    }
+
+    [RelayCommand]
+    private void AddTemplate()
+    {
+        var dialog = new Views.ConfigItemDialog("添加模板名称", "");
+        dialog.Owner = Application.Current.MainWindow;
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        {
+            var contentDialog = new Views.ConfigItemDialog("添加模板内容", "");
+            contentDialog.Owner = Application.Current.MainWindow;
+            if (contentDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(contentDialog.ItemValue))
+            {
+                ConfigService.Instance.AddContentTemplate(new ContentTemplate
+                {
+                    Name = dialog.ItemValue.Trim(),
+                    Content = contentDialog.ItemValue.Trim()
+                });
+                RefreshAsync();
+                StatusMessage = "模板已添加";
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void EditTemplate(ContentTemplate? template)
+    {
+        if (template == null) return;
+        var dialog = new Views.ConfigItemDialog("编辑模板名称", template.Name);
+        dialog.Owner = Application.Current.MainWindow;
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        {
+            var contentDialog = new Views.ConfigItemDialog("编辑模板内容", template.Content);
+            contentDialog.Owner = Application.Current.MainWindow;
+            if (contentDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(contentDialog.ItemValue))
+            {
+                ConfigService.Instance.UpdateContentTemplate(template.Name, new ContentTemplate
+                {
+                    Name = dialog.ItemValue.Trim(),
+                    Content = contentDialog.ItemValue.Trim()
+                });
+                RefreshAsync();
+                StatusMessage = "模板已更新";
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteTemplate(ContentTemplate? template)
+    {
+        if (template == null) return;
+        if (!ConfirmDialog.Show($"确定要删除模板「{template.Name}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        ConfigService.Instance.RemoveContentTemplate(template.Name);
+        RefreshAsync();
+        StatusMessage = "模板已删除";
     }
 }

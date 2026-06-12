@@ -78,6 +78,15 @@
         </Style>
     </Window.Resources>
 
+    <Window.InputBindings>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="WorkRecord"/>
+        <KeyBinding Key="D1" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="Dashboard"/>
+        <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="WorkRecord"/>
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="Knowledge"/>
+        <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="Issue"/>
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding NavigateToCommand}" CommandParameter="Settings"/>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240"/>

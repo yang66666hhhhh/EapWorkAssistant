@@ -59,6 +59,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     public string[] Projects => ProjectInfo.Projects;
     public string[] WorkTypes => ProjectInfo.WorkTypes;
+    public List<ContentTemplate> ContentTemplates => ConfigService.Instance.ContentTemplates;
 
     public WorkRecordViewModel()
     {
@@ -200,6 +201,21 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         IsEditing = false;
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
+    }
+
+    [RelayCommand]
+    private void ClosePanel()
+    {
+        RecordSaved?.Invoke();
+    }
+
+    [RelayCommand]
+    private void ApplyTemplate(ContentTemplate? template)
+    {
+        if (template == null) return;
+        CurrentRecord.Content = template.Content;
+        StatusMessage = $"已应用模板：{template.Name}";
+        _statusTimer.Start();
     }
 
     [RelayCommand]
