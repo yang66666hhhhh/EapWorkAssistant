@@ -25,6 +25,30 @@ public class ConfigService
     public List<string> WorkTypes => _data.WorkTypes;
     public List<ContentTemplate> ContentTemplates => _data.ContentTemplates;
 
+    public bool EnableShortcuts
+    {
+        get => _data.EnableShortcuts;
+        set { _data.EnableShortcuts = value; Save(); }
+    }
+
+    public bool EnableReminder
+    {
+        get => _data.EnableReminder;
+        set { _data.EnableReminder = value; Save(); }
+    }
+
+    public int ReminderHour
+    {
+        get => _data.ReminderHour;
+        set { _data.ReminderHour = value; Save(); }
+    }
+
+    public int ReminderMinute
+    {
+        get => _data.ReminderMinute;
+        set { _data.ReminderMinute = value; Save(); }
+    }
+
     public void Load()
     {
         lock (_lock)

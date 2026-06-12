@@ -10,8 +10,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="24"/>
+            <RowDefinition Height="16"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -23,7 +25,65 @@
                    FontSize="13" FontWeight="Medium" Margin="0,0,0,16"
                    Visibility="{Binding StatusMessage, Converter={x:Static local:CountToVisibilityConverter.Instance}}"/>
 
-        <Grid Grid.Row="2">
+        <!-- 通用设置 -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="24" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="通用设置" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+
+                <!-- 快捷键开关 -->
+                <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="16,14" Margin="0,0,0,10">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="键盘快捷键" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Ctrl+N 新增、Ctrl+S 保存、Esc 关闭、Ctrl+1~5 切换页面" FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <ToggleButton IsChecked="{Binding EnableShortcuts}" HorizontalAlignment="Right"
+                                      VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"/>
+                    </Grid>
+                </Border>
+
+                <!-- 定时提醒开关 -->
+                <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="16,14" Margin="0,0,0,10">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="下班提醒" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="下班后提醒记录当天工作" FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <ToggleButton IsChecked="{Binding EnableReminder}" HorizontalAlignment="Right"
+                                      VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"/>
+                    </Grid>
+                </Border>
+
+                <!-- 提醒时间设置 -->
+                <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="16,14"
+                        Visibility="{Binding EnableReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="提醒时间" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="设置下班提醒的时间" FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Text="{Binding ReminderHour, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource Input}" Width="50" HorizontalContentAlignment="Center"
+                                     VerticalContentAlignment="Center" Height="32"/>
+                            <TextBlock Text=":" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"
+                                       Margin="4,0,4,0" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBox Text="{Binding ReminderMinute, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource Input}" Width="50" HorizontalContentAlignment="Center"
+                                     VerticalContentAlignment="Center" Height="32"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="24"/>

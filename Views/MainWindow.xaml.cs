@@ -1,3 +1,4 @@
+using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Input;
@@ -9,6 +10,32 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Loaded += MainWindow_Loaded;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        UpdateShortcutState();
+    }
+
+    private void UpdateShortcutState()
+    {
+        var enabled = ConfigService.Instance.EnableShortcuts;
+        InputBindings.Clear();
+
+        if (enabled)
+        {
+            var vm = DataContext as MainViewModel;
+            if (vm != null)
+            {
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.N, ModifierKeys.Control) { CommandParameter = "WorkRecord" });
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D1, ModifierKeys.Control) { CommandParameter = "Dashboard" });
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D2, ModifierKeys.Control) { CommandParameter = "WorkRecord" });
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D3, ModifierKeys.Control) { CommandParameter = "Knowledge" });
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D4, ModifierKeys.Control) { CommandParameter = "Issue" });
+                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D5, ModifierKeys.Control) { CommandParameter = "Settings" });
+            }
+        }
     }
 
     private void ProfileCard_Click(object sender, MouseButtonEventArgs e)
@@ -45,5 +72,12 @@ public partial class MainWindow : Window
                 vm.NavigateToResultCommand.Execute(item);
             }
         }
+    }
+
+    // 当从设置页面返回时刷新快捷键状态
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+        UpdateShortcutState();
     }
 }

@@ -27,6 +27,18 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private ObservableCollection<ContentTemplate> _contentTemplates = new();
 
+    [ObservableProperty]
+    private bool _enableShortcuts = true;
+
+    [ObservableProperty]
+    private bool _enableReminder = true;
+
+    [ObservableProperty]
+    private int _reminderHour = 17;
+
+    [ObservableProperty]
+    private int _reminderMinute = 30;
+
     public SettingsViewModel()
     {
         _ = RefreshAsync();
@@ -37,7 +49,41 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         Projects = new ObservableCollection<string>(ConfigService.Instance.Projects);
         WorkTypes = new ObservableCollection<string>(ConfigService.Instance.WorkTypes);
         ContentTemplates = new ObservableCollection<ContentTemplate>(ConfigService.Instance.ContentTemplates);
+        EnableShortcuts = ConfigService.Instance.EnableShortcuts;
+        EnableReminder = ConfigService.Instance.EnableReminder;
+        ReminderHour = ConfigService.Instance.ReminderHour;
+        ReminderMinute = ConfigService.Instance.ReminderMinute;
         return Task.CompletedTask;
+    }
+
+    partial void OnEnableShortcutsChanged(bool value)
+    {
+        ConfigService.Instance.EnableShortcuts = value;
+        StatusMessage = value ? "快捷键已启用" : "快捷键已禁用";
+    }
+
+    partial void OnEnableReminderChanged(bool value)
+    {
+        ConfigService.Instance.EnableReminder = value;
+        StatusMessage = value ? "定时提醒已启用" : "定时提醒已禁用";
+    }
+
+    partial void OnReminderHourChanged(int value)
+    {
+        if (value >= 0 && value <= 23)
+        {
+            ConfigService.Instance.ReminderHour = value;
+            StatusMessage = $"提醒时间已更新为 {value:D2}:{ReminderMinute:D2}";
+        }
+    }
+
+    partial void OnReminderMinuteChanged(int value)
+    {
+        if (value >= 0 && value <= 59)
+        {
+            ConfigService.Instance.ReminderMinute = value;
+            StatusMessage = $"提醒时间已更新为 {ReminderHour:D2}:{value:D2}";
+        }
     }
 
     [RelayCommand]
