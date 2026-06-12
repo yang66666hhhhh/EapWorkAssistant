@@ -11,5 +11,12 @@ public partial class App : Application
         base.OnStartup(e);
         DatabaseInitializer.Initialize();
         DatabaseBackupService.BackupIfNeeded();
+        ReminderService.Start();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        ReminderService.Stop();
+        base.OnExit(e);
     }
 }

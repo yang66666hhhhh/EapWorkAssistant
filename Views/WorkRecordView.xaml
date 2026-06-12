@@ -89,6 +89,10 @@
                                             Style="{StaticResource BtnSuccess}" Margin="5,0,0,0" Padding="10,7" FontSize="12"/>
                                     <Button Content="月报" Command="{Binding GenerateMonthlyReportCommand}"
                                             Style="{StaticResource BtnWarning}" Margin="5,0,0,0" Padding="10,7" FontSize="12"/>
+                                    <Border Width="1" Background="{StaticResource BorderBrush}" Margin="8,5" Opacity="0.5"/>
+                                    <Button Content="导出CSV" Command="{Binding ExportCsvCommand}"
+                                            Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
+                                            Foreground="{StaticResource PrimaryBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

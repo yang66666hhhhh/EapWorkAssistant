@@ -292,6 +292,20 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
     }
 
+    [RelayCommand]
+    private void ExportCsv()
+    {
+        if (!Records.Any())
+        {
+            StatusMessage = "没有可导出的记录";
+            _statusTimer.Start();
+            return;
+        }
+        ExportService.ExportToCsv(Records, $"工作记录_{SelectedDate:yyyyMMdd}");
+        StatusMessage = "已导出CSV文件";
+        _statusTimer.Start();
+    }
+
     partial void OnSelectedDateChanged(DateTime value)
     {
         _ = LoadRecordsAsync();
