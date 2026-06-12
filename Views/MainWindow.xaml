@@ -189,72 +189,85 @@
                                      Command="{Binding NavigateToCommand}" CommandParameter="Settings"/>
                     </StackPanel>
                 </ScrollViewer>
-
-                <!-- 搜索框 -->
-                <Border DockPanel.Dock="Bottom" Margin="16,0,16,12" CornerRadius="10"
-                        Background="#FF162033" Padding="2"
-                        BorderBrush="#FF1E293B" BorderThickness="1">
-                    <Border CornerRadius="8" Background="#FF0F172A" Padding="0">
-                        <Grid Height="36">
-                            <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"
-                                     Foreground="White" FontSize="13" Padding="34,0,10,0"
-                                     VerticalContentAlignment="Center"
-                                     CaretBrush="White"
-                                     Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
-                                     KeyDown="SearchBox_KeyDown"/>
-                            <Border Background="Transparent" VerticalAlignment="Center"
-                                    Margin="10,0,0,0" IsHitTestVisible="False">
-                                <TextBlock Text="&#x1F50D;" FontSize="13" Opacity="0.4"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="搜索工作记录..." FontSize="12.5" VerticalAlignment="Center"
-                                       Margin="32,0,0,0" Opacity="0.35" IsHitTestVisible="False"
-                                       Foreground="#FF94A3B8">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
-                </Border>
             </DockPanel>
         </Border>
 
         <!-- ===== 主内容区 ===== -->
         <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}">
-            <ContentControl Content="{Binding CurrentView}">
-                <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-                        <views:DashboardView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:WorkRecordViewModel}">
-                        <views:WorkRecordView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:KnowledgeViewModel}">
-                        <views:KnowledgeView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:IssueViewModel}">
-                        <views:IssueView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-                        <views:SettingsView/>
-                    </DataTemplate>
-                </ContentControl.Resources>
-            </ContentControl>
+            <DockPanel>
+                <!-- 顶部搜索栏 -->
+                <Border DockPanel.Dock="Top" Background="White" Padding="16,10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                    <Grid Height="40">
+                        <Border CornerRadius="10" Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <Grid>
+                                <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"
+                                         Foreground="{StaticResource TextPrimaryBrush}" FontSize="13"
+                                         Padding="40,0,16,0" VerticalContentAlignment="Center"
+                                         CaretBrush="{StaticResource PrimaryBrush}"
+                                         Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                         KeyDown="SearchBox_KeyDown"/>
+                                <Border Background="Transparent" VerticalAlignment="Center"
+                                        Margin="14,0,0,0" IsHitTestVisible="False">
+                                    <TextBlock Text="&#x1F50D;" FontSize="14" Opacity="0.4"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="搜索工作记录、知识库、问题..." FontSize="13"
+                                           VerticalAlignment="Center" Margin="40,0,0,0"
+                                           Opacity="0.35" IsHitTestVisible="False"
+                                           Foreground="{StaticResource TextTertiaryBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                                CornerRadius="6" Padding="8,5"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <TextBlock Text="Ctrl+F 聚焦搜索" FontSize="11"
+                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- 主内容 -->
+                <ContentControl Content="{Binding CurrentView}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                            <views:DashboardView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:WorkRecordViewModel}">
+                            <views:WorkRecordView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:KnowledgeViewModel}">
+                            <views:KnowledgeView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:IssueViewModel}">
+                            <views:IssueView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                            <views:SettingsView/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+            </DockPanel>
         </Border>
 
         <!-- ===== 搜索结果弹窗 ===== -->
         <Border x:Name="SearchPopup" Panel.ZIndex="100"
                 Visibility="{Binding IsSearchPopupOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                 CornerRadius="14"
-                Margin="252,70,20,20" MaxHeight="500"
+                Margin="260,60,20,20" MaxHeight="500"
                 HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <Border.Background>
                 <SolidColorBrush Color="White" Opacity="0.98"/>
