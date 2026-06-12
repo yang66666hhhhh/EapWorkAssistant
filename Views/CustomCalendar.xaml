@@ -1,0 +1,221 @@
+<UserControl x:Class="EapWorkAssistant.Views.CustomCalendar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:EapWorkAssistant.Models"
+             x:Name="Root"
+             FontFamily="{StaticResource DefaultFont}">
+
+    <UserControl.Resources>
+        <!-- 导航箭头按钮 -->
+        <Style x:Key="NavBtnStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{StaticResource SurfaceHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{StaticResource BorderBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- "今天"快捷按钮 -->
+        <Style x:Key="TodayBtnStyle" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{StaticResource PrimaryLightBrush}"
+                                CornerRadius="6" Padding="10,4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{StaticResource PrimarySoftBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <!-- 月份导航区 -->
+        <Grid Margin="2,0,2,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左箭头 -->
+            <Button Grid.Column="0" Style="{StaticResource NavBtnStyle}" Click="PrevMonth_Click">
+                <Path Data="M9,3 L4,9 L9,15" Stroke="{StaticResource TextTertiaryBrush}"
+                      StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+            </Button>
+
+            <!-- 月份标题 + 今天按钮 -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="MonthTitle" FontSize="15" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Button Content="今天" Style="{StaticResource TodayBtnStyle}" Click="Today_Click"
+                        VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- 右箭头 -->
+            <Button Grid.Column="2" Style="{StaticResource NavBtnStyle}" Click="NextMonth_Click">
+                <Path Data="M5,3 L10,9 L5,15" Stroke="{StaticResource TextTertiaryBrush}"
+                      StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+            </Button>
+        </Grid>
+
+        <!-- 渐变装饰线 -->
+        <Border Height="2" CornerRadius="1" Margin="8,0,8,6" Opacity="0.6"
+                Background="{StaticResource PrimaryGradient}" IsHitTestVisible="False"/>
+
+        <!-- 星期标题 -->
+        <UniformGrid Columns="7" Margin="0,0,0,2" IsHitTestVisible="False">
+            <UniformGrid.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="FontSize" Value="10.5"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="Margin" Value="0,2,0,4"/>
+                </Style>
+            </UniformGrid.Resources>
+            <TextBlock Text="一"/>
+            <TextBlock Text="二"/>
+            <TextBlock Text="三"/>
+            <TextBlock Text="四"/>
+            <TextBlock Text="五"/>
+            <TextBlock Text="六" Foreground="{StaticResource BorderHoverBrush}"/>
+            <TextBlock Text="日" Foreground="{StaticResource BorderHoverBrush}"/>
+        </UniformGrid>
+
+        <!-- 日期网格 -->
+        <ItemsControl ItemsSource="{Binding CalendarDays, ElementName=Root}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="7"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type models:CalendarDayItem}">
+                    <Border x:Name="dayBg" Background="Transparent" CornerRadius="8"
+                            Margin="1,1" Padding="0" Cursor="Hand"
+                            MouseLeftButtonDown="Day_Click"
+                            MouseEnter="Day_MouseEnter" MouseLeave="Day_MouseLeave"
+                            BorderThickness="0" BorderBrush="Transparent"
+                            SnapsToDevicePixels="True">
+                        <Grid Height="30">
+                            <TextBlock x:Name="dayText" Text="{Binding Day}" FontSize="12"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontWeight="Normal"/>
+                            <!-- 有记录日期的指示点 -->
+                            <Ellipse x:Name="recordDot" Width="3.5" Height="3.5"
+                                     Fill="{StaticResource SuccessBrush}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                     Margin="0,0,0,4" Visibility="Collapsed"/>
+                        </Grid>
+                    </Border>
+                    <DataTemplate.Triggers>
+
+                        <!-- ====== 今天（未选中）: 边框环 + 主色字 ====== -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsToday}" Value="True"/>
+                                <Condition Binding="{Binding IsSelected}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="dayBg" Property="BorderThickness" Value="1.5"/>
+                            <Setter TargetName="dayBg" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="dayText" Property="FontWeight" Value="Bold"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                        </MultiDataTrigger>
+
+                        <!-- ====== 选中日期: 渐变填充 + 白字 ====== -->
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter TargetName="dayBg" Property="BorderThickness" Value="0"/>
+                            <Setter TargetName="dayBg" Property="Background" Value="{StaticResource PrimaryGradient}"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="White"/>
+                            <Setter TargetName="dayText" Property="FontWeight" Value="Bold"/>
+                            <Setter TargetName="recordDot" Property="Fill" Value="White"/>
+                        </DataTrigger>
+
+                        <!-- 选中 + 今天: 加粗白色边框 -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsSelected}" Value="True"/>
+                                <Condition Binding="{Binding IsToday}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="dayBg" Property="BorderThickness" Value="2"/>
+                            <Setter TargetName="dayBg" Property="BorderBrush" Value="White"/>
+                        </MultiDataTrigger>
+
+                        <!-- ====== 非当月日期: 浅灰色 ====== -->
+                        <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
+                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource BorderHoverBrush}"/>
+                            <Setter TargetName="dayText" Property="FontWeight" Value="Normal"/>
+                        </DataTrigger>
+
+                        <!-- 非当月 + 选中: 仍然用稍暗的文字 -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsCurrentMonth}" Value="False"/>
+                                <Condition Binding="{Binding IsSelected}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="dayText" Property="Foreground" Value="#CCFFFFFF"/>
+                        </MultiDataTrigger>
+
+                        <!-- ====== 周末（当月、未选中、非今天）: 柔和灰紫 ====== -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsWeekend}" Value="True"/>
+                                <Condition Binding="{Binding IsCurrentMonth}" Value="True"/>
+                                <Condition Binding="{Binding IsSelected}" Value="False"/>
+                                <Condition Binding="{Binding IsToday}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                        </MultiDataTrigger>
+
+                        <!-- ====== 有记录的日期: 绿色指示点 ====== -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding HasRecords}" Value="True"/>
+                                <Condition Binding="{Binding IsSelected}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="recordDot" Property="Visibility" Value="Visible"/>
+                        </MultiDataTrigger>
+
+                        <!-- ====== 悬浮效果（仅非选中状态） ====== -->
+                        <!-- 注意: WPF DataTrigger 不支持 IsMouseOver 在 DataTemplate 内，
+                             悬浮效果通过 Border 的 MouseEnter/MouseLeave 在 code-behind 处理 -->
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>
