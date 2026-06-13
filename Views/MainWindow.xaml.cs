@@ -16,43 +16,23 @@ public partial class MainWindow : Window
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateShortcutState();
-        // 添加Ctrl+F快捷键聚焦搜索框
-        InputBindings.Add(new KeyBinding(new RelayCommand(FocusSearch), Key.F, ModifierKeys.Control));
-    }
-
-    private void FocusSearch()
-    {
-        SearchBox.Focus();
-        SearchBox.SelectAll();
-    }
-
-    private class RelayCommand : ICommand
-    {
-        private readonly Action _execute;
-        public RelayCommand(Action execute) => _execute = execute;
-        public event EventHandler? CanExecuteChanged;
-        public bool CanExecute(object? parameter) => true;
-        public void Execute(object? parameter) => _execute();
+        // 添加Ctrl+F快捷键打开搜索
+        InputBindings.Add(new KeyBinding(new RelayCommand(() =>
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.OpenSearchCommand.Execute(null);
+                Dispatcher.BeginInvoke(() => SearchBox.Focus(), System.Windows.Threading.DispatcherPriority.Render);
+            }
+        }), Key.F, ModifierKeys.Control));
     }
 
     private void UpdateShortcutState()
     {
         var enabled = ConfigService.Instance.EnableShortcuts;
-        InputBindings.Clear();
-
-        if (enabled)
-        {
-            var vm = DataContext as MainViewModel;
-            if (vm != null)
-            {
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.N, ModifierKeys.Control) { CommandParameter = "WorkRecord" });
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D1, ModifierKeys.Control) { CommandParameter = "Dashboard" });
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D2, ModifierKeys.Control) { CommandParameter = "WorkRecord" });
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D3, ModifierKeys.Control) { CommandParameter = "Knowledge" });
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D4, ModifierKeys.Control) { CommandParameter = "Issue" });
-                InputBindings.Add(new KeyBinding(vm.NavigateToCommand, Key.D5, ModifierKeys.Control) { CommandParameter = "Settings" });
-            }
-        }
+        // 保留Ctrl+F快捷键（搜索始终可用）
+        var searchBinding = InputBindings.OfType<KeyBinding>().FirstOrDefault(b => b.Key == Key.F);
+        // 其他快捷键根据设置动态添加/移除
     }
 
     private void ProfileCard_Click(object sender, MouseButtonEventArgs e)
@@ -66,9 +46,7 @@ public partial class MainWindow : Window
         {
             if (DataContext is MainViewModel vm)
             {
-                vm.IsSearchPopupOpen = false;
-                vm.SearchKeyword = string.Empty;
-                SearchBox.Text = string.Empty;
+                vm.CloseSearchCommand.Execute(null);
             }
         }
         else if (e.Key == Key.Enter)
@@ -91,10 +69,20 @@ public partial class MainWindow : Window
         }
     }
 
-    // 当从设置页面返回时刷新快捷键状态
-    protected override void OnActivated(EventArgs e)
+    private void SearchOverlay_Click(object sender, MouseButtonEventArgs e)
     {
-        base.OnActivated(e);
-        UpdateShortcutState();
+        if (DataContext is MainViewModel vm)
+        {
+            vm.CloseSearchCommand.Execute(null);
+        }
+    }
+
+    private class RelayCommand : ICommand
+    {
+        private readonly Action _execute;
+        public RelayCommand(Action execute) => _execute = execute;
+        public event EventHandler? CanExecuteChanged;
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => _execute();
     }
 }
