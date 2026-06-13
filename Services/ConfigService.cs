@@ -49,6 +49,49 @@ public class ConfigService
         set { _data.ReminderMinute = value; Save(); }
     }
 
+    public string ShortcutSearch
+    {
+        get => _data.ShortcutSearch;
+        set { _data.ShortcutSearch = value; Save(); }
+    }
+
+    public string SearchHotkey
+    {
+        get => _data.ShortcutSearch;
+        set { _data.ShortcutSearch = value; Save(); }
+    }
+
+    public string ShortcutNew { get => _data.ShortcutNew; set { _data.ShortcutNew = value; Save(); } }
+    public string ShortcutSave { get => _data.ShortcutSave; set { _data.ShortcutSave = value; Save(); } }
+    public string ShortcutView1 { get => _data.ShortcutView1; set { _data.ShortcutView1 = value; Save(); } }
+    public string ShortcutView2 { get => _data.ShortcutView2; set { _data.ShortcutView2 = value; Save(); } }
+    public string ShortcutView3 { get => _data.ShortcutView3; set { _data.ShortcutView3 = value; Save(); } }
+    public string ShortcutView4 { get => _data.ShortcutView4; set { _data.ShortcutView4 = value; Save(); } }
+    public string ShortcutView5 { get => _data.ShortcutView5; set { _data.ShortcutView5 = value; Save(); } }
+
+    // ===== 外观与主题 =====
+    public string ThemeMode { get => _data.ThemeMode; set { _data.ThemeMode = value; Save(); } }
+    public string AccentColor { get => _data.AccentColor; set { _data.AccentColor = value; Save(); } }
+    public string FontSizeLevel { get => _data.FontSizeLevel; set { _data.FontSizeLevel = value; Save(); } }
+    public string UIDensity { get => _data.UIDensity; set { _data.UIDensity = value; Save(); } }
+
+    // ===== Dashboard 布局 =====
+    public bool ShowDashStats { get => _data.ShowDashStats; set { _data.ShowDashStats = value; Save(); } }
+    public bool ShowDashReminder { get => _data.ShowDashReminder; set { _data.ShowDashReminder = value; Save(); } }
+    public bool ShowDashProbation { get => _data.ShowDashProbation; set { _data.ShowDashProbation = value; Save(); } }
+    public bool ShowDashCharts { get => _data.ShowDashCharts; set { _data.ShowDashCharts = value; Save(); } }
+    public bool ShowDashHighlights { get => _data.ShowDashHighlights; set { _data.ShowDashHighlights = value; Save(); } }
+    public bool ShowDashRecent { get => _data.ShowDashRecent; set { _data.ShowDashRecent = value; Save(); } }
+
+    // ===== 启动与行为 =====
+    public bool AutoStart { get => _data.AutoStart; set { _data.AutoStart = value; Save(); } }
+    public bool MinimizeToTray { get => _data.MinimizeToTray; set { _data.MinimizeToTray = value; Save(); } }
+    public string DefaultView { get => _data.DefaultView; set { _data.DefaultView = value; Save(); } }
+    public int AutoSaveInterval { get => _data.AutoSaveInterval; set { _data.AutoSaveInterval = value; Save(); } }
+
+    // ===== 自定义字段 =====
+    public List<CustomField> CustomFields => _data.CustomFields;
+
     public void Load()
     {
         lock (_lock)
@@ -222,6 +265,44 @@ public class ConfigService
             if (index >= 0)
             {
                 _data.ContentTemplates[index] = newTemplate;
+                Save();
+            }
+        }
+    }
+
+    public void AddCustomField(CustomField field)
+    {
+        lock (_lock)
+        {
+            if (!_data.CustomFields.Any(f => f.Name == field.Name))
+            {
+                _data.CustomFields.Add(field);
+                Save();
+            }
+        }
+    }
+
+    public void RemoveCustomField(string name)
+    {
+        lock (_lock)
+        {
+            var field = _data.CustomFields.FirstOrDefault(f => f.Name == name);
+            if (field != null)
+            {
+                _data.CustomFields.Remove(field);
+                Save();
+            }
+        }
+    }
+
+    public void UpdateCustomField(string oldName, CustomField newField)
+    {
+        lock (_lock)
+        {
+            var index = _data.CustomFields.FindIndex(f => f.Name == oldName);
+            if (index >= 0)
+            {
+                _data.CustomFields[index] = newField;
                 Save();
             }
         }

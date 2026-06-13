@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
+using EapWorkAssistant.Services;
 using System.Collections.ObjectModel;
 
 namespace EapWorkAssistant.ViewModels;
@@ -47,7 +48,24 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        CurrentView = Dashboard;
+        // 根据配置设置默认启动视图
+        var defaultView = ConfigService.Instance.DefaultView;
+        CurrentView = defaultView switch
+        {
+            "WorkRecord" => WorkRecord,
+            "Knowledge" => Knowledge,
+            "Issue" => Issue,
+            "Settings" => Settings,
+            _ => Dashboard
+        };
+        SelectedIndex = defaultView switch
+        {
+            "WorkRecord" => 1,
+            "Knowledge" => 2,
+            "Issue" => 3,
+            "Settings" => 4,
+            _ => 0
+        };
         _ = Dashboard.LoadDashboardAsync();
     }
 
@@ -126,7 +144,8 @@ public partial class MainViewModel : ObservableObject
                     Title = $"{r.ProjectName} - {r.WorkDate}",
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DD",
-                    NavigateTo = "WorkRecord"
+                    NavigateTo = "WorkRecord",
+                    TargetDate = DateTime.TryParse(r.WorkDate, out var d) ? d : null
                 });
             }
 
@@ -144,7 +163,8 @@ public partial class MainViewModel : ObservableObject
                     Title = k.Title,
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DA",
-                    NavigateTo = "Knowledge"
+                    NavigateTo = "Knowledge",
+                    TargetId = k.Id
                 });
             }
 
@@ -164,7 +184,8 @@ public partial class MainViewModel : ObservableObject
                     Title = $"[{i.ProjectName}] {i.Title}",
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F527",
-                    NavigateTo = "Issue"
+                    NavigateTo = "Issue",
+                    TargetId = i.Id
                 });
             }
         }
@@ -194,7 +215,26 @@ public partial class MainViewModel : ObservableObject
         if (item == null) return;
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
+
+        // 工作记录：先设置目标日期，让 RefreshAsync 加载该日期的记录
+        if (item.NavigateTo == "WorkRecord" && item.TargetDate.HasValue)
+        {
+            WorkRecord.SelectedDate = item.TargetDate.Value;
+        }
+
         NavigateTo(item.NavigateTo);
+
+        // 知识库/问题跟踪：导航后用搜索关键词过滤，定位到目标条目
+        if (item.NavigateTo == "Knowledge")
+        {
+            Knowledge.SearchKeyword = item.Title;
+            _ = Knowledge.SearchCommand.ExecuteAsync(null);
+        }
+        else if (item.NavigateTo == "Issue")
+        {
+            Issue.SearchKeyword = item.Title;
+            _ = Issue.SearchCommand.ExecuteAsync(null);
+        }
     }
 
     partial void OnSearchKeywordChanged(string value)
@@ -225,4 +265,6 @@ public class SearchResultItem
     public string Content { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;
     public string NavigateTo { get; set; } = string.Empty;
+    public DateTime? TargetDate { get; set; }
+    public int TargetId { get; set; }
 }

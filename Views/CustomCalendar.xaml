@@ -21,10 +21,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{StaticResource SurfaceHoverBrush}"/>
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{StaticResource BorderBrush}"/>
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource BorderBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -37,20 +37,20 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{StaticResource PrimaryLightBrush}"
+                        <Border x:Name="bg" Background="{DynamicResource PrimaryLightBrush}"
                                 CornerRadius="6" Padding="10,4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{StaticResource PrimarySoftBrush}"/>
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                                 <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -71,14 +71,14 @@
 
             <!-- 左箭头 -->
             <Button Grid.Column="0" Style="{StaticResource NavBtnStyle}" Click="PrevMonth_Click">
-                <Path Data="M9,3 L4,9 L9,15" Stroke="{StaticResource TextTertiaryBrush}"
+                <Path Data="M9,3 L4,9 L9,15" Stroke="{DynamicResource TextTertiaryBrush}"
                       StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
             </Button>
 
             <!-- 月份标题 + 今天按钮 -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="MonthTitle" FontSize="15" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <Button Content="今天" Style="{StaticResource TodayBtnStyle}" Click="Today_Click"
                         VerticalAlignment="Center"/>
@@ -86,14 +86,14 @@
 
             <!-- 右箭头 -->
             <Button Grid.Column="2" Style="{StaticResource NavBtnStyle}" Click="NextMonth_Click">
-                <Path Data="M5,3 L10,9 L5,15" Stroke="{StaticResource TextTertiaryBrush}"
+                <Path Data="M5,3 L10,9 L5,15" Stroke="{DynamicResource TextTertiaryBrush}"
                       StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
             </Button>
         </Grid>
 
         <!-- 渐变装饰线 -->
         <Border Height="2" CornerRadius="1" Margin="8,0,8,6" Opacity="0.6"
-                Background="{StaticResource PrimaryGradient}" IsHitTestVisible="False"/>
+                Background="{DynamicResource PrimaryGradient}" IsHitTestVisible="False"/>
 
         <!-- 星期标题 -->
         <UniformGrid Columns="7" Margin="0,0,0,2" IsHitTestVisible="False">
@@ -101,7 +101,7 @@
                 <Style TargetType="TextBlock">
                     <Setter Property="FontSize" Value="10.5"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
                     <Setter Property="HorizontalAlignment" Value="Center"/>
                     <Setter Property="Margin" Value="0,2,0,4"/>
                 </Style>
@@ -111,8 +111,8 @@
             <TextBlock Text="三"/>
             <TextBlock Text="四"/>
             <TextBlock Text="五"/>
-            <TextBlock Text="六" Foreground="{StaticResource BorderHoverBrush}"/>
-            <TextBlock Text="日" Foreground="{StaticResource BorderHoverBrush}"/>
+            <TextBlock Text="六" Foreground="{DynamicResource BorderHoverBrush}"/>
+            <TextBlock Text="日" Foreground="{DynamicResource BorderHoverBrush}"/>
         </UniformGrid>
 
         <!-- 日期网格 -->
@@ -132,12 +132,12 @@
                             SnapsToDevicePixels="True">
                         <Grid Height="30">
                             <TextBlock x:Name="dayText" Text="{Binding Day}" FontSize="12"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontWeight="Normal"/>
                             <!-- 有记录日期的指示点 -->
                             <Ellipse x:Name="recordDot" Width="3.5" Height="3.5"
-                                     Fill="{StaticResource SuccessBrush}"
+                                     Fill="{DynamicResource SuccessBrush}"
                                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                      Margin="0,0,0,4" Visibility="Collapsed"/>
                         </Grid>
@@ -151,15 +151,15 @@
                                 <Condition Binding="{Binding IsSelected}" Value="False"/>
                             </MultiDataTrigger.Conditions>
                             <Setter TargetName="dayBg" Property="BorderThickness" Value="1.5"/>
-                            <Setter TargetName="dayBg" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="dayBg" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             <Setter TargetName="dayText" Property="FontWeight" Value="Bold"/>
-                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
                         </MultiDataTrigger>
 
                         <!-- ====== 选中日期: 渐变填充 + 白字 ====== -->
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
                             <Setter TargetName="dayBg" Property="BorderThickness" Value="0"/>
-                            <Setter TargetName="dayBg" Property="Background" Value="{StaticResource PrimaryGradient}"/>
+                            <Setter TargetName="dayBg" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
                             <Setter TargetName="dayText" Property="Foreground" Value="White"/>
                             <Setter TargetName="dayText" Property="FontWeight" Value="Bold"/>
                             <Setter TargetName="recordDot" Property="Fill" Value="White"/>
@@ -177,7 +177,7 @@
 
                         <!-- ====== 非当月日期: 浅灰色 ====== -->
                         <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
-                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource BorderHoverBrush}"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{DynamicResource BorderHoverBrush}"/>
                             <Setter TargetName="dayText" Property="FontWeight" Value="Normal"/>
                         </DataTrigger>
 
@@ -198,7 +198,7 @@
                                 <Condition Binding="{Binding IsSelected}" Value="False"/>
                                 <Condition Binding="{Binding IsToday}" Value="False"/>
                             </MultiDataTrigger.Conditions>
-                            <Setter TargetName="dayText" Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                         </MultiDataTrigger>
 
                         <!-- ====== 有记录的日期: 绿色指示点 ====== -->

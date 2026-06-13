@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 
 namespace EapWorkAssistant.ViewModels;
@@ -39,8 +40,102 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private int _reminderMinute = 30;
 
+    // 快捷键配置
+    [ObservableProperty] private string _shortcutSearch = "F";
+    [ObservableProperty] private string _shortcutNew = "N";
+    [ObservableProperty] private string _shortcutSave = "S";
+    [ObservableProperty] private string _shortcutView1 = "D1";
+    [ObservableProperty] private string _shortcutView2 = "D2";
+    [ObservableProperty] private string _shortcutView3 = "D3";
+    [ObservableProperty] private string _shortcutView4 = "D4";
+    [ObservableProperty] private string _shortcutView5 = "D5";
+
+    // ===== 外观与主题 =====
+    [ObservableProperty] private bool _isLightTheme = true;
+    [ObservableProperty] private bool _isDarkTheme;
+    [ObservableProperty] private string _selectedAccentColor = "Indigo";
+    [ObservableProperty] private string _selectedFontSize = "Medium";
+    [ObservableProperty] private string _selectedDensity = "Default";
+
+    // 强调色预览列表
+    public ObservableCollection<AccentColorItem> AccentColors { get; } = new();
+
+    public List<string> FontSizeOptions { get; } = new() { "Small", "Medium", "Large" };
+    public List<string> DensityOptions { get; } = new() { "Compact", "Default", "Comfortable" };
+
+    public string FontSizeLabel => SelectedFontSize switch
+    {
+        "Small" => "小号",
+        "Medium" => "标准",
+        "Large" => "大号",
+        _ => "标准"
+    };
+
+    public string DensityLabel => SelectedDensity switch
+    {
+        "Compact" => "紧凑",
+        "Default" => "标准",
+        "Comfortable" => "宽松",
+        _ => "标准"
+    };
+
+    // ===== Dashboard 布局 =====
+    [ObservableProperty] private bool _showDashStats = true;
+    [ObservableProperty] private bool _showDashReminder = true;
+    [ObservableProperty] private bool _showDashProbation = true;
+    [ObservableProperty] private bool _showDashCharts = true;
+    [ObservableProperty] private bool _showDashHighlights = true;
+    [ObservableProperty] private bool _showDashRecent = true;
+
+    // ===== 启动与行为 =====
+    [ObservableProperty] private bool _autoStart;
+    [ObservableProperty] private bool _minimizeToTray = true;
+    [ObservableProperty] private string _defaultView = "Dashboard";
+    [ObservableProperty] private int _autoSaveInterval = 5;
+
+    public List<string> ViewOptions { get; } = new() { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
+    public List<int> AutoSaveOptions { get; } = new() { 1, 3, 5, 10, 15, 30 };
+
+    public string DefaultViewLabel => DefaultView switch
+    {
+        "Dashboard" => "工作台",
+        "WorkRecord" => "工作记录",
+        "Knowledge" => "知识库",
+        "Issue" => "问题跟踪",
+        "Settings" => "设置",
+        _ => "工作台"
+    };
+
+    // ===== 自定义字段 =====
+    [ObservableProperty] private ObservableCollection<CustomFieldItem> _customFields = new();
+
+    public List<string> HotkeyOptions { get; } = new()
+    {
+        "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","U","W",
+        "D1","D2","D3","D4","D5","D6","D7","D8","D9","D0",
+        "F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12"
+    };
+
+    public List<string> KeyOptions { get; } = new()
+    {
+        "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","U","W"
+    };
+
     public SettingsViewModel()
     {
+        // 初始化强调色列表
+        foreach (var name in ThemeService.GetAccentColorNames)
+        {
+            AccentColors.Add(new AccentColorItem
+            {
+                Name = name,
+                PreviewColor = ThemeService.GetAccentPreviewColor(name)
+            });
+        }
+
+        // 监听主题变化
+        ThemeService.Instance.PropertyChanged += OnThemeServiceChanged;
+
         _ = RefreshAsync();
     }
 
@@ -53,9 +148,65 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         EnableReminder = ConfigService.Instance.EnableReminder;
         ReminderHour = ConfigService.Instance.ReminderHour;
         ReminderMinute = ConfigService.Instance.ReminderMinute;
+        ShortcutSearch = ConfigService.Instance.ShortcutSearch;
+        ShortcutNew = ConfigService.Instance.ShortcutNew;
+        ShortcutSave = ConfigService.Instance.ShortcutSave;
+        ShortcutView1 = ConfigService.Instance.ShortcutView1;
+        ShortcutView2 = ConfigService.Instance.ShortcutView2;
+        ShortcutView3 = ConfigService.Instance.ShortcutView3;
+        ShortcutView4 = ConfigService.Instance.ShortcutView4;
+        ShortcutView5 = ConfigService.Instance.ShortcutView5;
+
+        // 外观与主题
+        IsLightTheme = ThemeService.Instance.ThemeMode == "Light";
+        IsDarkTheme = ThemeService.Instance.ThemeMode == "Dark";
+        SelectedAccentColor = ThemeService.Instance.AccentColor;
+        SelectedFontSize = ThemeService.Instance.FontSizeLevel;
+        SelectedDensity = ThemeService.Instance.UIDensity;
+        OnPropertyChanged(nameof(FontSizeLabel));
+        OnPropertyChanged(nameof(DensityLabel));
+
+        // Dashboard 布局
+        ShowDashStats = ConfigService.Instance.ShowDashStats;
+        ShowDashReminder = ConfigService.Instance.ShowDashReminder;
+        ShowDashProbation = ConfigService.Instance.ShowDashProbation;
+        ShowDashCharts = ConfigService.Instance.ShowDashCharts;
+        ShowDashHighlights = ConfigService.Instance.ShowDashHighlights;
+        ShowDashRecent = ConfigService.Instance.ShowDashRecent;
+
+        // 启动与行为
+        AutoStart = ConfigService.Instance.AutoStart;
+        MinimizeToTray = ConfigService.Instance.MinimizeToTray;
+        DefaultView = ConfigService.Instance.DefaultView;
+        AutoSaveInterval = ConfigService.Instance.AutoSaveInterval;
+        OnPropertyChanged(nameof(DefaultViewLabel));
+
+        // 自定义字段
+        CustomFields = new ObservableCollection<CustomFieldItem>(
+            ConfigService.Instance.CustomFields.Select(f => new CustomFieldItem
+            {
+                Name = f.Name,
+                FieldType = f.FieldType,
+                DefaultValue = f.DefaultValue
+            }));
+
         return Task.CompletedTask;
     }
 
+    private void OnThemeServiceChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ThemeService.ThemeMode))
+        {
+            IsLightTheme = ThemeService.Instance.ThemeMode == "Light";
+            IsDarkTheme = ThemeService.Instance.ThemeMode == "Dark";
+        }
+        else if (e.PropertyName == nameof(ThemeService.AccentColor))
+        {
+            SelectedAccentColor = ThemeService.Instance.AccentColor;
+        }
+    }
+
+    // ===== 快捷键 handlers =====
     partial void OnEnableShortcutsChanged(bool value)
     {
         ConfigService.Instance.EnableShortcuts = value;
@@ -86,6 +237,82 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         }
     }
 
+    partial void OnShortcutSearchChanged(string value) { ConfigService.Instance.ShortcutSearch = value; StatusMessage = $"搜索快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutNewChanged(string value) { ConfigService.Instance.ShortcutNew = value; StatusMessage = $"新增快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutSaveChanged(string value) { ConfigService.Instance.ShortcutSave = value; StatusMessage = $"保存快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView1Changed(string value) { ConfigService.Instance.ShortcutView1 = value; StatusMessage = $"工作台快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView2Changed(string value) { ConfigService.Instance.ShortcutView2 = value; StatusMessage = $"工作记录快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView3Changed(string value) { ConfigService.Instance.ShortcutView3 = value; StatusMessage = $"知识库快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView4Changed(string value) { ConfigService.Instance.ShortcutView4 = value; StatusMessage = $"问题跟踪快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView5Changed(string value) { ConfigService.Instance.ShortcutView5 = value; StatusMessage = $"设置快捷键 → Ctrl+{value}"; }
+
+    // ===== 外观与主题 handlers =====
+    partial void OnIsLightThemeChanged(bool value)
+    {
+        if (value) { ThemeService.Instance.SetThemeMode("Light"); StatusMessage = "已切换至浅色模式"; }
+    }
+
+    partial void OnIsDarkThemeChanged(bool value)
+    {
+        if (value) { ThemeService.Instance.SetThemeMode("Dark"); StatusMessage = "已切换至深色模式"; }
+    }
+
+    partial void OnSelectedAccentColorChanged(string value)
+    {
+        ThemeService.Instance.SetAccentColor(value);
+        StatusMessage = $"强调色已切换为 {value}";
+    }
+
+    partial void OnSelectedFontSizeChanged(string value)
+    {
+        ThemeService.Instance.SetFontSizeLevel(value);
+        OnPropertyChanged(nameof(FontSizeLabel));
+        StatusMessage = $"字体大小已切换为 {FontSizeLabel}";
+    }
+
+    partial void OnSelectedDensityChanged(string value)
+    {
+        ThemeService.Instance.SetUIDensity(value);
+        OnPropertyChanged(nameof(DensityLabel));
+        StatusMessage = $"界面密度已切换为 {DensityLabel}";
+    }
+
+    // ===== Dashboard 布局 handlers =====
+    partial void OnShowDashStatsChanged(bool value) { ConfigService.Instance.ShowDashStats = value; StatusMessage = value ? "统计卡片已显示" : "统计卡片已隐藏"; }
+    partial void OnShowDashReminderChanged(bool value) { ConfigService.Instance.ShowDashReminder = value; StatusMessage = value ? "今日提醒已显示" : "今日提醒已隐藏"; }
+    partial void OnShowDashProbationChanged(bool value) { ConfigService.Instance.ShowDashProbation = value; StatusMessage = value ? "试用期进度已显示" : "试用期进度已隐藏"; }
+    partial void OnShowDashChartsChanged(bool value) { ConfigService.Instance.ShowDashCharts = value; StatusMessage = value ? "图表区域已显示" : "图表区域已隐藏"; }
+    partial void OnShowDashHighlightsChanged(bool value) { ConfigService.Instance.ShowDashHighlights = value; StatusMessage = value ? "工作亮点已显示" : "工作亮点已隐藏"; }
+    partial void OnShowDashRecentChanged(bool value) { ConfigService.Instance.ShowDashRecent = value; StatusMessage = value ? "最近记录已显示" : "最近记录已隐藏"; }
+
+    // ===== 启动与行为 handlers =====
+    partial void OnAutoStartChanged(bool value)
+    {
+        ConfigService.Instance.AutoStart = value;
+        AutoStartService.ApplyAutoStart(value);
+        StatusMessage = value ? "开机自启动已启用" : "开机自启动已禁用";
+    }
+
+    partial void OnMinimizeToTrayChanged(bool value)
+    {
+        ConfigService.Instance.MinimizeToTray = value;
+        StatusMessage = value ? "最小化到托盘已启用" : "最小化到托盘已禁用";
+    }
+
+    partial void OnDefaultViewChanged(string value)
+    {
+        ConfigService.Instance.DefaultView = value;
+        OnPropertyChanged(nameof(DefaultViewLabel));
+        StatusMessage = $"默认视图已设为 {DefaultViewLabel}";
+    }
+
+    partial void OnAutoSaveIntervalChanged(int value)
+    {
+        ConfigService.Instance.AutoSaveInterval = value;
+        StatusMessage = $"自动保存间隔已设为 {value} 分钟";
+    }
+
+    // ===== 任务管理 commands =====
     [RelayCommand]
     private void AddProject()
     {
@@ -214,4 +441,60 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         RefreshAsync();
         StatusMessage = "模板已删除";
     }
+
+    // ===== 自定义字段 commands =====
+    [RelayCommand]
+    private void AddCustomField()
+    {
+        var dialog = new Views.ConfigItemDialog("添加自定义字段名称", "");
+        dialog.Owner = Application.Current.MainWindow;
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        {
+            var field = new CustomField { Name = dialog.ItemValue.Trim(), FieldType = "Text" };
+            ConfigService.Instance.AddCustomField(field);
+            RefreshAsync();
+            StatusMessage = $"字段「{field.Name}」已添加";
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteCustomField(CustomFieldItem? field)
+    {
+        if (field == null) return;
+        if (!ConfirmDialog.Show($"确定要删除字段「{field.Name}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        ConfigService.Instance.RemoveCustomField(field.Name);
+        RefreshAsync();
+        StatusMessage = $"字段「{field.Name}」已删除";
+    }
+
+    [RelayCommand]
+    private void ResetDashboardLayout()
+    {
+        ShowDashStats = true;
+        ShowDashReminder = true;
+        ShowDashProbation = true;
+        ShowDashCharts = true;
+        ShowDashHighlights = true;
+        ShowDashRecent = true;
+        StatusMessage = "Dashboard 布局已重置为默认";
+    }
+}
+
+/// <summary>
+/// 强调色选项（用于 UI 展示色块）
+/// </summary>
+public class AccentColorItem
+{
+    public string Name { get; set; } = string.Empty;
+    public string PreviewColor { get; set; } = "#4F46E5";
+}
+
+/// <summary>
+/// 自定义字段 UI 模型
+/// </summary>
+public class CustomFieldItem
+{
+    public string Name { get; set; } = string.Empty;
+    public string FieldType { get; set; } = "Text";
+    public string DefaultValue { get; set; } = string.Empty;
 }

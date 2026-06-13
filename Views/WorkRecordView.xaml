@@ -21,8 +21,8 @@
             </Grid.RowDefinitions>
 
             <!-- ===== 顶部栏 ===== -->
-            <Border Grid.Row="0" Background="White" CornerRadius="13" Padding="0"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            <Border Grid.Row="0" Background="{DynamicResource CardBrush}" CornerRadius="13" Padding="0"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Margin="0,0,0,10" ClipToBounds="True">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -31,7 +31,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- 左侧渐变装饰条 -->
-                    <Border Grid.Column="0" Background="{StaticResource PrimaryGradient}" CornerRadius="13,0,0,13"/>
+                    <Border Grid.Column="0" Background="{DynamicResource PrimaryGradient}" CornerRadius="13,0,0,13"/>
 
                     <!-- 内容区 -->
                     <StackPanel Grid.Column="1" Margin="18,14,18,14">
@@ -40,7 +40,7 @@
                             <StackPanel>
                                 <TextBlock Text="工作记录" Style="{StaticResource Heading2}"/>
                                 <TextBlock Text="记录每日工作内容、成果和问题"
-                                           Foreground="{StaticResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
+                                           Foreground="{DynamicResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
                             </StackPanel>
                             <Button x:Name="OpenFormBtn" HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Click="OpenForm_Click" Style="{StaticResource BtnPrimary}" Padding="14,9">
@@ -53,7 +53,7 @@
                             </Button>
                         </Grid>
 
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,10,0,10" Opacity="0.7"/>
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,10,0,10" Opacity="0.7"/>
 
                         <!-- 工具栏 -->
                         <Grid>
@@ -65,13 +65,13 @@
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
                                 <!-- 日期显示 -->
-                                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8"
-                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                         Padding="10,0" Height="34" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="&#x1F4C5;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0" Opacity="0.7"/>
                                         <TextBlock x:Name="DateDisplayText" FontSize="12.5" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
@@ -79,7 +79,7 @@
                                 <Button x:Name="CalendarToggleBtn" Content="选择日期" Click="CalendarToggle_Click"
                                         Style="{StaticResource BtnSecondary}" Margin="6,0,0,0" Padding="10,7" FontSize="12"/>
 
-                                <Border Width="1" Background="{StaticResource BorderBrush}" Margin="10,5" Opacity="0.5"/>
+                                <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="10,5" Opacity="0.5"/>
 
                                 <!-- 报告按钮组 -->
                                 <StackPanel Orientation="Horizontal">
@@ -89,10 +89,10 @@
                                             Style="{StaticResource BtnSuccess}" Margin="5,0,0,0" Padding="10,7" FontSize="12"/>
                                     <Button Content="月报" Command="{Binding GenerateMonthlyReportCommand}"
                                             Style="{StaticResource BtnWarning}" Margin="5,0,0,0" Padding="10,7" FontSize="12"/>
-                                    <Border Width="1" Background="{StaticResource BorderBrush}" Margin="8,5" Opacity="0.5"/>
+                                    <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="8,5" Opacity="0.5"/>
                                     <Button Content="导出CSV" Command="{Binding ExportCsvCommand}"
                                             Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
-                                            Foreground="{StaticResource PrimaryBrush}"/>
+                                            Foreground="{DynamicResource PrimaryBrush}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -111,27 +111,27 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 今日工时 -->
-                <Border Grid.Column="0" Background="White" CornerRadius="11"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         ClipToBounds="True" Padding="0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{StaticResource PrimaryBrush}" CornerRadius="11,0,0,11"/>
+                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}" CornerRadius="11,0,0,11"/>
                         <Grid Grid.Column="1" Margin="14,10">
                             <StackPanel>
-                                <TextBlock Text="今日工时" FontSize="10.5" Foreground="{StaticResource TextTertiaryBrush}"
+                                <TextBlock Text="今日工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
                                            FontWeight="Medium"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding TodayHours, StringFormat={}{0:F1}}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
-                                    <TextBlock Text="h" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                                               FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
                                                VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                 </StackPanel>
                             </StackPanel>
-                            <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="8"
+                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
                                     Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock Text="&#x23F1;" FontSize="13" HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -141,27 +141,27 @@
                 </Border>
 
                 <!-- 记录数 -->
-                <Border Grid.Column="2" Background="White" CornerRadius="11"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         ClipToBounds="True" Padding="0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{StaticResource SuccessBrush}" CornerRadius="11,0,0,11"/>
+                        <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}" CornerRadius="11,0,0,11"/>
                         <Grid Grid.Column="1" Margin="14,10">
                             <StackPanel>
-                                <TextBlock Text="记录数" FontSize="10.5" Foreground="{StaticResource TextTertiaryBrush}"
+                                <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
                                            FontWeight="Medium"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding RecordCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
-                                    <TextBlock Text="条" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                                               FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                                    <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
                                                VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                 </StackPanel>
                             </StackPanel>
-                            <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="8"
+                            <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="8"
                                     Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock Text="&#x1F4CB;" FontSize="13" HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -171,27 +171,27 @@
                 </Border>
 
                 <!-- 亮点标记 -->
-                <Border Grid.Column="4" Background="White" CornerRadius="11"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                <Border Grid.Column="4" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         ClipToBounds="True" Padding="0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="3"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{StaticResource WarningBrush}" CornerRadius="11,0,0,11"/>
+                        <Border Grid.Column="0" Background="{DynamicResource WarningBrush}" CornerRadius="11,0,0,11"/>
                         <Grid Grid.Column="1" Margin="14,10">
                             <StackPanel>
-                                <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{StaticResource TextTertiaryBrush}"
+                                <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
                                            FontWeight="Medium"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding HighlightCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{StaticResource WarningBrush}"/>
-                                    <TextBlock Text="项" FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                                               FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                                    <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
                                                VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                 </StackPanel>
                             </StackPanel>
-                            <Border Background="{StaticResource WarningLightBrush}" CornerRadius="8"
+                            <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="8"
                                     Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock Text="&#x2B50;" FontSize="13" HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -210,8 +210,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- 表格 -->
-                <Border Grid.Row="0" Background="White" CornerRadius="13"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="0"
+                <Border Grid.Row="0" Background="{DynamicResource CardBrush}" CornerRadius="13"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0"
                         ClipToBounds="True">
                     <Grid>
                         <DataGrid ItemsSource="{Binding Records}" Style="{StaticResource ModernGrid}"
@@ -276,7 +276,7 @@
                                                         Command="{Binding DataContext.DeleteRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"
-                                                        Foreground="{StaticResource DangerBrush}"/>
+                                                        Foreground="{DynamicResource DangerBrush}"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -287,13 +287,13 @@
                         <!-- 空状态 -->
                         <Border Visibility="{Binding Records.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="40" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                Background="White" CornerRadius="13">
+                                Background="{DynamicResource CardBrush}" CornerRadius="13">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="&#x1F4DD;" FontSize="44" HorizontalAlignment="Center" Opacity="0.2"/>
-                                <TextBlock Text="当日暂无工作记录" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                                <TextBlock Text="当日暂无工作记录" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Medium"/>
                                 <TextBlock Text="点击上方按钮开始记录" FontSize="12"
-                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
@@ -302,39 +302,39 @@
 
                 <!-- 拖拽分隔条 -->
                 <GridSplitter Grid.Row="1" Height="12" HorizontalAlignment="Stretch"
-                              Background="#FFE5E7EB" ResizeBehavior="PreviousAndNext"
+                              Background="{DynamicResource BorderBrush}" ResizeBehavior="PreviousAndNext"
                               ShowsPreview="True" Cursor="SizeNS"/>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
                             VerticalAlignment="Center" IsHitTestVisible="False">
-                    <Ellipse Width="4" Height="4" Fill="#FF9CA3AF" Margin="0,0,4,0"/>
-                    <Ellipse Width="4" Height="4" Fill="#FF9CA3AF" Margin="0,0,4,0"/>
-                    <Ellipse Width="4" Height="4" Fill="#FF9CA3AF"/>
+                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}" Margin="0,0,4,0"/>
+                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}" Margin="0,0,4,0"/>
+                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}"/>
                 </StackPanel>
 
                 <!-- 报告预览 -->
-                <Border Grid.Row="2" Background="White" CornerRadius="13" Margin="0,0,0,0"
-                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                <Border Grid.Row="2" Background="{DynamicResource CardBrush}" CornerRadius="13" Margin="0,0,0,0"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="16,10,16,8">
                             <TextBlock Text="&#x1F4E4;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0" Opacity="0.7"/>
                             <TextBlock Text="报告预览" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <Border Width="1" Background="{StaticResource BorderBrush}" Margin="10,0" Opacity="0.5"/>
+                                       Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="10,0" Opacity="0.5"/>
                             <Button Content="复制" Command="{Binding CopyReportCommand}"
                                     Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="11.5"
-                                    Foreground="{StaticResource SuccessBrush}"/>
+                                    Foreground="{DynamicResource SuccessBrush}"/>
                             <Button Content="保存" Command="{Binding SaveReportCommand}"
                                     Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="11.5"
-                                    Foreground="{StaticResource WarningBrush}"/>
+                                    Foreground="{DynamicResource WarningBrush}"/>
                         </StackPanel>
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="9"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="9"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 Margin="10,0,10,10" Padding="12">
                             <TextBox x:Name="ReportTextBox" Text="{Binding ReportText}" IsReadOnly="True" TextWrapping="Wrap"
                                      AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
                                      BorderThickness="0" Background="Transparent"
                                      FontFamily="{StaticResource MonoFont}" FontSize="11.5"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
                         </Border>
                     </DockPanel>
                 </Border>
@@ -365,13 +365,13 @@
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="{Binding FormTitle}" FontSize="18" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding SelectedDate, StringFormat='yyyy-MM-dd ddd'}" FontSize="12"
-                                           Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"/>
-                                <Border Width="1" Background="{StaticResource BorderBrush}" Margin="10,2,10,2"/>
+                                           Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"/>
+                                <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="10,2,10,2"/>
                                 <TextBlock Text="记录每日工作内容与成果" FontSize="12"
-                                           Foreground="{StaticResource TextTertiaryBrush}"/>
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
@@ -380,18 +380,18 @@
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#x1F4CB;" FontSize="12" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <TextBlock Text="模板" FontSize="12" Foreground="{StaticResource PrimaryBrush}"/>
+                                        <TextBlock Text="模板" FontSize="12" Foreground="{DynamicResource PrimaryBrush}"/>
                                     </StackPanel>
                                 </Button.Content>
                             </Button>
                             <Button x:Name="CopyLastBtn" Click="CopyLast_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6" ToolTip="复制上一条记录的任务和类型">
                                 <TextBlock Text="复制上条" FontSize="12"
-                                           Foreground="{StaticResource PrimaryBrush}"/>
+                                           Foreground="{DynamicResource PrimaryBrush}"/>
                             </Button>
                             <Button x:Name="CloseFormBtn" Click="CloseForm_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6" ToolTip="关闭面板">
-                                <TextBlock Text="&#x2715;" FontSize="14" Foreground="{StaticResource TextTertiaryBrush}"/>
+                                <TextBlock Text="&#x2715;" FontSize="14" Foreground="{DynamicResource TextTertiaryBrush}"/>
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -407,9 +407,9 @@
                                 Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
                                 Padding="22,11"/>
                     </Grid>
-                    <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="9"
+                    <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="9"
                             Padding="14,10" Margin="0,10,0,0">
-                        <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource SuccessBrush}"
+                        <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
                                    FontSize="13" FontWeight="Medium"/>
                     </Border>
                 </StackPanel>
@@ -439,7 +439,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,14"/>
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,14"/>
 
                         <!-- 快捷模板 -->
                         <TextBlock Text="快捷模板" Style="{StaticResource Label}"/>
@@ -455,7 +455,7 @@
                                             Padding="10,5" Margin="0,0,6,6" FontSize="12"
                                             Command="{Binding DataContext.ApplyTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
-                                            Foreground="{StaticResource PrimaryBrush}"/>
+                                            Foreground="{DynamicResource PrimaryBrush}"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -467,17 +467,17 @@
                                  TextWrapping="Wrap" AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"/>
                         <TextBlock Text="描述做了什么、关键产出和交付物" FontSize="11"
-                                   Foreground="{StaticResource TextTertiaryBrush}" Margin="0,0,0,18"/>
+                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,18"/>
 
                         <!-- 问题与解决方案 -->
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 Padding="14,10" Margin="0,0,0,18" Cursor="Hand">
                             <StackPanel>
                                 <CheckBox x:Name="ProblemToggle" Content="遇到了问题？点击展开记录"
                                           IsChecked="{Binding HasProblem, Mode=TwoWay}"
                                           FontSize="13" FontWeight="SemiBold" Cursor="Hand"
-                                          Foreground="{StaticResource TextSecondaryBrush}"/>
+                                          Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <StackPanel Visibility="{Binding IsChecked, ElementName=ProblemToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                                             Margin="0,10,0,4">
                                     <TextBlock Text="问题描述" Style="{StaticResource Label}"/>
@@ -492,7 +492,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,18"/>
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,18"/>
 
                         <!-- 工时与进度 -->
                         <Grid Margin="0,0,0,18">
@@ -501,18 +501,18 @@
                                 <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+                            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
                                     CornerRadius="10" Padding="14,10"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
                                     <TextBox Text="{Binding CurrentRecord.Hours}" Style="{StaticResource Input}"
                                              BorderThickness="0" Background="Transparent" Padding="0,4"/>
                                 </StackPanel>
                             </Border>
-                            <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}"
+                            <Border Grid.Column="2" Background="{DynamicResource SurfaceBrush}"
                                     CornerRadius="10" Padding="14,10"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="进度 (%)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
                                     <TextBox Text="{Binding CurrentRecord.Progress}" Style="{StaticResource Input}"
@@ -522,12 +522,12 @@
                         </Grid>
 
                         <!-- 亮点标记 -->
-                        <Border Background="{StaticResource WarningLightBrush}" CornerRadius="10"
-                                Padding="14,12" BorderBrush="#FFE5D5A0" BorderThickness="1">
+                        <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="10"
+                                Padding="14,12" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1">
                             <StackPanel>
                                 <CheckBox x:Name="HighlightToggle"
                                           Content="&#x2B50; 标记为工作亮点" FontSize="13" FontWeight="SemiBold"
-                                          Foreground="{StaticResource TextPrimaryBrush}"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
                                           IsChecked="{Binding CurrentRecord.IsHighlight, Converter={x:Static local:BoolToIntConverter.Instance}}"
                                           Margin="0,0,0,8" Cursor="Hand"/>
                                 <StackPanel Visibility="{Binding IsChecked, ElementName=HighlightToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
@@ -535,7 +535,7 @@
                                              Style="{StaticResource TextArea}" Height="56"
                                              VerticalScrollBarVisibility="Auto"/>
                                     <TextBlock Text="简要描述这项工作的亮点和成果" FontSize="11"
-                                               Foreground="{StaticResource TextTertiaryBrush}" Margin="0,6,0,0"/>
+                                               Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,6,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

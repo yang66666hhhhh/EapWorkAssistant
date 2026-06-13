@@ -5,7 +5,7 @@
         WindowStartupLocation="CenterOwner" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ResizeMode="NoResize">
-    <Border Background="White" CornerRadius="14" Margin="16"
+    <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Margin="16"
             Effect="{StaticResource ShadowLg}">
         <Grid Margin="28,22,28,22">
             <Grid.RowDefinitions>
@@ -17,20 +17,20 @@
             <!-- 标题行 -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
                 <Border x:Name="IconBorder" Width="32" Height="32" CornerRadius="16"
-                        Background="{StaticResource DangerLightBrush}"
+                        Background="{DynamicResource DangerLightBrush}"
                         VerticalAlignment="Center" Margin="0,0,12,0">
                     <TextBlock x:Name="IconText" Text="&#x26A0;" FontSize="15"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <TextBlock x:Name="TitleText" Text="{Binding WindowTitle}"
                            FontSize="16" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            VerticalAlignment="Center"/>
             </StackPanel>
 
             <!-- 消息内容 -->
             <TextBlock Grid.Row="1" x:Name="MessageText" Text="{Binding Message}"
-                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                       FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
                        TextWrapping="Wrap" VerticalAlignment="Center"
                        LineHeight="22" Margin="44,0,0,16"/>
 

@@ -5,7 +5,8 @@
              xmlns:vm="clr-namespace:EapWorkAssistant.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+             Loaded="SettingsView_Loaded">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Style="{StaticResource ModernScrollViewer}">
         <StackPanel Margin="28,20,28,28">
@@ -15,74 +16,641 @@
 
             <!-- 状态消息 -->
             <Border Visibility="{Binding StatusMessage, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
-                    Background="{StaticResource SuccessLightBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
-                <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource SuccessBrush}"
+                    Background="{DynamicResource SuccessLightBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
                            FontSize="13" FontWeight="Medium"/>
             </Border>
 
+            <!-- ===== 外观与主题 ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+                <StackPanel>
+                    <TextBlock Text="&#x1F3A8; 外观与主题" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+
+                    <!-- 主题模式 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="主题模式" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="切换浅色或深色界面主题" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border CornerRadius="8" Padding="14,8" Margin="0,0,6,0" Cursor="Hand"
+                                        BorderThickness="1.5"
+                                        BorderBrush="{Binding IsLightTheme, Converter={x:Static local:BoolToBorderConverter.Instance}}"
+                                        Background="{Binding IsLightTheme, Converter={x:Static local:BoolToBgConverter.Instance}}"
+                                        MouseLeftButtonDown="LightTheme_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#x2600;" FontSize="13" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock Text="浅色" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border CornerRadius="8" Padding="14,8" Cursor="Hand"
+                                        BorderThickness="1.5"
+                                        BorderBrush="{Binding IsDarkTheme, Converter={x:Static local:BoolToBorderConverter.Instance}}"
+                                        Background="{Binding IsDarkTheme, Converter={x:Static local:BoolToBgConverter.Instance}}"
+                                        MouseLeftButtonDown="DarkTheme_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#x1F319;" FontSize="13" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <TextBlock Text="深色" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- 强调色 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <StackPanel>
+                            <TextBlock Text="强调色" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="选择应用的主题色" FontSize="12"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,10"/>
+                            <ItemsControl ItemsSource="{Binding AccentColors}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,8,0"
+                                                Cursor="Hand" MouseLeftButtonDown="AccentColor_Click"
+                                                Tag="{Binding Name}">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding PreviewColor}"/>
+                                            </Border.Background>
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.2"
+                                                                  Color="{Binding PreviewColor}"/>
+                                            </Border.Effect>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 字体大小 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="字体大小" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding FontSizeLabel, StringFormat=当前: {0}}" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border x:Name="FontSizeSmallBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click">
+                                    <TextBlock Text="小" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border x:Name="FontSizeMediumBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click">
+                                    <TextBlock Text="标准" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border x:Name="FontSizeLargeBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click">
+                                    <TextBlock Text="大" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- 界面密度 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="界面密度" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding DensityLabel, StringFormat=当前: {0}}" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border x:Name="DensityCompactBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click">
+                                    <TextBlock Text="紧凑" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border x:Name="DensityDefaultBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click">
+                                    <TextBlock Text="标准" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border x:Name="DensityComfortableBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
+                                        Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click">
+                                    <TextBlock Text="宽松" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Dashboard 布局 ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="&#x1F4CA; Dashboard 布局" Style="{StaticResource Heading3}"/>
+                            <TextBlock Text="自定义工作台显示哪些模块" FontSize="12"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="重置默认" Style="{StaticResource BtnGhost}"
+                                Padding="14,8" FontSize="12" VerticalAlignment="Center"
+                                HorizontalAlignment="Right"
+                                Command="{Binding ResetDashboardLayoutCommand}"/>
+                    </Grid>
+
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="0">
+                        <StackPanel>
+                            <!-- 统计卡片 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="统计卡片" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="今日/本周/本月工时和总记录数" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashStats" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashStats_Click"/>
+                                </Grid>
+                            </Border>
+                            <!-- 今日提醒 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="今日提醒" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="今日录制状态和试用期剩余天数" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashReminder" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashReminder_Click"/>
+                                </Grid>
+                            </Border>
+                            <!-- 试用期进度 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="试用期进度" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="试用期时间进度和记录覆盖率" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashProbation" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashProbation_Click"/>
+                                </Grid>
+                            </Border>
+                            <!-- 图表区域 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="图表区域" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="工时趋势柱状图和项目分布饼图" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashCharts" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashCharts_Click"/>
+                                </Grid>
+                            </Border>
+                            <!-- 工作亮点 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="工作亮点" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="标记的重要工作成果列表" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashHighlights" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashHighlights_Click"/>
+                                </Grid>
+                            </Border>
+                            <!-- 最近记录 -->
+                            <Border Padding="{DynamicResource DensityRowPadSm}">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="最近记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="最近5条工作记录表格" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleDashRecent" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="DashRecent_Click"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== 启动与行为 ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+                <StackPanel>
+                    <TextBlock Text="&#x26A1; 启动与行为" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+
+                    <!-- 开机自启动 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="开机自启动" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Windows 启动时自动打开应用" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="ToggleAutoStart" HorizontalAlignment="Right"
+                                          VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                          PreviewMouseLeftButtonDown="AutoStart_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 最小化到托盘 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="最小化到托盘" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="关闭窗口时最小化到系统托盘而非退出" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="ToggleMinimizeToTray" HorizontalAlignment="Right"
+                                          VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                          PreviewMouseLeftButtonDown="MinimizeToTray_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 默认视图 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="默认启动视图" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="启动时默认打开的页面" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <ComboBox ItemsSource="{Binding ViewOptions}" SelectedItem="{Binding DefaultView, Mode=TwoWay}"
+                                      Style="{StaticResource Select}" Width="140"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center"
+                                      Cursor="Hand" SelectionChanged="DefaultView_Changed">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={x:Static local:ViewNameToLabelConverter.Instance}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- 自动保存间隔 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="自动保存间隔" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding AutoSaveInterval, StringFormat=每 {0} 分钟自动保存}" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <ComboBox ItemsSource="{Binding AutoSaveOptions}" SelectedItem="{Binding AutoSaveInterval, Mode=TwoWay}"
+                                      Style="{StaticResource Select}" Width="100"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center"
+                                      Cursor="Hand" SelectionChanged="AutoSaveInterval_Changed"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== 自定义字段 ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="&#x1F4DD; 自定义字段" Style="{StaticResource Heading3}"/>
+                            <TextBlock Text="为工作记录添加额外的自定义字段" FontSize="12"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="+ 添加字段" Style="{StaticResource BtnPrimary}"
+                                Padding="14,8" FontSize="12" VerticalAlignment="Center"
+                                Command="{Binding AddCustomFieldCommand}"/>
+                    </Grid>
+                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <ScrollViewer Grid.Row="2" MaxHeight="200" VerticalScrollBarVisibility="Auto"
+                                  Style="{StaticResource ModernScrollViewer}">
+                        <ItemsControl ItemsSource="{Binding CustomFields}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8"
+                                            Padding="{DynamicResource DensityListPad}" Margin="{DynamicResource DensityRowMargin}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0"
+                                                    VerticalAlignment="Center">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
+                                                </Border.Background>
+                                                <TextBlock Text="{Binding FieldType}" FontSize="10"
+                                                           Foreground="{DynamicResource PrimaryBrush}" FontWeight="Medium"/>
+                                            </Border>
+                                            <Button Grid.Column="2" Content="删除" Style="{StaticResource BtnGhost}"
+                                                    Padding="10,5" FontSize="12"
+                                                    Foreground="{DynamicResource DangerBrush}"
+                                                    Command="{Binding DataContext.DeleteCustomFieldCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
             <!-- ===== 通用设置 ===== -->
-            <Border Style="{StaticResource Card}" Padding="22" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>
                     <TextBlock Text="&#x2699;&#xFE0F; 通用设置" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
 
-                    <!-- 快捷键开关 -->
-                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="18,14" Margin="0,0,0,10">
+                    <!-- 键盘快捷键 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="0" Margin="{DynamicResource DensityItemMargin}">
                         <Grid>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="键盘快捷键" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <TextBlock FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0">
-                                    <Run Text="Ctrl+N 新增"/>
-                                    <Run Text=" · "/>
-                                    <Run Text="Ctrl+S 保存"/>
-                                    <Run Text=" · "/>
-                                    <Run Text="Esc 关闭"/>
-                                    <Run Text=" · "/>
-                                    <Run Text="Ctrl+1~5 切换"/>
-                                    <Run Text=" · "/>
-                                    <Run Text="Ctrl+F 搜索"/>
-                                </TextBlock>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 标题行 -->
+                            <Border Padding="18,14,18,10">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="键盘快捷键" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="所有快捷键均使用 Ctrl 修饰键，Esc 关闭为固定行为"
+                                                   FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton x:Name="ToggleEnableShortcuts" HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                                  PreviewMouseLeftButtonDown="EnableShortcuts_Click"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 分隔线 -->
+                            <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="18,0"/>
+
+                            <!-- 快捷键列表 -->
+                            <StackPanel Grid.Row="2" Margin="18,10,18,14">
+
+                                <!-- 功能操作 -->
+                                <TextBlock Text="功能操作" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           FontFamily="{StaticResource MonoFont}" Margin="0,0,0,8"/>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="搜索" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutSearch, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutSearch}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="新增记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutNew, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
+                                              SelectedItem="{Binding ShortcutNew}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="保存记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutSave, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
+                                              SelectedItem="{Binding ShortcutSave}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <!-- 视图切换 -->
+                                <TextBlock Text="视图切换" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           FontFamily="{StaticResource MonoFont}" Margin="0,0,0,8"/>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="工作台" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutView1, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutView1}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="工作记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutView2, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutView2}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="知识库" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutView3, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutView3}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="问题跟踪" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutView4, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutView4}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="130"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="设置" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center">
+                                            <Run Text="Ctrl + "/>
+                                            <Run Text="{Binding ShortcutView5, Mode=OneWay}" FontWeight="Bold"
+                                                 Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                              SelectedItem="{Binding ShortcutView5}"
+                                              Opacity="0" Cursor="Hand" IsTabStop="True"/>
+                                </Grid>
+
                             </StackPanel>
-                            <ToggleButton IsChecked="{Binding EnableShortcuts}" HorizontalAlignment="Right"
-                                          VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"/>
                         </Grid>
                     </Border>
 
                     <!-- 定时提醒开关 -->
-                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="18,14" Margin="0,0,0,10">
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="下班提醒" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 <TextBlock Text="下班后提醒记录当天工作" FontSize="12"
-                                           Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
-                            <ToggleButton IsChecked="{Binding EnableReminder}" HorizontalAlignment="Right"
-                                          VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"/>
+                            <ToggleButton x:Name="ToggleEnableReminder" HorizontalAlignment="Right"
+                                          VerticalAlignment="Center" Style="{StaticResource ToggleSwitch}"
+                                          PreviewMouseLeftButtonDown="EnableReminder_Click"/>
                         </Grid>
                     </Border>
 
                     <!-- 提醒时间设置 -->
-                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="10" Padding="18,14"
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}"
                             Visibility="{Binding EnableReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="提醒时间" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 <TextBlock Text="设置下班提醒的时间" FontSize="12"
-                                           Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Border CornerRadius="8" Background="White" Padding="2"
-                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="2"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                     <TextBox Text="{Binding ReminderHour, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource Input}" Width="48" HorizontalContentAlignment="Center"
                                              VerticalContentAlignment="Center" Height="30" BorderThickness="0"/>
                                 </Border>
                                 <TextBlock Text=":" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"
-                                           Margin="6,0,6,0" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <Border CornerRadius="8" Background="White" Padding="2"
-                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                           Margin="6,0,6,0" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <Border CornerRadius="8" Background="{DynamicResource CardBrush}" Padding="2"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                     <TextBox Text="{Binding ReminderMinute, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource Input}" Width="48" HorizontalContentAlignment="Center"
                                              VerticalContentAlignment="Center" Height="30" BorderThickness="0"/>
@@ -94,7 +662,7 @@
             </Border>
 
             <!-- ===== 任务管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="22" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -109,27 +677,27 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="&#x1F4CB; 任务列表" Style="{StaticResource Heading3}"/>
                             <TextBlock Text="管理工作项目，记录时可选择" FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="+ 添加任务" Style="{StaticResource BtnPrimary}"
                                 Padding="14,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddProjectCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <ItemsControl ItemsSource="{Binding Projects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="8"
-                                            Padding="14,12" Margin="0,0,0,6">
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8"
+                                            Padding="{DynamicResource DensityListPad}" Margin="{DynamicResource DensityRowMargin}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="{Binding}" FontSize="13"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                 <Button Content="编辑" Style="{StaticResource BtnGhost}"
@@ -138,7 +706,7 @@
                                                         CommandParameter="{Binding}"/>
                                                 <Button Content="删除" Style="{StaticResource BtnGhost}"
                                                         Padding="10,5" FontSize="12"
-                                                        Foreground="{StaticResource DangerBrush}"
+                                                        Foreground="{DynamicResource DangerBrush}"
                                                         Command="{Binding DataContext.DeleteProjectCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"/>
                                             </StackPanel>
@@ -152,7 +720,7 @@
             </Border>
 
             <!-- ===== 工作类型管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="22" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -167,27 +735,27 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="&#x1F4DD; 工作类型" Style="{StaticResource Heading3}"/>
                             <TextBlock Text="分类工作内容，便于统计分析" FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="+ 添加类型" Style="{StaticResource BtnPrimary}"
                                 Padding="14,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddWorkTypeCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <ItemsControl ItemsSource="{Binding WorkTypes}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="8"
-                                            Padding="14,12" Margin="0,0,0,6">
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8"
+                                            Padding="{DynamicResource DensityListPad}" Margin="{DynamicResource DensityRowMargin}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="{Binding}" FontSize="13"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                 <Button Content="编辑" Style="{StaticResource BtnGhost}"
@@ -196,7 +764,7 @@
                                                         CommandParameter="{Binding}"/>
                                                 <Button Content="删除" Style="{StaticResource BtnGhost}"
                                                         Padding="10,5" FontSize="12"
-                                                        Foreground="{StaticResource DangerBrush}"
+                                                        Foreground="{DynamicResource DangerBrush}"
                                                         Command="{Binding DataContext.DeleteWorkTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"/>
                                             </StackPanel>
@@ -210,7 +778,7 @@
             </Border>
 
             <!-- ===== 内容模板管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="22" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -225,20 +793,20 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="&#x1F4CB; 内容模板" Style="{StaticResource Heading3}"/>
                             <TextBlock Text="预设常用工作内容，一键填充" FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="+ 添加模板" Style="{StaticResource BtnPrimary}"
                                 Padding="14,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddTemplateCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{StaticResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <ItemsControl ItemsSource="{Binding ContentTemplates}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{StaticResource SurfaceAltBrush}" CornerRadius="8"
-                                            Padding="14,12" Margin="0,0,0,6">
+                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8"
+                                            Padding="{DynamicResource DensityListPad}" Margin="{DynamicResource DensityRowMargin}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="90"/>
@@ -248,14 +816,14 @@
                                             <Border Grid.Column="0" CornerRadius="6" Padding="8,4"
                                                     VerticalAlignment="Center">
                                                 <Border.Background>
-                                                    <SolidColorBrush Color="{StaticResource Primary}" Opacity="0.08"/>
+                                                    <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
                                                 </Border.Background>
                                                 <TextBlock Text="{Binding Name}" FontSize="12"
-                                                           Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"
                                                            HorizontalAlignment="Center"/>
                                             </Border>
                                             <TextBlock Grid.Column="1" Text="{Binding Content}" FontSize="12"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
                                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                                        Margin="10,0,0,0"/>
                                             <StackPanel Grid.Column="2" Orientation="Horizontal">
@@ -265,7 +833,7 @@
                                                         CommandParameter="{Binding}"/>
                                                 <Button Content="删除" Style="{StaticResource BtnGhost}"
                                                         Padding="10,5" FontSize="12"
-                                                        Foreground="{StaticResource DangerBrush}"
+                                                        Foreground="{DynamicResource DangerBrush}"
                                                         Command="{Binding DataContext.DeleteTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"/>
                                             </StackPanel>

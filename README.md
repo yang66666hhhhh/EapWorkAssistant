@@ -9,9 +9,10 @@
 - **工作台仪表盘** - 一目了然查看工作概览
   - 今日/本周/本月工时统计
   - 试用期进度追踪（时间进度、记录覆盖率）
-  - 本周工时趋势图表
+  - 本周工时趋势图表（LiveCharts2）
   - 本月项目分布饼图
   - 工作亮点展示
+  - 自定义日历视图
   - 一键生成转正述职报告
 
 - **工作记录** - 每日工作内容管理
@@ -31,6 +32,11 @@
   - 按项目分类
 
 - **系统设置** - 个性化配置
+  - 主题切换（深色/浅色模式）
+  - 字号调节（小/中/大三档，全局缩放）
+  - 界面密度（紧凑/默认/宽松三档）
+  - 默认视图选择
+  - 自动保存间隔设置
   - 任务列表管理
   - 工作类型管理
   - 内容模板管理
@@ -61,9 +67,9 @@
 - 下班时间（17:30后）自动检查是否已记录工作
 - 如果未记录，弹窗提醒用户记录
 
-### 全局搜索
+### 全局搜索（Spotlight 风格）
 
-- 在侧边栏底部搜索框输入关键词
+- 浮动弹窗式搜索界面（Ctrl+K 唤出）
 - 支持搜索工作记录、知识库、问题跟踪
 - 按 Enter 搜索，按 Esc 关闭
 - 点击结果可跳转到对应页面
@@ -77,10 +83,10 @@
 ## 技术栈
 
 - **框架**: .NET 9.0 + WPF
-- **架构**: MVVM (CommunityToolkit.Mvvm)
+- **架构**: MVVM (CommunityToolkit.Mvvm 8.4.2)
 - **数据库**: SQLite + Dapper
-- **图表**: LiveCharts2
-- **UI**: 自定义现代风格控件
+- **图表**: LiveCharts2 (SkiaSharp)
+- **UI**: 自定义现代深色风格控件
 
 ## 项目结构
 
@@ -90,11 +96,12 @@ EapWorkAssistant/
 ├── Helpers/                 # 转换器和辅助类
 ├── Models/                  # 数据模型
 ├── Repositories/            # 数据访问层
-├── Resources/               # 样式资源
-├── Services/                # 业务服务
+├── Resources/               # 样式资源（Styles.xaml）
+├── Services/                # 业务服务（ThemeService, ConfigService 等）
 ├── ViewModels/              # 视图模型
 ├── Views/                   # 视图界面
 ├── App.xaml                 # 应用入口
+├── AGENTS.md                # AI 编程约束文件
 └── EapWorkAssistant.csproj  # 项目文件
 ```
 
@@ -123,6 +130,10 @@ EapWorkAssistant/
 备份文件位于：`%LOCALAPPDATA%\EapWorkAssistant\backups\`
 
 建议定期手动备份数据库文件。
+
+## AI 辅助开发
+
+本项目包含 `AGENTS.md` 文件，定义了 AI 辅助编程时需要遵守的架构约束、命名规范、WPF 陷阱提醒等规则。使用 AI 编程工具时请确保该文件存在于项目根目录。
 
 ## 许可证
 

@@ -7,7 +7,7 @@
         xmlns:svc="clr-namespace:EapWorkAssistant.Services"
         Title="EAP Work Assistant" Height="800" Width="1320"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource SurfaceBrush}"
+        Background="{DynamicResource SurfaceBrush}"
         FontFamily="{StaticResource DefaultFont}">
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -25,12 +25,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock x:Name="ico" Text="{TemplateBinding Content}" FontSize="15"
-                                           Foreground="{StaticResource SidebarTextBrush}"
+                                           Foreground="{DynamicResource SidebarTextBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="txt" Grid.Column="1"
                                            Text="{TemplateBinding Tag}" Margin="12,0,0,0"
                                            FontSize="13" FontWeight="Medium"
-                                           Foreground="{StaticResource SidebarTextBrush}"
+                                           Foreground="{DynamicResource SidebarTextBrush}"
                                            VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
@@ -60,14 +60,7 @@
                                 </MultiTrigger.ExitActions>
                             </MultiTrigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="item" Property="Background">
-                                    <Setter.Value>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#FF4338CA" Offset="0"/>
-                                            <GradientStop Color="#FF7C3AED" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
                                 <Setter TargetName="ico" Property="Foreground" Value="White"/>
                                 <Setter TargetName="txt" Property="Foreground" Value="White"/>
                                 <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
@@ -85,8 +78,8 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ===== 深色侧边栏 ===== -->
-        <Border Grid.Column="0" Background="{StaticResource SidebarBgBrush}">
+        <!-- ===== 侧边栏（适配亮/暗色主题） ===== -->
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBgBrush}">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.3" Direction="90"/>
             </Border.Effect>
@@ -98,24 +91,21 @@
                             <ColumnDefinition Width="44"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border CornerRadius="12" Width="44" Height="44">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#FF4338CA" Offset="0"/>
-                                    <GradientStop Color="#FF7C3AED" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
+                        <Border CornerRadius="12" Width="44" Height="44"
+                                Background="{DynamicResource PrimaryGradient}">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.35" Color="#FF4338CA"/>
+                                <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.25"/>
                             </Border.Effect>
                             <TextBlock Text="EAP" FontSize="13" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontFamily="{StaticResource MonoFont}"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,0,0">
-                            <TextBlock Text="EAP Work" FontSize="17" FontWeight="Bold" Foreground="White"
+                            <TextBlock Text="EAP Work" FontSize="17" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                        FontFamily="{StaticResource DefaultFont}"/>
-                            <TextBlock Text="Assistant v2.0" FontSize="11" Foreground="#FF64748B"
+                            <TextBlock Text="Assistant v2.0" FontSize="11"
+                                       Foreground="{DynamicResource SidebarTextBrush}"
                                        FontFamily="{StaticResource MonoFont}"/>
                         </StackPanel>
                     </Grid>
@@ -123,54 +113,45 @@
 
                 <!-- 底部卡片（点击打开个人信息） -->
                 <Border DockPanel.Dock="Bottom" Margin="16,0,16,20" CornerRadius="12" Padding="16"
-                        Cursor="Hand" MouseLeftButtonDown="ProfileCard_Click">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#FF1E293B" Offset="0"/>
-                            <GradientStop Color="#FF253349" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                        Cursor="Hand" MouseLeftButtonDown="ProfileCard_Click"
+                        Background="{DynamicResource SidebarCardBgBrush}">
                     <StackPanel>
                         <Grid Margin="0,0,0,10">
                             <!-- 头像：显示姓名首字 -->
-                            <Border Width="34" Height="34" CornerRadius="17" HorizontalAlignment="Left">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#FF4338CA" Offset="0"/>
-                                        <GradientStop Color="#FF7C3AED" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
+                            <Border Width="34" Height="34" CornerRadius="17" HorizontalAlignment="Left"
+                                    Background="{DynamicResource PrimaryGradient}">
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=AvatarInitial}"
                                            FontSize="15" FontWeight="Bold" Foreground="White"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Margin="44,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Name}"
-                                           FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                                           FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Role}"
-                                           FontSize="11" Foreground="#FF64748B"/>
+                                           FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
                             </StackPanel>
                         </Grid>
-                        <Border Background="#FF0F172A" CornerRadius="8" Padding="12,8">
+                        <Border Background="{DynamicResource SidebarCardBgBrush}" CornerRadius="8" Padding="12,8">
                             <StackPanel>
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Industry}"
-                                           FontSize="11" Foreground="#FF64748B"/>
+                                           FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Department}"
-                                           FontSize="12" Foreground="#FF94A3B8" FontWeight="Medium"/>
+                                           FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Medium"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
                 </Border>
 
                 <!-- 分隔线 -->
-                <Border DockPanel.Dock="Bottom" Height="1" Background="#FF1E293B" Margin="24,0,24,16"/>
+                <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource SidebarTextBrush}" Margin="24,0,24,16" Opacity="0.2"/>
 
                 <!-- 导航 -->
                 <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="NAVIGATION" FontSize="10" FontWeight="SemiBold"
-                                   Foreground="#FF475569" Margin="24,0,0,14"
+                                   Foreground="{DynamicResource SidebarTextBrush}" Margin="24,0,0,14"
                                    FontFamily="{StaticResource MonoFont}"/>
                         <RadioButton Style="{StaticResource NavButton}" IsChecked="True"
                                      Content="&#x1F4CA;" Tag="工作台"
@@ -193,189 +174,188 @@
         </Border>
 
         <!-- ===== 主内容区 ===== -->
-        <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}">
-            <ContentControl Content="{Binding CurrentView}">
-                <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-                        <views:DashboardView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:WorkRecordViewModel}">
-                        <views:WorkRecordView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:KnowledgeViewModel}">
-                        <views:KnowledgeView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:IssueViewModel}">
-                        <views:IssueView/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-                        <views:SettingsView/>
-                    </DataTemplate>
-                </ContentControl.Resources>
-            </ContentControl>
-        </Border>
+        <Grid Grid.Column="1" x:Name="MainContentArea">
 
-        <!-- ===== 搜索遮罩层 ===== -->
-        <Border x:Name="SearchOverlay" Panel.ZIndex="99"
-                Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                Background="#40000000" MouseLeftButtonDown="SearchOverlay_Click"/>
-
-        <!-- ===== 搜索弹窗（Spotlight 风格） ===== -->
-        <Border x:Name="SearchPopup" Panel.ZIndex="100"
-                Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                CornerRadius="16" Width="600" MaxHeight="480"
-                HorizontalAlignment="Center" VerticalAlignment="Top"
-                Margin="0,120,0,0">
-            <Border.Background>
-                <SolidColorBrush Color="White" Opacity="0.98"/>
-            </Border.Background>
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="40" ShadowDepth="8" Opacity="0.25" Color="#FF000000"/>
-            </Border.Effect>
-            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="16">
-                <DockPanel>
-                    <!-- 搜索输入框 -->
-                    <Border DockPanel.Dock="Top" Padding="18,16">
-                        <Grid>
-                            <Border CornerRadius="12" Background="{StaticResource SurfaceBrush}"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                                    Padding="4,2">
-                                <Grid Height="42">
-                                    <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"
-                                             Foreground="{StaticResource TextPrimaryBrush}" FontSize="15"
-                                             Padding="44,0,16,0" VerticalContentAlignment="Center"
-                                             CaretBrush="{StaticResource PrimaryBrush}"
-                                             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
-                                             KeyDown="SearchBox_KeyDown"/>
-                                    <Border VerticalAlignment="Center" Margin="14,0,0,0"
-                                            IsHitTestVisible="False">
-                                        <TextBlock Text="&#x1F50D;" FontSize="16" Opacity="0.5"/>
-                                    </Border>
-                                    <TextBlock Text="搜索工作记录、知识库、问题..." FontSize="14"
-                                               VerticalAlignment="Center" Margin="44,0,0,0"
-                                               Opacity="0.35" IsHitTestVisible="False"
-                                               Foreground="{StaticResource TextTertiaryBrush}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </Border>
-
-                    <!-- 分隔线 -->
-                    <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderBrush}" Opacity="0.5"/>
-
-                    <!-- 搜索状态/结果 -->
-                    <Border Padding="12,8">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="350">
-                            <Grid>
-                                <!-- 搜索中状态 -->
-                                <Border Visibility="{Binding IsSearching, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                        Padding="20,30">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="&#x1F50D;" FontSize="24" HorizontalAlignment="Center" Opacity="0.3"/>
-                                        <TextBlock Text="正在搜索..." FontSize="13"
-                                                   Foreground="{StaticResource TextTertiaryBrush}"
-                                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- 无结果状态 -->
-                                <Border Visibility="{Binding ShowNoResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                        Padding="20,30">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="&#x1F50D;" FontSize="24" HorizontalAlignment="Center" Opacity="0.3"/>
-                                        <TextBlock Text="未找到相关内容" FontSize="14" FontWeight="Medium"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                        <TextBlock Text="试试其他关键词" FontSize="12"
-                                                   Foreground="{StaticResource TextTertiaryBrush}"
-                                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- 初始状态 -->
-                                <Border Visibility="{Binding ShowInitial, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                        Padding="20,20">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="&#x2328;&#xFE0F;" FontSize="24" HorizontalAlignment="Center" Opacity="0.3"/>
-                                        <TextBlock Text="输入关键词开始搜索" FontSize="13"
-                                                   Foreground="{StaticResource TextTertiaryBrush}"
-                                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                        <TextBlock FontSize="11" HorizontalAlignment="Center" Margin="0,12,0,0">
-                                            <Run Foreground="{StaticResource TextTertiaryBrush}" Text="按 "/>
-                                            <Run Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
-                                            <Run Foreground="{StaticResource TextTertiaryBrush}" Text=" 搜索 · "/>
-                                            <Run Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
-                                            <Run Foreground="{StaticResource TextTertiaryBrush}" Text=" 关闭"/>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- 搜索结果列表 -->
-                                <ItemsControl ItemsSource="{Binding SearchResults}"
-                                              Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border CornerRadius="10" Padding="14,10" Margin="4,3"
-                                                    Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="40"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Border Grid.Column="0" CornerRadius="10" Width="40" Height="40">
-                                                        <Border.Background>
-                                                            <SolidColorBrush Color="{StaticResource Primary}" Opacity="0.1"/>
-                                                        </Border.Background>
-                                                        <TextBlock Text="{Binding Icon}" FontSize="16"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
-                                                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                                                       TextTrimming="CharacterEllipsis" MaxWidth="350"/>
-                                                            <Border CornerRadius="5" Padding="8,3" Margin="8,0,0,0">
-                                                                <Border.Background>
-                                                                    <SolidColorBrush Color="{StaticResource Primary}" Opacity="0.08"/>
-                                                                </Border.Background>
-                                                                <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
-                                                                           Foreground="{StaticResource PrimaryBrush}"/>
-                                                            </Border>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding Content}" FontSize="12"
-                                                                   Foreground="{StaticResource TextTertiaryBrush}"
-                                                                   TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Grid>
-                        </ScrollViewer>
-                    </Border>
-                </DockPanel>
+            <!-- 子视图内容（全区域，不占位） -->
+            <Border Background="{DynamicResource SurfaceBrush}">
+                <ContentControl Content="{Binding CurrentView}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                            <views:DashboardView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:WorkRecordViewModel}">
+                            <views:WorkRecordView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:KnowledgeViewModel}">
+                            <views:KnowledgeView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:IssueViewModel}">
+                            <views:IssueView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                            <views:SettingsView/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
             </Border>
-        </Border>
+
+            <!-- 悬浮搜索框（右上角，Ctrl+F 召唤，Esc 隐藏） -->
+            <Border Panel.ZIndex="60"
+                    Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="300" Margin="0,12,20,0">
+                <Border CornerRadius="10" Background="{DynamicResource CardBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Padding="12,0" Height="36">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.08" Color="#FF000000"/>
+                    </Border.Effect>
+                    <Grid>
+                        <TextBlock Text="&#x1F50D;" FontSize="13" Opacity="0.4"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   IsHitTestVisible="False"/>
+                        <TextBox x:Name="MainSearchBox" Background="Transparent" BorderThickness="0"
+                                 Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"
+                                 Padding="22,0,8,0" VerticalContentAlignment="Center"
+                                 CaretBrush="{DynamicResource PrimaryBrush}"
+                                 Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                 KeyDown="SearchBox_KeyDown"
+                                 GotFocus="SearchBox_GotFocus"
+                                 LostFocus="SearchBox_LostFocus"/>
+                        <TextBlock x:Name="SearchPlaceholder" FontSize="12"
+                                   VerticalAlignment="Center" Margin="22,0,0,0"
+                                   Opacity="0.35" IsHitTestVisible="False"
+                                   Foreground="{DynamicResource TextTertiaryBrush}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=MainSearchBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </Border>
+
+            <!-- 搜索遮罩层（点击关闭搜索下拉） -->
+            <Border Panel.ZIndex="50"
+                    Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                    Background="#10000000" MouseLeftButtonDown="SearchOverlay_Click"/>
+
+            <!-- 搜索结果下拉面板（悬浮） -->
+            <Border x:Name="SearchResultsPanel" Panel.ZIndex="60"
+                    Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="300" Margin="0,50,20,0">
+                <Border CornerRadius="12" Background="{DynamicResource CardBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        MaxHeight="420">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="6" Opacity="0.12" Color="#FF000000"/>
+                    </Border.Effect>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420">
+                        <Grid>
+                            <!-- 搜索中状态 -->
+                            <Border Visibility="{Binding IsSearching, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                    Padding="20,24">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="&#x1F50D;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <TextBlock Text="正在搜索..." FontSize="13"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 无结果状态 -->
+                            <Border Visibility="{Binding ShowNoResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                    Padding="20,24">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="&#x1F50D;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <TextBlock Text="未找到相关内容" FontSize="13" FontWeight="Medium"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    <TextBlock Text="试试其他关键词" FontSize="12"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 初始状态 -->
+                            <Border Visibility="{Binding ShowInitial, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                    Padding="20,20">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="&#x2328;&#xFE0F;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <TextBlock Text="输入关键词开始搜索" FontSize="13"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    <TextBlock FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text="按 "/>
+                                        <Run Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
+                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text=" 搜索 · "/>
+                                        <Run Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
+                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 搜索结果列表 -->
+                            <ItemsControl ItemsSource="{Binding SearchResults}"
+                                          Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="8" Padding="12,10" Margin="6,3"
+                                                Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="36"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" CornerRadius="8" Width="36" Height="36">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
+                                                    </Border.Background>
+                                                    <TextBlock Text="{Binding Icon}" FontSize="14"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="180"/>
+                                                        <Border CornerRadius="4" Padding="6,2" Margin="6,0,0,0">
+                                                            <Border.Background>
+                                                                <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
+                                                            </Border.Background>
+                                                            <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Content}" FontSize="11"
+                                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                                               TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

@@ -6,7 +6,43 @@
         AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ResizeMode="NoResize"
         FontFamily="{StaticResource DefaultFont}">
-    <Border Background="White" CornerRadius="14" Margin="16"
+    <Window.Resources>
+        <Style x:Key="ToggleChip" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="chip" CornerRadius="8" Padding="0,8"
+                                Background="#FFF5F6F8" BorderBrush="#FFE5E7EB" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="chip" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#FF4338CA" Offset="0"/>
+                                            <GradientStop Color="#FF7C3AED" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="chip" Property="BorderBrush" Value="#FF4338CA"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="chip" Property="BorderBrush" Value="#FF4338CA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Margin="16"
             Effect="{StaticResource ShadowLg}">
         <Grid Margin="28,22,28,22">
             <Grid.RowDefinitions>
@@ -33,21 +69,39 @@
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="个人信息" FontSize="16" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
                             <TextBlock Text="设置您的个人资料，点击侧边栏头像可随时修改"
-                                       FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                                       FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
                                        Margin="0,2,0,0"/>
                         </StackPanel>
                     </StackPanel>
                     <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                             Click="Cancel_Click" Style="{StaticResource BtnGhost}" Padding="8,6">
-                        <TextBlock Text="&#x2715;" FontSize="14" Foreground="{StaticResource TextTertiaryBrush}"/>
+                        <TextBlock Text="&#x2715;" FontSize="14" Foreground="{DynamicResource TextTertiaryBrush}"/>
                     </Button>
                 </Grid>
             </StackPanel>
 
             <!-- 表单字段 -->
             <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                <!-- 身份类型 -->
+                <StackPanel Margin="0,0,0,14">
+                    <TextBlock Text="员工类型" Style="{StaticResource Label}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton x:Name="ProbationRadio" Content="试用期" IsChecked="True"
+                                     Style="{StaticResource ToggleChip}" GroupName="EmployeeType"/>
+                        <RadioButton x:Name="RegularRadio" Grid.Column="2" Content="正式员工"
+                                     Style="{StaticResource ToggleChip}" GroupName="EmployeeType"/>
+                    </Grid>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,14" Opacity="0.7"/>
+
                 <!-- 姓名 + 职位 -->
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
@@ -65,7 +119,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,14" Opacity="0.7"/>
+                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,14" Opacity="0.7"/>
 
                 <!-- 行业 + 部门 -->
                 <Grid Margin="0,0,0,14">
@@ -90,7 +144,7 @@
                     <TextBox x:Name="FocusInput" Style="{StaticResource Input}"/>
                 </StackPanel>
                 <TextBlock Text="描述您的主要工作方向或技术领域" FontSize="11"
-                           Foreground="{StaticResource TextTertiaryBrush}" Margin="0,0,0,0"/>
+                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,0"/>
             </StackPanel>
 
             <!-- 按钮 -->

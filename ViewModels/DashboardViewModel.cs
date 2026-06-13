@@ -57,12 +57,30 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private string _coverageWarningText = string.Empty;
     [ObservableProperty] private bool _showCoverageWarning;
 
+    // 身份类型
+    public bool IsProbation => ProfileService.Instance.IsProbation;
+
+    // Dashboard 布局可见性（从配置读取）
+    public bool ShowDashStats => ConfigService.Instance.ShowDashStats;
+    public bool ShowDashReminder => ConfigService.Instance.ShowDashReminder;
+    public bool ShowDashProbation => ConfigService.Instance.ShowDashProbation && IsProbation;
+    public bool ShowDashCharts => ConfigService.Instance.ShowDashCharts;
+    public bool ShowDashHighlights => ConfigService.Instance.ShowDashHighlights;
+    public bool ShowDashRecent => ConfigService.Instance.ShowDashRecent;
+
     public async Task RefreshAsync() => await LoadDashboardAsync();
 
     [RelayCommand]
     public async Task LoadDashboardAsync()
     {
         CurrentDate = DateTime.Now.ToString("yyyy-MM-dd dddd");
+        OnPropertyChanged(nameof(IsProbation));
+        OnPropertyChanged(nameof(ShowDashStats));
+        OnPropertyChanged(nameof(ShowDashReminder));
+        OnPropertyChanged(nameof(ShowDashProbation));
+        OnPropertyChanged(nameof(ShowDashCharts));
+        OnPropertyChanged(nameof(ShowDashHighlights));
+        OnPropertyChanged(nameof(ShowDashRecent));
 
         var today = DateTime.Now.ToString("yyyy-MM-dd");
         var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now).ToString("yyyy-MM-dd");
@@ -101,8 +119,25 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         }).ToList();
         RecentRecords = new ObservableCollection<RecentRecordItem>(recent);
 
-        // 试用期进度
-        await LoadProbationProgressAsync();
+        // 试用期进度（仅试用期加载，正式员工清零）
+        if (ProfileService.Instance.IsProbation)
+        {
+            await LoadProbationProgressAsync();
+        }
+        else
+        {
+            ProbationStartDate = string.Empty;
+            ProbationDaysPassed = 0;
+            ProbationDaysTotal = 0;
+            ProbationProgressPercent = 0;
+            ProbationRemainingDays = 0;
+            ProbationInfo = string.Empty;
+            CoverageRatePercent = 0;
+            RecordedDaysCount = 0;
+            ShowCoverageWarning = false;
+            CoverageWarningText = string.Empty;
+            ProbationReport = string.Empty;
+        }
 
         // 工时趋势图表
         await LoadChartAsync();
@@ -151,16 +186,24 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 ? Math.Min(100, (double)recordedDays / workingDays * 100)
                 : 0;
 
-            // 覆盖率提醒
-            if (CoverageRatePercent < 60)
+            // 覆盖率提醒（仅试用期）
+            if (ProfileService.Instance.IsProbation)
             {
-                ShowCoverageWarning = true;
-                CoverageWarningText = $"记录覆盖率仅 {CoverageRatePercent:F0}%，建议每天记录工作内容，转正述职时数据更充实。";
-            }
-            else if (CoverageRatePercent < 80)
-            {
-                ShowCoverageWarning = true;
-                CoverageWarningText = $"记录覆盖率 {CoverageRatePercent:F0}%，接近完美！坚持每天记录，数据更完整。";
+                if (CoverageRatePercent < 60)
+                {
+                    ShowCoverageWarning = true;
+                    CoverageWarningText = $"记录覆盖率仅 {CoverageRatePercent:F0}%，建议每天记录工作内容，转正述职时数据更充实。";
+                }
+                else if (CoverageRatePercent < 80)
+                {
+                    ShowCoverageWarning = true;
+                    CoverageWarningText = $"记录覆盖率 {CoverageRatePercent:F0}%，接近完美！坚持每天记录，数据更完整。";
+                }
+                else
+                {
+                    ShowCoverageWarning = false;
+                    CoverageWarningText = string.Empty;
+                }
             }
             else
             {

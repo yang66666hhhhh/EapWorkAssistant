@@ -1,3 +1,4 @@
+using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System;
 using System.Windows;
@@ -14,6 +15,16 @@ public partial class DashboardView : UserControl
         DataContextChanged += (_, _) => SyncProbationDate();
         Loaded += (_, _) => SyncProbationDate();
         CustomCal.SelectedDateChanged += OnCalendarDateChanged;
+
+        // 监听个人资料变更，身份切换时立即刷新仪表盘
+        ProfileService.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ProfileService.IsProbation)
+                && DataContext is DashboardViewModel vm)
+            {
+                _ = vm.LoadDashboardAsync();
+            }
+        };
     }
 
     private void SyncProbationDate()

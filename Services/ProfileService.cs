@@ -22,6 +22,7 @@ public partial class ProfileService : ObservableObject
     [ObservableProperty] private string _department = "设备自动化";
     [ObservableProperty] private string _industry = "PCB行业";
     [ObservableProperty] private string _focus = "设备自动化";
+    [ObservableProperty] private bool _isProbation = true;
 
     static ProfileService()
     {
@@ -43,6 +44,7 @@ public partial class ProfileService : ObservableObject
                     Department = loaded.Department;
                     Industry = loaded.Industry;
                     Focus = loaded.Focus;
+                    IsProbation = loaded.IsProbation;
                     return;
                 }
             }
@@ -63,7 +65,8 @@ public partial class ProfileService : ObservableObject
                 Role = Role,
                 Department = Department,
                 Industry = Industry,
-                Focus = Focus
+                Focus = Focus,
+                IsProbation = IsProbation
             };
             File.WriteAllText(ProfilePath, JsonSerializer.Serialize(data, new JsonSerializerOptions
             {
@@ -84,6 +87,7 @@ public partial class ProfileService : ObservableObject
         OnPropertyChanged(nameof(Department));
         OnPropertyChanged(nameof(Industry));
         OnPropertyChanged(nameof(Focus));
+        OnPropertyChanged(nameof(IsProbation));
         OnPropertyChanged(nameof(AvatarInitial));
     }
 
@@ -94,5 +98,6 @@ public partial class ProfileService : ObservableObject
         public string Department { get; set; } = "设备自动化";
         public string Industry { get; set; } = "PCB行业";
         public string Focus { get; set; } = "设备自动化";
+        public bool IsProbation { get; set; } = true;
     }
 }

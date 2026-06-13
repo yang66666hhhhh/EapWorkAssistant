@@ -11,18 +11,18 @@
         <DockPanel>
 
             <!-- 顶部栏 -->
-            <Border DockPanel.Dock="Top" Background="White" CornerRadius="14" Padding="24"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            <Border DockPanel.Dock="Top" Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Margin="0,0,0,14">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="问题跟踪" Style="{StaticResource Heading2}"/>
                         <TextBlock Text="记录设备问题、根本原因和解决方案"
-                                   Foreground="{StaticResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
+                                   Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="10"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="4,2">
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="4,2">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -38,7 +38,7 @@
                         </Border>
                         <Button Content="搜索" Command="{Binding SearchCommand}"
                                 Style="{StaticResource BtnPrimary}" Margin="8,0,0,0" Padding="16,9"/>
-                        <Border Width="1" Background="{StaticResource BorderBrush}" Margin="14,0"/>
+                        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="14,0"/>
                         <Button x:Name="OpenFormBtn" Click="OpenForm_Click"
                                 Style="{StaticResource BtnPrimary}" Padding="16,9">
                             <StackPanel Orientation="Horizontal">
@@ -53,8 +53,8 @@
             </Border>
 
             <!-- 数据表格 -->
-            <Border Background="White" CornerRadius="14"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="0"
+            <Border Background="{DynamicResource CardBrush}" CornerRadius="14"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0"
                     ClipToBounds="True">
                 <Grid>
                     <DataGrid ItemsSource="{Binding Items}" Style="{StaticResource ModernGrid}"
@@ -102,7 +102,7 @@
                                                     Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"
-                                                    Foreground="{StaticResource DangerBrush}"/>
+                                                    Foreground="{DynamicResource DangerBrush}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -113,13 +113,13 @@
                     <!-- 空状态 -->
                     <Border Visibility="{Binding Items.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                             Padding="40" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            Background="White" CornerRadius="14">
+                            Background="{DynamicResource CardBrush}" CornerRadius="14">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock Text="&#x1F527;" FontSize="48" HorizontalAlignment="Center" Opacity="0.25"/>
-                            <TextBlock Text="暂无问题记录" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                            <TextBlock Text="暂无问题记录" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                        HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium"/>
                             <TextBlock Text="点击右上角「新增问题」按钮记录设备问题和解决方案" FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
                                        HorizontalAlignment="Center" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
@@ -141,14 +141,14 @@
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="&#x1F50D; 问题详情" FontSize="18" FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4"/>
                             <TextBlock Text="记录设备问题与解决方案" FontSize="12"
-                                       Foreground="{StaticResource TextTertiaryBrush}"/>
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
                         </StackPanel>
                         <Button x:Name="CloseFormBtn" HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Click="CloseForm_Click" Style="{StaticResource BtnGhost}"
                                 Padding="8,6" ToolTip="关闭面板">
-                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="{StaticResource TextTertiaryBrush}"/>
+                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="{DynamicResource TextTertiaryBrush}"/>
                         </Button>
                     </Grid>
                 </StackPanel>
@@ -163,9 +163,9 @@
                                 Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
                                 Padding="20,10"/>
                     </Grid>
-                    <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="10"
+                    <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="10"
                             Padding="14,10" Margin="0,10,0,0">
-                        <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource SuccessBrush}"
+                        <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
                                    FontSize="13" FontWeight="Medium"/>
                     </Border>
                 </StackPanel>
@@ -193,7 +193,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,14"/>
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,14"/>
 
                         <!-- 问题描述 -->
                         <TextBlock Text="描述 *" Style="{StaticResource Label}"/>
@@ -210,14 +210,14 @@
                         <TextBox Text="{Binding CurrentItem.Solution}" Height="80" Style="{StaticResource TextArea}"
                                  Margin="0,0,0,18" VerticalScrollBarVisibility="Auto"/>
 
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,2,0,18"/>
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,18"/>
 
                         <!-- 关键词 -->
                         <TextBlock Text="关键词" Style="{StaticResource Label}"/>
                         <TextBox Text="{Binding CurrentItem.Keywords}" Style="{StaticResource Input}"
                                  Margin="0,0,0,6"/>
                         <TextBlock Text="多个关键词用逗号分隔，便于搜索检索" FontSize="11"
-                                   Foreground="{StaticResource TextTertiaryBrush}"/>
+                                   Foreground="{DynamicResource TextTertiaryBrush}"/>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

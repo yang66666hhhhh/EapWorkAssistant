@@ -15,6 +15,8 @@ public partial class ProfileDialog : Window
         DepartmentInput.Text = p.Department;
         FocusInput.Text = p.Focus;
         AvatarPreview.Text = p.AvatarInitial;
+        ProbationRadio.IsChecked = p.IsProbation;
+        RegularRadio.IsChecked = !p.IsProbation;
         NameInput.TextChanged += (_, _) =>
             AvatarPreview.Text = string.IsNullOrWhiteSpace(NameInput.Text) ? "U" : NameInput.Text[..1];
     }
@@ -43,6 +45,7 @@ public partial class ProfileDialog : Window
         p.Industry = IndustryInput.Text.Trim();
         p.Department = DepartmentInput.Text.Trim();
         p.Focus = FocusInput.Text.Trim();
+        p.IsProbation = ProbationRadio.IsChecked == true;
         p.Save();
         p.NotifyAllChanged();
 
