@@ -4,6 +4,7 @@ using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
@@ -12,6 +13,7 @@ public partial class MainViewModel : ObservableObject
     private readonly WorkRecordRepository _recordRepo = new();
     private readonly KnowledgeRepository _knowledgeRepo = new();
     private readonly IssueRepository _issueRepo = new();
+    private readonly DispatcherTimer _searchTimer;
 
     [ObservableProperty]
     private object? _currentView;
@@ -48,6 +50,13 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
+        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer.Tick += async (_, _) =>
+        {
+            _searchTimer.Stop();
+            await SearchAsync();
+        };
+
         // 根据配置设置默认启动视图
         var defaultView = ConfigService.Instance.DefaultView;
         CurrentView = defaultView switch
@@ -101,9 +110,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void CloseSearch()
     {
+        _searchTimer.Stop();
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
         SearchResults.Clear();
+        ShowInitial = true;
+        ShowNoResults = false;
+        ShowResults = false;
     }
 
     [RelayCommand]
@@ -125,17 +138,13 @@ public partial class MainViewModel : ObservableObject
         ShowResults = false;
 
         var results = new List<SearchResultItem>();
-        var keyword = SearchKeyword.Trim().ToLower();
+        var keyword = SearchKeyword.Trim();
 
         try
         {
-            // 搜索工作记录
-            var records = await _recordRepo.GetAllAsync();
-            foreach (var r in records.Where(r =>
-                (r.Content?.ToLower().Contains(keyword) == true) ||
-                (r.ProjectName?.ToLower().Contains(keyword) == true) ||
-                (r.Problem?.ToLower().Contains(keyword) == true) ||
-                (r.Solution?.ToLower().Contains(keyword) == true)))
+            // 数据库级搜索（SQL LIKE）
+            var records = await _recordRepo.SearchAsync(keyword);
+            foreach (var r in records)
             {
                 var content = r.Content ?? "";
                 results.Add(new SearchResultItem
@@ -145,16 +154,13 @@ public partial class MainViewModel : ObservableObject
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DD",
                     NavigateTo = "WorkRecord",
-                    TargetDate = DateTime.TryParse(r.WorkDate, out var d) ? d : null
+                    TargetDate = DateTime.TryParse(r.WorkDate, out var d) ? d : null,
+                    Keyword = keyword
                 });
             }
 
-            // 搜索知识库
-            var knowledge = await _knowledgeRepo.GetAllAsync();
-            foreach (var k in knowledge.Where(k =>
-                (k.Title?.ToLower().Contains(keyword) == true) ||
-                (k.Content?.ToLower().Contains(keyword) == true) ||
-                (k.Tags?.ToLower().Contains(keyword) == true)))
+            var knowledge = await _knowledgeRepo.SearchAsync(keyword);
+            foreach (var k in knowledge)
             {
                 var content = k.Content ?? "";
                 results.Add(new SearchResultItem
@@ -164,18 +170,13 @@ public partial class MainViewModel : ObservableObject
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DA",
                     NavigateTo = "Knowledge",
-                    TargetId = k.Id
+                    TargetId = k.Id,
+                    Keyword = keyword
                 });
             }
 
-            // 搜索问题跟踪
-            var issues = await _issueRepo.GetAllAsync();
-            foreach (var i in issues.Where(i =>
-                (i.Title?.ToLower().Contains(keyword) == true) ||
-                (i.Description?.ToLower().Contains(keyword) == true) ||
-                (i.Keywords?.ToLower().Contains(keyword) == true) ||
-                (i.RootCause?.ToLower().Contains(keyword) == true) ||
-                (i.Solution?.ToLower().Contains(keyword) == true)))
+            var issues = await _issueRepo.SearchAsync(keyword);
+            foreach (var i in issues)
             {
                 var content = i.Description ?? "";
                 results.Add(new SearchResultItem
@@ -185,7 +186,8 @@ public partial class MainViewModel : ObservableObject
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F527",
                     NavigateTo = "Issue",
-                    TargetId = i.Id
+                    TargetId = i.Id,
+                    Keyword = keyword
                 });
             }
         }
@@ -213,6 +215,7 @@ public partial class MainViewModel : ObservableObject
     private void NavigateToResult(SearchResultItem? item)
     {
         if (item == null) return;
+        _searchTimer.Stop();
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
 
@@ -239,14 +242,20 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSearchKeywordChanged(string value)
     {
-        // 当搜索词清空时，重置状态
         if (string.IsNullOrWhiteSpace(value))
         {
+            _searchTimer.Stop();
             SearchResults.Clear();
             ShowInitial = true;
             ShowNoResults = false;
             ShowResults = false;
             IsSearching = false;
+        }
+        else
+        {
+            // 防抖：每次按键重启定时器，300ms 后自动搜索
+            _searchTimer.Stop();
+            _searchTimer.Start();
         }
     }
 
@@ -267,4 +276,5 @@ public class SearchResultItem
     public string NavigateTo { get; set; } = string.Empty;
     public DateTime? TargetDate { get; set; }
     public int TargetId { get; set; }
+    public string Keyword { get; set; } = string.Empty;
 }

@@ -18,7 +18,7 @@ public class IssueRepository
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.QueryAsync<Issue>(
-            "SELECT * FROM Issue WHERE Title LIKE @Kw OR Description LIKE @Kw OR Keywords LIKE @Kw OR RootCause LIKE @Kw ORDER BY CreateTime DESC",
+            "SELECT * FROM Issue WHERE Title LIKE @Kw OR Description LIKE @Kw OR Keywords LIKE @Kw OR RootCause LIKE @Kw OR Solution LIKE @Kw ORDER BY CreateTime DESC",
             new { Kw = $"%{keyword}%" });
     }
 

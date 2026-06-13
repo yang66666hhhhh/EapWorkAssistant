@@ -119,4 +119,12 @@ public class WorkRecordRepository
             "SELECT COUNT(DISTINCT WorkDate) FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End",
             new { Start = startDate, End = endDate });
     }
+
+    public async Task<IEnumerable<WorkRecord>> SearchAsync(string keyword)
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        return await connection.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
+            new { Kw = $"%{keyword}%" });
+    }
 }

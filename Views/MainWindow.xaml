@@ -199,161 +199,176 @@
                 </ContentControl>
             </Border>
 
-            <!-- 悬浮搜索框（右上角，Ctrl+F 召唤，Esc 隐藏） -->
-            <Border Panel.ZIndex="60"
-                    Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Width="300" Margin="0,12,20,0">
-                <Border CornerRadius="10" Background="{DynamicResource CardBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        Padding="12,0" Height="36">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.08" Color="#FF000000"/>
-                    </Border.Effect>
-                    <Grid>
-                        <TextBlock Text="&#x1F50D;" FontSize="13" Opacity="0.4"
-                                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                                   IsHitTestVisible="False"/>
-                        <TextBox x:Name="MainSearchBox" Background="Transparent" BorderThickness="0"
-                                 Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"
-                                 Padding="22,0,8,0" VerticalContentAlignment="Center"
-                                 CaretBrush="{DynamicResource PrimaryBrush}"
-                                 Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
-                                 KeyDown="SearchBox_KeyDown"
-                                 GotFocus="SearchBox_GotFocus"
-                                 LostFocus="SearchBox_LostFocus"/>
-                        <TextBlock x:Name="SearchPlaceholder" FontSize="12"
-                                   VerticalAlignment="Center" Margin="22,0,0,0"
-                                   Opacity="0.35" IsHitTestVisible="False"
-                                   Foreground="{DynamicResource TextTertiaryBrush}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=MainSearchBox}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-                </Border>
-            </Border>
-
-            <!-- 搜索遮罩层（点击关闭搜索下拉） -->
+            <!-- ===== Spotlight 风格居中搜索 ===== -->
+            <!-- 全屏遮罩 -->
             <Border Panel.ZIndex="50"
                     Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    Background="#10000000" MouseLeftButtonDown="SearchOverlay_Click"/>
+                    Background="#40000000" MouseLeftButtonDown="SearchOverlay_Click"/>
 
-            <!-- 搜索结果下拉面板（悬浮） -->
-            <Border x:Name="SearchResultsPanel" Panel.ZIndex="60"
+            <!-- 居中搜索面板 -->
+            <Border Panel.ZIndex="60"
                     Visibility="{Binding IsSearchOpen, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Width="300" Margin="0,50,20,0">
-                <Border CornerRadius="12" Background="{DynamicResource CardBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        MaxHeight="420">
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Width="540" Margin="0,80,0,0">
+                <Border CornerRadius="14" Background="{DynamicResource CardBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="20" ShadowDepth="6" Opacity="0.12" Color="#FF000000"/>
+                        <DropShadowEffect BlurRadius="30" ShadowDepth="10" Opacity="0.2" Color="#FF000000"/>
                     </Border.Effect>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420">
-                        <Grid>
-                            <!-- 搜索中状态 -->
-                            <Border Visibility="{Binding IsSearching, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                    Padding="20,24">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="&#x1F50D;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
-                                    <TextBlock Text="正在搜索..." FontSize="13"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                </StackPanel>
-                            </Border>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                            <!-- 无结果状态 -->
-                            <Border Visibility="{Binding ShowNoResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                    Padding="20,24">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="&#x1F50D;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
-                                    <TextBlock Text="未找到相关内容" FontSize="13" FontWeight="Medium"
-                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                    <TextBlock Text="试试其他关键词" FontSize="12"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
+                        <!-- 搜索输入框 -->
+                        <Border Padding="18,0" Height="48" BorderThickness="0,0,0,1"
+                                BorderBrush="{DynamicResource BorderBrush}">
+                            <Grid>
+                                <TextBlock Text="&#x1F50D;" FontSize="16" Opacity="0.4"
+                                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           IsHitTestVisible="False"/>
+                                <TextBox x:Name="MainSearchBox" Background="Transparent" BorderThickness="0"
+                                         Foreground="{DynamicResource TextPrimaryBrush}" FontSize="15"
+                                         Padding="28,0,8,0" VerticalContentAlignment="Center"
+                                         CaretBrush="{DynamicResource PrimaryBrush}"
+                                         Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                         KeyDown="SearchBox_KeyDown"
+                                         GotFocus="SearchBox_GotFocus"
+                                         LostFocus="SearchBox_LostFocus"/>
+                                <TextBlock x:Name="SearchPlaceholder" FontSize="13"
+                                           VerticalAlignment="Center" Margin="28,0,0,0"
+                                           Opacity="0.35" IsHitTestVisible="False"
+                                           Foreground="{DynamicResource TextTertiaryBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=MainSearchBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
 
-                            <!-- 初始状态 -->
-                            <Border Visibility="{Binding ShowInitial, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                    Padding="20,20">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="&#x2328;&#xFE0F;" FontSize="20" HorizontalAlignment="Center" Opacity="0.3"/>
-                                    <TextBlock Text="输入关键词开始搜索" FontSize="13"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                    <TextBlock FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0">
-                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text="按 "/>
-                                        <Run Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
-                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text=" 搜索 · "/>
-                                        <Run Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
-                                        <Run Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
+                        <!-- 搜索结果滚动区 -->
+                        <ScrollViewer x:Name="SearchResultsPanel" Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto" MaxHeight="380">
+                            <Grid>
+                                <!-- 搜索中状态 -->
+                                <Border Visibility="{Binding IsSearching, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                        Padding="20,28">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="&#x1F50D;" FontSize="22" HorizontalAlignment="Center" Opacity="0.3"/>
+                                        <TextBlock Text="正在搜索..." FontSize="13"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Border>
 
-                            <!-- 搜索结果列表 -->
-                            <ItemsControl ItemsSource="{Binding SearchResults}"
-                                          Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border CornerRadius="8" Padding="12,10" Margin="6,3"
-                                                Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="36"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" CornerRadius="8" Width="36" Height="36">
-                                                    <Border.Background>
-                                                        <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
-                                                    </Border.Background>
-                                                    <TextBlock Text="{Binding Icon}" FontSize="14"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                   TextTrimming="CharacterEllipsis" MaxWidth="180"/>
-                                                        <Border CornerRadius="4" Padding="6,2" Margin="6,0,0,0">
-                                                            <Border.Background>
-                                                                <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
-                                                            </Border.Background>
-                                                            <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
-                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
-                                                        </Border>
+                                <!-- 无结果状态 -->
+                                <Border Visibility="{Binding ShowNoResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                        Padding="20,28">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="&#x1F50D;" FontSize="22" HorizontalAlignment="Center" Opacity="0.3"/>
+                                        <TextBlock Text="未找到相关内容" FontSize="13" FontWeight="Medium"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                        <TextBlock Text="试试其他关键词" FontSize="12"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 初始状态 -->
+                                <Border Visibility="{Binding ShowInitial, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                        Padding="20,24">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="&#x2328;&#xFE0F;" FontSize="22" HorizontalAlignment="Center" Opacity="0.3"/>
+                                        <TextBlock Text="输入关键词，实时搜索全部内容" FontSize="13"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                        <TextBlock FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                            <Run Foreground="{DynamicResource TextTertiaryBrush}" Text="自动搜索 · "/>
+                                            <Run Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
+                                            <Run Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 搜索结果列表 -->
+                                <ItemsControl ItemsSource="{Binding SearchResults}"
+                                              Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8" Padding="14,10" Margin="8,3"
+                                                    Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="38"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" CornerRadius="8" Width="38" Height="38">
+                                                        <Border.Background>
+                                                            <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
+                                                        </Border.Background>
+                                                        <TextBlock Text="{Binding Icon}" FontSize="15"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock FontSize="12" FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                       TextTrimming="CharacterEllipsis" MaxWidth="320"
+                                                                       local:Highlight.Text="{Binding Title}"
+                                                                       local:Highlight.Keyword="{Binding Keyword}"/>
+                                                            <Border CornerRadius="4" Padding="6,2" Margin="6,0,0,0">
+                                                                <Border.Background>
+                                                                    <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
+                                                                </Border.Background>
+                                                                <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource PrimaryBrush}"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock FontSize="11"
+                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
+                                                                   local:Highlight.Text="{Binding Content}"
+                                                                   local:Highlight.Keyword="{Binding Keyword}"/>
                                                     </StackPanel>
-                                                    <TextBlock Text="{Binding Content}" FontSize="11"
-                                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                                               TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Grid>
-                    </ScrollViewer>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </ScrollViewer>
+
+                        <!-- 底部提示栏 -->
+                        <Border Grid.Row="2" Padding="16,8" BorderThickness="0,1,0,0"
+                                BorderBrush="{DynamicResource BorderBrush}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text="Ctrl+F 打开 · "/>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 立即搜索 · "/>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Border>
             </Border>
         </Grid>
