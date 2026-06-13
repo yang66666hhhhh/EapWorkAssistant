@@ -14,6 +14,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 {
     private readonly WorkRecordRepository _repo = new();
     private readonly DispatcherTimer _statusTimer;
+    private readonly DispatcherTimer _searchTimer;
 
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
@@ -85,6 +86,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private int _allHighlightCount;
 
+    [ObservableProperty]
+    private string _searchKeyword = "";
+
+    [ObservableProperty]
+    private int _currentPage = 1;
+
+    [ObservableProperty]
+    private int _filteredTotalCount;
+
+    [ObservableProperty]
+    private string _pageText = "";
+
+    [ObservableProperty]
+    private int _pageSize = 20;
+
+    [ObservableProperty]
+    private int _totalPages = 1;
+
+    [ObservableProperty]
+    private ObservableCollection<int> _visiblePageNumbers = new();
+
+    public int[] PageSizeOptions => [10, 20, 50, 100];
+
     public string[] Projects => ProjectInfo.Projects;
     public string[] WorkTypes => ProjectInfo.WorkTypes;
     public string[] FilterProjects => ["", .. ProjectInfo.Projects];
@@ -95,6 +119,15 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
+
+        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer.Tick += async (_, _) =>
+        {
+            _searchTimer.Stop();
+            CurrentPage = 1;
+            await LoadAllRecordsAsync();
+        };
+
         PropertyChanged += WorkRecordViewModel_PropertyChanged;
     }
 
@@ -339,28 +372,98 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task LoadAllRecordsAsync()
     {
-        var start = FilterStartDate ?? DateTime.Now.AddMonths(-1);
-        var end = FilterEndDate ?? DateTime.Now;
-        var startStr = start.ToString("yyyy-MM-dd");
-        var endStr = end.ToString("yyyy-MM-dd");
+        var start = FilterStartDate?.ToString("yyyy-MM-dd");
+        var end = FilterEndDate?.ToString("yyyy-MM-dd");
+        var offset = (CurrentPage - 1) * PageSize;
 
-        var records = (await _repo.GetByDateRangeAsync(startStr, endStr)).ToList();
+        var (records, totalCount, totalHours, highlightCount) = await _repo.GetFilteredPagedAsync(
+            SearchKeyword, FilterProject, FilterWorkType, start, end, offset, PageSize);
 
-        // 项目筛选
-        if (!string.IsNullOrEmpty(FilterProject))
-            records = records.Where(r => r.ProjectName == FilterProject).ToList();
+        AllRecords = new ObservableCollection<WorkRecord>(records);
+        AllTotalHours = totalHours;
+        AllTotalCount = totalCount;
+        AllHighlightCount = highlightCount;
+        FilteredTotalCount = totalCount;
+        UpdatePagination();
+    }
 
-        // 类型筛选
-        if (!string.IsNullOrEmpty(FilterWorkType))
-            records = records.Where(r => r.WorkType == FilterWorkType).ToList();
+    private void UpdatePagination()
+    {
+        TotalPages = CalculateTotalPages();
+        if (CurrentPage > TotalPages && TotalPages > 0)
+            CurrentPage = TotalPages;
+        PageText = FilteredTotalCount > 0
+            ? $"第 {CurrentPage} / {TotalPages} 页"
+            : "无记录";
+        UpdateVisiblePageNumbers();
+    }
 
-        // 按日期倒序排列
-        AllRecords = new ObservableCollection<WorkRecord>(
-            records.OrderByDescending(r => r.WorkDate).ThenByDescending(r => r.Id));
+    private int CalculateTotalPages()
+        => FilteredTotalCount > 0 ? (FilteredTotalCount + PageSize - 1) / PageSize : 1;
 
-        AllTotalHours = AllRecords.Sum(r => r.Hours);
-        AllTotalCount = AllRecords.Count;
-        AllHighlightCount = AllRecords.Count(r => r.IsHighlight == 1);
+    private void UpdateVisiblePageNumbers()
+    {
+        var pages = new ObservableCollection<int>();
+        var total = TotalPages;
+        var current = CurrentPage;
+
+        if (total <= 7)
+        {
+            for (int i = 1; i <= total; i++) pages.Add(i);
+        }
+        else
+        {
+            pages.Add(1);
+            int start = Math.Max(2, current - 2);
+            int end = Math.Min(total - 1, current + 2);
+
+            if (start > 2) pages.Add(0); // 0 = 省略号
+            for (int i = start; i <= end; i++) pages.Add(i);
+            if (end < total - 1) pages.Add(0);
+            pages.Add(total);
+        }
+
+        VisiblePageNumbers = pages;
+    }
+
+    [RelayCommand]
+    private async Task FirstPageAsync()
+    {
+        if (CurrentPage > 1) { CurrentPage = 1; await LoadAllRecordsAsync(); }
+    }
+
+    [RelayCommand]
+    private async Task PrevPageAsync()
+    {
+        if (CurrentPage > 1) { CurrentPage--; await LoadAllRecordsAsync(); }
+    }
+
+    [RelayCommand]
+    private async Task NextPageAsync()
+    {
+        if (CurrentPage < TotalPages) { CurrentPage++; await LoadAllRecordsAsync(); }
+    }
+
+    [RelayCommand]
+    private async Task LastPageAsync()
+    {
+        if (CurrentPage < TotalPages) { CurrentPage = TotalPages; await LoadAllRecordsAsync(); }
+    }
+
+    [RelayCommand]
+    private async Task GoToPageAsync(object? param)
+    {
+        if (param is int page && page > 0 && page <= TotalPages)
+        {
+            CurrentPage = page;
+            await LoadAllRecordsAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSearch()
+    {
+        SearchKeyword = "";
     }
 
     [RelayCommand]
@@ -387,6 +490,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 FilterEndDate = null;
                 break;
         }
+        CurrentPage = 1;
         _ = LoadAllRecordsAsync();
     }
 
@@ -396,6 +500,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (record == null) return;
         if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
         await _repo.DeleteAsync(record.Id);
+        // 删除后如果当前页变空，回退到上一页
+        if (AllRecords.Count <= 1 && CurrentPage > 1)
+            CurrentPage--;
         await LoadAllRecordsAsync();
         StatusMessage = "删除成功";
         _statusTimer.Start();
@@ -406,24 +513,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (record == null) return;
         // 切换到当日记录 Tab 并定位到该日期
-        SelectedDate = DateTime.Parse(record.WorkDate);
+        SelectedDate = DateTime.TryParse(record.WorkDate, out var d) ? d : DateTime.Now;
         SelectedTabIndex = 0;
         EditRecord(record);
         RecordSaved?.Invoke(); // 通知 View 打开抽屉
     }
 
     [RelayCommand]
-    private void ExportAllCsv()
+    private async Task ExportAllCsv()
     {
-        if (!AllRecords.Any())
+        if (FilteredTotalCount == 0)
         {
             StatusMessage = "没有可导出的记录";
             _statusTimer.Start();
             return;
         }
-        var start = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
-        var end = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
-        ExportService.ExportToCsv(AllRecords, $"工作记录_{start}_{end}");
+        // 导出全部匹配记录（不受分页限制）
+        var start = FilterStartDate?.ToString("yyyy-MM-dd");
+        var end = FilterEndDate?.ToString("yyyy-MM-dd");
+        var (records, _, _, _) = await _repo.GetFilteredPagedAsync(
+            SearchKeyword, FilterProject, FilterWorkType, start, end, 0, int.MaxValue);
+        var startStr = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
+        var endStr = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
+        ExportService.ExportToCsv(new ObservableCollection<WorkRecord>(records), $"工作记录_{startStr}_{endStr}");
         StatusMessage = "已导出CSV文件";
         _statusTimer.Start();
     }
@@ -439,12 +551,37 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 FilterStartDate = new DateTime(today.Year, today.Month, 1);
                 FilterEndDate = today;
             }
+            CurrentPage = 1;
             _ = LoadAllRecordsAsync();
         }
     }
 
-    partial void OnFilterProjectChanged(string value) => _ = LoadAllRecordsAsync();
-    partial void OnFilterWorkTypeChanged(string value) => _ = LoadAllRecordsAsync();
+    partial void OnFilterProjectChanged(string value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
+    partial void OnFilterWorkTypeChanged(string value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
+    partial void OnFilterStartDateChanged(DateTime? value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
+    partial void OnFilterEndDateChanged(DateTime? value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
+
+    partial void OnSearchKeywordChanged(string value)
+    {
+        _searchTimer.Stop();
+        CurrentPage = 1;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            _ = LoadAllRecordsAsync();
+        }
+        else
+        {
+            _searchTimer.Start();
+        }
+    }
+
+    partial void OnCurrentPageChanged(int value) => UpdatePagination();
+
+    partial void OnPageSizeChanged(int value)
+    {
+        CurrentPage = 1;
+        _ = LoadAllRecordsAsync();
+    }
 
     partial void OnSelectedDateChanged(DateTime value)
     {

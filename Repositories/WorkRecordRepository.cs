@@ -124,7 +124,62 @@ public class WorkRecordRepository
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.QueryAsync<WorkRecord>(
-            "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
+            "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
             new { Kw = $"%{keyword}%" });
+    }
+
+    /// <summary>
+    /// 带筛选和分页的查询，返回当前页记录 + 统计信息（总条数、总工时、亮点数）
+    /// </summary>
+    public async Task<(IEnumerable<WorkRecord> Records, int TotalCount, double TotalHours, int HighlightCount)>
+        GetFilteredPagedAsync(string? keyword, string? project, string? workType,
+            string? startDate, string? endDate, int offset, int limit)
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        var where = new List<string>();
+        var param = new DynamicParameters();
+
+        if (!string.IsNullOrEmpty(keyword))
+        {
+            where.Add("(ProjectName LIKE @Kw OR WorkType LIKE @Kw OR Content LIKE @Kw OR Achievement LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR HighlightNote LIKE @Kw)");
+            param.Add("Kw", $"%{keyword}%");
+        }
+        if (!string.IsNullOrEmpty(project))
+        {
+            where.Add("ProjectName = @Project");
+            param.Add("Project", project);
+        }
+        if (!string.IsNullOrEmpty(workType))
+        {
+            where.Add("WorkType = @WorkType");
+            param.Add("WorkType", workType);
+        }
+        if (!string.IsNullOrEmpty(startDate))
+        {
+            where.Add("WorkDate >= @StartDate");
+            param.Add("StartDate", startDate);
+        }
+        if (!string.IsNullOrEmpty(endDate))
+        {
+            where.Add("WorkDate <= @EndDate");
+            param.Add("EndDate", endDate);
+        }
+
+        var whereSql = where.Count > 0 ? "WHERE " + string.Join(" AND ", where) : "";
+
+        // 统计查询（跨全量匹配记录）
+        var statsSql = $@"SELECT COALESCE(SUM(Hours),0) AS TotalHours, COUNT(*) AS TotalCount,
+                          COALESCE(SUM(CASE WHEN IsHighlight=1 THEN 1 ELSE 0 END),0) AS HighlightCount
+                          FROM WorkRecord {whereSql}";
+        var stats = await connection.QuerySingleAsync(statsSql, param);
+
+        // 分页查询
+        var dataSql = $@"SELECT * FROM WorkRecord {whereSql}
+                         ORDER BY WorkDate DESC, Id DESC LIMIT @Limit OFFSET @Offset";
+        param.Add("Limit", limit);
+        param.Add("Offset", offset);
+        var records = await connection.QueryAsync<WorkRecord>(dataSql, param);
+
+        return (records, (int)stats.TotalCount, (double)stats.TotalHours, (int)stats.HighlightCount);
     }
 }

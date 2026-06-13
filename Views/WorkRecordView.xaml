@@ -276,7 +276,7 @@
                                 <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="&#x2B50;" Width="40">
+                                <DataGridTemplateColumn Header="&#x2B50;" Width="36">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="&#x2B50;" FontSize="13" HorizontalAlignment="Center"
@@ -299,7 +299,7 @@
                                 <!-- 类型 - 彩色标签 -->
                                 <DataGridTemplateColumn Header="类型" Width="80"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
-                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*">
+                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -310,9 +310,9 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
-                                <DataGridTemplateColumn Header="进度" Width="110"
+                                <DataGridTemplateColumn Header="进度" Width="130"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
-                                <DataGridTemplateColumn Header="操作" Width="140">
+                                <DataGridTemplateColumn Header="操作" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
@@ -350,15 +350,7 @@
                 </Border>
 
                 <!-- 拖拽分隔条 -->
-                <GridSplitter Grid.Row="1" Height="12" HorizontalAlignment="Stretch"
-                              Background="{DynamicResource BorderBrush}" ResizeBehavior="PreviousAndNext"
-                              ShowsPreview="True" Cursor="SizeNS"/>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                            VerticalAlignment="Center" IsHitTestVisible="False">
-                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}" Margin="0,0,4,0"/>
-                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}" Margin="0,0,4,0"/>
-                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextTertiaryBrush}"/>
-                </StackPanel>
+                <GridSplitter Grid.Row="1" Style="{StaticResource DragSplitter}"/>
 
                 <!-- 报告预览 -->
                 <Border Grid.Row="2" Background="{DynamicResource CardBrush}" CornerRadius="13" Margin="0,0,0,0"
@@ -405,6 +397,7 @@
                 </Border.Style>
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -532,8 +525,41 @@
                         </Grid>
                     </Border>
 
+                    <!-- 搜索栏 -->
+                    <Border Grid.Row="1" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,10" Padding="14,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#x1F50D;" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.6"/>
+                                <TextBox Text="{Binding SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource Input}" Width="320"
+                                         FontSize="12.5" Padding="8,6"
+                                         Tag="搜索记录内容、任务、类型..."
+                                         VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0">
+                                    <Run Text="共 "/><Run Text="{Binding FilteredTotalCount, Mode=OneWay}"/><Run Text=" 条"/>
+                                </TextBlock>
+                                <Button Content="清空" Command="{Binding ClearSearchCommand}"
+                                        Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="11.5"
+                                        Foreground="{DynamicResource PrimaryBrush}">
+                                    <Button.Visibility>
+                                        <Binding Path="SearchKeyword" Converter="{x:Static local:StringToVisibilityConverter.Instance}"/>
+                                    </Button.Visibility>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- 统计条 -->
-                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid Grid.Row="2" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
@@ -606,10 +632,158 @@
                         </Border>
                     </Grid>
 
-                    <!-- 记录列表 -->
-                    <Border Grid.Row="2" Background="{DynamicResource CardBrush}" CornerRadius="13"
+                    <!-- 记录列表 + 分页 -->
+                    <Border Grid.Row="3" Background="{DynamicResource CardBrush}" CornerRadius="13"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0" ClipToBounds="True">
-                        <Grid>
+                        <DockPanel>
+                            <!-- 分页控件 -->
+                            <Border DockPanel.Dock="Bottom" Padding="16,10"
+                                    Background="{DynamicResource SurfaceBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FilteredTotalCount}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 左侧：每页条数选择 -->
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="每页" FontSize="12"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                                                  SelectedItem="{Binding PageSize, Mode=TwoWay}"
+                                                  Style="{StaticResource Select}" Width="68" FontSize="12"/>
+                                        <TextBlock Text="条" FontSize="12"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- 中间：翻页按钮 -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                        <!-- 首页 -->
+                                        <Button Content="&#x23EE;" Command="{Binding FirstPageCommand}"
+                                                Style="{StaticResource PageNavButton}" FontSize="13"/>
+                                        <!-- 上一页 -->
+                                        <Button Content="&#x2039;" Command="{Binding PrevPageCommand}"
+                                                Style="{StaticResource PageNavButton}" FontSize="16" FontWeight="Bold"/>
+
+                                        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="6,6" Opacity="0.5"/>
+
+                                        <!-- 页码按钮 -->
+                                        <ItemsControl ItemsSource="{Binding VisiblePageNumbers}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="{Binding}"
+                                                            Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Margin="1,0" Width="32" Height="32" Padding="0"
+                                                            FontFamily="{StaticResource DefaultFont}" FontSize="12.5"
+                                                            FontWeight="Medium" Cursor="Hand"
+                                                            Foreground="{DynamicResource TextSecondaryBrush}">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="pbg" CornerRadius="8"
+                                                                        Background="Transparent"
+                                                                        Padding="{TemplateBinding Padding}">
+                                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="pbg" Property="Background"
+                                                                                Value="{DynamicResource SurfaceHoverBrush}"/>
+                                                                        <Setter Property="Foreground"
+                                                                                Value="{DynamicResource PrimaryBrush}"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Style.Triggers>
+                                                                    <!-- 省略号（值为0）禁用点击 -->
+                                                                    <DataTrigger Binding="{Binding}" Value="0">
+                                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                                        <Setter Property="Content" Value="..."/>
+                                                                        <Setter Property="Cursor" Value="Arrow"/>
+                                                                        <Setter Property="Foreground"
+                                                                                Value="{DynamicResource TextTertiaryBrush}"/>
+                                                                    </DataTrigger>
+                                                                    <!-- 当前页高亮 -->
+                                                                    <DataTrigger Value="True">
+                                                                        <DataTrigger.Binding>
+                                                                            <MultiBinding>
+                                                                                <MultiBinding.Converter>
+                                                                                    <local:PageActiveConverter/>
+                                                                                </MultiBinding.Converter>
+                                                                                <Binding/>
+                                                                                <Binding Path="DataContext.CurrentPage"
+                                                                                         RelativeSource="{RelativeSource AncestorType=ItemsControl}"/>
+                                                                            </MultiBinding>
+                                                                        </DataTrigger.Binding>
+                                                                        <Setter Property="Foreground" Value="White"/>
+                                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                                        <Setter Property="Template">
+                                                                            <Setter.Value>
+                                                                                <ControlTemplate TargetType="Button">
+                                                                                    <Border CornerRadius="8"
+                                                                                            Background="{DynamicResource PrimaryBrush}"
+                                                                                            Padding="{TemplateBinding Padding}">
+                                                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                                                          VerticalAlignment="Center"/>
+                                                                                    </Border>
+                                                                                </ControlTemplate>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="6,6" Opacity="0.5"/>
+
+                                        <!-- 下一页 -->
+                                        <Button Content="&#x203A;" Command="{Binding NextPageCommand}"
+                                                Style="{StaticResource PageNavButton}" FontSize="16" FontWeight="Bold"/>
+                                        <!-- 末页 -->
+                                        <Button Content="&#x23ED;" Command="{Binding LastPageCommand}"
+                                                Style="{StaticResource PageNavButton}" FontSize="13"/>
+                                    </StackPanel>
+
+                                    <!-- 右侧：总记录数 -->
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="共 "/><Run Text="{Binding FilteredTotalCount, Mode=OneWay}"
+                                                                  FontWeight="SemiBold"
+                                                                  Foreground="{DynamicResource TextSecondaryBrush}"/><Run Text=" 条"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Grid>
                             <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
                                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                 <DataGrid.ColumnHeaderStyle>
@@ -622,8 +796,8 @@
                                     <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="100"/>
-                                    <DataGridTemplateColumn Header="&#x2B50;" Width="40">
+                                    <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="125"/>
+                                    <DataGridTemplateColumn Header="&#x2B50;" Width="36">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="&#x2B50;" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -641,22 +815,35 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="120"/>
+                                    <!-- 任务（带搜索高亮） -->
+                                    <DataGridTemplateColumn Header="任务" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock local:Highlight.Text="{Binding ProjectName}"
+                                                           local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectName}"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTemplateColumn Header="类型" Width="80"
                                                             CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
-                                    <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                                <Setter Property="TextWrapping" Value="NoWrap"/>
-                                                <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <!-- 内容（带搜索高亮） -->
+                                    <DataGridTemplateColumn Header="内容" Width="*" MinWidth="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock local:Highlight.Text="{Binding Content}"
+                                                           local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                           ToolTip="{Binding Content}"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
-                                    <DataGridTemplateColumn Header="进度" Width="110"
+                                    <DataGridTemplateColumn Header="进度" Width="130"
                                                             CellTemplate="{StaticResource ProgressBarCell}"/>
-                                    <DataGridTemplateColumn Header="操作" Width="140">
+                                    <DataGridTemplateColumn Header="操作" Width="130">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
@@ -688,7 +875,8 @@
                                                HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Border>
-                        </Grid>
+                            </Grid>
+                        </DockPanel>
                     </Border>
                 </Grid>
             </Border>
