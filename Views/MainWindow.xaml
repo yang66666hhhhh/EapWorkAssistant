@@ -6,6 +6,7 @@
         xmlns:views="clr-namespace:EapWorkAssistant.Views"
         xmlns:svc="clr-namespace:EapWorkAssistant.Services"
         Title="EAP Work Assistant" Height="800" Width="1320"
+        Icon="pack://application:,,,/Resources/app.ico"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource SurfaceBrush}"
         FontFamily="{StaticResource DefaultFont}">
@@ -117,12 +118,29 @@
                         Background="{DynamicResource SidebarCardBgBrush}">
                     <StackPanel>
                         <Grid Margin="0,0,0,10">
-                            <!-- 头像：显示姓名首字 -->
+                            <!-- 头像：首字母 / 上传图片 -->
                             <Border Width="34" Height="34" CornerRadius="17" HorizontalAlignment="Left"
                                     Background="{DynamicResource PrimaryGradient}">
-                                <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=AvatarInitial}"
-                                           FontSize="15" FontWeight="Bold" Foreground="White"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Grid>
+                                    <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=AvatarInitial}"
+                                               FontSize="15" FontWeight="Bold" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- 头像图片层 -->
+                                    <Border CornerRadius="17"
+                                            Visibility="{Binding Source={x:Static svc:ProfileService.Instance}, Path=HasAvatar, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                        <Border.Background>
+                                            <ImageBrush Stretch="UniformToFill"
+                                                        ImageSource="{Binding Source={x:Static svc:ProfileService.Instance}, Path=AvatarPath, Converter={x:Static local:AvatarPathConverter.Instance}}"/>
+                                        </Border.Background>
+                                    </Border>
+                                    <!-- 悬浮编辑提示 -->
+                                    <Border x:Name="SidebarAvatarOverlay" CornerRadius="17"
+                                            Background="#50000000" Visibility="Collapsed"
+                                            IsHitTestVisible="False">
+                                        <TextBlock Text="&#x270E;" FontSize="12" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
                             </Border>
                             <StackPanel Margin="44,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Name}"

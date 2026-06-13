@@ -11,7 +11,12 @@
     <FileVersion>2.0.0.0</FileVersion>
     <Product>EAP Work Assistant</Product>
     <Company>EAP Engineering</Company>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\app.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
