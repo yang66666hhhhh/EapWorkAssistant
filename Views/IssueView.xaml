@@ -80,7 +80,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*">
+                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="100">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>

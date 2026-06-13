@@ -681,6 +681,70 @@
         <Setter Property="Margin" Value="0,8"/>
     </Style>
 
+    <!-- 拖拽分割条（横向）—— 呼吸式把手设计 -->
+    <Style x:Key="DragSplitter" TargetType="GridSplitter">
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="ResizeBehavior" Value="PreviousAndNext"/>
+        <Setter Property="ShowsPreview" Value="True"/>
+        <Setter Property="Cursor" Value="SizeNS"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GridSplitter">
+                    <Grid Background="Transparent">
+                        <!-- 底层引导线：极细，暗示可拖拽区域 -->
+                        <Border x:Name="guideLine" Height="1" CornerRadius="0.5"
+                                Background="{DynamicResource BorderBrush}"
+                                Opacity="0.35"
+                                VerticalAlignment="Center" Margin="80,0"/>
+
+                        <!-- 悬浮把手药丸：默认隐藏，鼠标悬停时淡入 -->
+                        <Border x:Name="gripPill"
+                                Width="44" Height="14"
+                                CornerRadius="7"
+                                Background="{DynamicResource SurfaceHoverBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Opacity="0"
+                                IsHitTestVisible="False">
+                            <!-- 三条精致横纹（拖拽纹理） -->
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <Border Width="14" Height="1" CornerRadius="0.5"
+                                        Background="{DynamicResource TextTertiaryBrush}"
+                                        Opacity="0.6" Margin="0,1"/>
+                                <Border Width="14" Height="1" CornerRadius="0.5"
+                                        Background="{DynamicResource TextTertiaryBrush}"
+                                        Opacity="0.6" Margin="0,1"/>
+                                <Border Width="14" Height="1" CornerRadius="0.5"
+                                        Background="{DynamicResource TextTertiaryBrush}"
+                                        Opacity="0.6" Margin="0,1"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- 悬浮态：把手浮现 -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="guideLine" Property="Opacity" Value="0.6"/>
+                            <Setter TargetName="guideLine" Property="Background"
+                                    Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter TargetName="gripPill" Property="Opacity" Value="1"/>
+                            <Setter TargetName="gripPill" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.06"
+                                                      Color="#FF000000"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- 圆点状态指示 -->
     <Style x:Key="StatusDot" TargetType="Ellipse">
         <Setter Property="Width" Value="8"/>
@@ -1283,6 +1347,103 @@
                             <Setter TargetName="dot" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                             <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==================== 分页控件样式 ==================== -->
+
+    <!-- 页码按钮（普通/当前页高亮） -->
+    <Style x:Key="PageNumberButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="MinWidth" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="6,0"/>
+        <Setter Property="Margin" Value="2,0"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
+                            Background="Transparent"
+                            BorderBrush="Transparent" BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 页码按钮-当前页高亮样式 -->
+    <Style x:Key="PageNumberActive" TargetType="Button" BasedOn="{StaticResource PageNumberButton}">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
+                            Background="{DynamicResource PrimaryBrush}"
+                            BorderBrush="Transparent" BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource PrimaryHover}"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 翻页导航按钮（上一页/下一页/首页/末页） -->
+    <Style x:Key="PageNavButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Margin" Value="2,0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
+                            Background="Transparent"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                            <Setter Property="Opacity" Value="0.5"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

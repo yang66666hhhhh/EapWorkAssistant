@@ -534,12 +534,12 @@
                                 <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="100"/>
+                                <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="125"/>
                                 <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="130"/>
                                 <!-- 类型 - 彩色标签 -->
                                 <DataGridTemplateColumn Header="类型" Width="80"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
-                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*">
+                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -550,7 +550,7 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
-                                <DataGridTemplateColumn Header="进度" Width="110"
+                                <DataGridTemplateColumn Header="进度" Width="130"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
                             </DataGrid.Columns>
                         </DataGrid>

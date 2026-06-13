@@ -1,4 +1,5 @@
 using EapWorkAssistant.Repositories;
+using EapWorkAssistant.Views;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -67,13 +68,14 @@ public static class ReminderService
 
     private static void ShowReminder()
     {
-        var result = MessageBox.Show(
+        var confirmed = ConfirmDialog.Show(
             "今天还没有记录工作内容哦！\n\n及时记录有助于转正述职报告的生成。\n\n是否现在去记录？",
             "工作记录提醒",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Information);
+            ConfirmDialogType.Info,
+            confirmText: "是",
+            cancelText: "否");
 
-        if (result == MessageBoxResult.Yes)
+        if (confirmed)
         {
             // 导航到工作记录页面
             if (Application.Current.MainWindow?.DataContext is ViewModels.MainViewModel vm)

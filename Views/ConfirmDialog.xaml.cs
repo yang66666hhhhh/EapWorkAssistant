@@ -15,30 +15,32 @@ public partial class ConfirmDialog : Window
     public string Message { get; set; } = string.Empty;
     public string WindowTitle { get; set; } = "确认";
 
-    public ConfirmDialog(string title, string message, ConfirmDialogType type = ConfirmDialogType.Warning)
+    public ConfirmDialog(string title, string message, ConfirmDialogType type = ConfirmDialogType.Warning,
+        string confirmText = "确认", string cancelText = "取消")
     {
         WindowTitle = title;
         Message = message;
         DataContext = this;
         InitializeComponent();
         TitleText.Text = title;
+        ConfirmButton.Content = confirmText;
+        CancelButton.Content = cancelText;
+
+        ConfirmButton.Style = (Style)FindResource("BtnPrimary");
 
         switch (type)
         {
             case ConfirmDialogType.Danger:
                 IconBorder.Background = (Brush)FindResource("DangerLightBrush");
                 IconText.Text = "\u26A0";
-                ConfirmButton.Style = (Style)FindResource("BtnDanger");
                 break;
             case ConfirmDialogType.Warning:
                 IconBorder.Background = (Brush)FindResource("WarningLightBrush");
                 IconText.Text = "\u26A0";
-                ConfirmButton.Style = (Style)FindResource("BtnWarning");
                 break;
             case ConfirmDialogType.Info:
                 IconBorder.Background = (Brush)FindResource("PrimaryLightBrush");
                 IconText.Text = "\u2139";
-                ConfirmButton.Style = (Style)FindResource("BtnPrimary");
                 break;
         }
     }
@@ -46,9 +48,10 @@ public partial class ConfirmDialog : Window
     /// <summary>
     /// 快捷方法：显示确认对话框并返回用户选择
     /// </summary>
-    public static bool Show(string message, string title = "确认", ConfirmDialogType type = ConfirmDialogType.Warning)
+    public static bool Show(string message, string title = "确认", ConfirmDialogType type = ConfirmDialogType.Warning,
+        string confirmText = "确认", string cancelText = "取消")
     {
-        var dialog = new ConfirmDialog(title, message, type)
+        var dialog = new ConfirmDialog(title, message, type, confirmText, cancelText)
         {
             Owner = Application.Current.MainWindow
         };

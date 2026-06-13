@@ -219,10 +219,13 @@ public partial class MainViewModel : ObservableObject
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
 
-        // 工作记录：先设置目标日期，让 RefreshAsync 加载该日期的记录
-        if (item.NavigateTo == "WorkRecord" && item.TargetDate.HasValue)
+        // 工作记录：切换到全部记录 Tab 并用关键词筛选
+        if (item.NavigateTo == "WorkRecord")
         {
-            WorkRecord.SelectedDate = item.TargetDate.Value;
+            if (item.TargetDate.HasValue)
+                WorkRecord.SelectedDate = item.TargetDate.Value;
+            WorkRecord.SearchKeyword = item.Keyword;  // 先设置关键词
+            WorkRecord.SelectedTabIndex = 1;           // 再切 Tab，触发加载时已带关键词
         }
 
         NavigateTo(item.NavigateTo);
