@@ -11,9 +11,58 @@
     <Grid>
         <!-- 内层内容区域 -->
         <Grid Margin="20,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- ===== 主区域（Grid 布局，支持 GridSplitter 拖拽） ===== -->
-        <Grid>
+            <!-- ===== Tab 切换栏 ===== -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="当日记录" Click="TabDaily_Click" Padding="16,8" FontSize="13" FontWeight="SemiBold"
+                        Cursor="Hand" BorderThickness="0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="全部记录" Click="TabAll_Click" Padding="16,8" FontSize="13" FontWeight="SemiBold"
+                        Cursor="Hand" Margin="6,0,0,0" BorderThickness="0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+
+            <!-- ===== Tab 0: 当日记录 ===== -->
+            <Border x:Name="TabDailyContent" Grid.Row="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -339,7 +388,310 @@
                     </DockPanel>
                 </Border>
             </Grid>
-        </Grid>
+            </Grid>
+            </Border>
+
+            <!-- ===== Tab 1: 全部记录 ===== -->
+            <Border x:Name="TabAllContent" Grid.Row="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 筛选栏 -->
+                    <Border Grid.Row="0" Background="{DynamicResource CardBrush}" CornerRadius="13"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,10" ClipToBounds="True" Padding="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="4"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="{DynamicResource PrimaryGradient}" CornerRadius="13,0,0,13"/>
+                            <StackPanel Grid.Column="1" Margin="18,12,18,12">
+                                <!-- 标题行 -->
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="全部记录" Style="{StaticResource Heading2}"/>
+                                        <TextBlock Text="查看和筛选所有工作记录"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <Button Content="导出CSV" Command="{Binding ExportAllCsvCommand}"
+                                            Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
+                                            Foreground="{DynamicResource PrimaryBrush}"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
+                                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,10" Opacity="0.7"/>
+                                <!-- 筛选条件 -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="120"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- 日期快捷 -->
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                        <Button Content="本周" Command="{Binding SetDatePresetCommand}" CommandParameter="thisWeek"
+                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                        <Button Content="本月" Command="{Binding SetDatePresetCommand}" CommandParameter="thisMonth"
+                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                        <Button Content="近3月" Command="{Binding SetDatePresetCommand}" CommandParameter="last3Months"
+                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                        <Button Content="全部" Command="{Binding SetDatePresetCommand}" CommandParameter="all"
+                                                Style="{StaticResource BtnGhost}" Padding="10,6" FontSize="12"
+                                                Foreground="{DynamicResource PrimaryBrush}"/>
+                                    </StackPanel>
+                                    <!-- 开始日期 -->
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="从" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <Button x:Name="FilterStartBtn" Click="FilterStart_Click"
+                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#x1F4C5;" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.7"/>
+                                                <TextBlock x:Name="FilterStartText" Text="开始日期" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <!-- 结束日期 -->
+                                    <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="至" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <Button x:Name="FilterEndBtn" Click="FilterEnd_Click"
+                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#x1F4C5;" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.7"/>
+                                                <TextBlock x:Name="FilterEndText" Text="结束日期" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <!-- 项目筛选 -->
+                                    <ComboBox Grid.Column="8" ItemsSource="{Binding FilterProjects}"
+                                              SelectedItem="{Binding FilterProject, Mode=TwoWay}"
+                                              Style="{StaticResource Select}" Width="120" FontSize="12">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding}" Value="">
+                                                                    <Setter Property="Text" Value="全部项目"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <!-- 类型筛选 -->
+                                    <ComboBox Grid.Column="10" ItemsSource="{Binding FilterWorkTypes}"
+                                              SelectedItem="{Binding FilterWorkType, Mode=TwoWay}"
+                                              Style="{StaticResource Select}" Width="120" FontSize="12">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding}" Value="">
+                                                                    <Setter Property="Text" Value="全部类型"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- 统计条 -->
+                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}" CornerRadius="11,0,0,11"/>
+                                <Grid Grid.Column="1" Margin="14,10">
+                                    <StackPanel>
+                                        <TextBlock Text="筛选工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding AllTotalHours, StringFormat={}{0:F1}}" FontSize="22"
+                                                       FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                            <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}" CornerRadius="11,0,0,11"/>
+                                <Grid Grid.Column="1" Margin="14,10">
+                                    <StackPanel>
+                                        <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding AllTotalCount}" FontSize="22"
+                                                       FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                                            <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Column="4" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{DynamicResource WarningBrush}" CornerRadius="11,0,0,11"/>
+                                <Grid Grid.Column="1" Margin="14,10">
+                                    <StackPanel>
+                                        <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding AllHighlightCount}" FontSize="22"
+                                                       FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                                            <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- 记录列表 -->
+                    <Border Grid.Row="2" Background="{DynamicResource CardBrush}" CornerRadius="13"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0" ClipToBounds="True">
+                        <Grid>
+                            <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource ModernGridCell}"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="100"/>
+                                    <DataGridTemplateColumn Header="&#x2B50;" Width="40">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="&#x2B50;" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsHighlight}" Value="1">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="120"/>
+                                    <DataGridTemplateColumn Header="类型" Width="80"
+                                                            CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
+                                    <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                                <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
+                                    <DataGridTemplateColumn Header="进度" Width="110"
+                                                            CellTemplate="{StaticResource ProgressBarCell}"/>
+                                    <DataGridTemplateColumn Header="操作" Width="140">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="编辑"
+                                                            Command="{Binding DataContext.EditAllRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"/>
+                                                    <Button Content="删除"
+                                                            Command="{Binding DataContext.DeleteAllRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"
+                                                            Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"
+                                                            Foreground="{DynamicResource DangerBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <!-- 空状态 -->
+                            <Border Visibility="{Binding AllRecords.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+                                    Padding="40" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    Background="{DynamicResource CardBrush}" CornerRadius="13">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F50D;" FontSize="44" HorizontalAlignment="Center" Opacity="0.2"/>
+                                    <TextBlock Text="暂无匹配的工作记录" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Medium"/>
+                                    <TextBlock Text="尝试调整筛选条件" FontSize="12"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- ===== 日历浮窗（使用覆盖层，避免 Popup 渲染问题） ===== -->
@@ -351,6 +703,17 @@
                 Width="310">
             <views:CustomCalendar x:Name="CustomCal"
                                   SelectedDate="{Binding SelectedDate, Mode=TwoWay}"/>
+        </Border>
+
+        <!-- ===== 筛选日历浮窗（全部记录 Tab 用） ===== -->
+        <Border x:Name="FilterCalendarBackdrop" Style="{StaticResource CalendarOverlay}"
+                MouseLeftButtonDown="FilterCalendarBackdrop_Click"
+                Panel.ZIndex="50" Visibility="Collapsed"/>
+        <Border x:Name="FilterCalendarContainer" Style="{StaticResource FloatingPanel}"
+                Margin="20,90,0,0" Panel.ZIndex="51"
+                Width="310" Visibility="Collapsed">
+            <views:CustomCalendar x:Name="FilterCal"
+                                  SelectedDateChanged="FilterCal_SelectedDateChanged"/>
         </Border>
 
         <!-- ===== 遮罩层 ===== -->

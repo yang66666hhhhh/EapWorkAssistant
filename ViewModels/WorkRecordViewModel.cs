@@ -57,8 +57,38 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private string _saveButtonText = "保存记录";
 
+    // ===== 全部记录 Tab =====
+    [ObservableProperty]
+    private int _selectedTabIndex;
+
+    [ObservableProperty]
+    private ObservableCollection<WorkRecord> _allRecords = new();
+
+    [ObservableProperty]
+    private DateTime? _filterStartDate;
+
+    [ObservableProperty]
+    private DateTime? _filterEndDate;
+
+    [ObservableProperty]
+    private string _filterProject = "";
+
+    [ObservableProperty]
+    private string _filterWorkType = "";
+
+    [ObservableProperty]
+    private double _allTotalHours;
+
+    [ObservableProperty]
+    private int _allTotalCount;
+
+    [ObservableProperty]
+    private int _allHighlightCount;
+
     public string[] Projects => ProjectInfo.Projects;
     public string[] WorkTypes => ProjectInfo.WorkTypes;
+    public string[] FilterProjects => ["", .. ProjectInfo.Projects];
+    public string[] FilterWorkTypes => ["", .. ProjectInfo.WorkTypes];
     public List<ContentTemplate> ContentTemplates => ConfigService.Instance.ContentTemplates;
 
     public WorkRecordViewModel()
@@ -305,6 +335,116 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         StatusMessage = "已导出CSV文件";
         _statusTimer.Start();
     }
+
+    [RelayCommand]
+    private async Task LoadAllRecordsAsync()
+    {
+        var start = FilterStartDate ?? DateTime.Now.AddMonths(-1);
+        var end = FilterEndDate ?? DateTime.Now;
+        var startStr = start.ToString("yyyy-MM-dd");
+        var endStr = end.ToString("yyyy-MM-dd");
+
+        var records = (await _repo.GetByDateRangeAsync(startStr, endStr)).ToList();
+
+        // 项目筛选
+        if (!string.IsNullOrEmpty(FilterProject))
+            records = records.Where(r => r.ProjectName == FilterProject).ToList();
+
+        // 类型筛选
+        if (!string.IsNullOrEmpty(FilterWorkType))
+            records = records.Where(r => r.WorkType == FilterWorkType).ToList();
+
+        // 按日期倒序排列
+        AllRecords = new ObservableCollection<WorkRecord>(
+            records.OrderByDescending(r => r.WorkDate).ThenByDescending(r => r.Id));
+
+        AllTotalHours = AllRecords.Sum(r => r.Hours);
+        AllTotalCount = AllRecords.Count;
+        AllHighlightCount = AllRecords.Count(r => r.IsHighlight == 1);
+    }
+
+    [RelayCommand]
+    private void SetDatePreset(string? preset)
+    {
+        var today = DateTime.Now;
+        switch (preset)
+        {
+            case "thisWeek":
+                int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                FilterStartDate = today.AddDays(-diff);
+                FilterEndDate = today.AddDays(6 - diff);
+                break;
+            case "thisMonth":
+                FilterStartDate = new DateTime(today.Year, today.Month, 1);
+                FilterEndDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
+                break;
+            case "last3Months":
+                FilterStartDate = today.AddMonths(-3);
+                FilterEndDate = today;
+                break;
+            case "all":
+                FilterStartDate = null;
+                FilterEndDate = null;
+                break;
+        }
+        _ = LoadAllRecordsAsync();
+    }
+
+    [RelayCommand]
+    private async Task DeleteAllRecordAsync(WorkRecord? record)
+    {
+        if (record == null) return;
+        if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
+        await _repo.DeleteAsync(record.Id);
+        await LoadAllRecordsAsync();
+        StatusMessage = "删除成功";
+        _statusTimer.Start();
+    }
+
+    [RelayCommand]
+    private void EditAllRecord(WorkRecord? record)
+    {
+        if (record == null) return;
+        // 切换到当日记录 Tab 并定位到该日期
+        SelectedDate = DateTime.Parse(record.WorkDate);
+        SelectedTabIndex = 0;
+        EditRecord(record);
+        RecordSaved?.Invoke(); // 通知 View 打开抽屉
+    }
+
+    [RelayCommand]
+    private void ExportAllCsv()
+    {
+        if (!AllRecords.Any())
+        {
+            StatusMessage = "没有可导出的记录";
+            _statusTimer.Start();
+            return;
+        }
+        var start = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
+        var end = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
+        ExportService.ExportToCsv(AllRecords, $"工作记录_{start}_{end}");
+        StatusMessage = "已导出CSV文件";
+        _statusTimer.Start();
+    }
+
+    partial void OnSelectedTabIndexChanged(int value)
+    {
+        if (value == 1)
+        {
+            // 首次切到全部记录时，默认显示本月
+            if (FilterStartDate == null && FilterEndDate == null)
+            {
+                var today = DateTime.Now;
+                FilterStartDate = new DateTime(today.Year, today.Month, 1);
+                FilterEndDate = today;
+            }
+            _ = LoadAllRecordsAsync();
+        }
+    }
+
+    partial void OnFilterProjectChanged(string value) => _ = LoadAllRecordsAsync();
+    partial void OnFilterWorkTypeChanged(string value) => _ = LoadAllRecordsAsync();
 
     partial void OnSelectedDateChanged(DateTime value)
     {

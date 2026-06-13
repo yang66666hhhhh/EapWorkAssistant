@@ -96,6 +96,18 @@ EapWorkAssistant/
 - 密度相关资源键：`DensityCardPad`, `DensityRowPad`, `DensityRowPadSm`, `DensityListPad`, `DensitySectionMargin`, `DensityRowMargin`, `DensityItemMargin`
 - 字号缩放应用于 `MainContentArea` Grid（MainWindow 中 x:Name="MainContentArea"）
 
+### 组件复用规范
+- **禁止使用 WPF 原生控件**：当项目已有自定义组件时，必须优先复用，不得引入 WPF 原生控件（如 `DatePicker`、`Calendar` 等）
+- 已有可复用组件：
+  - `CustomCalendar`（`Views/CustomCalendar.xaml`）：日期选择，支持月份导航、有记录日期标记、今日快捷。所有需要日期选择的场景必须使用此组件，配合浮窗覆盖层模式
+  - `ConfirmDialog`（`Views/ConfirmDialog.xaml`）：确认对话框，支持 Danger/Warning/Info 类型
+  - `ConfigItemDialog`（`Views/ConfigItemDialog.xaml`）：配置项编辑对话框
+  - `ProfileDialog`（`Views/ProfileDialog.xaml`）：个人信息编辑对话框
+- 新增 UI 功能前，先检查 `Views/` 和 `Resources/Styles.xaml` 中是否已有可复用的组件或样式
+- 按钮样式统一使用 `BtnPrimary`、`BtnSecondary`、`BtnSuccess`、`BtnWarning`、`BtnGhost`、`BtnDanger`
+- ComboBox 统一使用 `Select` 样式
+- TextBox 统一使用 `Input`（单行）或 `TextArea`（多行）样式
+
 ### ToggleButton 陷阱
 - WPF ToggleButton 的 `Click` 事件会在 `IsChecked` 自动切换**之后**触发
 - 如果在 Click 事件中手动设置 `IsChecked`，会导致双重切换（值变回原值）
@@ -181,6 +193,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 命名是否符合规范（PascalCase/camelCase）？
 - [ ] ViewModel 是否引入了 WPF 类型？
 - [ ] 新增的颜色/间距是否使用了资源键而非硬编码？
+- [ ] 是否复用了已有的自定义组件（CustomCalendar、ConfirmDialog 等），而非引入 WPF 原生控件？
 - [ ] ToggleButton 是否使用了 PreviewMouseLeftButtonDown？
 - [ ] ComboBox 是否使用了 Select 样式？
 - [ ] DynamicResource 是否用于了 Thickness 类型（而非 sys:Double）？

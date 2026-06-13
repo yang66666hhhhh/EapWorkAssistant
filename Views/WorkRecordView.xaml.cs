@@ -11,6 +11,8 @@ namespace EapWorkAssistant.Views;
 public partial class WorkRecordView : UserControl
 {
     private bool _isDrawerOpen;
+    private enum FilterDateField { Start, End }
+    private FilterDateField _activeFilterField;
 
     public WorkRecordView()
     {
@@ -26,11 +28,13 @@ public partial class WorkRecordView : UserControl
         {
             oldVm.RecordSaved -= OnRecordSaved;
             oldVm.ReportGenerated -= OnReportGenerated;
+            oldVm.PropertyChanged -= OnFilterPropertyChanged;
         }
         if (e.NewValue is WorkRecordViewModel newVm)
         {
             newVm.RecordSaved += OnRecordSaved;
             newVm.ReportGenerated += OnReportGenerated;
+            newVm.PropertyChanged += OnFilterPropertyChanged;
         }
         SyncDateDisplay();
     }
@@ -54,6 +58,23 @@ public partial class WorkRecordView : UserControl
         {
             DateDisplayText.Text = vm.SelectedDate.ToString("yyyy-MM-dd");
             CustomCal.SelectedDate = vm.SelectedDate;
+            SyncFilterDateDisplay(vm);
+        }
+    }
+
+    private void SyncFilterDateDisplay(WorkRecordViewModel vm)
+    {
+        FilterStartText.Text = vm.FilterStartDate?.ToString("yyyy-MM-dd") ?? "开始日期";
+        FilterEndText.Text = vm.FilterEndDate?.ToString("yyyy-MM-dd") ?? "结束日期";
+    }
+
+    private void OnFilterPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(WorkRecordViewModel.FilterStartDate)
+            or nameof(WorkRecordViewModel.FilterEndDate))
+        {
+            if (DataContext is WorkRecordViewModel vm)
+                SyncFilterDateDisplay(vm);
         }
     }
 
@@ -193,6 +214,86 @@ public partial class WorkRecordView : UserControl
     private void Backdrop_Click(object sender, MouseButtonEventArgs e)
     {
         CloseDrawer();
+    }
+
+    private void TabDaily_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+            vm.SelectedTabIndex = 0;
+    }
+
+    private void TabAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+            vm.SelectedTabIndex = 1;
+    }
+
+    // ===== 筛选日历 =====
+
+    private void FilterStart_Click(object sender, RoutedEventArgs e)
+    {
+        _activeFilterField = FilterDateField.Start;
+        OpenFilterCalendar();
+    }
+
+    private void FilterEnd_Click(object sender, RoutedEventArgs e)
+    {
+        _activeFilterField = FilterDateField.End;
+        OpenFilterCalendar();
+    }
+
+    private void OpenFilterCalendar()
+    {
+        if (DataContext is WorkRecordViewModel vm)
+        {
+            var currentDate = _activeFilterField == FilterDateField.Start
+                ? (vm.FilterStartDate ?? DateTime.Now)
+                : (vm.FilterEndDate ?? DateTime.Now);
+            FilterCal.SelectedDate = currentDate;
+            FilterCal.SyncDisplay();
+        }
+
+        var button = _activeFilterField == FilterDateField.Start ? FilterStartBtn : FilterEndBtn;
+        var buttonPos = button.TransformToAncestor(this).Transform(new System.Windows.Point(0, 0));
+
+        const double calWidth = 310;
+        const double calHeight = 290;
+        double viewWidth = this.ActualWidth;
+        double viewHeight = this.ActualHeight;
+
+        double x = Math.Max(8, buttonPos.X - 60);
+        if (x + calWidth > viewWidth - 8) x = viewWidth - calWidth - 8;
+
+        double y = buttonPos.Y + button.ActualHeight + 6;
+        if (y + calHeight > viewHeight - 8) y = buttonPos.Y - calHeight - 6;
+        if (y < 8) y = 8;
+
+        FilterCalendarContainer.Margin = new Thickness(x, y, 0, 0);
+        FilterCalendarBackdrop.Visibility = Visibility.Visible;
+        FilterCalendarContainer.Visibility = Visibility.Visible;
+    }
+
+    private void FilterCal_SelectedDateChanged(object? sender, DateTime date)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+        {
+            if (_activeFilterField == FilterDateField.Start)
+                vm.FilterStartDate = date;
+            else
+                vm.FilterEndDate = date;
+        }
+        CloseFilterCalendar();
+    }
+
+    private void FilterCalendarBackdrop_Click(object sender, MouseButtonEventArgs e)
+    {
+        CloseFilterCalendar();
+    }
+
+    private void CloseFilterCalendar()
+    {
+        FilterCalendarBackdrop.Visibility = Visibility.Collapsed;
+        FilterCalendarContainer.Visibility = Visibility.Collapsed;
     }
 
     private void CloseDrawer()
