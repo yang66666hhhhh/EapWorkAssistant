@@ -55,17 +55,35 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,16">
                 <Grid>
                     <StackPanel Orientation="Horizontal">
-                        <Border Width="34" Height="34" CornerRadius="17"
-                                VerticalAlignment="Center" Margin="0,0,12,0">
+                        <!-- 可点击头像 -->
+                        <Border x:Name="AvatarBorder" Width="48" Height="48" CornerRadius="24"
+                                VerticalAlignment="Center" Margin="0,0,12,0" Cursor="Hand"
+                                MouseLeftButtonDown="Avatar_Click">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="#FF4338CA" Offset="0"/>
                                     <GradientStop Color="#FF7C3AED" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
-                            <TextBlock x:Name="AvatarPreview" Text="E" FontSize="15" FontWeight="Bold"
-                                       Foreground="White" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Grid>
+                                <!-- 首字母 -->
+                                <TextBlock x:Name="AvatarPreview" Text="E" FontSize="18" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                                <!-- 头像图片（上传后覆盖） -->
+                                <Border x:Name="AvatarImageClip" CornerRadius="24" Visibility="Collapsed">
+                                    <Border.Background>
+                                        <ImageBrush x:Name="AvatarImageBrush" Stretch="UniformToFill"/>
+                                    </Border.Background>
+                                </Border>
+                                <!-- 悬浮编辑遮罩 -->
+                                <Border x:Name="AvatarOverlay" CornerRadius="24"
+                                        Background="#60000000" Visibility="Collapsed">
+                                    <TextBlock Text="&#x1F4F7;" FontSize="14"
+                                               Foreground="White" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="个人信息" FontSize="16" FontWeight="Bold"

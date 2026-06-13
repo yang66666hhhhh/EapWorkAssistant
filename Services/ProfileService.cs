@@ -14,6 +14,7 @@ public partial class ProfileService : ObservableObject
         "EapWorkAssistant");
 
     private static readonly string ProfilePath = Path.Combine(ConfigDir, "profile.json");
+    private static readonly string AvatarFile = Path.Combine(ConfigDir, "avatar.png");
 
     public static ProfileService Instance { get; } = new ProfileService();
 
@@ -23,6 +24,9 @@ public partial class ProfileService : ObservableObject
     [ObservableProperty] private string _industry = "PCB行业";
     [ObservableProperty] private string _focus = "设备自动化";
     [ObservableProperty] private bool _isProbation = true;
+
+    /// <summary>头像图片的完整路径（无头像时为 null）</summary>
+    [ObservableProperty] private string? _avatarPath;
 
     static ProfileService()
     {
@@ -45,6 +49,13 @@ public partial class ProfileService : ObservableObject
                     Industry = loaded.Industry;
                     Focus = loaded.Focus;
                     IsProbation = loaded.IsProbation;
+
+                    // 加载头像
+                    if (File.Exists(AvatarFile))
+                        AvatarPath = AvatarFile;
+                    else
+                        AvatarPath = null;
+
                     return;
                 }
             }
@@ -76,6 +87,39 @@ public partial class ProfileService : ObservableObject
         catch { }
     }
 
+    /// <summary>保存头像图片到本地存储</summary>
+    public void SaveAvatar(string sourceFilePath)
+    {
+        try
+        {
+            if (!Directory.Exists(ConfigDir))
+                Directory.CreateDirectory(ConfigDir);
+
+            File.Copy(sourceFilePath, AvatarFile, overwrite: true);
+            AvatarPath = AvatarFile;
+            OnPropertyChanged(nameof(AvatarPath));
+            OnPropertyChanged(nameof(HasAvatar));
+        }
+        catch { }
+    }
+
+    /// <summary>清除头像</summary>
+    public void ClearAvatar()
+    {
+        try
+        {
+            if (File.Exists(AvatarFile))
+                File.Delete(AvatarFile);
+        }
+        catch { }
+        AvatarPath = null;
+        OnPropertyChanged(nameof(AvatarPath));
+        OnPropertyChanged(nameof(HasAvatar));
+    }
+
+    /// <summary>是否有自定义头像</summary>
+    public bool HasAvatar => !string.IsNullOrEmpty(AvatarPath) && File.Exists(AvatarPath);
+
     /// <summary>头像显示文字：取名字的第一个字符</summary>
     public string AvatarInitial => string.IsNullOrWhiteSpace(Name) ? "U" : Name[..1];
 
@@ -89,6 +133,8 @@ public partial class ProfileService : ObservableObject
         OnPropertyChanged(nameof(Focus));
         OnPropertyChanged(nameof(IsProbation));
         OnPropertyChanged(nameof(AvatarInitial));
+        OnPropertyChanged(nameof(AvatarPath));
+        OnPropertyChanged(nameof(HasAvatar));
     }
 
     private class ProfileData
