@@ -42,6 +42,9 @@ public class ConfigData
     public string DefaultView { get; set; } = "Dashboard";
     public int AutoSaveInterval { get; set; } = 5;  // 分钟
 
+    // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====
+    public List<int> RestDays { get; set; } = new() { 0, 6 }; // 默认周六周日
+
     // ===== 工作记录自定义字段 =====
     public List<CustomField> CustomFields { get; set; } = new();
 }

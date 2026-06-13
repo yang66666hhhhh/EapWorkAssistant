@@ -89,6 +89,26 @@ public class ConfigService
     public string DefaultView { get => _data.DefaultView; set { _data.DefaultView = value; Save(); } }
     public int AutoSaveInterval { get => _data.AutoSaveInterval; set { _data.AutoSaveInterval = value; Save(); } }
 
+    // ===== 休息日 =====
+    public List<int> RestDays
+    {
+        get => _data.RestDays;
+        set { _data.RestDays = value; Save(); }
+    }
+
+    /// <summary>
+    /// 判断指定日期是否为休息日
+    /// </summary>
+    public bool IsRestDay(DateTime date)
+    {
+        return _data.RestDays.Contains((int)date.DayOfWeek);
+    }
+
+    /// <summary>
+    /// 获取今天是否为休息日
+    /// </summary>
+    public bool IsTodayRestDay => IsRestDay(DateTime.Now);
+
     // ===== 自定义字段 =====
     public List<CustomField> CustomFields => _data.CustomFields;
 

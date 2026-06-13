@@ -92,11 +92,20 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         WeekHours = await _recordRepo.GetTotalHoursAsync(weekStart, weekEnd);
         MonthHours = await _recordRepo.GetTotalHoursAsync(monthStart, monthEnd);
 
-        // 今日记录提醒
+        // 今日记录提醒（休息日显示不同提示）
         HasTodayRecords = TodayHours > 0;
-        TodayReminderText = HasTodayRecords
-            ? $"今日已记录 {TodayHours:F1} 小时，继续保持！"
-            : "今天还没有记录工作，点击「工作记录」开始记录吧！";
+        var isRestDay = ConfigService.Instance.IsTodayRestDay;
+        if (isRestDay)
+        {
+            var dayName = new[] { "周日", "周一", "周二", "周三", "周四", "周五", "周六" }[(int)DateTime.Now.DayOfWeek];
+            TodayReminderText = $"今天是{dayName}（休息日），好好休息，下个工作日继续记录吧！";
+        }
+        else
+        {
+            TodayReminderText = HasTodayRecords
+                ? $"今日已记录 {TodayHours:F1} 小时，继续保持！"
+                : "今天还没有记录工作，点击「工作记录」开始记录吧！";
+        }
 
         var allRecords = (await _recordRepo.GetAllAsync()).ToList();
         TotalRecords = allRecords.Count;
@@ -175,11 +184,12 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             var recordedDays = await _recordRepo.GetRecordedDaysCountAsync(startDateStr, endDateStr);
             RecordedDaysCount = recordedDays;
 
-            // 计算工作日数（排除周末）
+            // 计算工作日数（排除配置的休息日）
+            var restDays = ConfigService.Instance.RestDays;
             var workingDays = 0;
             for (var d = start.Date; d <= DateTime.Now.Date && d <= end.Date; d = d.AddDays(1))
             {
-                if (d.DayOfWeek != DayOfWeek.Saturday && d.DayOfWeek != DayOfWeek.Sunday)
+                if (!restDays.Contains((int)d.DayOfWeek))
                     workingDays++;
             }
             CoverageRatePercent = workingDays > 0

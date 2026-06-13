@@ -93,6 +93,15 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private string _defaultView = "Dashboard";
     [ObservableProperty] private int _autoSaveInterval = 5;
 
+    // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====
+    [ObservableProperty] private bool _isRestDay0; // 周日
+    [ObservableProperty] private bool _isRestDay1; // 周一
+    [ObservableProperty] private bool _isRestDay2; // 周二
+    [ObservableProperty] private bool _isRestDay3; // 周三
+    [ObservableProperty] private bool _isRestDay4; // 周四
+    [ObservableProperty] private bool _isRestDay5; // 周五
+    [ObservableProperty] private bool _isRestDay6; // 周六
+
     public List<string> ViewOptions { get; } = new() { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
     public List<int> AutoSaveOptions { get; } = new() { 1, 3, 5, 10, 15, 30 };
 
@@ -180,6 +189,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         DefaultView = ConfigService.Instance.DefaultView;
         AutoSaveInterval = ConfigService.Instance.AutoSaveInterval;
         OnPropertyChanged(nameof(DefaultViewLabel));
+
+        // 休息日
+        var restDays = ConfigService.Instance.RestDays;
+        IsRestDay0 = restDays.Contains(0);
+        IsRestDay1 = restDays.Contains(1);
+        IsRestDay2 = restDays.Contains(2);
+        IsRestDay3 = restDays.Contains(3);
+        IsRestDay4 = restDays.Contains(4);
+        IsRestDay5 = restDays.Contains(5);
+        IsRestDay6 = restDays.Contains(6);
 
         // 自定义字段
         CustomFields = new ObservableCollection<CustomFieldItem>(
@@ -311,6 +330,34 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.AutoSaveInterval = value;
         StatusMessage = $"自动保存间隔已设为 {value} 分钟";
     }
+
+    // ===== 休息日 handlers =====
+    private void UpdateRestDays()
+    {
+        var days = new List<int>();
+        if (IsRestDay0) days.Add(0);
+        if (IsRestDay1) days.Add(1);
+        if (IsRestDay2) days.Add(2);
+        if (IsRestDay3) days.Add(3);
+        if (IsRestDay4) days.Add(4);
+        if (IsRestDay5) days.Add(5);
+        if (IsRestDay6) days.Add(6);
+        ConfigService.Instance.RestDays = days;
+
+        var names = new[] { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+        var selected = days.Select(d => names[d]).ToList();
+        StatusMessage = days.Count > 0
+            ? $"休息日已设为：{string.Join("、", selected)}"
+            : "未设置休息日，所有日期均为工作日";
+    }
+
+    partial void OnIsRestDay0Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay1Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay2Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay3Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay4Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay5Changed(bool value) => UpdateRestDays();
+    partial void OnIsRestDay6Changed(bool value) => UpdateRestDays();
 
     // ===== 任务管理 commands =====
     [RelayCommand]

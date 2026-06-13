@@ -329,6 +329,38 @@
                 </StackPanel>
             </Border>
 
+            <!-- ===== 休息日设置 ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+                <StackPanel>
+                    <TextBlock Text="&#x1F4C5; 休息日设置" Style="{StaticResource Heading3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="选择每周的休息日，仪表盘提示和试用期覆盖率计算将跳过休息日" FontSize="12"
+                               Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,16"/>
+
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="18,16">
+                        <StackPanel>
+                            <TextBlock Text="每周休息日" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+                            <WrapPanel Orientation="Horizontal">
+                                <CheckBox Content="周日" IsChecked="{Binding IsRestDay0, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周一" IsChecked="{Binding IsRestDay1, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周二" IsChecked="{Binding IsRestDay2, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周三" IsChecked="{Binding IsRestDay3, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周四" IsChecked="{Binding IsRestDay4, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周五" IsChecked="{Binding IsRestDay5, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                                <CheckBox Content="周六" IsChecked="{Binding IsRestDay6, Mode=TwoWay}"
+                                          Style="{StaticResource DayCheckBox}" Margin="0,0,8,8"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- ===== 自定义字段 ===== -->
             <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <Grid>
