@@ -910,36 +910,6 @@
         </Setter>
     </Style>
 
-    <!-- ==================== ToolTip 样式（悬停浮窗，支持选中复制） ==================== -->
-    <Style TargetType="ToolTip">
-        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="MaxWidth" Value="400"/>
-        <Setter Property="HasDropShadow" Value="False"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ToolTip">
-                    <Border Background="{DynamicResource CardBrush}" CornerRadius="8" Padding="14,10"
-                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                            Effect="{StaticResource ShadowMd}">
-                        <StackPanel>
-                            <TextBox Text="{TemplateBinding Content}"
-                                     IsReadOnly="True" TextWrapping="Wrap"
-                                     BorderThickness="0" Background="Transparent"
-                                     Padding="0" IsTabStop="False"
-                                     FontFamily="{StaticResource DefaultFont}" FontSize="13"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"
-                                     AcceptsReturn="False" VerticalScrollBarVisibility="Disabled"/>
-                            <local:CopyButton Margin="0,6,0,0" HorizontalAlignment="Left"
-                                              Tag="{TemplateBinding Content}"/>
-                        </StackPanel>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- ==================== ContextMenu 样式（右键菜单，美化圆角阴影） ==================== -->
     <Style TargetType="ContextMenu">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>

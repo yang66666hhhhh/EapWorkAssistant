@@ -140,7 +140,8 @@ public static class DataGridCopyHelper
         while (child != null)
         {
             if (child is T parent) return parent;
-            child = VisualTreeHelper.GetParent(child);
+            // LogicalTreeHelper 兼容 Visual 和 ContentElement（如 Run），不会抛异常
+            child = LogicalTreeHelper.GetParent(child);
         }
         return null;
     }
