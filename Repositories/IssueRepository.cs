@@ -34,8 +34,8 @@ public class IssueRepository
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.ExecuteAsync(@"
-            INSERT INTO Issue (ProjectName, Title, Description, RootCause, Solution, Keywords, CreateTime)
-            VALUES (@ProjectName, @Title, @Description, @RootCause, @Solution, @Keywords, @CreateTime)",
+            INSERT INTO Issue (ProjectName, Title, Description, RootCause, Solution, Keywords, Status, Priority, CreateTime)
+            VALUES (@ProjectName, @Title, @Description, @RootCause, @Solution, @Keywords, @Status, @Priority, @CreateTime)",
             issue);
     }
 
@@ -44,7 +44,7 @@ public class IssueRepository
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.ExecuteAsync(@"
             UPDATE Issue SET ProjectName=@ProjectName, Title=@Title, Description=@Description,
-            RootCause=@RootCause, Solution=@Solution, Keywords=@Keywords WHERE Id=@Id",
+            RootCause=@RootCause, Solution=@Solution, Keywords=@Keywords, Status=@Status, Priority=@Priority WHERE Id=@Id",
             issue);
     }
 

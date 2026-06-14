@@ -76,6 +76,20 @@ public partial class MainViewModel : ObservableObject
             _ => 0
         };
         _ = Dashboard.LoadDashboardAsync();
+
+        // 订阅仪表盘图表点击导航事件
+        Dashboard.NavigateToWorkRecord += (date) =>
+        {
+            WorkRecord.SelectedDate = date;
+            WorkRecord.SelectedTabIndex = 0;
+            NavigateTo("WorkRecord");
+        };
+        Dashboard.NavigateToWorkRecordFilter += (project) =>
+        {
+            WorkRecord.FilterProject = project;
+            WorkRecord.SelectedTabIndex = 1;
+            NavigateTo("WorkRecord");
+        };
     }
 
     [RelayCommand]
@@ -142,7 +156,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            // 数据库级搜索（SQL LIKE）
+            // 数据库级搜索（SQL LIKE，支持多关键词空格分隔）
             var records = await _recordRepo.SearchAsync(keyword);
             foreach (var r in records)
             {
@@ -191,9 +205,9 @@ public partial class MainViewModel : ObservableObject
                 });
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 搜索出错时显示无结果
+            ToastService.Error($"搜索出错：{ex.Message}");
         }
 
         SearchResults = new ObservableCollection<SearchResultItem>(results.Take(20));

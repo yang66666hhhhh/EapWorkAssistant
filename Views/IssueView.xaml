@@ -3,6 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
              FontFamily="{StaticResource DefaultFont}">
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding ClosePanelCommand}"/>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NewCommand}"/>
+    </UserControl.InputBindings>
     <Grid>
         <!-- 内层内容区域（带边距） -->
         <Grid Margin="28,24">
@@ -30,7 +35,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="&#x1F50D;" FontSize="13" VerticalAlignment="Center"
                                            Margin="8,0,6,0" Opacity="0.45"/>
-                                <TextBox Grid.Column="1" Text="{Binding SearchKeyword}" Width="180" BorderThickness="0"
+                                <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180" BorderThickness="0"
                                          Background="Transparent" VerticalContentAlignment="Center"
                                          Padding="4,7" FontSize="13"
                                          FontFamily="{StaticResource DefaultFont}"/>
@@ -70,8 +75,8 @@
                             <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="140"/>
-                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="180">
+                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="120"/>
+                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="160">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -80,7 +85,80 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="100">
+                            <!-- 状态 - 彩色标签 -->
+                            <DataGridTemplateColumn Header="状态" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Open">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="InProgress">
+                                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Resolved">
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Closed">
+                                                            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Status, Converter={x:Static local:IssueStatusConverter.Instance}}"
+                                                       FontSize="11" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Open">
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="InProgress">
+                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Resolved">
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <!-- 优先级 -->
+                            <DataGridTemplateColumn Header="优先级" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
+                                                   FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Priority}" Value="High">
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Priority}" Value="Critical">
+                                                            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Priority}" Value="Low">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="80">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -89,7 +167,6 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="关键词" Binding="{Binding Keywords}" Width="120"/>
                             <DataGridTemplateColumn Header="操作" Width="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -185,11 +262,43 @@
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="任务 *" Style="{StaticResource Label}"/>
                                 <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding CurrentItem.ProjectName}"
-                                          Style="{StaticResource Select}"/>
+                                          Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="标题 *" Style="{StaticResource Label}"/>
-                                <TextBox Text="{Binding CurrentItem.Title}" Style="{StaticResource Input}"/>
+                                <TextBox x:Name="TitleBox" Text="{Binding CurrentItem.Title}" Style="{StaticResource Input}"
+                                         TextChanged="FormField_Changed"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- 状态 + 优先级（并排） -->
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="状态" Style="{StaticResource Label}"/>
+                                <ComboBox ItemsSource="{Binding Statuses}" SelectedItem="{Binding CurrentItem.Status}"
+                                          Style="{StaticResource Select}" SelectionChanged="FormField_Changed">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={x:Static local:IssueStatusConverter.Instance}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="优先级" Style="{StaticResource Label}"/>
+                                <ComboBox ItemsSource="{Binding Priorities}" SelectedItem="{Binding CurrentItem.Priority}"
+                                          Style="{StaticResource Select}" SelectionChanged="FormField_Changed">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={x:Static local:IssuePriorityConverter.Instance}}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </StackPanel>
                         </Grid>
 
@@ -197,25 +306,23 @@
 
                         <!-- 问题描述 -->
                         <TextBlock Text="描述 *" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentItem.Description}" Height="80" Style="{StaticResource TextArea}"
-                                 Margin="0,0,0,14" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="DescriptionBox" Text="{Binding CurrentItem.Description}" Height="80" Style="{StaticResource TextArea}"
+                                 Margin="0,0,0,14" VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
 
-                        <!-- 根本原因 -->
                         <TextBlock Text="根本原因" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentItem.RootCause}" Height="80" Style="{StaticResource TextArea}"
-                                 Margin="0,0,0,14" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="RootCauseBox" Text="{Binding CurrentItem.RootCause}" Height="80" Style="{StaticResource TextArea}"
+                                 Margin="0,0,0,14" VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
 
-                        <!-- 解决方案 -->
                         <TextBlock Text="解决方案" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentItem.Solution}" Height="80" Style="{StaticResource TextArea}"
-                                 Margin="0,0,0,18" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="SolutionBox" Text="{Binding CurrentItem.Solution}" Height="80" Style="{StaticResource TextArea}"
+                                 Margin="0,0,0,18" VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
 
                         <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,18"/>
 
                         <!-- 关键词 -->
                         <TextBlock Text="关键词" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentItem.Keywords}" Style="{StaticResource Input}"
-                                 Margin="0,0,0,6"/>
+                        <TextBox x:Name="KeywordsBox" Text="{Binding CurrentItem.Keywords}" Style="{StaticResource Input}"
+                                 Margin="0,0,0,6" TextChanged="FormField_Changed"/>
                         <TextBlock Text="多个关键词用逗号分隔，便于搜索检索" FontSize="11"
                                    Foreground="{DynamicResource TextTertiaryBrush}"/>
                     </StackPanel>

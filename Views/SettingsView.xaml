@@ -79,7 +79,7 @@
                                     <DataTemplate>
                                         <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,8,0"
                                                 Cursor="Hand" MouseLeftButtonDown="AccentColor_Click"
-                                                Tag="{Binding Name}">
+                                                Tag="{Binding Name}" ToolTip="{Binding Name}">
                                             <Border.Background>
                                                 <SolidColorBrush Color="{Binding PreviewColor}"/>
                                             </Border.Background>
@@ -87,6 +87,13 @@
                                                 <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.2"
                                                                   Color="{Binding PreviewColor}"/>
                                             </Border.Effect>
+                                            <Border CornerRadius="20"
+                                                    BorderBrush="White" BorderThickness="2.5"
+                                                    Visibility="{Binding IsSelected, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                                <TextBlock Text="&#x2713;" FontSize="14" FontWeight="Bold"
+                                                           Foreground="White"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -106,17 +113,17 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Border x:Name="FontSizeSmallBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click" ToolTip="小号字体">
                                     <TextBlock Text="小" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="FontSizeMediumBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click" ToolTip="标准字体">
                                     <TextBlock Text="标准" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="FontSizeLargeBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click" ToolTip="大号字体">
                                     <TextBlock Text="大" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                             </StackPanel>
@@ -135,17 +142,17 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Border x:Name="DensityCompactBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click" ToolTip="紧凑布局 - 减少间距">
                                     <TextBlock Text="紧凑" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="DensityDefaultBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click" ToolTip="标准布局 - 默认间距">
                                     <TextBlock Text="标准" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="DensityComfortableBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click" ToolTip="宽松布局 - 增加间距">
                                     <TextBlock Text="宽松" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                             </StackPanel>
@@ -361,64 +368,25 @@
                 </StackPanel>
             </Border>
 
-            <!-- ===== 自定义字段 ===== -->
-            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
+            <!-- ===== 自定义字段（功能开发中） ===== -->
+            <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}" Opacity="0.6">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
+                    <Grid Grid.Row="0">
+                        <StackPanel>
                             <TextBlock Text="&#x1F4DD; 自定义字段" Style="{StaticResource Heading3}"/>
-                            <TextBlock Text="为工作记录添加额外的自定义字段" FontSize="12"
+                            <TextBlock Text="为工作记录添加额外的自定义字段（功能开发中，敬请期待）" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
-                        <Button Grid.Column="1" Content="+ 添加字段" Style="{StaticResource BtnPrimary}"
-                                Padding="14,8" FontSize="12" VerticalAlignment="Center"
-                                Command="{Binding AddCustomFieldCommand}"/>
+                        <Border CornerRadius="6" Padding="10,4" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Background="{DynamicResource SurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <TextBlock Text="Coming Soon" FontSize="10.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        </Border>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
-                    <ScrollViewer Grid.Row="2" MaxHeight="200" VerticalScrollBarVisibility="Auto"
-                                  Style="{StaticResource ModernScrollViewer}">
-                        <ItemsControl ItemsSource="{Binding CustomFields}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8"
-                                            Padding="{DynamicResource DensityListPad}" Margin="{DynamicResource DensityRowMargin}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0"
-                                                    VerticalAlignment="Center">
-                                                <Border.Background>
-                                                    <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
-                                                </Border.Background>
-                                                <TextBlock Text="{Binding FieldType}" FontSize="10"
-                                                           Foreground="{DynamicResource PrimaryBrush}" FontWeight="Medium"/>
-                                            </Border>
-                                            <Button Grid.Column="2" Content="删除" Style="{StaticResource BtnGhost}"
-                                                    Padding="10,5" FontSize="12"
-                                                    Foreground="{DynamicResource DangerBrush}"
-                                                    Command="{Binding DataContext.DeleteCustomFieldCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding}"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
                 </Grid>
             </Border>
 
@@ -718,6 +686,7 @@
                     <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
+                        <StackPanel>
                         <ItemsControl ItemsSource="{Binding Projects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -747,6 +716,19 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <!-- 空状态 -->
+                        <Border Visibility="{Binding Projects.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+                                Padding="24,20">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="&#x1F4BC;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <TextBlock Text="暂无任务项目" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                <TextBlock Text="点击上方按钮添加任务" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                            </StackPanel>
+                        </Border>
+                        </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </Border>
@@ -776,6 +758,7 @@
                     <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
+                        <StackPanel>
                         <ItemsControl ItemsSource="{Binding WorkTypes}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -805,6 +788,19 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <!-- 空状态 -->
+                        <Border Visibility="{Binding WorkTypes.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+                                Padding="24,20">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="&#x1F4DD;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <TextBlock Text="暂无工作类型" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                <TextBlock Text="点击上方按钮添加类型" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                            </StackPanel>
+                        </Border>
+                        </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </Border>
@@ -834,6 +830,7 @@
                     <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
                     <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
+                        <StackPanel>
                         <ItemsControl ItemsSource="{Binding ContentTemplates}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -874,6 +871,19 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <!-- 空状态 -->
+                        <Border Visibility="{Binding ContentTemplates.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+                                Padding="24,20">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="&#x1F4CB;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <TextBlock Text="暂无内容模板" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                <TextBlock Text="点击上方按钮添加模板" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                            </StackPanel>
+                        </Border>
+                        </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </Border>

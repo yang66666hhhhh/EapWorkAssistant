@@ -49,8 +49,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 今日工时 -->
-                <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Grid.Column="0" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="今日工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -71,8 +70,7 @@
                 </Border>
 
                 <!-- 本周工时 -->
-                <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Grid.Column="2" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本周工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -93,8 +91,7 @@
                 </Border>
 
                 <!-- 本月工时 -->
-                <Border Grid.Column="4" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Grid.Column="4" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本月工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -115,8 +112,7 @@
                 </Border>
 
                 <!-- 总记录 -->
-                <Border Grid.Column="6" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Grid.Column="6" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="总记录" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -378,10 +374,24 @@
                             <TextBlock Text="每日工时分布" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
-                        <lvc:CartesianChart Series="{Binding ChartSeries}"
-                                            XAxes="{Binding ChartXAxes}"
-                                            YAxes="{Binding ChartYAxes}"
-                                            MinHeight="190" MaxHeight="210"/>
+                        <Grid>
+                            <lvc:CartesianChart Series="{Binding ChartSeries}"
+                                                XAxes="{Binding ChartXAxes}"
+                                                YAxes="{Binding ChartYAxes}"
+                                                DataPointerDownCommand="{Binding ChartPointClickCommand}"
+                                                MinHeight="190" MaxHeight="210"/>
+                            <Border Visibility="{Binding HasChartData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
+                                    Background="{DynamicResource CardBrush}" CornerRadius="8">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4C8;" FontSize="36" HorizontalAlignment="Center" Opacity="0.25"/>
+                                    <TextBlock Text="暂无工时数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock Text="开始记录工作后将自动生成图表" FontSize="11"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </DockPanel>
                 </Border>
 
@@ -396,8 +406,22 @@
                             <TextBlock Text="各项目工时占比" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
-                        <lvc:PieChart Series="{Binding ProjectPieSeries}"
-                                      MinHeight="190" MaxHeight="210"/>
+                        <Grid>
+                            <lvc:PieChart Series="{Binding ProjectPieSeries}"
+                                          DataPointerDownCommand="{Binding PieChartClickCommand}"
+                                          MinHeight="190" MaxHeight="210"/>
+                            <Border Visibility="{Binding HasPieData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
+                                    Background="{DynamicResource CardBrush}" CornerRadius="8">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4CA;" FontSize="36" HorizontalAlignment="Center" Opacity="0.25"/>
+                                    <TextBlock Text="暂无项目数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock Text="记录工作后将显示项目分布" FontSize="11"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </DockPanel>
                 </Border>
 

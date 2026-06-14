@@ -26,8 +26,8 @@ public class KnowledgeRepository
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.ExecuteAsync(@"
-            INSERT INTO Knowledge (Title, Content, Tags, CreateTime)
-            VALUES (@Title, @Content, @Tags, @CreateTime)",
+            INSERT INTO Knowledge (Title, Content, Tags, Category, IsFavorite, CreateTime)
+            VALUES (@Title, @Content, @Tags, @Category, @IsFavorite, @CreateTime)",
             knowledge);
     }
 
@@ -35,7 +35,7 @@ public class KnowledgeRepository
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.ExecuteAsync(@"
-            UPDATE Knowledge SET Title=@Title, Content=@Content, Tags=@Tags WHERE Id=@Id",
+            UPDATE Knowledge SET Title=@Title, Content=@Content, Tags=@Tags, Category=@Category, IsFavorite=@IsFavorite WHERE Id=@Id",
             knowledge);
     }
 
@@ -44,5 +44,26 @@ public class KnowledgeRepository
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
         return await connection.ExecuteAsync(
             "DELETE FROM Knowledge WHERE Id = @Id", new { Id = id });
+    }
+
+    public async Task<IEnumerable<string>> GetAllTagsAsync()
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        var rows = await connection.QueryAsync<string>("SELECT Tags FROM Knowledge WHERE Tags != '' ORDER BY CreateTime DESC");
+        return rows.SelectMany(t => t.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)).Distinct();
+    }
+
+    public async Task<IEnumerable<string>> GetAllCategoriesAsync()
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        return await connection.QueryAsync<string>(
+            "SELECT DISTINCT Category FROM Knowledge WHERE Category != '' ORDER BY Category");
+    }
+
+    public async Task<IEnumerable<Knowledge>> GetFavoritesAsync()
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        return await connection.QueryAsync<Knowledge>(
+            "SELECT * FROM Knowledge WHERE IsFavorite = 1 ORDER BY CreateTime DESC");
     }
 }

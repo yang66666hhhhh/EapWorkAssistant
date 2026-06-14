@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using LiveChartsCore;
+using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
@@ -46,6 +47,10 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     // 项目分布饼图
     [ObservableProperty] private ISeries[] _projectPieSeries = Array.Empty<ISeries>();
+
+    // 图表数据状态
+    public bool HasChartData => ChartSeries != null && ChartSeries.Length > 0;
+    public bool HasPieData => ProjectPieSeries != null && ProjectPieSeries.Length > 0;
 
     // 亮点列表
     [ObservableProperty] private ObservableCollection<HighlightItem> _highlights = new();
@@ -281,6 +286,8 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 MinLimit = 0
             }
         };
+
+        OnPropertyChanged(nameof(HasChartData));
     }
 
     private async Task LoadProjectPieChartAsync()
@@ -294,6 +301,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         if (!statsList.Any())
         {
             ProjectPieSeries = Array.Empty<ISeries>();
+            OnPropertyChanged(nameof(HasPieData));
             return;
         }
 
@@ -324,6 +332,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         }
 
         ProjectPieSeries = series.ToArray();
+        OnPropertyChanged(nameof(HasPieData));
     }
 
     private async Task LoadHighlightsAsync()
@@ -379,6 +388,40 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         settings.Save();
         _ = LoadDashboardAsync();
     }
+
+    /// <summary>柱状图点击：跳转到对应日期的工作记录</summary>
+    [RelayCommand]
+    private void ChartPointClick(ChartPoint? point)
+    {
+        if (point == null) return;
+        var index = point.Index;
+        var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now);
+        var targetDate = weekStart.AddDays(index);
+        // 通过事件通知 MainViewModel 导航
+        NavigateToWorkRecord?.Invoke(targetDate);
+    }
+
+    /// <summary>饼图点击：跳转到对应项目的全部记录</summary>
+    [RelayCommand]
+    private void PieChartClick(ChartPoint? point)
+    {
+        if (point == null) return;
+        // 通过索引从饼图系列中获取项目名称
+        var index = point.Index;
+        if (index >= 0 && index < ProjectPieSeries.Length)
+        {
+            var series = ProjectPieSeries[index];
+            var projectName = series.Name;
+            if (!string.IsNullOrEmpty(projectName))
+                NavigateToWorkRecordFilter?.Invoke(projectName);
+        }
+    }
+
+    /// <summary>请求导航到工作记录页面（由 MainViewModel 订阅）</summary>
+    public event Action<DateTime>? NavigateToWorkRecord;
+
+    /// <summary>请求导航到工作记录并按项目筛选</summary>
+    public event Action<string>? NavigateToWorkRecordFilter;
 }
 
 public class RecentRecordItem

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
+using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -13,6 +14,10 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 {
     private readonly KnowledgeRepository _repo = new();
     private readonly DispatcherTimer _statusTimer;
+    private readonly DispatcherTimer _searchTimer;
+    private bool _suppressDirty;
+
+    public event Action? PanelCloseRequested;
 
     [ObservableProperty]
     private ObservableCollection<Knowledge> _items = new();
@@ -29,10 +34,66 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
+    [ObservableProperty]
+    private bool _isFormDirty;
+
+    // 分类和标签建议
+    [ObservableProperty]
+    private ObservableCollection<string> _allCategories = new();
+
+    [ObservableProperty]
+    private ObservableCollection<string> _allTags = new();
+
+    [ObservableProperty]
+    private string _filterCategory = "";
+
+    [ObservableProperty]
+    private bool _showFavoritesOnly;
+
+    public string[] FilterCategories => ["", .. AllCategories];
+
     public KnowledgeViewModel()
     {
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
+
+        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer.Tick += async (_, _) =>
+        {
+            _searchTimer.Stop();
+            await SearchAsync();
+        };
+    }
+
+    partial void OnSearchKeywordChanged(string value)
+    {
+        _searchTimer.Stop();
+        if (string.IsNullOrWhiteSpace(value))
+            _ = LoadAsync();
+        else
+            _searchTimer.Start();
+    }
+
+    partial void OnFilterCategoryChanged(string value)
+    {
+        _ = LoadAsync();
+    }
+
+    partial void OnShowFavoritesOnlyChanged(bool value)
+    {
+        _ = LoadAsync();
+    }
+
+    [RelayCommand]
+    private void ClosePanel()
+    {
+        PanelCloseRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void ClearSearch()
+    {
+        SearchKeyword = "";
     }
 
     public async Task RefreshAsync() => await LoadAsync();
@@ -46,16 +107,47 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
                 Id = value.Id,
                 Title = value.Title,
                 Content = value.Content,
-                Tags = value.Tags
+                Tags = value.Tags,
+                Category = value.Category,
+                IsFavorite = value.IsFavorite
             };
+            IsFormDirty = false;
         }
+    }
+
+    partial void OnCurrentItemChanged(Knowledge value)
+    {
+        IsFormDirty = false;
     }
 
     [RelayCommand]
     private async Task LoadAsync()
     {
-        var items = await _repo.GetAllAsync();
+        IEnumerable<Knowledge> items;
+        if (ShowFavoritesOnly)
+            items = await _repo.GetFavoritesAsync();
+        else
+            items = await _repo.GetAllAsync();
+
+        // 分类筛选
+        if (!string.IsNullOrEmpty(FilterCategory))
+            items = items.Where(k => k.Category == FilterCategory);
+
         Items = new ObservableCollection<Knowledge>(items);
+        await RefreshTagsAndCategoriesAsync();
+    }
+
+    private async Task RefreshTagsAndCategoriesAsync()
+    {
+        try
+        {
+            var tags = await _repo.GetAllTagsAsync();
+            AllTags = new ObservableCollection<string>(tags);
+            var categories = await _repo.GetAllCategoriesAsync();
+            AllCategories = new ObservableCollection<string>(categories);
+            OnPropertyChanged(nameof(FilterCategories));
+        }
+        catch { }
     }
 
     [RelayCommand]
@@ -64,6 +156,10 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         var items = string.IsNullOrWhiteSpace(SearchKeyword)
             ? await _repo.GetAllAsync()
             : await _repo.SearchAsync(SearchKeyword);
+
+        if (!string.IsNullOrEmpty(FilterCategory))
+            items = items.Where(k => k.Category == FilterCategory);
+
         Items = new ObservableCollection<Knowledge>(items);
     }
 
@@ -77,19 +173,39 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             return;
         }
 
-        if (CurrentItem.Id > 0)
-            await _repo.UpdateAsync(CurrentItem);
-        else
+        try
         {
-            CurrentItem.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            await _repo.InsertAsync(CurrentItem);
+            if (CurrentItem.Id > 0)
+                await _repo.UpdateAsync(CurrentItem);
+            else
+            {
+                CurrentItem.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                await _repo.InsertAsync(CurrentItem);
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"保存失败：{ex.Message}");
+            return;
         }
 
+        _suppressDirty = true;
         CurrentItem = new Knowledge();
         SelectedItem = null;
+        IsFormDirty = false;
+        _suppressDirty = false;
         await LoadAsync();
-        StatusMessage = "保存成功";
-        _statusTimer.Start();
+        ToastService.Success("知识已保存");
+    }
+
+    [RelayCommand]
+    private async Task ToggleFavoriteAsync(Knowledge? item)
+    {
+        if (item == null) return;
+        item.IsFavorite = item.IsFavorite == 1 ? 0 : 1;
+        await _repo.UpdateAsync(item);
+        await LoadAsync();
+        ToastService.Success(item.IsFavorite == 1 ? "已收藏" : "已取消收藏");
     }
 
     [RelayCommand]
@@ -106,8 +222,7 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             CurrentItem = new Knowledge();
         }
         await LoadAsync();
-        StatusMessage = "删除成功";
-        _statusTimer.Start();
+        ToastService.Success("已删除");
     }
 
     [RelayCommand]
@@ -119,14 +234,25 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             Id = item.Id,
             Title = item.Title,
             Content = item.Content,
-            Tags = item.Tags
+            Tags = item.Tags,
+            Category = item.Category,
+            IsFavorite = item.IsFavorite
         };
     }
 
     [RelayCommand]
     private void New()
     {
+        _suppressDirty = true;
         CurrentItem = new Knowledge();
         SelectedItem = null;
+        IsFormDirty = false;
+        _suppressDirty = false;
+    }
+
+    public void MarkDirty()
+    {
+        if (!_suppressDirty)
+            IsFormDirty = true;
     }
 }

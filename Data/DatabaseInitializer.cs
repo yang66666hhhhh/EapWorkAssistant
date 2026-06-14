@@ -73,5 +73,51 @@ public static class DatabaseInitializer
             migrateCmd.ExecuteNonQuery();
         }
         catch { /* 列已存在 */ }
+
+        // 迁移：为 Issue 表添加状态和优先级字段
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Issue ADD COLUMN Status TEXT DEFAULT 'Open'";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Issue ADD COLUMN Priority TEXT DEFAULT 'Medium'";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        // 迁移：为 Knowledge 表添加分类和收藏字段
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Knowledge ADD COLUMN Category TEXT DEFAULT ''";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Knowledge ADD COLUMN IsFavorite INTEGER DEFAULT 0";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        // 创建索引以优化查询性能
+        try
+        {
+            migrateCmd.CommandText = @"
+                CREATE INDEX IF NOT EXISTS idx_workrecord_workdate ON WorkRecord(WorkDate);
+                CREATE INDEX IF NOT EXISTS idx_workrecord_project ON WorkRecord(ProjectName);
+                CREATE INDEX IF NOT EXISTS idx_workrecord_highlight ON WorkRecord(IsHighlight);
+                CREATE INDEX IF NOT EXISTS idx_issue_project ON Issue(ProjectName);
+                CREATE INDEX IF NOT EXISTS idx_issue_status ON Issue(Status);
+                CREATE INDEX IF NOT EXISTS idx_knowledge_category ON Knowledge(Category);
+                CREATE INDEX IF NOT EXISTS idx_knowledge_favorite ON Knowledge(IsFavorite);
+            ";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 索引创建失败不影响启动 */ }
     }
 }

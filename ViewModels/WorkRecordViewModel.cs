@@ -15,6 +15,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private readonly WorkRecordRepository _repo = new();
     private readonly DispatcherTimer _statusTimer;
     private readonly DispatcherTimer _searchTimer;
+    private readonly DispatcherTimer _autoSaveTimer;
+    private bool _suppressDirty;
 
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
@@ -48,6 +50,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private bool _hasProblem;
+
+    [ObservableProperty]
+    private bool _isFormDirty;
 
     [ObservableProperty]
     private bool _isEditing;
@@ -128,7 +133,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             await LoadAllRecordsAsync();
         };
 
+        // 自动保存计时器
+        _autoSaveTimer = new DispatcherTimer();
+        _autoSaveTimer.Tick += async (_, _) =>
+        {
+            if (IsFormDirty && !string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
+                && !string.IsNullOrWhiteSpace(CurrentRecord.Content))
+            {
+                await SaveRecordAsync();
+                StatusMessage = "已自动保存";
+                _statusTimer.Start();
+            }
+        };
+        StartAutoSaveTimer();
+
         PropertyChanged += WorkRecordViewModel_PropertyChanged;
+    }
+
+    /// <summary>根据配置启动/重启自动保存计时器</summary>
+    public void StartAutoSaveTimer()
+    {
+        var interval = ConfigService.Instance.AutoSaveInterval;
+        _autoSaveTimer.Interval = TimeSpan.FromMinutes(Math.Max(1, interval));
+        _autoSaveTimer.Start();
     }
 
     private void WorkRecordViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -144,7 +171,11 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
     }
 
-    public async Task RefreshAsync() => await LoadRecordsAsync();
+    public async Task RefreshAsync()
+    {
+        StartAutoSaveTimer(); // 重新读取配置并重启自动保存
+        await LoadRecordsAsync();
+    }
 
     [RelayCommand]
     private async Task LoadRecordsAsync()
@@ -199,22 +230,32 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
 
         CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
-        if (CurrentRecord.Id > 0)
-            await _repo.UpdateAsync(CurrentRecord);
-        else
+        try
         {
-            CurrentRecord.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            await _repo.InsertAsync(CurrentRecord);
+            if (CurrentRecord.Id > 0)
+                await _repo.UpdateAsync(CurrentRecord);
+            else
+            {
+                CurrentRecord.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                await _repo.InsertAsync(CurrentRecord);
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"保存失败：{ex.Message}");
+            return;
         }
 
+        _suppressDirty = true;
         CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
         HasProblem = false;
         IsEditing = false;
+        IsFormDirty = false;
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
+        _suppressDirty = false;
         await LoadRecordsAsync();
-        StatusMessage = $"✓ 保存成功 · 今日共 {RecordCount} 条记录，{TodayHours:F1} 小时";
-        _statusTimer.Start();
+        ToastService.Success($"工作记录已保存 · 今日共 {RecordCount} 条");
         RecordSaved?.Invoke();
     }
 
@@ -227,8 +268,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         await _repo.DeleteAsync(record.Id);
         await LoadRecordsAsync();
-        StatusMessage = "✓ 删除成功";
-        _statusTimer.Start();
+        ToastService.Success("记录已删除");
     }
 
     [RelayCommand]
@@ -259,11 +299,20 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void NewRecord()
     {
+        _suppressDirty = true;
         CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
         HasProblem = false;
         IsEditing = false;
+        IsFormDirty = false;
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
+        _suppressDirty = false;
+    }
+
+    public void MarkDirty()
+    {
+        if (!_suppressDirty)
+            IsFormDirty = true;
     }
 
     [RelayCommand]
@@ -339,8 +388,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (!string.IsNullOrWhiteSpace(ReportText))
         {
             ExportService.CopyToClipboard(ReportText);
-            StatusMessage = "已复制到剪贴板";
-            _statusTimer.Start();
+            ToastService.Success("报告已复制到剪贴板");
         }
     }
 
@@ -350,8 +398,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (!string.IsNullOrWhiteSpace(ReportText))
         {
             ExportService.SaveToFile(ReportText, "工作日报");
-            StatusMessage = "已保存";
-            _statusTimer.Start();
+            ToastService.Success("报告已保存");
         }
     }
 
@@ -365,8 +412,43 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
         ExportService.ExportToCsv(Records, $"工作记录_{SelectedDate:yyyyMMdd}");
-        StatusMessage = "已导出CSV文件";
-        _statusTimer.Start();
+        ToastService.Success("CSV 文件已导出");
+    }
+
+    [RelayCommand]
+    private async Task ImportCsvAsync()
+    {
+        var records = ExportService.ImportFromCsv();
+        if (records == null || records.Count == 0)
+        {
+            StatusMessage = "导入失败：文件为空或格式不正确";
+            _statusTimer.Start();
+            return;
+        }
+
+        if (!ConfirmDialog.Show($"确定要导入 {records.Count} 条工作记录吗？\n导入后不可撤销。", "确认导入", ConfirmDialogType.Warning))
+            return;
+
+        try
+        {
+            var count = await _repo.BatchInsertAsync(records);
+            await LoadRecordsAsync();
+            ToastService.Success($"已导入 {count} 条工作记录");
+        }
+        catch
+        {
+            ToastService.Error("导入失败，请检查 CSV 文件格式");
+        }
+    }
+
+    [RelayCommand]
+    private void SaveReportAsMarkdown()
+    {
+        if (!string.IsNullOrWhiteSpace(ReportText))
+        {
+            ExportService.SaveAsMarkdown("工作日报", ReportText, "工作日报");
+            ToastService.Success("Markdown 文件已保存");
+        }
     }
 
     [RelayCommand]

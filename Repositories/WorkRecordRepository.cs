@@ -64,6 +64,15 @@ public class WorkRecordRepository
             "DELETE FROM WorkRecord WHERE Id = @Id", new { Id = id });
     }
 
+    public async Task<int> BatchInsertAsync(IEnumerable<WorkRecord> records)
+    {
+        using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        return await connection.ExecuteAsync(@"
+            INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
+            VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime)",
+            records);
+    }
+
     public async Task<double> GetTotalHoursAsync(string startDate, string endDate)
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
@@ -123,9 +132,22 @@ public class WorkRecordRepository
     public async Task<IEnumerable<WorkRecord>> SearchAsync(string keyword)
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+        // 支持多关键词空格分隔搜索
+        var keywords = keyword.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (keywords.Length <= 1)
+        {
+            return await connection.QueryAsync<WorkRecord>(
+                "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
+                new { Kw = $"%{keyword}%" });
+        }
+
+        var where = string.Join(" AND ", keywords.Select((_, i) =>
+            $"(Content LIKE @Kw{i} OR ProjectName LIKE @Kw{i} OR Problem LIKE @Kw{i} OR Solution LIKE @Kw{i} OR Achievement LIKE @Kw{i} OR HighlightNote LIKE @Kw{i})"));
+        var param = new DynamicParameters();
+        for (int i = 0; i < keywords.Length; i++)
+            param.Add($"Kw{i}", $"%{keywords[i]}%");
         return await connection.QueryAsync<WorkRecord>(
-            "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
-            new { Kw = $"%{keyword}%" });
+            $"SELECT * FROM WorkRecord WHERE {where} ORDER BY WorkDate DESC, Id DESC LIMIT 50", param);
     }
 
     /// <summary>
@@ -141,8 +163,23 @@ public class WorkRecordRepository
 
         if (!string.IsNullOrEmpty(keyword))
         {
-            where.Add("(ProjectName LIKE @Kw OR WorkType LIKE @Kw OR Content LIKE @Kw OR Achievement LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR HighlightNote LIKE @Kw)");
-            param.Add("Kw", $"%{keyword}%");
+            // 支持多关键词空格分隔
+            var keywords = keyword.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (keywords.Length > 1)
+            {
+                var kwConditions = new List<string>();
+                for (int i = 0; i < keywords.Length; i++)
+                {
+                    kwConditions.Add($"(ProjectName LIKE @Kw{i} OR WorkType LIKE @Kw{i} OR Content LIKE @Kw{i} OR Achievement LIKE @Kw{i} OR Problem LIKE @Kw{i} OR Solution LIKE @Kw{i} OR HighlightNote LIKE @Kw{i})");
+                    param.Add($"Kw{i}", $"%{keywords[i]}%");
+                }
+                where.Add($"({string.Join(" AND ", kwConditions)})");
+            }
+            else
+            {
+                where.Add("(ProjectName LIKE @Kw OR WorkType LIKE @Kw OR Content LIKE @Kw OR Achievement LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR HighlightNote LIKE @Kw)");
+                param.Add("Kw", $"%{keyword}%");
+            }
         }
         if (!string.IsNullOrEmpty(project))
         {
