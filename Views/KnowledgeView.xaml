@@ -148,8 +148,7 @@
                                         </Grid>
                                         <TextBlock Text="{Binding Content}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" TextTrimming="CharacterEllipsis"
-                                                   Margin="0,6,0,0" MaxHeight="34"
-                                                   ToolTip="{Binding Content}"/>
+                                                   Margin="0,6,0,0" MaxHeight="34"/>
                                         <Grid Margin="0,10,0,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <Border Style="{StaticResource TagPrimary}" Margin="0,0,6,0">
