@@ -100,10 +100,11 @@
                     ClipToBounds="True">
                 <Grid>
                     <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
-                             Style="{StaticResource ModernListBox}">
+                             Style="{StaticResource ModernListBox}"
+                             ItemContainerStyle="{StaticResource ModernListBoxItem}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource ModernListBoxItem}" Padding="18,14">
+                                <Border Padding="18,14">
                                     <StackPanel>
                                         <Grid>
                                             <StackPanel Orientation="Horizontal">
