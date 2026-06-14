@@ -103,7 +103,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,0,0">
                             <TextBlock Text="EAP Work" FontSize="17" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       Foreground="White"
                                        FontFamily="{StaticResource DefaultFont}"/>
                             <TextBlock Text="Assistant v2.0" FontSize="11"
                                        Foreground="{DynamicResource SidebarTextBrush}"
@@ -145,7 +145,7 @@
                             <StackPanel Margin="44,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Name}"
                                            FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                           Foreground="White"/>
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Role}"
                                            FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
                             </StackPanel>
@@ -155,7 +155,7 @@
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Industry}"
                                            FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
                                 <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Department}"
-                                           FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Medium"/>
+                                           FontSize="12" Foreground="White" FontWeight="Medium"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
