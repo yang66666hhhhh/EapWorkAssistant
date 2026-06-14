@@ -344,6 +344,9 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.5"/>
                         </Trigger>
+                        <DataTrigger Binding="{Binding (local:ValidationHelper.IsInvalid), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -485,6 +488,9 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
                         </MultiTrigger>
+                        <DataTrigger Binding="{Binding (local:ValidationHelper.IsInvalid), RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -547,6 +553,20 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 可交互卡片（悬停边框+阴影） -->
+    <Style x:Key="CardHover" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
             </Trigger>
         </Style.Triggers>
     </Style>

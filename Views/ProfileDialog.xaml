@@ -16,7 +16,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="chip" CornerRadius="8" Padding="0,8"
-                                Background="#FFF5F6F8" BorderBrush="#FFE5E7EB" BorderThickness="1">
+                                Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -24,17 +24,17 @@
                                 <Setter TargetName="chip" Property="Background">
                                     <Setter.Value>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#FF4338CA" Offset="0"/>
-                                            <GradientStop Color="#FF7C3AED" Offset="1"/>
+                                            <GradientStop Color="{DynamicResource Primary}" Offset="0"/>
+                                            <GradientStop Color="{DynamicResource AccentViolet}" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Setter.Value>
                                 </Setter>
-                                <Setter TargetName="chip" Property="BorderBrush" Value="#FF4338CA"/>
+                                <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                 <Setter Property="Foreground" Value="White"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="chip" Property="BorderBrush" Value="#FF4338CA"/>
+                                <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -61,8 +61,8 @@
                                 MouseLeftButtonDown="Avatar_Click">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#FF4338CA" Offset="0"/>
-                                    <GradientStop Color="#FF7C3AED" Offset="1"/>
+                                    <GradientStop Color="{DynamicResource Primary}" Offset="0"/>
+                                    <GradientStop Color="{DynamicResource AccentViolet}" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                             <Grid>

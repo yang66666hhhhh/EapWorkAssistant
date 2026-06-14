@@ -68,20 +68,7 @@ public static class ReminderService
 
     private static void ShowReminder()
     {
-        var confirmed = ConfirmDialog.Show(
-            "今天还没有记录工作内容哦！\n\n及时记录有助于转正述职报告的生成。\n\n是否现在去记录？",
-            "工作记录提醒",
-            ConfirmDialogType.Info,
-            confirmText: "是",
-            cancelText: "否");
-
-        if (confirmed)
-        {
-            // 导航到工作记录页面
-            if (Application.Current.MainWindow?.DataContext is ViewModels.MainViewModel vm)
-            {
-                vm.NavigateToCommand.Execute("WorkRecord");
-            }
-        }
+        _remindedToday = true;
+        ToastService.Info("今天还没有记录工作，点击「工作记录」开始记录吧！", "工作记录提醒");
     }
 }

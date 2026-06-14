@@ -278,6 +278,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
 
     partial void OnSelectedAccentColorChanged(string value)
     {
+        foreach (var item in AccentColors)
+            item.IsSelected = item.Name == value;
+        OnPropertyChanged(nameof(AccentColors));
         ThemeService.Instance.SetAccentColor(value);
         StatusMessage = $"强调色已切换为 {value}";
     }
@@ -534,6 +537,7 @@ public class AccentColorItem
 {
     public string Name { get; set; } = string.Empty;
     public string PreviewColor { get; set; } = "#4F46E5";
+    public bool IsSelected { get; set; }
 }
 
 /// <summary>

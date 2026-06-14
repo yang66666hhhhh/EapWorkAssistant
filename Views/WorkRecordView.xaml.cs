@@ -1,10 +1,9 @@
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.ViewModels;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace EapWorkAssistant.Views;
 
@@ -170,32 +169,13 @@ public partial class WorkRecordView : UserControl
     {
         if (_isDrawerOpen) return;
         _isDrawerOpen = true;
+        DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 540);
+    }
 
-        // 显示遮罩（淡入）
-        Backdrop.Visibility = Visibility.Visible;
-        Backdrop.Opacity = 0;
-        var fadeIn = new DoubleAnimation
-        {
-            From = 0, To = 1,
-            Duration = new Duration(TimeSpan.FromMilliseconds(120))
-        };
-        Backdrop.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-
-        // 显示浮窗面板并滑入
-        FormPanel.Visibility = Visibility.Visible;
-        OpenFormBtn.Visibility = Visibility.Collapsed;
-
-        var translate = new TranslateTransform { X = 540 };
-        FormPanel.RenderTransform = translate;
-
-        var slideIn = new DoubleAnimation
-        {
-            From = 540,
-            To = 0,
-            Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-        };
-        translate.BeginAnimation(TranslateTransform.XProperty, slideIn);
+    private void FormField_Changed(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+            vm.MarkDirty();
     }
 
     private void CloseForm_Click(object sender, RoutedEventArgs e)
@@ -299,44 +279,22 @@ public partial class WorkRecordView : UserControl
     private void CloseDrawer()
     {
         if (!_isDrawerOpen) return;
+
+        if (DataContext is WorkRecordViewModel vm && vm.IsFormDirty)
+        {
+            bool confirmed = ConfirmDialog.Show(
+                "当前表单有未保存的修改，确定要放弃吗？",
+                "放弃修改？",
+                ConfirmDialogType.Warning,
+                "放弃", "取消");
+            if (!confirmed) return;
+        }
+
         _isDrawerOpen = false;
-
-        // 遮罩淡出
-        var fadeOut = new DoubleAnimation
+        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
         {
-            From = 1, To = 0,
-            Duration = new Duration(TimeSpan.FromMilliseconds(120))
-        };
-        fadeOut.Completed += (_, _) =>
-        {
-            Backdrop.Visibility = Visibility.Collapsed;
-        };
-        Backdrop.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-
-        // 浮窗滑出
-        var translate = FormPanel.RenderTransform as TranslateTransform
-                        ?? new TranslateTransform { X = 0 };
-        FormPanel.RenderTransform = translate;
-
-        var slideOut = new DoubleAnimation
-        {
-            From = 0,
-            To = 540,
-            Duration = new Duration(TimeSpan.FromMilliseconds(150)),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-        };
-
-        slideOut.Completed += (_, _) =>
-        {
-            FormPanel.Visibility = Visibility.Collapsed;
-            OpenFormBtn.Visibility = Visibility.Visible;
-            // 关闭时重置为新增模式
             if (DataContext is WorkRecordViewModel vm)
-            {
                 vm.NewRecordCommand.Execute(null);
-            }
-        };
-
-        translate.BeginAnimation(TranslateTransform.XProperty, slideOut);
+        }, 540);
     }
 }

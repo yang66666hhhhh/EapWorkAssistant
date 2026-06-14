@@ -32,6 +32,7 @@ public static class DatabaseBackupService
             if (!File.Exists(backupFile))
             {
                 File.Copy(DbPath, backupFile, true);
+                ToastService.Info("数据库已自动备份", "数据安全");
             }
 
             CleanupOldBackups();
