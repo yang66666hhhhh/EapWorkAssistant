@@ -203,14 +203,37 @@ try { migrateCmd.CommandText = "CREATE INDEX IF NOT EXISTS idx_xxx_yyy ON Xxx(Yy
 
 ## 常用模式
 
+### SafeFire（异步异常统一处理）
+`Helpers/TaskExtensions.cs` 提供 `Task.SafeFire(string errorMessage)` 扩展方法，用于安全触发 fire-and-forget 异步操作。内部 await Task 并用 try/catch + `ToastService.Error` 反馈异常。**所有 `_ = SomeAsync()` 调用都应替换为 `SomeAsync().SafeFire("描述")`**。
+
+```csharp
+// ✅ 正确
+LoadAllRecordsAsync().SafeFire("加载记录失败");
+
+// ❌ 错误（异常被静默吞掉）
+_ = LoadAllRecordsAsync();
+```
+
+### 查询版本号（竞态防护）
+`WorkRecordViewModel` 使用 `_queryGeneration` 整型计数器防止筛选器快速切换时旧查询结果覆盖新结果。每次 `LoadAllRecordsAsync` 调用时 `++_queryGeneration`，await 返回后检查 `if (gen != _queryGeneration) return;` 丢弃过期结果。
+
 ### 自动保存（DispatcherTimer）
-WorkRecordViewModel 使用 `DispatcherTimer` 实现自动保存。在 `StartAutoSaveTimer()` 中初始化，每次保存或切换记录时重置计时器。修改自动保存间隔时需同步更新 `ConfigService` 中的配置值。
+WorkRecordViewModel 使用 `DispatcherTimer` 实现自动保存。关键约束：
+- `StartAutoSaveTimer()` 根据 `ConfigService.Instance.AutoSaveInterval` 设置间隔
+- `PauseAutoSaveTimer()` 在离开工作记录页面时调用（`MainViewModel.NavigateTo` 中处理）
+- `_isAutoSaving` 标记防止重入：Tick handler 是 `async void`，如果 save 耗时超过 interval，第二次 Tick 会重入
+- 必须在 try/finally 中重置 `_isAutoSaving = false`
 
 ### 图表点击导航（LiveCharts2）
 DashboardViewModel 通过 `DataPointerDownCommand` 绑定实现图表点击事件。**命令参数类型为 `IEnumerable<ChartPoint>?`**（不是单个 `ChartPoint`），需用 `.FirstOrDefault()` 取出第一个点。柱状图使用 `point.Index` 推算日期跳转到工作记录；饼图使用 `point.Index` 从 `ProjectPieSeries` 数组获取项目名跳转。**注意**：LiveCharts2 的 `ChartPoint` 没有 `Series` 属性，必须通过索引访问外部系列数组。
 
 ### Toast 错误反馈
-关键操作（保存、删除、导入等）使用 try/catch 包裹，catch 中调用 `ToastService.Instance.ShowError(message)` 反馈异常。成功操作用 `ToastService.Instance.ShowSuccess(message)` 确认。
+`ToastService` 是静态类，方法直接调用（不需要 `.Instance`）：
+```csharp
+ToastService.Error($"保存失败：{ex.Message}");
+ToastService.Success("问题已保存");
+ToastService.Info("数据库已自动备份", "数据安全");
+```
 
 ### 多关键词搜索
 WorkRecordRepository.SearchAsync 支持空格分隔多关键词 AND 匹配。将输入按空格拆分，为每个关键词生成独立的 `LIKE` 条件并用 `AND` 连接。单关键词时退化为简单 LIKE 查询。
@@ -218,8 +241,76 @@ WorkRecordRepository.SearchAsync 支持空格分隔多关键词 AND 匹配。将
 ### 状态/优先级中文映射
 `Helpers/IssueStatusConverter.cs` 包含 `IssueStatusConverter` 和 `IssuePriorityConverter`，将英文值映射为中文标签（如 Open → 待处理，Critical → 紧急）。XAML 中使用 `ItemTemplate` + 转换器实现中文显示、英文存储。
 
-### CSV 导入
-`ExportService.ImportFromCsv()` 使用 `OpenFileDialog` 选择文件，内含 `ParseCsvLine()` 方法处理带引号的 CSV 字段。返回 `List<WorkRecord>?` 后由 `WorkRecordRepository.BatchInsertAsync` 批量插入。
+### CSV 导入/导出
+`ExportService` 使用**状态机解析器** `ParseCsvRows()` 处理 CSV，正确处理引号内的逗号、换行符和转义引号（`""`）。**禁止使用 `File.ReadAllLines`**，因为内容字段可能包含换行。导出时 `EscapeCsv` 对含逗号、引号、`\n`、`\r` 的字段加引号包裹。
+
+### 报告内容解析（ParseContentItems）
+`ReportService.ParseContentItems` 将多行文本拆分为 `(string Text, bool IsSubItem)` 列表。识别规则按优先级：
+1. 顶层编号：`1、` `1.` `1．` `1)` `（1）` `(1)` → 主项
+2. 符号标记：`-` `•` `·` `*` `+` → 子项
+3. 字母编号：`a.` `b)` → 子项
+4. 圆圈数字：`①` `②` `③` → 子项
+5. 缩进识别：Tab 或 2+ 空格开头且无编号 → 子项
+6. 其他文本：合并到上一条（续行处理）
+
+### 数据库备份
+`DatabaseBackupService` 使用 SQLite 原生备份流程，**禁止直接 `File.Copy` 活跃数据库**：
+```csharp
+srcConn.Open();
+// 1. 将 WAL 日志刷入主文件
+new SQLiteCommand("PRAGMA wal_checkpoint(FULL);", srcConn).ExecuteNonQuery();
+// 2. 使用 SQLite backup API
+srcConn.BackupDatabase(dstConn, "main", "main", -1, null, 0);
+```
+
+### WPF 依赖属性优先级陷阱
+XAML 中**本地值（precedence 3）优先于 Style Trigger（precedence 5）**。如果需要 DataTrigger 动态切换属性，默认值必须写在 Style Setter 中，**不能写在元素标签上**：
+```xml
+<!-- ❌ 错误：DataTrigger 永远无法覆盖本地值 -->
+<Border IsHitTestVisible="False">
+    <Border.Style>
+        <Style TargetType="Border">
+            <Style.Triggers>
+                <DataTrigger ...>
+                    <Setter Property="IsHitTestVisible" Value="True"/>  <!-- 无效 -->
+
+<!-- ✅ 正确：默认值在 Style Setter 中 -->
+<Border>
+    <Border.Style>
+        <Style TargetType="Border">
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Style.Triggers>
+                <DataTrigger ...>
+                    <Setter Property="IsHitTestVisible" Value="True"/>  <!-- 生效 -->
+```
+
+### 导航与自动保存协调
+`MainViewModel.NavigateTo` 负责在视图切换时：
+1. 离开 WorkRecord 时调用 `WorkRecord.PauseAutoSaveTimer()`
+2. 进入 WorkRecord 时调用 `WorkRecord.StartAutoSaveTimer()`
+3. 仅当 `CurrentView` 实际变化时才调用 `RefreshAsync()`，避免重复加载
+
+### 主题切换互斥
+`SettingsViewModel` 中 `IsLightTheme` 和 `IsDarkTheme` 必须互斥联动。在 `OnIsLightThemeChanged(true)` 中设置 `IsDarkTheme = false`，反之亦然。避免两个按钮同时高亮。
+
+### 数字输入验证
+工时（double）和进度（int）TextBox 使用 `PreviewTextInput` 事件限制输入：
+```csharp
+// 工时：允许数字和最多一个小数点
+e.Handled = !double.TryParse(textBox.Text + e.Text, out _) && newText != ".";
+// 进度：仅允许整数
+e.Handled = !int.TryParse(e.Text, out _);
+```
+
+### 表单重置
+知识库和问题跟踪的「新增」按钮在打开抽屉前必须重置表单：
+```csharp
+if (DataContext is KnowledgeViewModel vm)
+{
+    vm.CurrentItem = new Knowledge();
+    vm.IsFormDirty = false;
+}
+```
 
 ## 提交规范
 
@@ -253,24 +344,54 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 9. **修改 XAML 前必须确认结构完整性**：不要意外删除 Grid、ColumnDefinitions 等结构性标签
 10. **修改后必须验证编译通过**：执行 `dotnet build` 确认 0 error
 11. **新增数据库字段必须同步迁移代码**：在 `DatabaseInitializer.cs` 中同时更新建表语句和 ALTER TABLE 迁移
+12. **禁止使用 fire-and-forget 裸调用**：所有 `_ = SomeAsync()` 必须替换为 `SomeAsync().SafeFire("描述")`
+13. **禁止在 XAML 元素标签上设置需要 DataTrigger 动态覆盖的属性**：默认值必须写在 Style Setter 中
+14. **禁止直接 File.Copy 活跃 SQLite 数据库**：必须使用 WAL checkpoint + BackupDatabase API
+15. **批量数据库写入必须包裹在事务中**：使用 `BeginTransaction/Commit/Rollback`
 
 ## 代码审查清单
 
 每次修改代码后，AI 应自查以下项目：
 
+**基础规范：**
 - [ ] 新增文件是否放入了正确的目录？
 - [ ] 命名是否符合规范（PascalCase/camelCase）？
 - [ ] ViewModel 是否引入了 WPF 类型？
 - [ ] 新增的颜色/间距是否使用了资源键而非硬编码？
+- [ ] 编译是否通过（dotnet build 0 error）？
+- [ ] 是否有遗留的 TODO 或临时调试代码？
+
+**组件复用：**
 - [ ] 是否复用了已有的自定义组件（CustomCalendar、ConfirmDialog 等），而非引入 WPF 原生控件？
 - [ ] ToggleButton 是否使用了 PreviewMouseLeftButtonDown？
 - [ ] ComboBox 是否使用了 Select 样式？
+
+**WPF/XAML：**
 - [ ] DynamicResource 是否用于了 Thickness 类型（而非 sys:Double）？
 - [ ] Storyboard 中是否避免了 DynamicResource？
-- [ ] 编译是否通过（dotnet build 0 error）？
-- [ ] 是否有遗留的 TODO 或临时调试代码？
+- [ ] 需要 DataTrigger 动态切换的属性是否写在 Style Setter 中（而非元素本地值）？
+- [ ] DataTrigger 比较值类型是否与绑定源类型匹配？
+
+**数据库：**
 - [ ] 新增模型字段是否同步更新了 `DatabaseInitializer.cs` 的建表和迁移代码？
 - [ ] 新增数据库索引是否使用了 `CREATE INDEX IF NOT EXISTS`？
+- [ ] 批量写入是否包裹在事务中？
+- [ ] 数据库备份是否使用了 WAL checkpoint + BackupDatabase API（而非 File.Copy）？
+
+**异步与错误处理：**
+- [ ] 所有异步调用是否使用了 `.SafeFire()` 而非 `_ = ` 裸调用？
 - [ ] 关键操作是否添加了 try/catch + Toast 错误反馈？
+- [ ] 快速切换筛选器是否有竞态防护（查询版本号或 CancellationToken）？
+- [ ] DispatcherTimer Tick handler 是否有重入保护？
+
+**数据校验：**
+- [ ] ViewModel SaveAsync 是否校验了所有必填字段？
+- [ ] 数字输入 TextBox 是否添加了 PreviewTextInput 验证？
+- [ ] CSV 解析是否正确处理了引号内逗号和换行符（使用状态机而非 ReadAllLines）？
 - [ ] LiveCharts2 代码是否避免了访问 `ChartPoint.Series`（不存在的属性）？
-- [ ] CSV 解析是否正确处理了引号内逗号的边界情况？
+
+**导航与生命周期：**
+- [ ] NavigateTo 是否仅在视图实际切换时才触发 RefreshAsync？
+- [ ] 自动保存计时器在离开工作记录页面时是否暂停？
+- [ ] 单例服务的事件订阅是否有对应的取消订阅路径？
+- [ ] 知识库/问题跟踪「新增」按钮是否在打开抽屉前重置了表单？
