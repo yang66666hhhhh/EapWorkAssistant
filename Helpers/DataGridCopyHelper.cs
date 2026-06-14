@@ -411,44 +411,69 @@ internal sealed class PreviewPopup
             Padding = new Thickness(0),
             IsTabStop = false,
             FontSize = 13,
-            MaxWidth = 380,
+            MaxWidth = 400,
             AcceptsReturn = false,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
-            Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27))
+            Foreground = new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37))
         };
 
         _copyButton = new CopyButton
         {
-            Margin = new Thickness(0, 8, 0, 0),
+            Margin = new Thickness(0, 10, 0, 0),
             HorizontalAlignment = HorizontalAlignment.Left
         };
 
+        // 左侧紫色装饰条
+        var accentBar = new Border
+        {
+            Width = 3,
+            CornerRadius = new CornerRadius(2),
+            Background = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA)),
+            Margin = new Thickness(0, 2, 10, 2),
+            VerticalAlignment = VerticalAlignment.Stretch
+        };
+
+        var textArea = new StackPanel { Children = { _textBox, _copyButton } };
+
+        var contentPanel = new DockPanel { Children = { accentBar, textArea } };
+
+        // 主内容卡片
         var content = new Border
         {
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(14, 10, 14, 10),
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(16, 14, 16, 14),
             Background = new SolidColorBrush(Colors.White),
             BorderBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
             BorderThickness = new Thickness(1),
-            Child = new StackPanel { Children = { _textBox, _copyButton } }
+            Child = contentPanel
         };
 
-        // 阴影层
-        var shadowWrap = new Border
+        // 多层 Border 模拟阴影（避免 DropShadowEffect 导致圆角发灰）
+        var shadow1 = new Border
         {
-            Child = content,
-            Effect = new DropShadowEffect
-            {
-                BlurRadius = 24,
-                ShadowDepth = 4,
-                Opacity = 0.10,
-                Color = Colors.Black
-            }
+            CornerRadius = new CornerRadius(14),
+            Background = new SolidColorBrush(Color.FromArgb(8, 0, 0, 0)),
+            Margin = new Thickness(6, 6, 6, 10),
+            Child = content
+        };
+        var shadow2 = new Border
+        {
+            CornerRadius = new CornerRadius(15),
+            Background = new SolidColorBrush(Color.FromArgb(5, 0, 0, 0)),
+            Margin = new Thickness(4),
+            Child = shadow1
+        };
+        var shadow3 = new Border
+        {
+            CornerRadius = new CornerRadius(16),
+            Background = new SolidColorBrush(Color.FromArgb(3, 0, 0, 0)),
+            Margin = new Thickness(2),
+            Child = shadow2
         };
 
         _popup = new Popup
         {
-            Child = shadowWrap,
+            Child = shadow3,
             StaysOpen = true,
             AllowsTransparency = true,
             Placement = PlacementMode.Bottom,
