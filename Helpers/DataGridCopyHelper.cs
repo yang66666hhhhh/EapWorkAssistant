@@ -55,7 +55,7 @@ public static class DataGridCopyHelper
         if (cell == _trackedCell) return;
 
         _trackedCell = cell;
-        if (cell != null)
+        if (cell != null && IsContentColumn(cell.Column))
         {
             var text = ExtractCellText(cell);
             if (!string.IsNullOrEmpty(text))
@@ -67,6 +67,27 @@ public static class DataGridCopyHelper
         {
             PreviewPopup.Instance.Hide();
         }
+    }
+
+    /// <summary>
+    /// 自动识别内容列（需要悬停预览的长文本列）。
+    /// 检测 Binding 路径为 Content 的列，所有表格自动生效。
+    /// </summary>
+    private static bool IsContentColumn(DataGridColumn? column)
+    {
+        if (column == null) return false;
+
+        if (column is DataGridTextColumn textCol
+            && textCol.Binding is System.Windows.Data.Binding b
+            && b.Path?.Path == "Content")
+            return true;
+
+        if (column is DataGridTemplateColumn tmplCol
+            && tmplCol.ClipboardContentBinding is System.Windows.Data.Binding cb
+            && cb.Path?.Path == "Content")
+            return true;
+
+        return column.Header?.ToString() == "内容";
     }
 
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)

@@ -297,7 +297,6 @@
                                         <Style TargetType="TextBlock">
                                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                                             <Setter Property="TextWrapping" Value="NoWrap"/>
-                                            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -819,7 +818,7 @@
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding ProjectName}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                           TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectName}"
+                                                           TextTrimming="CharacterEllipsis"
                                                            VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -833,7 +832,6 @@
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           ToolTip="{Binding Content}"
                                                            VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
