@@ -59,32 +59,32 @@ public static class DataGridCopyHelper
         {
             var text = ExtractCellText(cell);
             if (!string.IsNullOrEmpty(text))
-                GridPreviewPopup.Instance.Show(cell, text);
+                PreviewPopup.Instance.Show(cell, text);
             else
-                GridPreviewPopup.Instance.Hide();
+                PreviewPopup.Instance.Hide();
         }
         else
         {
-            GridPreviewPopup.Instance.Hide();
+            PreviewPopup.Instance.Hide();
         }
     }
 
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _trackedCell = null;
-        GridPreviewPopup.Instance.Hide();
+        PreviewPopup.Instance.Hide();
     }
 
     private static void OnGridMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject) == null)
-            GridPreviewPopup.Instance.HideImmediate();
+            PreviewPopup.Instance.HideImmediate();
     }
 
     private static void OnGridScroll(object sender, ScrollChangedEventArgs e)
     {
         if (e.VerticalChange != 0 || e.HorizontalChange != 0)
-            GridPreviewPopup.Instance.HideImmediate();
+            PreviewPopup.Instance.HideImmediate();
     }
 
     // ==================== 右键菜单 ====================
@@ -92,7 +92,7 @@ public static class DataGridCopyHelper
     private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (sender is not DataGrid grid) return;
-        GridPreviewPopup.Instance.HideImmediate();
+        PreviewPopup.Instance.HideImmediate();
 
         var cell = FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
         if (cell == null) return;
@@ -362,16 +362,13 @@ public class CopyButton : Button
 }
 
 /// <summary>
-/// DataGrid 单元格悬停预览弹出层（单例）。
+/// 通用悬停预览弹出层（单例）。
 /// 替代系统 ToolTip，解决鼠标移到浮窗上即消失的问题。
-/// 原理：
-///   - 鼠标进入单元格 → 300ms 延迟后显示
-///   - 鼠标离开 → 200ms 延迟隐藏（期间若进入另一单元格则取消）
-///   - 鼠标在弹出层上 → 保持显示
+/// 可用于 DataGridCell、ListBoxItem 等任意 FrameworkElement。
 /// </summary>
-internal sealed class GridPreviewPopup
+internal sealed class PreviewPopup
 {
-    public static readonly GridPreviewPopup Instance = new();
+    public static readonly PreviewPopup Instance = new();
 
     private readonly Popup _popup;
     private readonly TextBox _textBox;
@@ -379,9 +376,9 @@ internal sealed class GridPreviewPopup
 
     private DispatcherTimer? _showTimer;
     private DispatcherTimer? _hideTimer;
-    private DataGridCell? _currentCell;
+    private FrameworkElement? _currentTarget;
 
-    private GridPreviewPopup()
+    private PreviewPopup()
     {
         _textBox = new TextBox
         {
@@ -440,11 +437,10 @@ internal sealed class GridPreviewPopup
         // 鼠标在弹出层上 → 取消隐藏
         content.MouseEnter += (_, _) => _hideTimer?.Stop();
         content.MouseLeave += (_, _) => StartHideTimer();
-        // TextBox 区域内也阻止隐藏
         _textBox.MouseEnter += (_, _) => _hideTimer?.Stop();
     }
 
-    public void Show(DataGridCell cell, string text)
+    public void Show(FrameworkElement target, string text)
     {
         _hideTimer?.Stop();
         _showTimer?.Stop();
@@ -455,10 +451,10 @@ internal sealed class GridPreviewPopup
             return;
         }
 
-        _currentCell = cell;
+        _currentTarget = target;
         _textBox.Text = text;
         _copyButton.Tag = text;
-        _popup.PlacementTarget = cell;
+        _popup.PlacementTarget = target;
 
         _showTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
         {
@@ -467,7 +463,7 @@ internal sealed class GridPreviewPopup
         _showTimer.Tick += (_, _) =>
         {
             _showTimer.Stop();
-            if (_currentCell != null && _currentCell.IsMouseOver)
+            if (_currentTarget != null && _currentTarget.IsMouseOver)
                 _popup.IsOpen = true;
         };
         _showTimer.Start();
@@ -480,7 +476,7 @@ internal sealed class GridPreviewPopup
         _showTimer?.Stop();
         _hideTimer?.Stop();
         _popup.IsOpen = false;
-        _currentCell = null;
+        _currentTarget = null;
     }
 
     private void StartHideTimer()
@@ -493,10 +489,10 @@ internal sealed class GridPreviewPopup
         _hideTimer.Tick += (_, _) =>
         {
             _hideTimer.Stop();
-            if (!_popup.IsMouseOver && (_currentCell == null || !_currentCell.IsMouseOver))
+            if (!_popup.IsMouseOver && (_currentTarget == null || !_currentTarget.IsMouseOver))
             {
                 _popup.IsOpen = false;
-                _currentCell = null;
+                _currentTarget = null;
             }
         };
         _hideTimer.Start();
@@ -504,8 +500,9 @@ internal sealed class GridPreviewPopup
 }
 
 /// <summary>
-/// ListBox 全局右键复制支持（附加属性）。
+/// ListBox 全局复制支持（附加属性）。
 /// 在 ListBox 上设置 local:ListBoxCopyHelper.EnableCopy="True" 即可启用：
+///   - 悬停预览：鼠标停留后弹出浮窗，支持选中复制
 ///   - 右键菜单：复制点击位置文本 / 复制整条记录
 /// </summary>
 public static class ListBoxCopyHelper
@@ -521,9 +518,47 @@ public static class ListBoxCopyHelper
     {
         if (d is not ListBox listBox) return;
         if ((bool)e.NewValue)
+        {
             listBox.PreviewMouseRightButtonDown += OnRightClick;
+            listBox.PreviewMouseMove += OnItemMouseMove;
+            listBox.AddHandler(UIElement.MouseLeaveEvent, new MouseEventHandler(OnListBoxMouseLeave));
+        }
         else
+        {
             listBox.PreviewMouseRightButtonDown -= OnRightClick;
+            listBox.PreviewMouseMove -= OnItemMouseMove;
+            listBox.RemoveHandler(UIElement.MouseLeaveEvent, new MouseEventHandler(OnListBoxMouseLeave));
+        }
+    }
+
+    // ==================== 悬停预览 ====================
+
+    private static ListBoxItem? _trackedItem;
+
+    private static void OnItemMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        var item = DataGridCopyHelper.FindVisualParent<ListBoxItem>(e.OriginalSource as DependencyObject);
+        if (item == _trackedItem) return;
+
+        _trackedItem = item;
+        if (item?.DataContext != null)
+        {
+            var text = ExtractFullText(item.DataContext);
+            if (!string.IsNullOrEmpty(text))
+                PreviewPopup.Instance.Show(item, text);
+            else
+                PreviewPopup.Instance.Hide();
+        }
+        else
+        {
+            PreviewPopup.Instance.Hide();
+        }
+    }
+
+    private static void OnListBoxMouseLeave(object sender, MouseEventArgs e)
+    {
+        _trackedItem = null;
+        PreviewPopup.Instance.Hide();
     }
 
     private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
