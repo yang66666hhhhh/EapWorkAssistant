@@ -1,13 +1,18 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Threading;
 
 namespace EapWorkAssistant.Helpers;
 
 /// <summary>
-/// DataGrid 全局右键复制支持（附加属性）。
-/// 在 DataGrid 上设置 local:DataGridCopyHelper.EnableCopy="True" 即可启用：
+/// DataGrid 全局复制支持（附加属性）。
+/// 设置 local:DataGridCopyHelper.EnableCopy="True" 即可启用：
+///   - 悬停预览：鼠标停留 300ms 后弹出浮窗，支持选中复制
 ///   - 右键菜单：复制单元格 / 复制整行
 /// </summary>
 public static class DataGridCopyHelper
@@ -23,14 +28,71 @@ public static class DataGridCopyHelper
     {
         if (d is not DataGrid grid) return;
         if ((bool)e.NewValue)
+        {
             grid.PreviewMouseRightButtonDown += OnRightClick;
+            grid.PreviewMouseMove += OnCellMouseMove;
+            grid.AddHandler(UIElement.MouseLeaveEvent, new MouseEventHandler(OnGridMouseLeave));
+            grid.PreviewMouseDown += OnGridMouseDown;
+            grid.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(OnGridScroll));
+        }
         else
+        {
             grid.PreviewMouseRightButtonDown -= OnRightClick;
+            grid.PreviewMouseMove -= OnCellMouseMove;
+            grid.RemoveHandler(UIElement.MouseLeaveEvent, new MouseEventHandler(OnGridMouseLeave));
+            grid.PreviewMouseDown -= OnGridMouseDown;
+            grid.RemoveHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(OnGridScroll));
+        }
     }
+
+    // ==================== 悬停预览 ====================
+
+    private static DataGridCell? _trackedCell;
+
+    private static void OnCellMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        var cell = FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+        if (cell == _trackedCell) return;
+
+        _trackedCell = cell;
+        if (cell != null)
+        {
+            var text = ExtractCellText(cell);
+            if (!string.IsNullOrEmpty(text))
+                GridPreviewPopup.Instance.Show(cell, text);
+            else
+                GridPreviewPopup.Instance.Hide();
+        }
+        else
+        {
+            GridPreviewPopup.Instance.Hide();
+        }
+    }
+
+    private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        _trackedCell = null;
+        GridPreviewPopup.Instance.Hide();
+    }
+
+    private static void OnGridMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject) == null)
+            GridPreviewPopup.Instance.HideImmediate();
+    }
+
+    private static void OnGridScroll(object sender, ScrollChangedEventArgs e)
+    {
+        if (e.VerticalChange != 0 || e.HorizontalChange != 0)
+            GridPreviewPopup.Instance.HideImmediate();
+    }
+
+    // ==================== 右键菜单 ====================
 
     private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (sender is not DataGrid grid) return;
+        GridPreviewPopup.Instance.HideImmediate();
 
         var cell = FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
         if (cell == null) return;
@@ -63,7 +125,6 @@ public static class DataGridCopyHelper
             menu.Items.Add(copyRow);
         }
 
-        // 替换单元格上已有的 ContextMenu 并打开
         cell.ContextMenu = menu;
         menu.PlacementTarget = cell;
         menu.Placement = PlacementMode.MousePoint;
@@ -83,7 +144,7 @@ public static class DataGridCopyHelper
         return null;
     }
 
-    private static T? FindVisualChild<T>(DependencyObject? parent) where T : DependencyObject
+    internal static T? FindVisualChild<T>(DependencyObject? parent) where T : DependencyObject
     {
         if (parent == null) return null;
         int count = VisualTreeHelper.GetChildrenCount(parent);
@@ -114,10 +175,8 @@ public static class DataGridCopyHelper
 
     #region Text Extraction
 
-    /// <summary>从单元格视觉树中提取显示文本</summary>
-    private static string ExtractCellText(DataGridCell cell)
+    internal static string ExtractCellText(DataGridCell cell)
     {
-        // 1. 优先读取第一个 TextBlock.Text（含 Highlight 高亮 Inlines 拼接文本）
         var textBlock = FindVisualChild<TextBlock>(cell);
         if (textBlock != null)
         {
@@ -125,12 +184,10 @@ public static class DataGridCopyHelper
             if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
         }
 
-        // 2. TextBox（编辑模式）
         var textBox = FindVisualChild<TextBox>(cell);
         if (textBox != null && !string.IsNullOrWhiteSpace(textBox.Text))
             return textBox.Text.Trim();
 
-        // 3. 拼接所有 TextBlock（进度条等复合模板）
         var allTexts = FindAllVisualChildren<TextBlock>(cell)
             .Select(tb => tb.Text)
             .Where(t => !string.IsNullOrWhiteSpace(t))
@@ -141,7 +198,6 @@ public static class DataGridCopyHelper
         return "";
     }
 
-    /// <summary>从 DataGrid 所有可见列中提取整行文本（tab 分隔）</summary>
     private static string ExtractRowText(DataGrid grid, object? item)
     {
         if (item == null) return "";
@@ -162,14 +218,12 @@ public static class DataGridCopyHelper
 
     private static string GetColumnCellText(DataGridColumn column, object item)
     {
-        // DataGridTextColumn: 从 Binding path 反射
         if (column is DataGridTextColumn textCol && textCol.Binding is System.Windows.Data.Binding textBinding)
         {
             var val = GetPropertyValue(item, textBinding.Path.Path);
             return FormatValue(val, textBinding.StringFormat);
         }
 
-        // DataGridTemplateColumn: 优先用 ClipboardContentBinding
         if (column is DataGridTemplateColumn templateCol)
         {
             if (templateCol.ClipboardContentBinding is System.Windows.Data.Binding clipBinding)
@@ -211,7 +265,6 @@ public static class DataGridCopyHelper
         }
     }
 
-    /// <summary>从资源字典中应用 ContextMenu 样式（含 ItemContainerStyle）</summary>
     internal static void ApplyContextMenuStyle(ContextMenu menu)
     {
         var style = Application.Current.TryFindResource(typeof(ContextMenu)) as Style;
@@ -220,11 +273,58 @@ public static class DataGridCopyHelper
 }
 
 /// <summary>
-/// 自定义按钮：点击时将 Tag 中的文本复制到剪贴板。
-/// 用于 ToolTip 模板中的"复制"按钮（避免 XAML 事件绑定问题）。
+/// 自定义复制按钮：内置点击反馈动画。
+/// 点击后背景变绿、文字切换为"已复制"，1 秒后自动恢复。
 /// </summary>
 public class CopyButton : Button
 {
+    private readonly Border _bg;
+    private readonly TextBlock _txt;
+    private DispatcherTimer? _resetTimer;
+    private readonly Color _normalColor = Color.FromRgb(0xEE, 0xF2, 0xFF); // #EEF2FF primary-light
+
+    public CopyButton()
+    {
+        _txt = new TextBlock
+        {
+            Text = "📋 复制",
+            FontSize = 12,
+            FontWeight = FontWeights.Medium,
+            Foreground = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA)), // primary
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        _bg = new Border
+        {
+            CornerRadius = new CornerRadius(6),
+            Background = new SolidColorBrush(_normalColor),
+            Padding = new Thickness(10, 4, 10, 4),
+            Child = _txt
+        };
+
+        // 直接设置 Content 为 Border，不使用 ControlTemplate
+        Content = _bg;
+        Cursor = Cursors.Hand;
+
+        // 悬停效果
+        _bg.MouseEnter += (_, _) =>
+        {
+            _bg.Background = new SolidColorBrush(Color.FromRgb(0xDB, 0xEA, 0xFE)); // lighter blue
+        };
+        _bg.MouseLeave += (_, _) =>
+        {
+            _bg.Background = new SolidColorBrush(_normalColor);
+        };
+    }
+
+    /// <summary>设置按钮显示的文字（同时更新 Tag 用于复制）</summary>
+    public void SetContentText(string text)
+    {
+        _txt.Text = text;
+        Tag = text;
+    }
+
     protected override void OnClick()
     {
         base.OnClick();
@@ -232,6 +332,174 @@ public class CopyButton : Button
         {
             try { Clipboard.SetText(text); } catch { }
         }
+        AnimateCopied();
+    }
+
+    private void AnimateCopied()
+    {
+        // 背景色动画：→ 成功绿
+        var green = Color.FromRgb(0x05, 0x96, 0x69);
+        _bg.Background = new SolidColorBrush(green);
+        _txt.Foreground = new SolidColorBrush(Colors.White);
+
+        string original = _txt.Text;
+        _txt.Text = "✓ 已复制";
+
+        _resetTimer?.Stop();
+        _resetTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1),
+        };
+        _resetTimer.Tick += (_, _) =>
+        {
+            _resetTimer.Stop();
+            _bg.Background = new SolidColorBrush(_normalColor);
+            _txt.Foreground = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA));
+            _txt.Text = original;
+        };
+        _resetTimer.Start();
+    }
+}
+
+/// <summary>
+/// DataGrid 单元格悬停预览弹出层（单例）。
+/// 替代系统 ToolTip，解决鼠标移到浮窗上即消失的问题。
+/// 原理：
+///   - 鼠标进入单元格 → 300ms 延迟后显示
+///   - 鼠标离开 → 200ms 延迟隐藏（期间若进入另一单元格则取消）
+///   - 鼠标在弹出层上 → 保持显示
+/// </summary>
+internal sealed class GridPreviewPopup
+{
+    public static readonly GridPreviewPopup Instance = new();
+
+    private readonly Popup _popup;
+    private readonly TextBox _textBox;
+    private readonly CopyButton _copyButton;
+
+    private DispatcherTimer? _showTimer;
+    private DispatcherTimer? _hideTimer;
+    private DataGridCell? _currentCell;
+
+    private GridPreviewPopup()
+    {
+        _textBox = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            BorderThickness = new Thickness(0),
+            Background = Brushes.Transparent,
+            Padding = new Thickness(0),
+            IsTabStop = false,
+            FontSize = 13,
+            MaxWidth = 380,
+            AcceptsReturn = false,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27))
+        };
+
+        _copyButton = new CopyButton
+        {
+            Margin = new Thickness(0, 8, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+
+        var content = new Border
+        {
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(14, 10, 14, 10),
+            Background = new SolidColorBrush(Colors.White),
+            BorderBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
+            BorderThickness = new Thickness(1),
+            Child = new StackPanel { Children = { _textBox, _copyButton } }
+        };
+
+        // 阴影层
+        var shadowWrap = new Border
+        {
+            Child = content,
+            Effect = new DropShadowEffect
+            {
+                BlurRadius = 24,
+                ShadowDepth = 4,
+                Opacity = 0.10,
+                Color = Colors.Black
+            }
+        };
+
+        _popup = new Popup
+        {
+            Child = shadowWrap,
+            StaysOpen = true,
+            AllowsTransparency = true,
+            Placement = PlacementMode.Bottom,
+            VerticalOffset = 2,
+            Focusable = false
+        };
+
+        // 鼠标在弹出层上 → 取消隐藏
+        content.MouseEnter += (_, _) => _hideTimer?.Stop();
+        content.MouseLeave += (_, _) => StartHideTimer();
+        // TextBox 区域内也阻止隐藏
+        _textBox.MouseEnter += (_, _) => _hideTimer?.Stop();
+    }
+
+    public void Show(DataGridCell cell, string text)
+    {
+        _hideTimer?.Stop();
+        _showTimer?.Stop();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            HideImmediate();
+            return;
+        }
+
+        _currentCell = cell;
+        _textBox.Text = text;
+        _copyButton.Tag = text;
+        _popup.PlacementTarget = cell;
+
+        _showTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(300)
+        };
+        _showTimer.Tick += (_, _) =>
+        {
+            _showTimer.Stop();
+            if (_currentCell != null && _currentCell.IsMouseOver)
+                _popup.IsOpen = true;
+        };
+        _showTimer.Start();
+    }
+
+    public void Hide() => StartHideTimer();
+
+    public void HideImmediate()
+    {
+        _showTimer?.Stop();
+        _hideTimer?.Stop();
+        _popup.IsOpen = false;
+        _currentCell = null;
+    }
+
+    private void StartHideTimer()
+    {
+        _hideTimer?.Stop();
+        _hideTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(200)
+        };
+        _hideTimer.Tick += (_, _) =>
+        {
+            _hideTimer.Stop();
+            if (!_popup.IsMouseOver && (_currentCell == null || !_currentCell.IsMouseOver))
+            {
+                _popup.IsOpen = false;
+                _currentCell = null;
+            }
+        };
+        _hideTimer.Start();
     }
 }
 
@@ -262,16 +530,13 @@ public static class ListBoxCopyHelper
     {
         if (sender is not ListBox listBox) return;
 
-        // 找到右键的 ListBoxItem
         var listBoxItem = DataGridCopyHelper.FindVisualParent<ListBoxItem>(e.OriginalSource as DependencyObject);
         if (listBoxItem == null) return;
 
         var item = listBoxItem.DataContext;
         if (item == null) return;
 
-        // 提取点击位置的文本
         var clickedText = ExtractClickedText(e.OriginalSource as DependencyObject, listBoxItem);
-        // 提取整条记录文本
         var fullText = ExtractFullText(item);
 
         if (string.IsNullOrEmpty(clickedText) && string.IsNullOrEmpty(fullText)) return;
@@ -307,23 +572,19 @@ public static class ListBoxCopyHelper
         e.Handled = true;
     }
 
-    /// <summary>提取点击位置最近的 TextBlock 文本</summary>
     private static string ExtractClickedText(DependencyObject? source, ListBoxItem container)
     {
-        // 从点击源向上查找最近的 TextBlock
         var textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(source);
         while (textBlock != null)
         {
             var text = textBlock.Text;
             if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
-            // 继续向上查找下一个 TextBlock
             textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(
                 VisualTreeHelper.GetParent(textBlock));
         }
         return "";
     }
 
-    /// <summary>通过反射提取数据对象所有字符串属性，拼接为整条文本</summary>
     private static string ExtractFullText(object item)
     {
         var parts = new List<string>();
