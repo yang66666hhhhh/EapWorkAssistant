@@ -201,8 +201,8 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 ? Math.Min(100, (double)recordedDays / workingDays * 100)
                 : 0;
 
-            // 覆盖率提醒（仅试用期）
-            if (ProfileService.Instance.IsProbation)
+            // 覆盖率提醒（仅试用期，休息日不显示）
+            if (ProfileService.Instance.IsProbation && !ConfigService.Instance.IsTodayRestDay)
             {
                 if (CoverageRatePercent < 60)
                 {
