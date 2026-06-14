@@ -72,7 +72,7 @@ public static class DataGridCopyHelper
 
     #region Visual Tree Helpers
 
-    private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+    internal static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
     {
         while (child != null)
         {
@@ -221,6 +221,123 @@ public class CopyButton : Button
     {
         base.OnClick();
         if (Tag is string text && !string.IsNullOrEmpty(text))
+        {
+            try { Clipboard.SetText(text); } catch { }
+        }
+    }
+}
+
+/// <summary>
+/// ListBox 全局右键复制支持（附加属性）。
+/// 在 ListBox 上设置 local:ListBoxCopyHelper.EnableCopy="True" 即可启用：
+///   - 右键菜单：复制点击位置文本 / 复制整条记录
+/// </summary>
+public static class ListBoxCopyHelper
+{
+    public static readonly DependencyProperty EnableCopyProperty =
+        DependencyProperty.RegisterAttached("EnableCopy", typeof(bool), typeof(ListBoxCopyHelper),
+            new PropertyMetadata(false, OnPropertyChanged));
+
+    public static void SetEnableCopy(DependencyObject obj, bool value) => obj.SetValue(EnableCopyProperty, value);
+    public static bool GetEnableCopy(DependencyObject obj) => (bool)obj.GetValue(EnableCopyProperty);
+
+    private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not ListBox listBox) return;
+        if ((bool)e.NewValue)
+            listBox.PreviewMouseRightButtonDown += OnRightClick;
+        else
+            listBox.PreviewMouseRightButtonDown -= OnRightClick;
+    }
+
+    private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is not ListBox listBox) return;
+
+        // 找到右键的 ListBoxItem
+        var listBoxItem = DataGridCopyHelper.FindVisualParent<ListBoxItem>(e.OriginalSource as DependencyObject);
+        if (listBoxItem == null) return;
+
+        var item = listBoxItem.DataContext;
+        if (item == null) return;
+
+        // 提取点击位置的文本
+        var clickedText = ExtractClickedText(e.OriginalSource as DependencyObject, listBoxItem);
+        // 提取整条记录文本
+        var fullText = ExtractFullText(item);
+
+        if (string.IsNullOrEmpty(clickedText) && string.IsNullOrEmpty(fullText)) return;
+
+        var menu = new ContextMenu();
+
+        if (!string.IsNullOrEmpty(clickedText))
+        {
+            var copyText = new MenuItem
+            {
+                Header = "复制",
+                InputGestureText = "Ctrl+C",
+                Tag = clickedText
+            };
+            copyText.Click += CopyToClipboard;
+            menu.Items.Add(copyText);
+        }
+
+        if (!string.IsNullOrEmpty(fullText) && fullText != clickedText)
+        {
+            var copyAll = new MenuItem { Header = "复制整条", Tag = fullText };
+            copyAll.Click += CopyToClipboard;
+            menu.Items.Add(copyAll);
+        }
+
+        if (menu.Items.Count == 0) return;
+
+        listBoxItem.ContextMenu = menu;
+        menu.PlacementTarget = listBoxItem;
+        menu.Placement = PlacementMode.MousePoint;
+        menu.IsOpen = true;
+        e.Handled = true;
+    }
+
+    /// <summary>提取点击位置最近的 TextBlock 文本</summary>
+    private static string ExtractClickedText(DependencyObject? source, ListBoxItem container)
+    {
+        // 从点击源向上查找最近的 TextBlock
+        var textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(source);
+        while (textBlock != null)
+        {
+            var text = textBlock.Text;
+            if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
+            // 继续向上查找下一个 TextBlock
+            textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(
+                VisualTreeHelper.GetParent(textBlock));
+        }
+        return "";
+    }
+
+    /// <summary>通过反射提取数据对象所有字符串属性，拼接为整条文本</summary>
+    private static string ExtractFullText(object item)
+    {
+        var parts = new List<string>();
+        var properties = new[] { "Title", "Content", "Tags", "Category", "CreateTime" };
+
+        foreach (var name in properties)
+        {
+            try
+            {
+                var prop = item.GetType().GetProperty(name);
+                var val = prop?.GetValue(item)?.ToString();
+                if (!string.IsNullOrWhiteSpace(val))
+                    parts.Add(val);
+            }
+            catch { }
+        }
+
+        return parts.Count > 0 ? string.Join("\t", parts) : item.ToString() ?? "";
+    }
+
+    private static void CopyToClipboard(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { Tag: string text } && !string.IsNullOrEmpty(text))
         {
             try { Clipboard.SetText(text); } catch { }
         }

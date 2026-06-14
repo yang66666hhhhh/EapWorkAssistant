@@ -665,6 +665,7 @@
 
     <!-- ListBox -->
     <Style x:Key="ModernListBox" TargetType="ListBox">
+        <Setter Property="local:ListBoxCopyHelper.EnableCopy" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Background" Value="Transparent"/>
