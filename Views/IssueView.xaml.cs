@@ -35,6 +35,12 @@ public partial class IssueView : UserControl
     private void OpenForm_Click(object sender, RoutedEventArgs e)
     {
         if (_isDrawerOpen) return;
+        // 新增模式：重置表单
+        if (DataContext is IssueViewModel vm)
+        {
+            vm.CurrentItem = new EapWorkAssistant.Models.Issue();
+            vm.IsFormDirty = false;
+        }
         _isDrawerOpen = true;
         DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
     }

@@ -96,6 +96,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateTo(string viewName)
     {
+        var previousView = CurrentView;
         CurrentView = viewName switch
         {
             "Dashboard" => Dashboard,
@@ -106,7 +107,14 @@ public partial class MainViewModel : ObservableObject
             _ => Dashboard
         };
 
-        if (CurrentView is IRefreshable refreshable)
+        // 离开工作记录时暂停自动保存，进入时恢复
+        if (previousView == WorkRecord && CurrentView != WorkRecord)
+            WorkRecord.PauseAutoSaveTimer();
+        else if (CurrentView == WorkRecord && previousView != WorkRecord)
+            WorkRecord.StartAutoSaveTimer();
+
+        // 仅在视图实际切换时才刷新，避免重复加载
+        if (CurrentView != previousView && CurrentView is IRefreshable refreshable)
             refreshable.RefreshAsync().SafeFire("刷新失败");
     }
 

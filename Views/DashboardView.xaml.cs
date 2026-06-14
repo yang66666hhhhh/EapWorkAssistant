@@ -1,6 +1,8 @@
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,22 +11,30 @@ namespace EapWorkAssistant.Views;
 
 public partial class DashboardView : UserControl
 {
+    private PropertyChangedEventHandler? _profileHandler;
+
     public DashboardView()
     {
         InitializeComponent();
-        DataContextChanged += (_, _) => SyncProbationDate();
+        DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => SyncProbationDate();
         CustomCal.SelectedDateChanged += OnCalendarDateChanged;
 
         // 监听个人资料变更，身份切换时立即刷新仪表盘
-        ProfileService.Instance.PropertyChanged += (_, e) =>
+        _profileHandler = (_, e) =>
         {
             if (e.PropertyName == nameof(ProfileService.IsProbation)
                 && DataContext is DashboardViewModel vm)
             {
-                _ = vm.LoadDashboardAsync();
+                vm.LoadDashboardAsync().SafeFire("加载仪表盘失败");
             }
         };
+        ProfileService.Instance.PropertyChanged += _profileHandler;
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        SyncProbationDate();
     }
 
     private void SyncProbationDate()

@@ -268,12 +268,22 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     // ===== 外观与主题 handlers =====
     partial void OnIsLightThemeChanged(bool value)
     {
-        if (value) { ThemeService.Instance.SetThemeMode("Light"); StatusMessage = "已切换至浅色模式"; }
+        if (value)
+        {
+            IsDarkTheme = false;
+            ThemeService.Instance.SetThemeMode("Light");
+            StatusMessage = "已切换至浅色模式";
+        }
     }
 
     partial void OnIsDarkThemeChanged(bool value)
     {
-        if (value) { ThemeService.Instance.SetThemeMode("Dark"); StatusMessage = "已切换至深色模式"; }
+        if (value)
+        {
+            IsLightTheme = false;
+            ThemeService.Instance.SetThemeMode("Dark");
+            StatusMessage = "已切换至深色模式";
+        }
     }
 
     partial void OnSelectedAccentColorChanged(string value)

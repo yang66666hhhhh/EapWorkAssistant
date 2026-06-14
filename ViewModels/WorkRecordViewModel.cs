@@ -177,6 +177,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         _autoSaveTimer.Start();
     }
 
+    /// <summary>暂停自动保存（离开工作记录页面时调用）</summary>
+    public void PauseAutoSaveTimer() => _autoSaveTimer.Stop();
+
     private void WorkRecordViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(HasProblem) && !HasProblem)
