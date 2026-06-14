@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-- **项目名称**: EAP Work Assistant v2.0
+- **项目名称**: EAP Work Assistant v2.1
 - **技术栈**: .NET 9.0 + WPF + CommunityToolkit.Mvvm 8.4.2 + SQLite/Dapper + LiveCharts2
 - **架构模式**: MVVM（Model-View-ViewModel）
 - **语言**: C# 12+，UI 使用中文标签
@@ -53,6 +53,43 @@ EapWorkAssistant/
 - `x:Name` 仅在 code-behind 需要引用时添加，不得随意命名
 - `x:Key` 使用 PascalCase（`CardStyle`, `PrimaryBrush`）
 - Style 命名遵循 `功能+控件类型` 模式（`Select` 用于 ComboBox，`Card` 用于 Border）
+
+## 数据模型字段参考
+
+### WorkRecord
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| Id | int | 主键 |
+| WorkDate | DateTime | 工作日期 |
+| ProjectName | string | 项目名称 |
+| WorkType | string | 工作类型 |
+| Content | string | 工作内容 |
+| Achievement | string | **工作成果**（v2.1 新增） |
+| Problem | string | 遇到的问题 |
+| Solution | string | 解决方案 |
+| IsHighlight | int | 是否亮点（0/1） |
+| Hours | double | 工时 |
+
+### Issue
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| Id | int | 主键 |
+| ProjectName | string | 项目名称 |
+| Description | string | 问题描述 |
+| RootCause | string | 根因分析 |
+| Solution | string | 解决方案 |
+| Status | string | **状态**（v2.1 新增）：Open / InProgress / Resolved / Closed |
+| Priority | string | **优先级**（v2.1 新增）：Low / Medium / High / Critical |
+
+### Knowledge
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| Id | int | 主键 |
+| Title | string | 标题 |
+| Content | string | 内容 |
+| Tags | string | 标签（逗号分隔） |
+| Category | string | **分类**（v2.1 新增） |
+| IsFavorite | int | **是否收藏**（v2.1 新增，0/1） |
 
 ## 架构约束
 
@@ -149,9 +186,40 @@ private void SomeButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEve
 
 - 数据库文件位置：`%LOCALAPPDATA%\EapWorkAssistant\eapwork.db`
 - 自动备份目录：`%LOCALAPPDATA%\EapWorkAssistant\backups\`
-- 表结构变更必须在 `DatabaseInitializer.cs` 中更新建表语句
-- 新增列使用 `ALTER TABLE ... ADD COLUMN` 并带默认值
+- 表结构变更必须在 `DatabaseInitializer.cs` 中更新建表语句**和迁移代码**
+- 新增列使用 `ALTER TABLE ... ADD COLUMN` 并带默认值，用 try/catch 包裹以兼容已升级的数据库
+- 新增索引使用 `CREATE INDEX IF NOT EXISTS` 语句，同样用 try/catch 包裹
+- 已有索引：`idx_workrecord_workdate`, `idx_workrecord_project`, `idx_issue_project`, `idx_issue_status`, `idx_knowledge_category`, `idx_knowledge_tags`, `idx_knowledge_isfavorite`
 - 保留 30 天备份，备份文件名含日期
+
+### 迁移代码模板
+```csharp
+// 新增列
+try { migrateCmd.CommandText = "ALTER TABLE Xxx ADD COLUMN Yyy TEXT DEFAULT 'default'"; migrateCmd.ExecuteNonQuery(); } catch { }
+
+// 新增索引
+try { migrateCmd.CommandText = "CREATE INDEX IF NOT EXISTS idx_xxx_yyy ON Xxx(Yyy)"; migrateCmd.ExecuteNonQuery(); } catch { }
+```
+
+## 常用模式
+
+### 自动保存（DispatcherTimer）
+WorkRecordViewModel 使用 `DispatcherTimer` 实现自动保存。在 `StartAutoSaveTimer()` 中初始化，每次保存或切换记录时重置计时器。修改自动保存间隔时需同步更新 `ConfigService` 中的配置值。
+
+### 图表点击导航（LiveCharts2）
+DashboardViewModel 通过 `DataPointerDownCommand` 绑定实现图表点击事件。柱状图使用 `ChartPoint.Index` 推算日期跳转到工作记录；饼图使用 `point.Index` 从 `ProjectPieSeries` 数组获取项目名跳转。**注意**：LiveCharts2 的 `ChartPoint` 没有 `Series` 属性，必须通过索引访问外部系列数组。
+
+### Toast 错误反馈
+关键操作（保存、删除、导入等）使用 try/catch 包裹，catch 中调用 `ToastService.Instance.ShowError(message)` 反馈异常。成功操作用 `ToastService.Instance.ShowSuccess(message)` 确认。
+
+### 多关键词搜索
+WorkRecordRepository.SearchAsync 支持空格分隔多关键词 AND 匹配。将输入按空格拆分，为每个关键词生成独立的 `LIKE` 条件并用 `AND` 连接。单关键词时退化为简单 LIKE 查询。
+
+### 状态/优先级中文映射
+`Helpers/IssueStatusConverter.cs` 包含 `IssueStatusConverter` 和 `IssuePriorityConverter`，将英文值映射为中文标签（如 Open → 待处理，Critical → 紧急）。XAML 中使用 `ItemTemplate` + 转换器实现中文显示、英文存储。
+
+### CSV 导入
+`ExportService.ImportFromCsv()` 使用 `OpenFileDialog` 选择文件，内含 `ParseCsvLine()` 方法处理带引号的 CSV 字段。返回 `List<WorkRecord>?` 后由 `WorkRecordRepository.BatchInsertAsync` 批量插入。
 
 ## 提交规范
 
@@ -184,6 +252,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 8. **禁止在 Storyboard 中使用 DynamicResource**：会导致运行时异常
 9. **修改 XAML 前必须确认结构完整性**：不要意外删除 Grid、ColumnDefinitions 等结构性标签
 10. **修改后必须验证编译通过**：执行 `dotnet build` 确认 0 error
+11. **新增数据库字段必须同步迁移代码**：在 `DatabaseInitializer.cs` 中同时更新建表语句和 ALTER TABLE 迁移
 
 ## 代码审查清单
 
@@ -200,3 +269,8 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] Storyboard 中是否避免了 DynamicResource？
 - [ ] 编译是否通过（dotnet build 0 error）？
 - [ ] 是否有遗留的 TODO 或临时调试代码？
+- [ ] 新增模型字段是否同步更新了 `DatabaseInitializer.cs` 的建表和迁移代码？
+- [ ] 新增数据库索引是否使用了 `CREATE INDEX IF NOT EXISTS`？
+- [ ] 关键操作是否添加了 try/catch + Toast 错误反馈？
+- [ ] LiveCharts2 代码是否避免了访问 `ChartPoint.Series`（不存在的属性）？
+- [ ] CSV 解析是否正确处理了引号内逗号的边界情况？
