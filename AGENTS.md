@@ -207,7 +207,7 @@ try { migrateCmd.CommandText = "CREATE INDEX IF NOT EXISTS idx_xxx_yyy ON Xxx(Yy
 WorkRecordViewModel 使用 `DispatcherTimer` 实现自动保存。在 `StartAutoSaveTimer()` 中初始化，每次保存或切换记录时重置计时器。修改自动保存间隔时需同步更新 `ConfigService` 中的配置值。
 
 ### 图表点击导航（LiveCharts2）
-DashboardViewModel 通过 `DataPointerDownCommand` 绑定实现图表点击事件。柱状图使用 `ChartPoint.Index` 推算日期跳转到工作记录；饼图使用 `point.Index` 从 `ProjectPieSeries` 数组获取项目名跳转。**注意**：LiveCharts2 的 `ChartPoint` 没有 `Series` 属性，必须通过索引访问外部系列数组。
+DashboardViewModel 通过 `DataPointerDownCommand` 绑定实现图表点击事件。**命令参数类型为 `IEnumerable<ChartPoint>?`**（不是单个 `ChartPoint`），需用 `.FirstOrDefault()` 取出第一个点。柱状图使用 `point.Index` 推算日期跳转到工作记录；饼图使用 `point.Index` 从 `ProjectPieSeries` 数组获取项目名跳转。**注意**：LiveCharts2 的 `ChartPoint` 没有 `Series` 属性，必须通过索引访问外部系列数组。
 
 ### Toast 错误反馈
 关键操作（保存、删除、导入等）使用 try/catch 包裹，catch 中调用 `ToastService.Instance.ShowError(message)` 反馈异常。成功操作用 `ToastService.Instance.ShowSuccess(message)` 确认。

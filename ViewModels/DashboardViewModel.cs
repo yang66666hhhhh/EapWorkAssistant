@@ -391,8 +391,9 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     /// <summary>柱状图点击：跳转到对应日期的工作记录</summary>
     [RelayCommand]
-    private void ChartPointClick(ChartPoint? point)
+    private void ChartPointClick(IEnumerable<ChartPoint>? points)
     {
+        var point = points?.FirstOrDefault();
         if (point == null) return;
         var index = point.Index;
         var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now);
@@ -403,8 +404,9 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     /// <summary>饼图点击：跳转到对应项目的全部记录</summary>
     [RelayCommand]
-    private void PieChartClick(ChartPoint? point)
+    private void PieChartClick(IEnumerable<ChartPoint>? points)
     {
+        var point = points?.FirstOrDefault();
         if (point == null) return;
         // 通过索引从饼图系列中获取项目名称
         var index = point.Index;
