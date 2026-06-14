@@ -57,12 +57,20 @@ public static class DataGridCopyHelper
         _trackedCell = cell;
         if (cell != null)
         {
-            var text = ExtractCellText(cell);
-            // 只对较长文本（内容列）显示悬停预览，短文本（日期/类型/工时等）不弹
-            if (!string.IsNullOrEmpty(text) && text.Length > 15)
-                PreviewPopup.Instance.Show(cell, text);
+            // 只对"内容"列显示悬停预览
+            var header = cell.Column?.Header?.ToString();
+            if (header == "内容")
+            {
+                var text = ExtractCellText(cell);
+                if (!string.IsNullOrEmpty(text))
+                    PreviewPopup.Instance.Show(cell, text);
+                else
+                    PreviewPopup.Instance.Hide();
+            }
             else
+            {
                 PreviewPopup.Instance.Hide();
+            }
         }
         else
         {
