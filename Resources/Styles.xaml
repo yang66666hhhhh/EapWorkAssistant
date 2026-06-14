@@ -943,6 +943,98 @@
         </Setter>
     </Style>
 
+    <!-- ==================== ContextMenu 样式（右键菜单，美化圆角阴影） ==================== -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="MenuItem">
+                                <Border x:Name="bg" Background="Transparent" CornerRadius="6"
+                                        Padding="10,7" Margin="2,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" SharedSizeGroup="IconCol"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
+                                        </Grid.ColumnDefinitions>
+                                        <!-- Icon -->
+                                        <ContentPresenter x:Name="Icon" Grid.Column="0"
+                                                         ContentSource="Icon"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"
+                                                         Width="16" Height="16"/>
+                                        <!-- Header -->
+                                        <ContentPresenter Grid.Column="1"
+                                                         ContentSource="Header"
+                                                         RecognizesAccessKey="True"
+                                                         VerticalAlignment="Center"
+                                                         Margin="6,0,12,0"/>
+                                        <!-- Input Gesture -->
+                                        <TextBlock x:Name="GestureText" Grid.Column="2"
+                                                   Text="{TemplateBinding InputGestureText}"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   Margin="12,0,0,0"/>
+                                    </Grid>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="Icon" Value="{x:Null}">
+                                        <Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
+                                    </Trigger>
+                                    <Trigger Property="InputGestureText" Value="">
+                                        <Setter TargetName="GestureText" Property="Visibility" Value="Collapsed"/>
+                                    </Trigger>
+                                    <Trigger Property="IsHighlighted" Value="True">
+                                        <Setter TargetName="bg" Property="Background"
+                                                Value="{DynamicResource PrimaryLightBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource TextTertiaryBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{DynamicResource CardBrush}" CornerRadius="10"
+                            Padding="4,4"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Effect="{StaticResource ShadowMd}">
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Separator -->
+    <Style TargetType="Separator">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Separator">
+                    <Border Height="1" Margin="10,4"
+                            Background="{DynamicResource BorderBrush}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ==================== Calendar 样式（仅用于 DatePicker 弹窗） ==================== -->
     <Style x:Key="ModernCalendar" TargetType="Calendar">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>

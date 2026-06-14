@@ -42,6 +42,7 @@ public static class DataGridCopyHelper
         if (string.IsNullOrEmpty(cellText) && string.IsNullOrEmpty(rowText)) return;
 
         var menu = new ContextMenu();
+        ApplyContextMenuStyle(menu);
 
         if (!string.IsNullOrEmpty(cellText))
         {
@@ -209,6 +210,13 @@ public static class DataGridCopyHelper
             try { Clipboard.SetText(text); } catch { }
         }
     }
+
+    /// <summary>从资源字典中应用 ContextMenu 样式（含 ItemContainerStyle）</summary>
+    internal static void ApplyContextMenuStyle(ContextMenu menu)
+    {
+        var style = Application.Current.TryFindResource(typeof(ContextMenu)) as Style;
+        if (style != null) menu.Style = style;
+    }
 }
 
 /// <summary>
@@ -269,6 +277,7 @@ public static class ListBoxCopyHelper
         if (string.IsNullOrEmpty(clickedText) && string.IsNullOrEmpty(fullText)) return;
 
         var menu = new ContextMenu();
+        DataGridCopyHelper.ApplyContextMenuStyle(menu);
 
         if (!string.IsNullOrEmpty(clickedText))
         {
