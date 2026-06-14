@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
@@ -73,9 +74,9 @@ public partial class MainViewModel : ObservableObject
             "Knowledge" => 2,
             "Issue" => 3,
             "Settings" => 4,
-            _ => 0
+                _ => 0
         };
-        _ = Dashboard.LoadDashboardAsync();
+        Dashboard.LoadDashboardAsync().SafeFire("加载仪表盘失败");
 
         // 订阅仪表盘图表点击导航事件
         Dashboard.NavigateToWorkRecord += (date) =>
@@ -106,7 +107,7 @@ public partial class MainViewModel : ObservableObject
         };
 
         if (CurrentView is IRefreshable refreshable)
-            _ = refreshable.RefreshAsync();
+            refreshable.RefreshAsync().SafeFire("刷新失败");
     }
 
     [RelayCommand]
@@ -247,13 +248,13 @@ public partial class MainViewModel : ObservableObject
         // 知识库/问题跟踪：导航后用搜索关键词过滤，定位到目标条目
         if (item.NavigateTo == "Knowledge")
         {
-            Knowledge.SearchKeyword = item.Title;
-            _ = Knowledge.SearchCommand.ExecuteAsync(null);
+            Knowledge.SearchKeyword = item.Keyword;
+            Knowledge.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
         }
         else if (item.NavigateTo == "Issue")
         {
-            Issue.SearchKeyword = item.Title;
-            _ = Issue.SearchCommand.ExecuteAsync(null);
+            Issue.SearchKeyword = item.Keyword;
+            Issue.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
         }
     }
 

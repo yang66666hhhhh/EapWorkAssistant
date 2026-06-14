@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
@@ -17,12 +18,17 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private readonly DispatcherTimer _searchTimer;
     private readonly DispatcherTimer _autoSaveTimer;
     private bool _suppressDirty;
+    private int _queryGeneration;
+    private bool _isAutoSaving;
 
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
 
     /// <summary>报告生成后触发，通知 View 滚动到报告区域</summary>
     public event Action? ReportGenerated;
+
+    /// <summary>SelectedDate 变化时触发，通知 View 更新日期显示</summary>
+    public event Action<DateTime>? SelectedDateChanged;
 
     [ObservableProperty]
     private ObservableCollection<WorkRecord> _records = new();
@@ -137,12 +143,25 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         _autoSaveTimer = new DispatcherTimer();
         _autoSaveTimer.Tick += async (_, _) =>
         {
+            if (_isAutoSaving) return; // 防止重入
             if (IsFormDirty && !string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
                 && !string.IsNullOrWhiteSpace(CurrentRecord.Content))
             {
-                await SaveRecordAsync();
-                StatusMessage = "已自动保存";
-                _statusTimer.Start();
+                _isAutoSaving = true;
+                try
+                {
+                    await SaveRecordAsync();
+                    StatusMessage = "已自动保存";
+                    _statusTimer.Start();
+                }
+                catch (Exception ex)
+                {
+                    ToastService.Error($"自动保存失败：{ex.Message}");
+                }
+                finally
+                {
+                    _isAutoSaving = false;
+                }
             }
         };
         StartAutoSaveTimer();
@@ -454,12 +473,16 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task LoadAllRecordsAsync()
     {
+        var gen = ++_queryGeneration;
         var start = FilterStartDate?.ToString("yyyy-MM-dd");
         var end = FilterEndDate?.ToString("yyyy-MM-dd");
         var offset = (CurrentPage - 1) * PageSize;
 
         var (records, totalCount, totalHours, highlightCount) = await _repo.GetFilteredPagedAsync(
             SearchKeyword, FilterProject, FilterWorkType, start, end, offset, PageSize);
+
+        // 如果已有更新的查询启动，丢弃本次结果
+        if (gen != _queryGeneration) return;
 
         AllRecords = new ObservableCollection<WorkRecord>(records);
         AllTotalHours = totalHours;
@@ -573,7 +596,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 break;
         }
         CurrentPage = 1;
-        _ = LoadAllRecordsAsync();
+        LoadAllRecordsAsync().SafeFire("加载记录失败");
     }
 
     [RelayCommand]
@@ -634,14 +657,14 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 FilterEndDate = today;
             }
             CurrentPage = 1;
-            _ = LoadAllRecordsAsync();
+            LoadAllRecordsAsync().SafeFire("加载记录失败");
         }
     }
 
-    partial void OnFilterProjectChanged(string value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
-    partial void OnFilterWorkTypeChanged(string value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
-    partial void OnFilterStartDateChanged(DateTime? value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
-    partial void OnFilterEndDateChanged(DateTime? value) { CurrentPage = 1; _ = LoadAllRecordsAsync(); }
+    partial void OnFilterProjectChanged(string value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterWorkTypeChanged(string value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterStartDateChanged(DateTime? value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterEndDateChanged(DateTime? value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
 
     partial void OnSearchKeywordChanged(string value)
     {
@@ -649,7 +672,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         CurrentPage = 1;
         if (string.IsNullOrWhiteSpace(value))
         {
-            _ = LoadAllRecordsAsync();
+            LoadAllRecordsAsync().SafeFire("加载记录失败");
         }
         else
         {
@@ -662,11 +685,12 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     partial void OnPageSizeChanged(int value)
     {
         CurrentPage = 1;
-        _ = LoadAllRecordsAsync();
+        LoadAllRecordsAsync().SafeFire("加载记录失败");
     }
 
     partial void OnSelectedDateChanged(DateTime value)
     {
-        _ = LoadRecordsAsync();
+        SelectedDateChanged?.Invoke(value);
+        LoadRecordsAsync().SafeFire("加载记录失败");
     }
 }

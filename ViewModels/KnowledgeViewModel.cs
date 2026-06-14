@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
@@ -69,19 +70,19 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
     {
         _searchTimer.Stop();
         if (string.IsNullOrWhiteSpace(value))
-            _ = LoadAsync();
+            LoadAsync().SafeFire("加载知识失败");
         else
             _searchTimer.Start();
     }
 
     partial void OnFilterCategoryChanged(string value)
     {
-        _ = LoadAsync();
+        LoadAsync().SafeFire("加载知识失败");
     }
 
     partial void OnShowFavoritesOnlyChanged(bool value)
     {
-        _ = LoadAsync();
+        LoadAsync().SafeFire("加载知识失败");
     }
 
     [RelayCommand]
@@ -169,6 +170,13 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         if (string.IsNullOrWhiteSpace(CurrentItem.Title))
         {
             StatusMessage = "请输入标题";
+            _statusTimer.Start();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(CurrentItem.Content))
+        {
+            StatusMessage = "请输入内容";
             _statusTimer.Start();
             return;
         }

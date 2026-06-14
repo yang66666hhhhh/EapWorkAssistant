@@ -27,12 +27,14 @@ public partial class WorkRecordView : UserControl
         {
             oldVm.RecordSaved -= OnRecordSaved;
             oldVm.ReportGenerated -= OnReportGenerated;
+            oldVm.SelectedDateChanged -= OnSelectedDateChanged;
             oldVm.PropertyChanged -= OnFilterPropertyChanged;
         }
         if (e.NewValue is WorkRecordViewModel newVm)
         {
             newVm.RecordSaved += OnRecordSaved;
             newVm.ReportGenerated += OnReportGenerated;
+            newVm.SelectedDateChanged += OnSelectedDateChanged;
             newVm.PropertyChanged += OnFilterPropertyChanged;
         }
         SyncDateDisplay();
@@ -48,6 +50,15 @@ public partial class WorkRecordView : UserControl
         Dispatcher.Invoke(() =>
         {
             ReportTextBox.BringIntoView();
+        });
+    }
+
+    private void OnSelectedDateChanged(DateTime date)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            DateDisplayText.Text = date.ToString("yyyy-MM-dd");
+            CustomCal.SelectedDate = date;
         });
     }
 
@@ -296,5 +307,20 @@ public partial class WorkRecordView : UserControl
             if (DataContext is WorkRecordViewModel vm)
                 vm.NewRecordCommand.Execute(null);
         }, 540);
+    }
+
+    /// <summary>工时输入验证：只允许数字和小数点</summary>
+    private void HoursInput_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        var textBox = (TextBox)sender;
+        var newText = textBox.Text + e.Text;
+        // 允许数字和最多一个小数点
+        e.Handled = !double.TryParse(newText, out _) && newText != ".";
+    }
+
+    /// <summary>进度输入验证：只允许整数</summary>
+    private void ProgressInput_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = !int.TryParse(e.Text, out _);
     }
 }

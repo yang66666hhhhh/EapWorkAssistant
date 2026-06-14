@@ -221,9 +221,10 @@
             <!-- 全屏遮罩 -->
             <Border Panel.ZIndex="50" x:Name="SearchOverlayBorder"
                     Background="#40000000" MouseLeftButtonDown="SearchOverlay_Click"
-                    IsHitTestVisible="False" Opacity="0">
+                    Opacity="0">
                 <Border.Style>
                     <Style TargetType="Border">
+                        <Setter Property="IsHitTestVisible" Value="False"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsSearchOpen}" Value="True">
                                 <DataTrigger.EnterActions>
@@ -251,12 +252,13 @@
             <Border Panel.ZIndex="60" x:Name="SearchPanelBorder"
                     HorizontalAlignment="Center" VerticalAlignment="Top"
                     Width="540" Margin="0,80,0,0"
-                    IsHitTestVisible="False" Opacity="0">
+                    Opacity="0">
                 <Border.RenderTransform>
                     <TranslateTransform Y="0"/>
                 </Border.RenderTransform>
                 <Border.Style>
                     <Style TargetType="Border">
+                        <Setter Property="IsHitTestVisible" Value="False"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsSearchOpen}" Value="True">
                                 <DataTrigger.EnterActions>

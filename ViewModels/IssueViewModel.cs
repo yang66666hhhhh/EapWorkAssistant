@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
@@ -57,7 +58,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     {
         _searchTimer.Stop();
         if (string.IsNullOrWhiteSpace(value))
-            _ = LoadAsync();
+            LoadAsync().SafeFire("加载问题失败");
         else
             _searchTimer.Start();
     }
@@ -98,6 +99,13 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         if (string.IsNullOrWhiteSpace(CurrentItem.Title))
         {
             StatusMessage = "请输入标题";
+            _statusTimer.Start();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(CurrentItem.ProjectName))
+        {
+            StatusMessage = "请选择项目";
             _statusTimer.Start();
             return;
         }

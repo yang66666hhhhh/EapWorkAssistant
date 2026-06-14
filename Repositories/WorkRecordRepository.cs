@@ -67,10 +67,22 @@ public class WorkRecordRepository
     public async Task<int> BatchInsertAsync(IEnumerable<WorkRecord> records)
     {
         using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-        return await connection.ExecuteAsync(@"
-            INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
-            VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime)",
-            records);
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            var count = await connection.ExecuteAsync(@"
+                INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
+                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime)",
+                records, transaction);
+            transaction.Commit();
+            return count;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     public async Task<double> GetTotalHoursAsync(string startDate, string endDate)

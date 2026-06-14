@@ -75,7 +75,8 @@ public static class ExportService
     }
 
     /// <summary>
-    /// 从 CSV 文件导入工作记录，返回解析后的记录列表
+    /// 从 CSV 文件导入工作记录，返回解析后的记录列表。
+    /// 使用状态机解析，正确处理引号内换行符。
     /// </summary>
     public static List<WorkRecord>? ImportFromCsv()
     {
@@ -89,18 +90,18 @@ public static class ExportService
 
         try
         {
-            var lines = File.ReadAllLines(dialog.FileName, Encoding.UTF8);
-            if (lines.Length < 2) return null; // 至少需要标题行 + 1行数据
+            var content = File.ReadAllText(dialog.FileName, Encoding.UTF8);
+            var rows = ParseCsvRows(content);
+            if (rows.Count < 2) return null; // 至少需要标题行 + 1行数据
 
             var records = new List<WorkRecord>();
             // 跳过标题行（第一行）
-            for (int i = 1; i < lines.Length; i++)
+            for (int i = 1; i < rows.Count; i++)
             {
-                var line = lines[i].Trim();
-                if (string.IsNullOrEmpty(line)) continue;
-
-                var fields = ParseCsvLine(line);
-                if (fields.Count < 5) continue; // 至少需要5个字段
+                var fields = rows[i];
+                if (fields.Count == 0 || (fields.Count == 1 && string.IsNullOrWhiteSpace(fields[0])))
+                    continue;
+                if (fields.Count < 5) continue;
 
                 var record = new WorkRecord
                 {
@@ -109,7 +110,7 @@ public static class ExportService
                     WorkType = fields[2],
                     Content = fields[3],
                     Hours = double.TryParse(fields[4], out var h) ? h : 0,
-                    Progress = int.TryParse(fields[5], out var p) ? p : 0,
+                    Progress = fields.Count > 5 && int.TryParse(fields[5], out var p) ? p : 0,
                     IsHighlight = fields.Count > 6 && fields[6] == "是" ? 1 : 0,
                     Problem = fields.Count > 7 ? fields[7] : "",
                     Solution = fields.Count > 8 ? fields[8] : "",
@@ -127,25 +128,26 @@ public static class ExportService
     }
 
     /// <summary>
-    /// 解析单行 CSV，正确处理引号内的逗号
+    /// CSV 状态机解析器：正确处理引号内的逗号、换行、转义引号
     /// </summary>
-    private static List<string> ParseCsvLine(string line)
+    private static List<List<string>> ParseCsvRows(string content)
     {
-        var fields = new List<string>();
-        var current = new StringBuilder();
+        var rows = new List<List<string>>();
+        var currentField = new StringBuilder();
+        var currentRow = new List<string>();
         bool inQuotes = false;
 
-        for (int i = 0; i < line.Length; i++)
+        for (int i = 0; i < content.Length; i++)
         {
-            char c = line[i];
+            char c = content[i];
             if (inQuotes)
             {
                 if (c == '"')
                 {
-                    if (i + 1 < line.Length && line[i + 1] == '"')
+                    if (i + 1 < content.Length && content[i + 1] == '"')
                     {
-                        current.Append('"');
-                        i++; // 跳过转义的引号
+                        currentField.Append('"');
+                        i++;
                     }
                     else
                     {
@@ -154,7 +156,7 @@ public static class ExportService
                 }
                 else
                 {
-                    current.Append(c);
+                    currentField.Append(c);
                 }
             }
             else
@@ -165,23 +167,42 @@ public static class ExportService
                 }
                 else if (c == ',')
                 {
-                    fields.Add(current.ToString());
-                    current.Clear();
+                    currentRow.Add(currentField.ToString());
+                    currentField.Clear();
+                }
+                else if (c == '\r')
+                {
+                    // 跳过 \r，等 \n 处理行结束
+                    continue;
+                }
+                else if (c == '\n')
+                {
+                    currentRow.Add(currentField.ToString());
+                    currentField.Clear();
+                    rows.Add(currentRow);
+                    currentRow = new List<string>();
                 }
                 else
                 {
-                    current.Append(c);
+                    currentField.Append(c);
                 }
             }
         }
-        fields.Add(current.ToString());
-        return fields;
+
+        // 处理文件末尾没有换行的情况
+        if (currentField.Length > 0 || currentRow.Count > 0)
+        {
+            currentRow.Add(currentField.ToString());
+            rows.Add(currentRow);
+        }
+
+        return rows;
     }
 
     private static string EscapeCsv(string? value)
     {
         if (string.IsNullOrEmpty(value)) return "";
-        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
         {
             return $"\"{value.Replace("\"", "\"\"")}\"";
         }

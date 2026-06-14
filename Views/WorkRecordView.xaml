@@ -1075,6 +1075,7 @@
                                     <TextBlock Text="工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
                                     <TextBox Text="{Binding CurrentRecord.Hours}" Style="{StaticResource Input}"
                                              BorderThickness="0" Background="Transparent" Padding="0,4"
+                                             PreviewTextInput="HoursInput_PreviewTextInput"
                                              TextChanged="FormField_Changed"/>
                                 </StackPanel>
                             </Border>
@@ -1085,6 +1086,7 @@
                                     <TextBlock Text="进度 (%)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
                                     <TextBox Text="{Binding CurrentRecord.Progress}" Style="{StaticResource Input}"
                                              BorderThickness="0" Background="Transparent" Padding="0,4"
+                                             PreviewTextInput="ProgressInput_PreviewTextInput"
                                              TextChanged="FormField_Changed"/>
                                 </StackPanel>
                             </Border>

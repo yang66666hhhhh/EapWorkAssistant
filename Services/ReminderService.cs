@@ -33,6 +33,9 @@ public static class ReminderService
 
     private static async Task CheckAndRemindAsync()
     {
+        // 检查是否启用了提醒
+        if (!ConfigService.Instance.EnableReminder) return;
+
         // 如果日期变了，重置提醒状态
         if (DateTime.Today != _lastCheckDate)
         {
@@ -43,9 +46,11 @@ public static class ReminderService
         // 如果已经提醒过，跳过
         if (_remindedToday) return;
 
-        // 只在下班时间后提醒（17:30之后）
+        // 使用用户配置的提醒时间
         var now = DateTime.Now;
-        if (now.Hour < 17 || (now.Hour == 17 && now.Minute < 30))
+        var reminderHour = ConfigService.Instance.ReminderHour;
+        var reminderMinute = ConfigService.Instance.ReminderMinute;
+        if (now.Hour < reminderHour || (now.Hour == reminderHour && now.Minute < reminderMinute))
             return;
 
         // 检查今天是否有记录

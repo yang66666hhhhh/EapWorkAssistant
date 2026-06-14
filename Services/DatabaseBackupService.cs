@@ -1,3 +1,4 @@
+using System.Data.SQLite;
 using System.IO;
 
 namespace EapWorkAssistant.Services;
@@ -31,7 +32,7 @@ public static class DatabaseBackupService
 
             if (!File.Exists(backupFile))
             {
-                File.Copy(DbPath, backupFile, true);
+                SafeBackup(backupFile);
                 ToastService.Info("数据库已自动备份", "数据安全");
             }
 
@@ -41,6 +42,25 @@ public static class DatabaseBackupService
         {
             // Backup failure should not crash the app
         }
+    }
+
+    /// <summary>
+    /// 安全备份：先 checkpoint WAL，再使用 SQLite backup API
+    /// </summary>
+    private static void SafeBackup(string backupFile)
+    {
+        using var srcConn = new SQLiteConnection($"Data Source={DbPath};Version=3;");
+        srcConn.Open();
+
+        // 将 WAL 日志刷入主数据库文件
+        using (var cmd = new SQLiteCommand("PRAGMA wal_checkpoint(FULL);", srcConn))
+            cmd.ExecuteNonQuery();
+
+        using var dstConn = new SQLiteConnection($"Data Source={backupFile};Version=3;");
+        dstConn.Open();
+
+        // 使用 SQLite 内置 backup API，确保一致性
+        srcConn.BackupDatabase(dstConn, "main", "main", -1, null, 0);
     }
 
     private static void CleanupOldBackups()
