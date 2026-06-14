@@ -180,7 +180,10 @@ public class ConfigService
                     WriteIndented = true
                 }));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ToastService.Error($"配置保存失败：{ex.Message}");
+            }
         }
     }
 

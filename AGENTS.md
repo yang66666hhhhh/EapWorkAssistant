@@ -303,6 +303,16 @@ e.Handled = !double.TryParse(textBox.Text + e.Text, out _) && newText != ".";
 e.Handled = !int.TryParse(e.Text, out _);
 ```
 
+### 全局异常兜底（App.xaml.cs）
+`App.xaml.cs` 注册了三类未捕获异常处理器，确保应用不会因意外异常直接崩溃：
+- `DispatcherUnhandledException`：UI 线程异常，设置 `e.Handled = true` 阻止崩溃
+- `AppDomain.CurrentDomain.UnhandledException`：非 UI 线程异常（通常无法恢复）
+- `TaskScheduler.UnobservedTaskException`：Task 中未 await 的异常，调用 `e.SetObserved()`
+
+所有异常统一由 `LogAndNotify(Exception ex)` 处理：
+1. 写入日志文件 `%LOCALAPPDATA%\EapWorkAssistant\logs\error_{日期}.log`
+2. 通过 `ToastService.Error` 通知用户
+
 ### 表单重置
 知识库和问题跟踪的「新增」按钮在打开抽屉前必须重置表单：
 ```csharp
@@ -349,6 +359,8 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 13. **禁止在 XAML 元素标签上设置需要 DataTrigger 动态覆盖的属性**：默认值必须写在 Style Setter 中
 14. **禁止直接 File.Copy 活跃 SQLite 数据库**：必须使用 WAL checkpoint + BackupDatabase API
 15. **批量数据库写入必须包裹在事务中**：使用 `BeginTransaction/Commit/Rollback`
+16. **禁止移除全局异常处理**：`App.xaml.cs` 中的 `DispatcherUnhandledException`、`AppDomain.UnhandledException`、`TaskScheduler.UnobservedTaskException` 是发布质量的底线保障
+17. **关键服务禁止静默吞异常**：`ConfigService.Save`、`ProfileService.Save/SaveAvatar` 等写操作必须 catch 并用 `ToastService.Error` 通知用户
 
 ## 代码审查清单
 
@@ -384,6 +396,8 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 关键操作是否添加了 try/catch + Toast 错误反馈？
 - [ ] 快速切换筛选器是否有竞态防护（查询版本号或 CancellationToken）？
 - [ ] DispatcherTimer Tick handler 是否有重入保护？
+- [ ] 全局异常处理是否完整（DispatcherUnhandledException + AppDomain + TaskScheduler）？
+- [ ] 关键服务的 catch 块是否通知了用户（Toast），而非静默吞掉？
 
 **数据校验：**
 - [ ] ViewModel SaveAsync 是否校验了所有必填字段？

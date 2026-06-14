@@ -60,7 +60,10 @@ public partial class ProfileService : ObservableObject
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            ToastService.Error($"个人信息加载失败：{ex.Message}");
+        }
     }
 
     public void Save()
@@ -84,7 +87,10 @@ public partial class ProfileService : ObservableObject
                 WriteIndented = true
             }));
         }
-        catch { }
+        catch (Exception ex)
+        {
+            ToastService.Error($"个人信息保存失败：{ex.Message}");
+        }
     }
 
     /// <summary>保存头像图片到本地存储</summary>
@@ -100,7 +106,10 @@ public partial class ProfileService : ObservableObject
             OnPropertyChanged(nameof(AvatarPath));
             OnPropertyChanged(nameof(HasAvatar));
         }
-        catch { }
+        catch (Exception ex)
+        {
+            ToastService.Error($"头像保存失败：{ex.Message}");
+        }
     }
 
     /// <summary>清除头像</summary>

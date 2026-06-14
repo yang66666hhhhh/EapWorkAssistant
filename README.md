@@ -128,9 +128,12 @@ EapWorkAssistant/
 ## 运行要求
 
 - Windows 10/11
-- .NET 9.0 Runtime
+- .NET 9.0 Runtime（开发调试时需要）
+- 发布版本已包含运行时，无需额外安装
 
-## 开发环境
+## 开发与发布
+
+### 开发环境
 
 1. 安装 [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 2. 克隆项目
@@ -142,6 +145,16 @@ EapWorkAssistant/
    cd EapWorkAssistant
    dotnet run
    ```
+
+### 发布分发包
+
+运行项目根目录的 `publish.bat` 脚本，或手动执行：
+
+```bash
+dotnet publish -c Release --self-contained true -r win-x64 -o publish
+```
+
+发布后 `publish/` 目录即为完整的应用包，可直接压缩分发给用户。用户无需安装 .NET Runtime，双击 `EapWorkAssistant.exe` 即可运行。
 
 ## 数据备份
 
