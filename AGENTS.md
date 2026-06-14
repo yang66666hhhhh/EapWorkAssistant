@@ -162,6 +162,7 @@ private void SomeButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEve
 
 ### ComboBox 样式
 - 所有 ComboBox 必须使用 `Style="{StaticResource Select}"` 统一样式
+- **包括不可见覆盖层**：即使 ComboBox 设置了 `Opacity="0"` 作为透明输入覆盖层，也必须添加 Select 样式，否则弹出面板会使用默认 WPF 样式
 - 如果需要中文显示标签但绑定英文值，使用 `ItemTemplate` + `IValueConverter`
 - ComboBox 布局应 `HorizontalAlignment="Right" VerticalAlignment="Center"`
 
@@ -364,7 +365,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 **组件复用：**
 - [ ] 是否复用了已有的自定义组件（CustomCalendar、ConfirmDialog 等），而非引入 WPF 原生控件？
 - [ ] ToggleButton 是否使用了 PreviewMouseLeftButtonDown？
-- [ ] ComboBox 是否使用了 Select 样式？
+- [ ] ComboBox 是否使用了 Select 样式？（包括 Opacity=0 的覆盖层 ComboBox）
 
 **WPF/XAML：**
 - [ ] DynamicResource 是否用于了 Thickness 类型（而非 sys:Double）？

@@ -449,6 +449,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutSearch}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -471,6 +472,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
                                               SelectedItem="{Binding ShortcutNew}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -493,6 +495,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
                                               SelectedItem="{Binding ShortcutSave}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -520,6 +523,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView1}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -542,6 +546,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView2}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -564,6 +569,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView3}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -586,6 +592,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView4}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
@@ -608,6 +615,7 @@
                                     </Border>
                                     <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView5}"
+                                              Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
                                 </Grid>
 
