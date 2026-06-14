@@ -110,6 +110,8 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        StatusMessage = "正在保存...";
+
         try
         {
             if (CurrentItem.Id > 0)
@@ -122,6 +124,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         }
         catch (Exception ex)
         {
+            StatusMessage = string.Empty;
             ToastService.Error($"保存失败：{ex.Message}");
             return;
         }
@@ -131,6 +134,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         IsFormDirty = false;
         _suppressDirty = false;
         await LoadAsync();
+        StatusMessage = string.Empty;
         ToastService.Success("问题已保存");
     }
 

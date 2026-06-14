@@ -251,6 +251,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        StatusMessage = "正在保存...";
+
         CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
         try
         {
@@ -264,6 +266,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
         catch (Exception ex)
         {
+            StatusMessage = string.Empty;
             ToastService.Error($"保存失败：{ex.Message}");
             return;
         }
@@ -277,6 +280,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         SaveButtonText = "保存记录";
         _suppressDirty = false;
         await LoadRecordsAsync();
+        StatusMessage = string.Empty;
         ToastService.Success($"工作记录已保存 · 今日共 {RecordCount} 条");
         RecordSaved?.Invoke();
     }
