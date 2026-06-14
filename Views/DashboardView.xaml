@@ -547,7 +547,8 @@
                     <Grid>
                         <DataGrid ItemsSource="{Binding RecentRecords}" Style="{StaticResource ModernGrid}"
                                   VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto">
+                                  HorizontalScrollBarVisibility="Auto"
+                                  ClipboardCopyMode="IncludeHeader">
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                             </DataGrid.ColumnHeaderStyle>
@@ -562,6 +563,7 @@
                                 <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="130"/>
                                 <!-- 类型 - 彩色标签 -->
                                 <DataGridTemplateColumn Header="类型" Width="80"
+                                                        ClipboardContentBinding="{Binding WorkType}"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
@@ -575,6 +577,7 @@
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
                                 <DataGridTemplateColumn Header="进度" Width="130"
+                                                        ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
                             </DataGrid.Columns>
                         </DataGrid>

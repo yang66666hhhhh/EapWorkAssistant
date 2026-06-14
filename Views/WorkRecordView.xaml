@@ -269,7 +269,8 @@
                     <Grid>
                         <DataGrid ItemsSource="{Binding Records}" Style="{StaticResource ModernGrid}"
                                   VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto">
+                                  HorizontalScrollBarVisibility="Auto"
+                                  ClipboardCopyMode="IncludeHeader">
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                             </DataGrid.ColumnHeaderStyle>
@@ -302,6 +303,7 @@
                                 <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="130"/>
                                 <!-- 类型 - 彩色标签 -->
                                 <DataGridTemplateColumn Header="类型" Width="80"
+                                                        ClipboardContentBinding="{Binding WorkType}"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
@@ -315,6 +317,7 @@
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
                                 <DataGridTemplateColumn Header="进度" Width="130"
+                                                        ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
                                 <DataGridTemplateColumn Header="操作" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -792,7 +795,8 @@
                             </Border>
                             <Grid>
                             <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
-                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                      ClipboardCopyMode="IncludeHeader">
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                                 </DataGrid.ColumnHeaderStyle>
@@ -823,7 +827,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                     <!-- 任务（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="任务" Width="120">
+                                    <DataGridTemplateColumn Header="任务" Width="120" ClipboardContentBinding="{Binding ProjectName}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding ProjectName}"
@@ -836,7 +840,7 @@
                                     <DataGridTemplateColumn Header="类型" Width="80"
                                                             CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                     <!-- 内容（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="内容" Width="*" MinWidth="100">
+                                    <DataGridTemplateColumn Header="内容" Width="*" MinWidth="100" ClipboardContentBinding="{Binding Content}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
@@ -849,6 +853,7 @@
                                     </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                     <DataGridTemplateColumn Header="进度" Width="130"
+                                                            ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                             CellTemplate="{StaticResource ProgressBarCell}"/>
                                     <DataGridTemplateColumn Header="操作" Width="130">
                                         <DataGridTemplateColumn.CellTemplate>

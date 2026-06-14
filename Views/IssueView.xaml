@@ -64,7 +64,8 @@
                 <Grid>
                     <DataGrid ItemsSource="{Binding Items}" Style="{StaticResource ModernGrid}"
                               VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto">
+                              HorizontalScrollBarVisibility="Auto"
+                              ClipboardCopyMode="IncludeHeader">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                         </DataGrid.ColumnHeaderStyle>
@@ -86,7 +87,7 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                             <!-- 状态 - 彩色标签 -->
-                            <DataGridTemplateColumn Header="状态" Width="80">
+                            <DataGridTemplateColumn Header="状态" Width="80" ClipboardContentBinding="{Binding Status}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
@@ -133,7 +134,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <!-- 优先级 -->
-                            <DataGridTemplateColumn Header="优先级" Width="70">
+                            <DataGridTemplateColumn Header="优先级" Width="70" ClipboardContentBinding="{Binding Priority}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
