@@ -55,27 +55,50 @@ public static class DataGridCopyHelper
         if (cell == _trackedCell) return;
 
         _trackedCell = cell;
-        if (cell != null)
+        if (cell != null && IsContentColumn(cell.Column))
         {
-            // 只对"内容"列显示悬停预览
-            var header = cell.Column?.Header?.ToString();
-            if (header == "内容")
-            {
-                var text = ExtractCellText(cell);
-                if (!string.IsNullOrEmpty(text))
-                    PreviewPopup.Instance.Show(cell, text);
-                else
-                    PreviewPopup.Instance.Hide();
-            }
+            var text = ExtractCellText(cell);
+            if (!string.IsNullOrEmpty(text))
+                PreviewPopup.Instance.Show(cell, text);
             else
-            {
                 PreviewPopup.Instance.Hide();
-            }
         }
         else
         {
             PreviewPopup.Instance.Hide();
         }
+    }
+
+    /// <summary>
+    /// 自动判断列是否为"内容"列（需要悬停预览的长文本列）。
+    /// 检测规则：Binding 路径为 Content/RootCause/Title，或列头为"内容"/"根本原因"/"标题"。
+    /// 所有表格自动生效，无需逐页配置。
+    /// </summary>
+    private static bool IsContentColumn(DataGridColumn? column)
+    {
+        if (column == null) return false;
+
+        // 检查文本列的 Binding 路径
+        if (column is DataGridTextColumn textCol
+            && textCol.Binding is System.Windows.Data.Binding b)
+        {
+            var path = b.Path?.Path;
+            if (path is "Content" or "RootCause" or "Title")
+                return true;
+        }
+
+        // 检查模板列的 ClipboardContentBinding
+        if (column is DataGridTemplateColumn tmplCol
+            && tmplCol.ClipboardContentBinding is System.Windows.Data.Binding cb)
+        {
+            var path = cb.Path?.Path;
+            if (path is "Content" or "RootCause" or "Title")
+                return true;
+        }
+
+        // 兜底：检查列头文字
+        var header = column.Header?.ToString();
+        return header is "内容" or "根本原因" or "标题";
     }
 
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
