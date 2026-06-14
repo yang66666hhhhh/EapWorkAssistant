@@ -295,15 +295,19 @@ public static class DataGridCopyHelper
 }
 
 /// <summary>
-/// 自定义复制按钮：内置点击反馈动画。
-/// 点击后背景变绿、文字切换为"已复制"，1 秒后自动恢复。
+/// 自定义复制按钮：描边风格 + 悬停填充 + 点击变绿反馈。
 /// </summary>
 public class CopyButton : Button
 {
     private readonly Border _bg;
     private readonly TextBlock _txt;
     private DispatcherTimer? _resetTimer;
-    private readonly Color _normalColor = Color.FromRgb(0xEE, 0xF2, 0xFF); // #EEF2FF primary-light
+
+    private static readonly Color Primary = Color.FromRgb(0x43, 0x38, 0xCA);
+    private static readonly Color PrimaryHover = Color.FromRgb(0x37, 0x30, 0xA3);
+    private static readonly Color Success = Color.FromRgb(0x05, 0x96, 0x69);
+    private static readonly Brush PrimaryBrush = new SolidColorBrush(Primary);
+    private static readonly Brush WhiteBrush = new SolidColorBrush(Colors.White);
 
     public CopyButton()
     {
@@ -311,32 +315,45 @@ public class CopyButton : Button
         {
             Text = "📋 复制",
             FontSize = 12,
-            FontWeight = FontWeights.Medium,
-            Foreground = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA)), // primary
+            FontWeight = FontWeights.SemiBold,
+            Foreground = PrimaryBrush,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
 
         _bg = new Border
         {
-            CornerRadius = new CornerRadius(6),
-            Background = new SolidColorBrush(_normalColor),
-            Padding = new Thickness(10, 4, 10, 4),
+            CornerRadius = new CornerRadius(8),
+            Background = Brushes.Transparent,
+            BorderBrush = PrimaryBrush,
+            BorderThickness = new Thickness(1.5),
+            Padding = new Thickness(14, 6, 14, 6),
             Child = _txt
         };
 
-        // 直接设置 Content 为 Border，不使用 ControlTemplate
         Content = _bg;
         Cursor = Cursors.Hand;
 
-        // 悬停效果
+        // 悬停：填充主色 + 白字
         _bg.MouseEnter += (_, _) =>
         {
-            _bg.Background = new SolidColorBrush(Color.FromRgb(0xDB, 0xEA, 0xFE)); // lighter blue
+            _bg.Background = PrimaryBrush;
+            _txt.Foreground = WhiteBrush;
         };
         _bg.MouseLeave += (_, _) =>
         {
-            _bg.Background = new SolidColorBrush(_normalColor);
+            _bg.Background = Brushes.Transparent;
+            _bg.BorderBrush = PrimaryBrush;
+            _txt.Foreground = PrimaryBrush;
+        };
+        // 按下：加深
+        _bg.MouseLeftButtonDown += (_, _) =>
+        {
+            _bg.Background = new SolidColorBrush(PrimaryHover);
+        };
+        _bg.MouseLeftButtonUp += (_, _) =>
+        {
+            _bg.Background = PrimaryBrush;
         };
     }
 
@@ -359,10 +376,11 @@ public class CopyButton : Button
 
     private void AnimateCopied()
     {
-        // 背景色动画：→ 成功绿
-        var green = Color.FromRgb(0x05, 0x96, 0x69);
-        _bg.Background = new SolidColorBrush(green);
-        _txt.Foreground = new SolidColorBrush(Colors.White);
+        // 反馈：填充成功绿 + 白字
+        var green = new SolidColorBrush(Success);
+        _bg.Background = green;
+        _bg.BorderBrush = green;
+        _txt.Foreground = WhiteBrush;
 
         string original = _txt.Text;
         _txt.Text = "✓ 已复制";
@@ -375,8 +393,10 @@ public class CopyButton : Button
         _resetTimer.Tick += (_, _) =>
         {
             _resetTimer.Stop();
-            _bg.Background = new SolidColorBrush(_normalColor);
-            _txt.Foreground = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA));
+            // 恢复描边风格：透明底 + 主色边框 + 主色文字
+            _bg.Background = Brushes.Transparent;
+            _bg.BorderBrush = PrimaryBrush;
+            _txt.Foreground = PrimaryBrush;
             _txt.Text = original;
         };
         _resetTimer.Start();
