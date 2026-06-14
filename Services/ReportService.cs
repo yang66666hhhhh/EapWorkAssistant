@@ -14,21 +14,90 @@ public class ReportService
     private readonly IssueRepository _issueRepo = new();
 
     /// <summary>
-    /// 将记录的 Content 字段（可能包含多行编号文本）拆分为独立的条目列表。
-    /// 自动去除原始编号（如 "1、" "2." 等），返回纯文本条目。
+    /// 解析工作记录内容，将多行文本拆分为条目列表（区分主项和子项）。
+    /// 
+    /// 识别规则（按优先级）：
+    ///   1. 顶层编号：1、 1. 1． 1) （1） (1) 等 → 主项
+    ///   2. 符号标记：- • · * + → 子项
+    ///   3. 字母编号：a. b) 等 → 子项
+    ///   4. 圆圈数字：① ② ③ 等 → 子项
+    ///   5. 缩进识别：以 Tab 或 2+ 空格开头且无编号 → 子项
+    ///   6. 其他文本：合并到上一条（续行处理）
     /// </summary>
-    private static List<string> ParseContentItems(string content)
+    private static List<(string Text, bool IsSubItem)> ParseContentItems(string content)
     {
-        var items = new List<string>();
+        var items = new List<(string, bool)>();
         if (string.IsNullOrWhiteSpace(content)) return items;
 
+        // 子项符号标记：- • · * +
+        const string SubBulletPattern = @"^[-*+•·]\s+|^[-*+•·](?=[^\s\-.])";
+        // 字母编号子项：a. a) （仅限 a-z 单字母）
+        const string SubLetterPattern = @"^[a-z][.)]\s*";
+        // 圆圈数字子项：① ② ③ ...
+        const string SubCircledPattern = @"^[①②③④⑤⑥⑦⑧⑨⑩]\s*";
+        // 顶层编号：1、 1. 1． 1) （1） (1)
+        const string TopNumberPattern = @"^[\(（]?\d+[\)）、.．]\s*";
+
         var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var line in lines)
+        foreach (var rawLine in lines)
         {
-            // 去除行首编号：支持 "1、" "1." "1．" "1)" "（1）" 等常见格式
-            var cleaned = Regex.Replace(line.Trim(), @"^[\(（]?\d+[\)）、.．]\s*", "");
-            if (!string.IsNullOrWhiteSpace(cleaned))
-                items.Add(cleaned);
+            var trimmed = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+            // ── 1. 符号子项 ──────────────────────
+            if (Regex.IsMatch(trimmed, SubBulletPattern))
+            {
+                var text = Regex.Replace(trimmed, SubBulletPattern, "").Trim();
+                if (!string.IsNullOrWhiteSpace(text))
+                    items.Add((text, true));
+                continue;
+            }
+
+            // ── 2. 顶层编号 ───────────────────────
+            if (Regex.IsMatch(trimmed, TopNumberPattern))
+            {
+                var text = Regex.Replace(trimmed, TopNumberPattern, "").Trim();
+                if (!string.IsNullOrWhiteSpace(text))
+                    items.Add((text, false));
+                continue;
+            }
+
+            // ── 3. 字母编号子项 ──────────────────
+            if (Regex.IsMatch(trimmed, SubLetterPattern))
+            {
+                var text = Regex.Replace(trimmed, SubLetterPattern, "").Trim();
+                if (!string.IsNullOrWhiteSpace(text))
+                    items.Add((text, true));
+                continue;
+            }
+
+            // ── 4. 圆圈数字子项 ──────────────────
+            if (Regex.IsMatch(trimmed, SubCircledPattern))
+            {
+                var text = Regex.Replace(trimmed, SubCircledPattern, "").Trim();
+                if (!string.IsNullOrWhiteSpace(text))
+                    items.Add((text, true));
+                continue;
+            }
+
+            // ── 5. 缩进子项（Tab 或 2+ 空格开头，无编号） ──
+            if (Regex.IsMatch(rawLine, @"^(\t|\s{2,})") && items.Count > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(trimmed))
+                    items.Add((trimmed, true));
+                continue;
+            }
+
+            // ── 6. 续行：合并到上一条 ────────────
+            if (items.Count > 0)
+            {
+                var (prevText, prevIsSub) = items[^1];
+                items[^1] = ($"{prevText}{trimmed}", prevIsSub);
+            }
+            else
+            {
+                items.Add((trimmed, false));
+            }
         }
         return items;
     }
@@ -47,10 +116,15 @@ public class ReportService
         foreach (var r in records)
         {
             var items = ParseContentItems(r.Content);
-            foreach (var item in items)
+            foreach (var (text, isSub) in items)
             {
-                sb.AppendLine($"{index}. {item}");
-                index++;
+                if (isSub)
+                    sb.AppendLine($"    - {text}");
+                else
+                {
+                    sb.AppendLine($"{index}. {text}");
+                    index++;
+                }
             }
         }
 
@@ -95,15 +169,20 @@ public class ReportService
         {
             sb.AppendLine();
             sb.AppendLine($"■ {group.Key}");
-            var allItems = new List<string>();
+            var allItems = new List<(string, bool)>();
             foreach (var r in group.OrderBy(r => r.WorkDate))
                 allItems.AddRange(ParseContentItems(r.Content));
 
             int idx = 1;
-            foreach (var item in allItems)
+            foreach (var (text, isSub) in allItems)
             {
-                sb.AppendLine($"  {idx}. {item}");
-                idx++;
+                if (isSub)
+                    sb.AppendLine($"    - {text}");
+                else
+                {
+                    sb.AppendLine($"  {idx}. {text}");
+                    idx++;
+                }
             }
         }
 
@@ -127,10 +206,15 @@ public class ReportService
             foreach (var l in learning)
             {
                 var items = ParseContentItems(l.Content);
-                foreach (var item in items)
+                foreach (var (text, isSub) in items)
                 {
-                    sb.AppendLine($"  {idx}. {item}");
-                    idx++;
+                    if (isSub)
+                        sb.AppendLine($"    - {text}");
+                    else
+                    {
+                        sb.AppendLine($"  {idx}. {text}");
+                        idx++;
+                    }
                 }
             }
         }
@@ -195,15 +279,20 @@ public class ReportService
         {
             sb.AppendLine();
             sb.AppendLine($"■ {group.Key}");
-            var allItems = new List<string>();
+            var allItems = new List<(string, bool)>();
             foreach (var r in group.OrderBy(r => r.WorkDate))
                 allItems.AddRange(ParseContentItems(r.Content));
 
             int idx = 1;
-            foreach (var item in allItems)
+            foreach (var (text, isSub) in allItems)
             {
-                sb.AppendLine($"  {idx}. {item}");
-                idx++;
+                if (isSub)
+                    sb.AppendLine($"    - {text}");
+                else
+                {
+                    sb.AppendLine($"  {idx}. {text}");
+                    idx++;
+                }
             }
         }
 
@@ -228,10 +317,15 @@ public class ReportService
             foreach (var l in learning.OrderBy(r => r.WorkDate))
             {
                 var items = ParseContentItems(l.Content);
-                foreach (var item in items)
+                foreach (var (text, isSub) in items)
                 {
-                    sb.AppendLine($"  {idx}. {item}");
-                    idx++;
+                    if (isSub)
+                        sb.AppendLine($"    - {text}");
+                    else
+                    {
+                        sb.AppendLine($"  {idx}. {text}");
+                        idx++;
+                    }
                 }
             }
         }
@@ -312,10 +406,15 @@ public class ReportService
             {
                 var items = ParseContentItems(
                     !string.IsNullOrWhiteSpace(h.HighlightNote) ? h.HighlightNote : h.Content);
-                foreach (var item in items)
+                foreach (var (text, isSub) in items)
                 {
-                    sb.AppendLine($"  {idx}. 【{h.ProjectName}】{item}");
-                    idx++;
+                    if (isSub)
+                        sb.AppendLine($"     - {text}");
+                    else
+                    {
+                        sb.AppendLine($"  {idx}. 【{h.ProjectName}】{text}");
+                        idx++;
+                    }
                 }
                 if (!string.IsNullOrWhiteSpace(h.Achievement))
                     sb.AppendLine($"     → 成果：{h.Achievement}");
@@ -330,10 +429,15 @@ public class ReportService
             foreach (var r in records.OrderByDescending(r => r.Hours).Take(10))
             {
                 var items = ParseContentItems(r.Content);
-                foreach (var item in items)
+                foreach (var (text, isSub) in items)
                 {
-                    sb.AppendLine($"  {idx}. 【{r.ProjectName}】{item}");
-                    idx++;
+                    if (isSub)
+                        sb.AppendLine($"     - {text}");
+                    else
+                    {
+                        sb.AppendLine($"  {idx}. 【{r.ProjectName}】{text}");
+                        idx++;
+                    }
                 }
                 if (!string.IsNullOrWhiteSpace(r.Achievement))
                     sb.AppendLine($"     → 成果：{r.Achievement}");
@@ -372,7 +476,8 @@ public class ReportService
             foreach (var h in weekHighlights)
             {
                 var note = !string.IsNullOrWhiteSpace(h.HighlightNote) ? h.HighlightNote : h.Content;
-                var firstLine = ParseContentItems(note).FirstOrDefault() ?? note;
+                var firstItem = ParseContentItems(note).FirstOrDefault();
+                var firstLine = firstItem.Text ?? note;
                 sb.AppendLine($"    ★ {firstLine}");
             }
         }
@@ -430,10 +535,15 @@ public class ReportService
             foreach (var l in learning.OrderBy(r => r.WorkDate))
             {
                 var items = ParseContentItems(l.Content);
-                foreach (var item in items)
+                foreach (var (text, isSub) in items)
                 {
-                    sb.AppendLine($"  {idx}. {item}");
-                    idx++;
+                    if (isSub)
+                        sb.AppendLine($"    - {text}");
+                    else
+                    {
+                        sb.AppendLine($"  {idx}. {text}");
+                        idx++;
+                    }
                 }
             }
             sb.AppendLine();
