@@ -181,6 +181,8 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        StatusMessage = "正在保存...";
+
         try
         {
             if (CurrentItem.Id > 0)
@@ -193,6 +195,7 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         }
         catch (Exception ex)
         {
+            StatusMessage = string.Empty;
             ToastService.Error($"保存失败：{ex.Message}");
             return;
         }
@@ -203,6 +206,7 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         IsFormDirty = false;
         _suppressDirty = false;
         await LoadAsync();
+        StatusMessage = string.Empty;
         ToastService.Success("知识已保存");
     }
 
