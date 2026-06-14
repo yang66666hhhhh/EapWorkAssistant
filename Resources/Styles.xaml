@@ -265,7 +265,7 @@
     </Style>
 
     <!-- 幽灵按钮 -->
-    <Style x:Key="BtnGhost" TargetType="Button">
+    <Style x:Key="BtnGhost" TargetType="ButtonBase">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Medium"/>
@@ -276,7 +276,7 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="Button">
+                <ControlTemplate TargetType="ButtonBase">
                     <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="7"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
