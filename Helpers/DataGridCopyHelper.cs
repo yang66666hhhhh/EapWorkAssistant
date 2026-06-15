@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace EapWorkAssistant.Helpers;
@@ -295,66 +296,102 @@ public static class DataGridCopyHelper
 }
 
 /// <summary>
-/// 自定义复制按钮：描边风格 + 悬停填充 + 点击变绿反馈。
+/// 自定义复制按钮：柔和底色 + 精致描边 + 矢量图标 + 平滑动画反馈。
+/// 所有颜色通过 DynamicResource 跟随主题/强调色变化。
 /// </summary>
 public class CopyButton : Button
 {
     private readonly Border _bg;
     private readonly TextBlock _txt;
+    private readonly Path _icon;
+    private readonly Geometry _clipboardGeo;
+    private readonly Geometry _checkGeo;
     private DispatcherTimer? _resetTimer;
-
-    private static readonly Color Primary = Color.FromRgb(0x43, 0x38, 0xCA);
-    private static readonly Color PrimaryHover = Color.FromRgb(0x37, 0x30, 0xA3);
-    private static readonly Color Success = Color.FromRgb(0x05, 0x96, 0x69);
-    private static readonly Brush PrimaryBrush = new SolidColorBrush(Primary);
-    private static readonly Brush WhiteBrush = new SolidColorBrush(Colors.White);
+    private bool _copied;
 
     public CopyButton()
     {
+        _clipboardGeo = (Geometry)(Application.Current.TryFindResource("IconClipboard")
+            ?? Geometry.Parse("M19,2H15.7C15.3,0.8 14.2,0 13,0H11C9.8,0 8.7,0.8 8.3,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2M11,2H13A1,1 0 0,1 14,3A1,1 0 0,1 13,4H11A1,1 0 0,1 10,3A1,1 0 0,1 11,2Z"));
+        _checkGeo = (Geometry)(Application.Current.TryFindResource("IconCheck")
+            ?? Geometry.Parse("M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"));
+
+        _icon = new Path
+        {
+            Data = _clipboardGeo,
+            Width = 13,
+            Height = 13,
+            Stretch = Stretch.Uniform,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        _icon.SetResourceReference(Shape.FillProperty, "PrimaryBrush");
+
         _txt = new TextBlock
         {
-            Text = "📋 复制",
+            Text = "复制",
             FontSize = 12,
-            FontWeight = FontWeights.SemiBold,
-            Foreground = PrimaryBrush,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center
+            FontWeight = FontWeights.Medium,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(4, 0, 0, 0)
+        };
+        _txt.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
+
+        var content = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { _icon, _txt }
         };
 
         _bg = new Border
         {
-            CornerRadius = new CornerRadius(8),
-            Background = Brushes.Transparent,
-            BorderBrush = PrimaryBrush,
-            BorderThickness = new Thickness(1.5),
-            Padding = new Thickness(14, 6, 14, 6),
-            Child = _txt
+            CornerRadius = new CornerRadius(6),
+            Padding = new Thickness(10, 5, 12, 5),
+            Child = content
         };
+        _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
+        _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
+        _bg.BorderThickness = new Thickness(0.8);
+        _bg.Opacity = 0.85;
 
         Content = _bg;
         Cursor = Cursors.Hand;
 
-        // 悬停：填充主色 + 白字
         _bg.MouseEnter += (_, _) =>
         {
-            _bg.Background = PrimaryBrush;
-            _txt.Foreground = WhiteBrush;
+            if (_copied) return;
+            _bg.BeginAnimation(OpacityProperty, null);
+            _bg.Opacity = 1;
+            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
+            _bg.BorderBrush = Brushes.Transparent;
+            _icon.Fill = Brushes.White;
+            _txt.Foreground = Brushes.White;
         };
         _bg.MouseLeave += (_, _) =>
         {
-            _bg.Background = Brushes.Transparent;
-            _bg.BorderBrush = PrimaryBrush;
-            _txt.Foreground = PrimaryBrush;
+            if (_copied) return;
+            ResetStyle();
         };
-        // 按下：加深
         _bg.MouseLeftButtonDown += (_, _) =>
         {
-            _bg.Background = new SolidColorBrush(PrimaryHover);
+            if (_copied) return;
+            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryHoverBrush");
         };
         _bg.MouseLeftButtonUp += (_, _) =>
         {
-            _bg.Background = PrimaryBrush;
+            if (_copied) return;
+            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
         };
+    }
+
+    /// <summary>恢复默认柔和底色风格</summary>
+    private void ResetStyle()
+    {
+        _bg.Opacity = 0.85;
+        _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
+        _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
+        _bg.BorderThickness = new Thickness(0.8);
+        _icon.SetResourceReference(Shape.FillProperty, "PrimaryBrush");
+        _txt.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
     }
 
     /// <summary>设置按钮显示的文字（同时更新 Tag 用于复制）</summary>
@@ -376,28 +413,27 @@ public class CopyButton : Button
 
     private void AnimateCopied()
     {
-        // 反馈：填充成功绿 + 白字
-        var green = new SolidColorBrush(Success);
-        _bg.Background = green;
-        _bg.BorderBrush = green;
-        _txt.Foreground = WhiteBrush;
-
-        string original = _txt.Text;
-        _txt.Text = "✓ 已复制";
+        _copied = true;
+        _bg.SetResourceReference(Border.BackgroundProperty, "SuccessBrush");
+        _bg.SetResourceReference(Border.BorderBrushProperty, "SuccessBrush");
+        _bg.Opacity = 1;
+        _icon.Fill = Brushes.White;
+        _icon.Data = _checkGeo;
+        _txt.Foreground = Brushes.White;
+        _txt.Text = "已复制";
 
         _resetTimer?.Stop();
         _resetTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(1),
+            Interval = TimeSpan.FromSeconds(1.2),
         };
         _resetTimer.Tick += (_, _) =>
         {
             _resetTimer.Stop();
-            // 恢复描边风格：透明底 + 主色边框 + 主色文字
-            _bg.Background = Brushes.Transparent;
-            _bg.BorderBrush = PrimaryBrush;
-            _txt.Foreground = PrimaryBrush;
-            _txt.Text = original;
+            _copied = false;
+            _icon.Data = _clipboardGeo;
+            _txt.Text = "复制";
+            ResetStyle();
         };
         _resetTimer.Start();
     }
@@ -407,6 +443,7 @@ public class CopyButton : Button
 /// 通用悬停预览弹出层（单例）。
 /// 替代系统 ToolTip，解决鼠标移到浮窗上即消失的问题。
 /// 可用于 DataGridCell、ListBoxItem 等任意 FrameworkElement。
+/// 所有颜色通过 DynamicResource 跟随主题变化。
 /// </summary>
 internal sealed class PreviewPopup
 {
@@ -434,8 +471,8 @@ internal sealed class PreviewPopup
             MaxWidth = 400,
             AcceptsReturn = false,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
-            Foreground = new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37))
         };
+        _textBox.SetResourceReference(TextBox.ForegroundProperty, "TextPrimaryBrush");
 
         _copyButton = new CopyButton
         {
@@ -443,32 +480,32 @@ internal sealed class PreviewPopup
             HorizontalAlignment = HorizontalAlignment.Left
         };
 
-        // 左侧紫色装饰条
+        // 左侧主色装饰条（跟随强调色）
         var accentBar = new Border
         {
             Width = 3,
             CornerRadius = new CornerRadius(2),
-            Background = new SolidColorBrush(Color.FromRgb(0x43, 0x38, 0xCA)),
             Margin = new Thickness(0, 2, 10, 2),
             VerticalAlignment = VerticalAlignment.Stretch
         };
+        accentBar.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
 
         var textArea = new StackPanel { Children = { _textBox, _copyButton } };
 
         var contentPanel = new DockPanel { Children = { accentBar, textArea } };
 
-        // 主内容卡片
+        // 主内容卡片（跟随主题卡片色）
         var content = new Border
         {
             CornerRadius = new CornerRadius(12),
             Padding = new Thickness(16, 14, 16, 14),
-            Background = new SolidColorBrush(Colors.White),
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
             BorderThickness = new Thickness(1),
             Child = contentPanel
         };
+        content.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+        content.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
 
-        // 多层 Border 模拟阴影（避免 DropShadowEffect 导致圆角发灰）
+        // 多层 Border 模拟阴影（黑色半透明，深浅主题通用）
         var shadow1 = new Border
         {
             CornerRadius = new CornerRadius(14),
