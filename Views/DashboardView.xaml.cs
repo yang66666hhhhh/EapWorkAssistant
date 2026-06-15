@@ -42,7 +42,10 @@ public partial class DashboardView : UserControl
         if (DataContext is DashboardViewModel vm)
         {
             ProbDateText.Text = vm.ProbationStartDate;
+            // 临时取消事件订阅，防止初始同步触发 SaveProbationStartDate 校验
+            CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
             CustomCal.SelectedDate = vm.CalendarDate;
+            CustomCal.SelectedDateChanged += OnCalendarDateChanged;
         }
     }
 

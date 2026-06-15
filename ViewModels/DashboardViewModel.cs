@@ -362,6 +362,23 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             : DateTime.Now.AddMonths(-3).ToString("yyyy-MM-dd");
         var endDate = DateTime.Now.ToString("yyyy-MM-dd");
 
+        // 防护：如果起始日期 >= 今天（误操作导致），自动回退到最早的工作记录日期
+        if (DateTime.TryParse(startDate, out var startDt) && startDt.Date >= DateTime.Now.Date)
+        {
+            var allRecords = (await _recordRepo.GetAllAsync()).ToList();
+            if (allRecords.Any())
+            {
+                var validDates = allRecords
+                    .Where(r => !string.IsNullOrWhiteSpace(r.WorkDate) && DateTime.TryParse(r.WorkDate, out _))
+                    .Select(r => DateTime.Parse(r.WorkDate))
+                    .ToList();
+                if (validDates.Any())
+                {
+                    startDate = validDates.Min().ToString("yyyy-MM-dd");
+                }
+            }
+        }
+
         var service = new ReportService();
         ProbationReport = await service.GenerateProbationReportAsync(startDate, endDate);
     }
@@ -383,6 +400,15 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void SaveProbationStartDate(DateTime startDate)
     {
+        // 校验：转正开始日期不能是今天或未来日期
+        if (startDate.Date >= DateTime.Now.Date)
+        {
+            ToastService.Info(
+                $"请选择入职日期（早于 {DateTime.Now:yyyy-MM-dd}），不能设为今天或未来的日期。",
+                "日期校验");
+            return;
+        }
+
         var settings = ProbationSettings.Load();
         settings.StartDate = startDate.ToString("yyyy-MM-dd");
         settings.Save();

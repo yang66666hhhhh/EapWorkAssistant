@@ -340,7 +340,7 @@ public class ReportService
         var issues = (await _issueRepo.GetAllAsync()).ToList();
 
         if (!records.Any())
-            return "试用期内暂无工作记录";
+            return $"试用期内暂无工作记录\n\n查询范围：{startDate} ~ {endDate}\n如果实际有记录，请检查「试用期开始日期」设置是否正确。";
 
         var settings = ProbationSettings.Load();
         var start = DateTime.Parse(startDate);
