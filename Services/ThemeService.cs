@@ -53,22 +53,22 @@ public class ThemeService : INotifyPropertyChanged
     // 深靛蓝基底 + 三层灰阶 + 微光边框
     private static readonly ThemeColors DarkColors = new()
     {
-        Surface       = "#0C1222",   // 深邃底色，略带靛蓝调
-        SurfaceHover  = "#1E293B",   // slate-800 悬停态
-        SurfaceAlt    = "#141D2F",   // 比 Surface 稍亮，输入区域
-        CardColor     = "#1A2538",   // 卡片面，比底色亮一级，有浮起感
+        Surface       = "#151D2E",   // 深邃底色，略带靛蓝调（提亮）
+        SurfaceHover  = "#243044",   // 悬停态（提亮）
+        SurfaceAlt    = "#1C2739",   // 比 Surface 稍亮，输入区域
+        CardColor     = "#212E42",   // 卡片面，比底色亮一级，有浮起感
         TextPrimary   = "#F1F5F9",   // slate-100 高对比主文字
         TextSecondary = "#94A3B8",   // slate-400 次要文字
-        TextTertiary  = "#475569",   // slate-600 辅助文字（暗色下更柔和）
-        Border        = "#1E3048",   // 微光边框，不刺眼但有分隔感
-        BorderHover   = "#2D4A6A",   // 悬停时边框变亮
-        SidebarBg     = "#060B16",   // 比主区域更深的侧边栏
-        SidebarText   = "#64748B",   // slate-500 侧边栏文字
-        SidebarHover  = "#111827",   // 悬停态，比底色略亮
-        SidebarCardBg = "#0F172A",   // 个人资料卡，微微亮于底色
-        ScrollThumb       = "#2D4A6A",
-        ScrollThumbHover  = "#3B6490",
-        ScrollThumbActive = "#5A8AB8",
+        TextTertiary  = "#64748B",   // slate-500 辅助文字（提亮，原 slate-600 太暗）
+        Border        = "#2A3A52",   // 微光边框（提亮，增强分隔感）
+        BorderHover   = "#3B5476",   // 悬停时边框变亮
+        SidebarBg     = "#0F1726",   // 比主区域更深的侧边栏（提亮）
+        SidebarText   = "#7B8BA3",   // 侧边栏文字（提亮，增强可读性）
+        SidebarHover  = "#1A2638",   // 悬停态，比底色略亮
+        SidebarCardBg = "#182438",   // 个人资料卡
+        ScrollThumb       = "#3B5476",
+        ScrollThumbHover  = "#4E6F96",
+        ScrollThumbActive = "#6A8FBA",
         Success       = "#34D399", SuccessLight = "#064E3B",
         Warning       = "#FBBF24", WarningLight = "#451A03",
         Danger        = "#F87171", DangerLight = "#450A0A",
@@ -242,17 +242,25 @@ public class ThemeService : INotifyPropertyChanged
         if (!AccentPalettes.TryGetValue(_accentColor, out var palette)) return;
         var res = Application.Current.Resources;
 
+        // 深色模式下，将 PrimaryLight/PrimarySoft 与深色表面混合，避免刺眼的亮色背景
+        var lightColor = IsDarkMode
+            ? BlendColors(ParseColor(DarkColors.Surface), ParseColor(palette.Primary), 0.25)
+            : ParseColor(palette.PrimaryLight);
+        var softColor = IsDarkMode
+            ? BlendColors(ParseColor(DarkColors.Surface), ParseColor(palette.Primary), 0.12)
+            : ParseColor(palette.PrimarySoft);
+
         SetColor(res, "Primary", palette.Primary);
         SetColor(res, "PrimaryHover", palette.PrimaryHover);
-        SetColor(res, "PrimaryLight", palette.PrimaryLight);
-        SetColor(res, "PrimarySoft", palette.PrimarySoft);
+        SetColor(res, "PrimaryLight", lightColor);
+        SetColor(res, "PrimarySoft", softColor);
         SetColor(res, "AccentIndigo", palette.Primary);   // 兼容旧引用
         SetColor(res, "AccentViolet", palette.PrimaryHover);
 
         UpdateBrush(res, "PrimaryBrush", palette.Primary);
         UpdateBrush(res, "PrimaryHoverBrush", palette.PrimaryHover);
-        UpdateBrush(res, "PrimaryLightBrush", palette.PrimaryLight);
-        UpdateBrush(res, "PrimarySoftBrush", palette.PrimarySoft);
+        UpdateBrush(res, "PrimaryLightBrush", lightColor);
+        UpdateBrush(res, "PrimarySoftBrush", softColor);
         UpdateBrush(res, "AccentIndigoBrush", palette.Primary);
         UpdateBrush(res, "AccentVioletBrush", palette.PrimaryHover);
 
@@ -363,11 +371,25 @@ public class ThemeService : INotifyPropertyChanged
             res.Add(key, color);
     }
 
+    private static void SetColor(ResourceDictionary res, string key, Color color)
+    {
+        if (res.Contains(key))
+            res[key] = color;
+        else
+            res.Add(key, color);
+    }
+
     private static void UpdateBrush(ResourceDictionary res, string key, string hexColor)
     {
         var color = ParseColor(hexColor);
         // WPF 中 XAML 定义的 Brush 会被 Freeze，不能直接修改 Color
         // 始终创建新的 unfrozen 画刷替换资源条目
+        var newBrush = new SolidColorBrush(color);
+        res[key] = newBrush;
+    }
+
+    private static void UpdateBrush(ResourceDictionary res, string key, Color color)
+    {
         var newBrush = new SolidColorBrush(color);
         res[key] = newBrush;
     }
@@ -385,6 +407,17 @@ public class ThemeService : INotifyPropertyChanged
         var r = (byte)(c.R + (255 - c.R) * factor);
         var g = (byte)(c.G + (255 - c.G) * factor);
         var b = (byte)(c.B + (255 - c.B) * factor);
+        return Color.FromRgb(r, g, b);
+    }
+
+    /// <summary>
+    /// 将两个颜色按比例混合，factor 0=纯c1 1=纯c2
+    /// </summary>
+    private static Color BlendColors(Color c1, Color c2, double factor)
+    {
+        var r = (byte)(c1.R + (c2.R - c1.R) * factor);
+        var g = (byte)(c1.G + (c2.G - c1.G) * factor);
+        var b = (byte)(c1.B + (c2.B - c1.B) * factor);
         return Color.FromRgb(r, g, b);
     }
 

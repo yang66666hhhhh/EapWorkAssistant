@@ -45,9 +45,6 @@ public static class Highlight
             return;
         }
 
-        var highlightBrush = Application.Current.TryFindResource("PrimaryBrush") as Brush
-            ?? Brushes.Orange;
-
         var lowerText = text.ToLower();
         var lowerKw = keyword.ToLower();
         var lastIndex = 0;
@@ -60,11 +57,12 @@ public static class Highlight
             if (matchIndex > lastIndex)
                 textBlock.Inlines.Add(new Run(text[lastIndex..matchIndex]));
 
-            textBlock.Inlines.Add(new Run(text[matchIndex..(matchIndex + keyword.Length)])
+            var highlightRun = new Run(text[matchIndex..(matchIndex + keyword.Length)])
             {
-                Foreground = highlightBrush,
                 FontWeight = FontWeights.SemiBold
-            });
+            };
+            highlightRun.SetResourceReference(TextElement.ForegroundProperty, "PrimaryBrush");
+            textBlock.Inlines.Add(highlightRun);
 
             lastIndex = matchIndex + keyword.Length;
         }

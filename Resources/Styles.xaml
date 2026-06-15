@@ -90,7 +90,7 @@
     <SolidColorBrush x:Key="AccentAmberBrush" Color="{DynamicResource AccentAmber}"/>
 
     <!-- ==================== 字体 ==================== -->
-    <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI</FontFamily>
+    <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI, Segoe UI Emoji</FontFamily>
     <FontFamily x:Key="MonoFont">Cascadia Code, Consolas</FontFamily>
 
     <!-- 字体大小（可被 ThemeService 动态修改） -->
@@ -123,6 +123,52 @@
         <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
     </Storyboard>
 
+    <!-- ==================== 矢量图标资源 ==================== -->
+    <!-- 所有图标使用 Path 矢量绘制，不受字体限制，颜色自动跟随主题 -->
+    <Geometry x:Key="IconClock">M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 1,1 4,12A8,8 0 0,1 12,4M12.5,7H11V13L16.2,16.2L17,14.9L12.5,12.2V7Z</Geometry>
+    <Geometry x:Key="IconCalendar">M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,5V7H5V5H19M5,19V9H19V19H5Z</Geometry>
+    <Geometry x:Key="IconPencil">M20.7,7C20.4,7.4 20,7.7 20,8C20,8.3 20.3,8.6 20.6,8.6C20.9,8.6 21.3,8.3 21.6,7.9L20.7,7M3,17.2V21H6.8L18.3,9.5L14.5,5.7L3,17.2Z</Geometry>
+    <Geometry x:Key="IconClipboard">M19,2H15.7C15.3,0.8 14.2,0 13,0H11C9.8,0 8.7,0.8 8.3,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2M11,2H13A1,1 0 0,1 14,3A1,1 0 0,1 13,4H11A1,1 0 0,1 10,3A1,1 0 0,1 11,2Z</Geometry>
+    <Geometry x:Key="IconChart">M3,22V8H7V22H3M10,22V2H14V22H10M17,22V12H21V22H17Z</Geometry>
+    <Geometry x:Key="IconTarget">M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 1,1 4,12A8,8 0 0,1 12,4M12,8A4,4 0 1,0 16,12A4,4 0 0,0 12,8M12,10A2,2 0 1,1 10,12A2,2 0 0,1 12,10Z</Geometry>
+    <Geometry x:Key="IconWrench">M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z</Geometry>
+    <Geometry x:Key="IconBook">M18,2H6C4.9,2 4,2.9 4,4V20C4,21.1 4.9,22 6,22H18C19.1,22 20,21.1 20,20V4C20,2.9 19.1,2 18,2M18,20H6V4H18V20M8,6H16V8H8V6Z</Geometry>
+    <Geometry x:Key="IconSearch">M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.1 15.4,12.6 14.4,13.7L19.9,19.2L18.5,20.6L13,15.1C11.9,16 10.4,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5A4.5,4.5 0 0,0 5,9.5A4.5,4.5 0 0,0 9.5,14A4.5,4.5 0 0,0 14,9.5A4.5,4.5 0 0,0 9.5,5Z</Geometry>
+    <Geometry x:Key="IconList">M3,4H21V6H3V4M3,11H21V13H3V11M3,18H21V20H3V18Z</Geometry>
+    <Geometry x:Key="IconStar">M12,2L15.1,8.3L22,9.3L17,14.1L18.2,21L12,17.8L5.8,21L7,14.1L2,9.3L8.9,8.3L12,2Z</Geometry>
+    <Geometry x:Key="IconTrend">M3,17L9,11L13,15L21,7L22.3,8.3L13,17.6L9,13.6L3,19.6V17Z</Geometry>
+    <Geometry x:Key="IconPie">M12,2A10,10 0 1,0 22,12H12V2M12,12L22,12A10,10 0 0,1 12,22V12Z</Geometry>
+    <Geometry x:Key="IconSparkle">M12,2L14,8L20,10L14,12L12,18L10,12L4,10L10,8L12,2Z</Geometry>
+    <Geometry x:Key="IconDoc">M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z</Geometry>
+    <Geometry x:Key="IconGear">M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.4,13A7.5,7.5 0 0,0 19.5,12A7.5,7.5 0 0,0 19.4,11L22,9L19.5,4.5L16.8,5.7A7.2,7.2 0 0,0 15,4.5L14.6,1.5H9.4L9,4.5A7.2,7.2 0 0,0 7.2,5.7L4.5,4.5L2,9L4.6,11A7.5,7.5 0 0,0 4.5,12A7.5,7.5 0 0,0 4.6,13L2,15L4.5,19.5L7.2,18.3A7.2,7.2 0 0,0 9,19.5L9.4,22.5H14.6L15,19.5A7.2,7.2 0 0,0 16.8,18.3L19.5,19.5L22,15L19.4,13Z</Geometry>
+    <Geometry x:Key="IconLightning">M7,2V13H10V22L17,10H13L17,2H7Z</Geometry>
+    <Geometry x:Key="IconArrowUp">M12,4L4,12H9V20H15V12H20L12,4Z</Geometry>
+    <Geometry x:Key="IconWarning">M1,21H23L12,2L1,21M13,18H11V16H13V18M13,14H11V10H13V14Z</Geometry>
+    <Geometry x:Key="IconCamera">M12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15M20,4H16.8L15,2H9L7.2,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4Z</Geometry>
+    <Geometry x:Key="IconMoon">M17.8,15.8C15.5,17.4 12.3,17.1 10.3,15.1C8.3,13.1 8,9.9 9.6,7.6C7.2,8.8 5.5,11.3 5.5,14.1A8.5,8.5 0 0,0 14,22.6C16.8,22.6 19.3,20.9 20.5,18.5C19.6,18.2 18.6,17.2 17.8,15.8Z</Geometry>
+    <Geometry x:Key="IconSun">M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.4,4.4L12,3L9.6,4.4L12,2M4.2,4.2L5.6,5.6L3.8,5.6L4.2,4.2M2,12L4.4,9.6L3,12L4.4,14.4L2,12M4.2,19.8L5.6,18.4L3.8,18.4L4.2,19.8M12,22L9.6,19.6L12,21L14.4,19.6L12,22M19.8,19.8L18.4,18.4L20.2,18.4L19.8,19.8M22,12L19.6,14.4L21,12L19.6,9.6L22,12M19.8,4.2L18.4,5.6L20.2,5.6L19.8,4.2Z</Geometry>
+    <Geometry x:Key="IconSend">M2,21L23,12L2,3V10L17,12L2,14V21Z</Geometry>
+    <Geometry x:Key="IconClose">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</Geometry>
+    <Geometry x:Key="IconCheck">M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z</Geometry>
+    <Geometry x:Key="IconCancel">M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z</Geometry>
+    <Geometry x:Key="IconInfo">M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M11,7V9H13V7H11M11,11V17H13V11H11Z</Geometry>
+    <Geometry x:Key="IconChevronLeft">M15.41,7.41L14,6L8,12L14,18L15.41,16.59L10.83,12L15.41,7.41Z</Geometry>
+    <Geometry x:Key="IconChevronRight">M8.59,16.59L10,18L16,12L10,6L8.59,7.41L13.17,12L8.59,16.59Z</Geometry>
+    <Geometry x:Key="IconSkipFirst">M6,6H8V18H6V6M9.5,12L18,18V6L9.5,12Z</Geometry>
+    <Geometry x:Key="IconSkipLast">M16,6H18V18H16V6M6,18L14.5,12L6,6V18Z</Geometry>
+    <Geometry x:Key="IconStarOutline">M12,2L15.1,8.3L22,9.3L17,14.1L18.2,21L12,17.8L5.8,21L7,14.1L2,9.3L8.9,8.3L12,2M12,5.5L9.7,10.3L4.5,11L8.2,14.6L7.3,19.5L12,17L16.7,19.5L15.8,14.6L19.5,11L14.3,10.3L12,5.5Z</Geometry>
+    <Geometry x:Key="IconKeyboard">M20,5H4A2,2 0 0,0 2,7V17A2,2 0 0,0 4,19H20A2,2 0 0,0 22,17V7A2,2 0 0,0 20,5M11,8H13V10H11V8M8,8H10V10H8V8M5,8H7V10H5V8M8,14H16V16H8V14M17,11H19V13H17V11M14,11H16V13H14V11M11,11H13V13H11V11M8,11H10V13H8V11M5,11H7V13H5V11M17,8H19V10H17V8Z</Geometry>
+    <Geometry x:Key="IconPalette">M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A2,2 0 0,0 14,20A2,2 0 0,0 12,18H11A2,2 0 0,1 11,14H13A9,9 0 0,0 13,4A1,1 0 0,1 12,2M7.5,13A1.5,1.5 0 0,1 6,11.5A1.5,1.5 0 0,1 7.5,10A1.5,1.5 0 0,1 9,11.5A1.5,1.5 0 0,1 7.5,13M10,8.5A1.5,1.5 0 0,1 8.5,7A1.5,1.5 0 0,1 10,5.5A1.5,1.5 0 0,1 11.5,7A1.5,1.5 0 0,1 10,8.5M16.5,8.5A1.5,1.5 0 0,1 15,7A1.5,1.5 0 0,1 16.5,5.5A1.5,1.5 0 0,1 18,7A1.5,1.5 0 0,1 16.5,8.5M19,12A1.5,1.5 0 0,1 17.5,10.5A1.5,1.5 0 0,1 19,9A1.5,1.5 0 0,1 20.5,10.5A1.5,1.5 0 0,1 19,12Z</Geometry>
+    <Geometry x:Key="IconArrowRight">M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z</Geometry>
+
+    <!-- ==================== 全局默认 TextBlock 样式 ==================== -->
+    <!-- 仅设置字体链（含 emoji 回退）；Foreground 由 Window 级 TextElement.Foreground 继承驱动 -->
+    <!-- 这样按钮的 TextElement.Foreground（local value, 优先级3）可以覆盖继承值（优先级5）， -->
+    <!-- 而不会被隐式样式的 Setter（优先级8）截断 -->
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+    </Style>
+
     <!-- ==================== 控件样式 ==================== -->
 
     <!-- 主按钮（精致悬浮 + 微缩放） -->
@@ -131,7 +177,7 @@
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource PrimaryGradient}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="20,11"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -140,13 +186,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" CornerRadius="9"
-                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#FF4F46E5" Offset="0"/>
-                                <GradientStop Color="#FF4338CA" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
+                            Background="{DynamicResource PrimaryGradient}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -176,7 +218,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{DynamicResource SuccessBrush}" CornerRadius="9"
-                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}">
+                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -202,7 +245,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{DynamicResource WarningBrush}" CornerRadius="9"
-                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}">
+                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -224,6 +268,28 @@
     <!-- 危险按钮 -->
     <Style x:Key="BtnDanger" TargetType="Button" BasedOn="{StaticResource BtnPrimary}">
         <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" Background="{DynamicResource DangerBrush}" CornerRadius="9"
+                            Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Effect" Value="{StaticResource ShadowMd}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bg" Property="Effect" Value="{x:Null}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- 次要按钮（精致边框 + 微交互） -->
@@ -243,7 +309,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="9"
                             Padding="{TemplateBinding Padding}" BorderThickness="{TemplateBinding BorderThickness}"
-                            BorderBrush="{TemplateBinding BorderBrush}">
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -278,7 +345,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ButtonBase">
                     <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="7"
-                            Padding="{TemplateBinding Padding}">
+                            Padding="{TemplateBinding Padding}"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -309,7 +377,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="14,12"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
-        <Setter Property="SelectionBrush" Value="#FF4338CA"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -319,7 +387,7 @@
                         <Border x:Name="glow" CornerRadius="9"
                                 Background="{DynamicResource PrimaryBrush}"
                                 Opacity="0" IsHitTestVisible="False"
-                                Effect="{StaticResource ShadowFocus}"
+                                Effect="{DynamicResource ShadowFocus}"
                                 Margin="-2"/>
                         <!-- 主内容层（始终清晰渲染） -->
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
@@ -422,7 +490,7 @@
                         <Border x:Name="glow" CornerRadius="9"
                                 Background="{DynamicResource PrimaryBrush}"
                                 Opacity="0" IsHitTestVisible="False"
-                                Effect="{StaticResource ShadowFocus}"
+                                Effect="{DynamicResource ShadowFocus}"
                                 Margin="-2"/>
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -593,8 +661,140 @@
         <Setter Property="Background" Value="{DynamicResource DangerLightBrush}"/>
     </Style>
 
+    <!-- ==================== 现代化滚动条（提前定义，供后续控件引用） ==================== -->
+    <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="14"/>
+                <Setter Property="Height" Value="Auto"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid>
+                                <Border Background="{DynamicResource BorderBrush}" CornerRadius="7" Margin="2,2,0,2"/>
+                                <Track x:Name="PART_Track" IsDirectionReversed="True" Margin="3,2,1,2">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb>
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Border x:Name="thumb" Background="{DynamicResource ScrollThumbBrush}" CornerRadius="5"
+                                                            MinHeight="20"/>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="thumb" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsDragging" Value="True">
+                                                            <Setter TargetName="thumb" Property="Background" Value="{DynamicResource ScrollThumbActiveBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="Height" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid>
+                                <Border Background="{DynamicResource BorderBrush}" CornerRadius="7" Margin="2,2,2,0"/>
+                                <Track x:Name="PART_Track" Margin="2,3,2,1">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb>
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Border x:Name="thumb" Background="{DynamicResource ScrollThumbBrush}" CornerRadius="5"
+                                                            MinWidth="20"/>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="thumb" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsDragging" Value="True">
+                                                            <Setter TargetName="thumb" Property="Background" Value="{DynamicResource ScrollThumbActiveBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ModernScrollViewer" TargetType="ScrollViewer">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="Local"/>
+        <Setter Property="FocusManager.IsFocusScope" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollViewer">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ScrollContentPresenter Grid.Column="0" Grid.Row="0"
+                                                CanContentScroll="{TemplateBinding CanContentScroll}"
+                                                Margin="{TemplateBinding Padding}"/>
+                        <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Grid.Row="0"
+                                   Style="{StaticResource ModernScrollBar}"
+                                   Orientation="Vertical"
+                                   Maximum="{TemplateBinding ScrollableHeight}"
+                                   ViewportSize="{TemplateBinding ViewportHeight}"
+                                   Value="{TemplateBinding VerticalOffset}"
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                        <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Column="0" Grid.Row="1"
+                                   Style="{StaticResource ModernScrollBar}"
+                                   Orientation="Horizontal"
+                                   Maximum="{TemplateBinding ScrollableWidth}"
+                                   ViewportSize="{TemplateBinding ViewportWidth}"
+                                   Value="{TemplateBinding HorizontalOffset}"
+                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                        <Border Grid.Column="1" Grid.Row="1" Background="Transparent"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 全局隐式 ScrollViewer 样式：所有 ScrollViewer 自动使用现代化滚动条 -->
+    <Style TargetType="ScrollViewer" BasedOn="{StaticResource ModernScrollViewer}"/>
+
     <!-- DataGrid -->
     <Style x:Key="ModernGrid" TargetType="DataGrid">
+        <Style.Resources>
+            <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}"/>
+        </Style.Resources>
         <Setter Property="local:DataGridCopyHelper.EnableCopy" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
@@ -781,140 +981,12 @@
         <Setter Property="HorizontalAlignment" Value="Left"/>
     </Style>
 
-    <!-- ==================== 现代化滚动条 ==================== -->
-    <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
-        <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Style.Triggers>
-            <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Width" Value="14"/>
-                <Setter Property="Height" Value="Auto"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ScrollBar">
-                            <Grid>
-                                <!-- 滚动条轨道背景（深色可见） -->
-                                <Border Background="{DynamicResource BorderBrush}" CornerRadius="7" Margin="2,2,0,2"/>
-                                <Track x:Name="PART_Track" IsDirectionReversed="True" Margin="3,2,1,2">
-                                    <Track.DecreaseRepeatButton>
-                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
-                                    </Track.DecreaseRepeatButton>
-                                    <Track.Thumb>
-                                        <Thumb>
-                                            <Thumb.Template>
-                                                <ControlTemplate TargetType="Thumb">
-                                                    <Border x:Name="thumb" Background="#FF9CA3AF" CornerRadius="5"
-                                                            MinHeight="20"/>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="thumb" Property="Background" Value="#FF6B7280"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsDragging" Value="True">
-                                                            <Setter TargetName="thumb" Property="Background" Value="#FF4B5563"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Thumb.Template>
-                                        </Thumb>
-                                    </Track.Thumb>
-                                    <Track.IncreaseRepeatButton>
-                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
-                                    </Track.IncreaseRepeatButton>
-                                </Track>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-            <Trigger Property="Orientation" Value="Horizontal">
-                <Setter Property="Width" Value="Auto"/>
-                <Setter Property="Height" Value="14"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ScrollBar">
-                            <Grid>
-                                <!-- 滚动条轨道背景（深色可见） -->
-                                <Border Background="{DynamicResource BorderBrush}" CornerRadius="7" Margin="2,2,2,0"/>
-                                <Track x:Name="PART_Track" Margin="2,3,2,1">
-                                    <Track.DecreaseRepeatButton>
-                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
-                                    </Track.DecreaseRepeatButton>
-                                    <Track.Thumb>
-                                        <Thumb>
-                                            <Thumb.Template>
-                                                <ControlTemplate TargetType="Thumb">
-                                                    <Border x:Name="thumb" Background="#FF9CA3AF" CornerRadius="5"
-                                                            MinWidth="20"/>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="thumb" Property="Background" Value="#FF6B7280"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsDragging" Value="True">
-                                                            <Setter TargetName="thumb" Property="Background" Value="#FF4B5563"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Thumb.Template>
-                                        </Thumb>
-                                    </Track.Thumb>
-                                    <Track.IncreaseRepeatButton>
-                                        <RepeatButton Background="Transparent" BorderThickness="0" Focusable="False"/>
-                                    </Track.IncreaseRepeatButton>
-                                </Track>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- 现代化 ScrollViewer（使用自定义滚动条） -->
-    <Style x:Key="ModernScrollViewer" TargetType="ScrollViewer">
-        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="KeyboardNavigation.TabNavigation" Value="Local"/>
-        <Setter Property="FocusManager.IsFocusScope" Value="False"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ScrollViewer">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <ScrollContentPresenter Grid.Column="0" Grid.Row="0"
-                                                CanContentScroll="{TemplateBinding CanContentScroll}"
-                                                Margin="{TemplateBinding Padding}"/>
-                        <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Grid.Row="0"
-                                   Style="{StaticResource ModernScrollBar}"
-                                   Orientation="Vertical"
-                                   Maximum="{TemplateBinding ScrollableHeight}"
-                                   ViewportSize="{TemplateBinding ViewportHeight}"
-                                   Value="{TemplateBinding VerticalOffset}"
-                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-                        <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Column="0" Grid.Row="1"
-                                   Style="{StaticResource ModernScrollBar}"
-                                   Orientation="Horizontal"
-                                   Maximum="{TemplateBinding ScrollableWidth}"
-                                   ViewportSize="{TemplateBinding ViewportWidth}"
-                                   Value="{TemplateBinding HorizontalOffset}"
-                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
-                        <Border Grid.Column="1" Grid.Row="1" Background="Transparent"/>
-                    </Grid>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- ==================== ContextMenu 样式（右键菜单，美化圆角阴影） ==================== -->
     <Style TargetType="ContextMenu">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="HasDropShadow" Value="False"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="ItemContainerStyle">
@@ -1115,7 +1187,7 @@
                         <Border x:Name="glow" CornerRadius="9"
                                 Background="{DynamicResource PrimaryBrush}"
                                 Opacity="0" IsHitTestVisible="False"
-                                Effect="{StaticResource ShadowFocus}"
+                                Effect="{DynamicResource ShadowFocus}"
                                 Margin="-2"/>
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
@@ -1143,9 +1215,9 @@
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="btnBg" Background="Transparent"
                                                     CornerRadius="7">
-                                                <TextBlock Text="&#x1F4C5;" FontSize="16"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
+                                                      Width="14" Height="14" Stretch="Uniform"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
@@ -1463,7 +1535,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
                             Background="Transparent"
-                            BorderBrush="Transparent" BorderThickness="1">
+                            BorderBrush="Transparent" BorderThickness="1"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1490,7 +1563,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
                             Background="{DynamicResource PrimaryBrush}"
-                            BorderBrush="Transparent" BorderThickness="1">
+                            BorderBrush="Transparent" BorderThickness="1"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1522,7 +1596,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
                             Background="Transparent"
-                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>

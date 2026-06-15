@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using EapWorkAssistant.Services;
 
 namespace EapWorkAssistant.Helpers;
 
@@ -18,7 +19,9 @@ public class BoolToBorderConverter : IValueConverter
         {
             if (Application.Current.Resources["PrimaryBrush"] is SolidColorBrush brush)
                 return brush;
-            return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4F46E5"));
+            // 回退：从 ThemeService 获取当前强调色
+            var hex = ThemeService.GetAccentPreviewColor(ThemeService.Instance.AccentColor);
+            return new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
         }
         return new SolidColorBrush(Colors.Transparent);
     }
@@ -28,7 +31,7 @@ public class BoolToBorderConverter : IValueConverter
 }
 
 /// <summary>
-/// bool → 选中/未选中背景色（选中时浅色 Primary 背景）
+/// bool → 选中/未选中背景色（选中时浅色 Primary 背景，深色模式下用半透明主色）
 /// </summary>
 public class BoolToBgConverter : IValueConverter
 {
@@ -38,6 +41,18 @@ public class BoolToBgConverter : IValueConverter
     {
         if (value is true)
         {
+            var isDark = ThemeService.Instance.IsDarkMode;
+            if (isDark)
+            {
+                // 深色模式：用主色 20% 不透明度做选中背景
+                if (Application.Current.Resources["PrimaryBrush"] is SolidColorBrush primary)
+                    return new SolidColorBrush(Color.FromArgb(51, primary.Color.R, primary.Color.G, primary.Color.B));
+                // 回退
+                var hex = ThemeService.GetAccentPreviewColor(ThemeService.Instance.AccentColor);
+                var c = (Color)ColorConverter.ConvertFromString(hex);
+                return new SolidColorBrush(Color.FromArgb(51, c.R, c.G, c.B));
+            }
+            // 浅色模式：用 PrimaryLight 柔和底色
             if (Application.Current.Resources["PrimaryLightBrush"] is SolidColorBrush brush)
                 return brush;
             return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEF2FF"));
