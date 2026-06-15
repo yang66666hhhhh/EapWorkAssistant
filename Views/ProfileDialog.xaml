@@ -79,9 +79,9 @@
                                 <!-- 悬浮编辑遮罩 -->
                                 <Border x:Name="AvatarOverlay" CornerRadius="24"
                                         Background="#60000000" Visibility="Collapsed">
-                                    <TextBlock Text="&#x1F4F7;" FontSize="14"
-                                               Foreground="White" HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                    <Path Data="{StaticResource IconCamera}" Fill="White"
+                                          Width="14" Height="14" Stretch="Uniform"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -95,7 +95,8 @@
                     </StackPanel>
                     <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                             Click="Cancel_Click" Style="{StaticResource BtnGhost}" Padding="8,6">
-                        <TextBlock Text="&#x2715;" FontSize="14" Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
+                              Width="14" Height="14" Stretch="Uniform"/>
                     </Button>
                 </Grid>
             </StackPanel>

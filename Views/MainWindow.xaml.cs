@@ -46,7 +46,7 @@ public partial class MainWindow : Window
         return fallback;
     }
 
-    private void RegisterAllShortcuts()
+    public void RegisterAllShortcuts()
     {
         // 清除旧的动态绑定
         foreach (var b in _dynamicBindings)
@@ -55,8 +55,16 @@ public partial class MainWindow : Window
 
         var cfg = ConfigService.Instance;
 
+        // 总开关关闭时不注册任何快捷键
+        if (!cfg.EnableShortcuts)
+        {
+            if (SearchPlaceholder != null)
+                SearchPlaceholder.Text = "搜索...";
+            return;
+        }
+
         // 搜索
-        AddBinding(cfg.ShortcutSearch, Key.F, () =>
+        AddBinding(cfg.ShortcutSearch, Key.F, cfg.ShortcutSearchEnabled, () =>
         {
             if (DataContext is MainViewModel vm)
             {
@@ -67,7 +75,7 @@ public partial class MainWindow : Window
         });
 
         // 新增记录
-        AddBinding(cfg.ShortcutNew, Key.N, () =>
+        AddBinding(cfg.ShortcutNew, Key.N, cfg.ShortcutNewEnabled, () =>
         {
             if (DataContext is MainViewModel vm)
             {
@@ -77,7 +85,7 @@ public partial class MainWindow : Window
         });
 
         // 保存记录
-        AddBinding(cfg.ShortcutSave, Key.S, () =>
+        AddBinding(cfg.ShortcutSave, Key.S, cfg.ShortcutSaveEnabled, () =>
         {
             if (DataContext is MainViewModel vm && vm.CurrentView is WorkRecordViewModel wr)
                 _ = wr.SaveRecordCommand.ExecuteAsync(null);
@@ -87,10 +95,11 @@ public partial class MainWindow : Window
         var views = new[] { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
         var defaultKeys = new[] { Key.D1, Key.D2, Key.D3, Key.D4, Key.D5 };
         var cfgKeys = new[] { cfg.ShortcutView1, cfg.ShortcutView2, cfg.ShortcutView3, cfg.ShortcutView4, cfg.ShortcutView5 };
+        var enabledFlags = new[] { cfg.ShortcutView1Enabled, cfg.ShortcutView2Enabled, cfg.ShortcutView3Enabled, cfg.ShortcutView4Enabled, cfg.ShortcutView5Enabled };
         for (int i = 0; i < 5; i++)
         {
             var view = views[i];
-            AddBinding(cfgKeys[i], defaultKeys[i], () =>
+            AddBinding(cfgKeys[i], defaultKeys[i], enabledFlags[i], () =>
             {
                 if (DataContext is MainViewModel vm)
                     vm.NavigateToCommand.Execute(view);
@@ -99,11 +108,12 @@ public partial class MainWindow : Window
 
         // 更新搜索框占位文字
         if (SearchPlaceholder != null)
-            SearchPlaceholder.Text = $"搜索... (Ctrl+{cfg.ShortcutSearch})";
+            SearchPlaceholder.Text = cfg.ShortcutSearchEnabled ? $"搜索... (Ctrl+{cfg.ShortcutSearch})" : "搜索...";
     }
 
-    private void AddBinding(string keyStr, Key fallback, Action action)
+    private void AddBinding(string keyStr, Key fallback, bool enabled, Action action)
     {
+        if (!enabled) return;
         var key = ParseKey(keyStr, fallback);
         var binding = new KeyBinding(new RelayCommand(action), key, ModifierKeys.Control);
         _dynamicBindings.Add(binding);

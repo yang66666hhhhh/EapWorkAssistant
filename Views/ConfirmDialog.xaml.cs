@@ -32,15 +32,18 @@ public partial class ConfirmDialog : Window
         {
             case ConfirmDialogType.Danger:
                 IconBorder.Background = (Brush)FindResource("DangerLightBrush");
-                IconText.Text = "\u26A0";
+                IconPath.Data = (Geometry)FindResource("IconWarning");
+                IconPath.Fill = (Brush)FindResource("DangerBrush");
                 break;
             case ConfirmDialogType.Warning:
                 IconBorder.Background = (Brush)FindResource("WarningLightBrush");
-                IconText.Text = "\u26A0";
+                IconPath.Data = (Geometry)FindResource("IconWarning");
+                IconPath.Fill = (Brush)FindResource("WarningBrush");
                 break;
             case ConfirmDialogType.Info:
                 IconBorder.Background = (Brush)FindResource("PrimaryLightBrush");
-                IconText.Text = "\u2139";
+                IconPath.Data = (Geometry)FindResource("IconInfo");
+                IconPath.Fill = (Brush)FindResource("PrimaryBrush");
                 break;
         }
     }

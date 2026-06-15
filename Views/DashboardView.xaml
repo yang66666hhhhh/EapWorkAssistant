@@ -26,7 +26,7 @@
                             Padding="14,9" BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#x1F4C5;" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBlock Text="{Binding CurrentDate, Mode=OneWay}"
                                        FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
                                        VerticalAlignment="Center" FontWeight="Medium"/>
@@ -63,8 +63,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x23F1;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -84,8 +83,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x1F4C5;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource SuccessBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -105,8 +103,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x1F4CA;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconChart}" Fill="{DynamicResource WarningBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -126,8 +123,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x1F4DD;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource AccentVioletBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -142,7 +138,7 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="10"
                                     Width="42" Height="42" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock Text="&#x1F4DD;" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource PrimaryBrush}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="今日记录" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
@@ -155,7 +151,7 @@
                             <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="8" Padding="14,8"
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#x1F3AF;" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <Path Data="{StaticResource IconTarget}" Fill="{DynamicResource TextPrimaryBrush}" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
                                                VerticalAlignment="Center">
                                         <Run Text="试用期剩余 "/>
@@ -174,7 +170,7 @@
                     Background="{DynamicResource WarningLightBrush}" CornerRadius="10" Padding="16,12"
                     BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" Margin="0,0,0,14">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#x26A0;&#xFE0F;" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Path Data="{StaticResource IconWarning}" Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Text="{Binding CoverageWarningText}" FontSize="13"
                                Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
@@ -204,8 +200,7 @@
                         </StackPanel>
                         <Border Background="{DynamicResource DangerLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x1F527;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconWrench}" Fill="{DynamicResource DangerBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -225,8 +220,9 @@
                         </StackPanel>
                         <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="&#x1F4DA;" FontSize="17" HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource PrimaryBrush}"
+                                  Width="18" Height="18" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -241,8 +237,11 @@
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
                             <Grid>
                                 <StackPanel>
-                                    <TextBlock Text="&#x1F3AF; 试用期进度" FontSize="18" FontWeight="Bold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="{StaticResource IconTarget}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="试用期进度" FontSize="18" FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </StackPanel>
                                     <TextBlock Text="{Binding ProbationInfo}" FontSize="13"
                                                Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
@@ -254,7 +253,7 @@
                                             Padding="10,0" Height="34" VerticalAlignment="Center"
                                             Cursor="Hand" MouseLeftButtonDown="ProbDateBtn_Click">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="&#x1F4C5;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0" Opacity="0.7"/>
+                                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0" Opacity="0.7"/>
                                             <TextBlock x:Name="ProbDateText" FontSize="12.5" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        VerticalAlignment="Center"/>
@@ -340,7 +339,7 @@
                                     Padding="18" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                     VerticalAlignment="Center">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="&#x1F4DD;" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                    <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}" Width="32" Height="32" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                     <TextBlock Text="转正述职报告" FontSize="14" FontWeight="SemiBold"
                                                Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     <Button Content="一键生成" Command="{Binding GenerateProbationReportCommand}"
@@ -369,8 +368,11 @@
                         Visibility="{Binding ShowDashCharts, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
-                            <TextBlock Text="&#x1F4C8; 本周工时趋势" FontSize="16" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconTrend}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="本周工时趋势" FontSize="16" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
                             <TextBlock Text="每日工时分布" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
@@ -383,7 +385,7 @@
                             <Border Visibility="{Binding HasChartData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
                                     Background="{DynamicResource CardBrush}" CornerRadius="8">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x1F4C8;" FontSize="36" HorizontalAlignment="Center" Opacity="0.25"/>
+                                    <Path Data="{StaticResource IconTrend}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                     <TextBlock Text="暂无工时数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                                HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                     <TextBlock Text="开始记录工作后将自动生成图表" FontSize="11"
@@ -401,8 +403,11 @@
                         Visibility="{Binding ShowDashCharts, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
-                            <TextBlock Text="&#x1F4CA; 本月项目分布" FontSize="16" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="本月项目分布" FontSize="16" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
                             <TextBlock Text="各项目工时占比" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
@@ -413,7 +418,7 @@
                             <Border Visibility="{Binding HasPieData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
                                     Background="{DynamicResource CardBrush}" CornerRadius="8">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x1F4CA;" FontSize="36" HorizontalAlignment="Center" Opacity="0.25"/>
+                                    <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                     <TextBlock Text="暂无项目数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                                HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                     <TextBlock Text="记录工作后将显示项目分布" FontSize="11"
@@ -431,8 +436,11 @@
                         Visibility="{Binding ShowDashHighlights, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                            <TextBlock Text="&#x2B50; 工作亮点" FontSize="16" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="工作亮点" FontSize="16" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
                             <TextBlock Text="标记的重要成果" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
@@ -468,7 +476,7 @@
                             <Border Visibility="{Binding Highlights.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                     Padding="20">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x2B50;" FontSize="36" HorizontalAlignment="Center" Opacity="0.25"/>
+                                    <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                     <TextBlock Text="暂无亮点记录" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                                HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                     <TextBlock Text="在「工作记录」中勾选&#x201C;亮点&#x201D;标记" FontSize="11"
@@ -490,8 +498,11 @@
                     <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
                         <Grid>
                             <StackPanel>
-                                <TextBlock Text="&#x2728; 转正述职材料" FontSize="16"
-                                           FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconSparkle}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="转正述职材料" FontSize="16"
+                                               FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </StackPanel>
                                 <TextBlock Text="自动生成试用期工作总结，用于转正评审"
                                            FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
                                            Margin="0,3,0,0"/>
@@ -530,8 +541,11 @@
                     <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
                         <Grid>
                             <StackPanel>
-                                <TextBlock Text="&#x1F4CB; 最近工作记录" FontSize="16" FontWeight="Bold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="最近工作记录" FontSize="16" FontWeight="Bold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </StackPanel>
                                 <TextBlock Text="最近5条工作记录，快速回顾近期工作"
                                            FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
                                            Margin="0,3,0,0"/>
@@ -585,7 +599,7 @@
                         <Border Visibility="{Binding RecentRecords.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="40" HorizontalAlignment="Stretch">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="&#x1F4CB;" FontSize="48" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource TextPrimaryBrush}" Width="48" Height="48" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                 <TextBlock Text="暂无工作记录" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium"/>
                                 <TextBlock Text="前往「工作记录」页面开始记录您的工作" FontSize="12"

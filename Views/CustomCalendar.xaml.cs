@@ -111,14 +111,13 @@ namespace EapWorkAssistant.Views
             }
         }
 
-        // ===== 日期格子悬浮效果 =====
-        private static readonly SolidColorBrush HoverBrush = new(Color.FromArgb(255, 239, 241, 245));
+        // ===== 日期格子悬浮效果（跟随主题） =====
 
         private void Day_MouseEnter(object sender, MouseEventArgs e)
         {
             if (sender is Border bg && bg.DataContext is CalendarDayItem item && !item.IsSelected)
             {
-                bg.Background = HoverBrush;
+                bg.SetResourceReference(Border.BackgroundProperty, "SurfaceHoverBrush");
             }
         }
 
