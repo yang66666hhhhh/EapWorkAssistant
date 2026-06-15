@@ -50,6 +50,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private string _shortcutView4 = "D4";
     [ObservableProperty] private string _shortcutView5 = "D5";
 
+    // 快捷键独立启用状态
+    [ObservableProperty] private bool _shortcutSearchEnabled = true;
+    [ObservableProperty] private bool _shortcutNewEnabled = true;
+    [ObservableProperty] private bool _shortcutSaveEnabled = true;
+    [ObservableProperty] private bool _shortcutView1Enabled = true;
+    [ObservableProperty] private bool _shortcutView2Enabled = true;
+    [ObservableProperty] private bool _shortcutView3Enabled = true;
+    [ObservableProperty] private bool _shortcutView4Enabled = true;
+    [ObservableProperty] private bool _shortcutView5Enabled = true;
+
     // ===== 外观与主题 =====
     [ObservableProperty] private bool _isLightTheme = true;
     [ObservableProperty] private bool _isDarkTheme;
@@ -165,6 +175,14 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ShortcutView3 = ConfigService.Instance.ShortcutView3;
         ShortcutView4 = ConfigService.Instance.ShortcutView4;
         ShortcutView5 = ConfigService.Instance.ShortcutView5;
+        ShortcutSearchEnabled = ConfigService.Instance.ShortcutSearchEnabled;
+        ShortcutNewEnabled = ConfigService.Instance.ShortcutNewEnabled;
+        ShortcutSaveEnabled = ConfigService.Instance.ShortcutSaveEnabled;
+        ShortcutView1Enabled = ConfigService.Instance.ShortcutView1Enabled;
+        ShortcutView2Enabled = ConfigService.Instance.ShortcutView2Enabled;
+        ShortcutView3Enabled = ConfigService.Instance.ShortcutView3Enabled;
+        ShortcutView4Enabled = ConfigService.Instance.ShortcutView4Enabled;
+        ShortcutView5Enabled = ConfigService.Instance.ShortcutView5Enabled;
 
         // 外观与主题
         IsLightTheme = ThemeService.Instance.ThemeMode == "Light";
@@ -229,6 +247,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     partial void OnEnableShortcutsChanged(bool value)
     {
         ConfigService.Instance.EnableShortcuts = value;
+        ReregisterShortcuts();
         StatusMessage = value ? "快捷键已启用" : "快捷键已禁用";
     }
 
@@ -256,14 +275,30 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         }
     }
 
-    partial void OnShortcutSearchChanged(string value) { ConfigService.Instance.ShortcutSearch = value; StatusMessage = $"搜索快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutNewChanged(string value) { ConfigService.Instance.ShortcutNew = value; StatusMessage = $"新增快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutSaveChanged(string value) { ConfigService.Instance.ShortcutSave = value; StatusMessage = $"保存快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutView1Changed(string value) { ConfigService.Instance.ShortcutView1 = value; StatusMessage = $"工作台快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutView2Changed(string value) { ConfigService.Instance.ShortcutView2 = value; StatusMessage = $"工作记录快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutView3Changed(string value) { ConfigService.Instance.ShortcutView3 = value; StatusMessage = $"知识库快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutView4Changed(string value) { ConfigService.Instance.ShortcutView4 = value; StatusMessage = $"问题跟踪快捷键 → Ctrl+{value}"; }
-    partial void OnShortcutView5Changed(string value) { ConfigService.Instance.ShortcutView5 = value; StatusMessage = $"设置快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutSearchChanged(string value) { ConfigService.Instance.ShortcutSearch = value; ReregisterShortcuts(); StatusMessage = $"搜索快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutNewChanged(string value) { ConfigService.Instance.ShortcutNew = value; ReregisterShortcuts(); StatusMessage = $"新增快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutSaveChanged(string value) { ConfigService.Instance.ShortcutSave = value; ReregisterShortcuts(); StatusMessage = $"保存快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView1Changed(string value) { ConfigService.Instance.ShortcutView1 = value; ReregisterShortcuts(); StatusMessage = $"工作台快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView2Changed(string value) { ConfigService.Instance.ShortcutView2 = value; ReregisterShortcuts(); StatusMessage = $"工作记录快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView3Changed(string value) { ConfigService.Instance.ShortcutView3 = value; ReregisterShortcuts(); StatusMessage = $"知识库快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView4Changed(string value) { ConfigService.Instance.ShortcutView4 = value; ReregisterShortcuts(); StatusMessage = $"问题跟踪快捷键 → Ctrl+{value}"; }
+    partial void OnShortcutView5Changed(string value) { ConfigService.Instance.ShortcutView5 = value; ReregisterShortcuts(); StatusMessage = $"设置快捷键 → Ctrl+{value}"; }
+
+    // 快捷键启用/禁用时重新注册
+    partial void OnShortcutSearchEnabledChanged(bool value) { ConfigService.Instance.ShortcutSearchEnabled = value; ReregisterShortcuts(); StatusMessage = value ? "搜索快捷键已启用" : "搜索快捷键已禁用"; }
+    partial void OnShortcutNewEnabledChanged(bool value) { ConfigService.Instance.ShortcutNewEnabled = value; ReregisterShortcuts(); StatusMessage = value ? "新增快捷键已启用" : "新增快捷键已禁用"; }
+    partial void OnShortcutSaveEnabledChanged(bool value) { ConfigService.Instance.ShortcutSaveEnabled = value; ReregisterShortcuts(); StatusMessage = value ? "保存快捷键已启用" : "保存快捷键已禁用"; }
+    partial void OnShortcutView1EnabledChanged(bool value) { ConfigService.Instance.ShortcutView1Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "工作台快捷键已启用" : "工作台快捷键已禁用"; }
+    partial void OnShortcutView2EnabledChanged(bool value) { ConfigService.Instance.ShortcutView2Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "工作记录快捷键已启用" : "工作记录快捷键已禁用"; }
+    partial void OnShortcutView3EnabledChanged(bool value) { ConfigService.Instance.ShortcutView3Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "知识库快捷键已启用" : "知识库快捷键已禁用"; }
+    partial void OnShortcutView4EnabledChanged(bool value) { ConfigService.Instance.ShortcutView4Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "问题跟踪快捷键已启用" : "问题跟踪快捷键已禁用"; }
+    partial void OnShortcutView5EnabledChanged(bool value) { ConfigService.Instance.ShortcutView5Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "设置快捷键已启用" : "设置快捷键已禁用"; }
+
+    private void ReregisterShortcuts()
+    {
+        if (Application.Current?.MainWindow is Views.MainWindow mw)
+            mw.RegisterAllShortcuts();
+    }
 
     // ===== 外观与主题 handlers =====
     partial void OnIsLightThemeChanged(bool value)
@@ -543,11 +578,11 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
 /// <summary>
 /// 强调色选项（用于 UI 展示色块）
 /// </summary>
-public class AccentColorItem
+public partial class AccentColorItem : ObservableObject
 {
     public string Name { get; set; } = string.Empty;
     public string PreviewColor { get; set; } = "#4F46E5";
-    public bool IsSelected { get; set; }
+    [ObservableProperty] private bool _isSelected;
 }
 
 /// <summary>

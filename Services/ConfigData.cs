@@ -22,6 +22,16 @@ public class ConfigData
     public string ShortcutView4 { get; set; } = "D4";
     public string ShortcutView5 { get; set; } = "D5";
 
+    // 各快捷键独立启用状态
+    public bool ShortcutSearchEnabled { get; set; } = true;
+    public bool ShortcutNewEnabled { get; set; } = true;
+    public bool ShortcutSaveEnabled { get; set; } = true;
+    public bool ShortcutView1Enabled { get; set; } = true;
+    public bool ShortcutView2Enabled { get; set; } = true;
+    public bool ShortcutView3Enabled { get; set; } = true;
+    public bool ShortcutView4Enabled { get; set; } = true;
+    public bool ShortcutView5Enabled { get; set; } = true;
+
     // ===== 外观与主题 =====
     public string ThemeMode { get; set; } = "Light";        // Light, Dark
     public string AccentColor { get; set; } = "Indigo";     // Indigo, Violet, Blue, Emerald, Rose, Amber

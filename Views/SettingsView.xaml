@@ -24,7 +24,11 @@
             <!-- ===== 外观与主题 ===== -->
             <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>
-                    <TextBlock Text="&#x1F3A8; 外观与主题" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Path Data="{StaticResource IconPalette}" Fill="{DynamicResource TextPrimaryBrush}"
+                              Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="外观与主题" Style="{StaticResource Heading3}"/>
+                    </StackPanel>
 
                     <!-- 主题模式 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
@@ -36,24 +40,26 @@
                                            Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Border CornerRadius="8" Padding="14,8" Margin="0,0,6,0" Cursor="Hand"
+                                <Border x:Name="LightThemeBtn" CornerRadius="8" Padding="14,8" Margin="0,0,6,0" Cursor="Hand"
                                         BorderThickness="1.5"
                                         BorderBrush="{Binding IsLightTheme, Converter={x:Static local:BoolToBorderConverter.Instance}}"
                                         Background="{Binding IsLightTheme, Converter={x:Static local:BoolToBgConverter.Instance}}"
                                         MouseLeftButtonDown="LightTheme_Click">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#x2600;" FontSize="13" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <Path Data="{StaticResource IconSun}" Fill="{DynamicResource TextPrimaryBrush}"
+                                              Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
                                         <TextBlock Text="浅色" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
-                                <Border CornerRadius="8" Padding="14,8" Cursor="Hand"
+                                <Border x:Name="DarkThemeBtn" CornerRadius="8" Padding="14,8" Cursor="Hand"
                                         BorderThickness="1.5"
                                         BorderBrush="{Binding IsDarkTheme, Converter={x:Static local:BoolToBorderConverter.Instance}}"
                                         Background="{Binding IsDarkTheme, Converter={x:Static local:BoolToBgConverter.Instance}}"
                                         MouseLeftButtonDown="DarkTheme_Click">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="&#x1F319;" FontSize="13" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                        <Path Data="{StaticResource IconMoon}" Fill="{DynamicResource TextPrimaryBrush}"
+                                              Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
                                         <TextBlock Text="深色" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -90,9 +96,9 @@
                                             <Border CornerRadius="20"
                                                     BorderBrush="White" BorderThickness="2.5"
                                                     Visibility="{Binding IsSelected, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                                <TextBlock Text="&#x2713;" FontSize="14" FontWeight="Bold"
-                                                           Foreground="White"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconCheck}" Fill="White"
+                                                      Width="14" Height="14" Stretch="Uniform"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                         </Border>
                                     </DataTemplate>
@@ -166,7 +172,11 @@
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4CA; Dashboard 布局" Style="{StaticResource Heading3}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="Dashboard 布局" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
                             <TextBlock Text="自定义工作台显示哪些模块" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -264,7 +274,11 @@
             <!-- ===== 启动与行为 ===== -->
             <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>
-                    <TextBlock Text="&#x26A1; 启动与行为" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Path Data="{StaticResource IconLightning}" Fill="{DynamicResource TextPrimaryBrush}"
+                              Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="启动与行为" Style="{StaticResource Heading3}"/>
+                    </StackPanel>
 
                     <!-- 开机自启动 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
@@ -339,7 +353,11 @@
             <!-- ===== 休息日设置 ===== -->
             <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>
-                    <TextBlock Text="&#x1F4C5; 休息日设置" Style="{StaticResource Heading3}" Margin="0,0,0,4"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}"
+                              Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="休息日设置" Style="{StaticResource Heading3}"/>
+                    </StackPanel>
                     <TextBlock Text="选择每周的休息日，仪表盘提示和试用期覆盖率计算将跳过休息日" FontSize="12"
                                Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,16"/>
 
@@ -376,7 +394,11 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4DD; 自定义字段" Style="{StaticResource Heading3}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="自定义字段" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
                             <TextBlock Text="为工作记录添加额外的自定义字段（功能开发中，敬请期待）" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -393,7 +415,11 @@
             <!-- ===== 通用设置 ===== -->
             <Border Style="{StaticResource Card}" Padding="22" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>
-                    <TextBlock Text="&#x2699;&#xFE0F; 通用设置" Style="{StaticResource Heading3}" Margin="0,0,0,16"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Path Data="{StaticResource IconGear}" Fill="{DynamicResource TextPrimaryBrush}"
+                              Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="通用设置" Style="{StaticResource Heading3}"/>
+                    </StackPanel>
 
                     <!-- 键盘快捷键 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="0" Margin="{DynamicResource DensityItemMargin}">
@@ -433,11 +459,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="搜索" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutSearchEnabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="Search"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -447,7 +478,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutSearch}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -456,11 +487,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="新增记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutNewEnabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="New"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -470,7 +506,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding KeyOptions}"
                                               SelectedItem="{Binding ShortcutNew}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -479,11 +515,16 @@
                                 <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="保存记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutSaveEnabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="Save"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -493,7 +534,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding KeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding KeyOptions}"
                                               SelectedItem="{Binding ShortcutSave}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -507,11 +548,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="工作台" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutView1Enabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="View1"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -521,7 +567,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView1}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -530,11 +576,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="工作记录" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutView2Enabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="View2"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -544,7 +595,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView2}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -553,11 +604,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="知识库" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutView3Enabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="View3"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -567,7 +623,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView3}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -576,11 +632,16 @@
                                 <Grid Margin="0,0,0,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="问题跟踪" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutView4Enabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="View4"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -590,7 +651,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView4}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -599,11 +660,16 @@
                                 <Grid Margin="0,0,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="设置" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
+                                    <ToggleButton Grid.Column="1" IsChecked="{Binding ShortcutView5Enabled, Mode=TwoWay}"
+                                                  Style="{StaticResource ToggleSwitch}" Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"
+                                                  PreviewMouseLeftButtonDown="ShortcutToggle_Click" Tag="View5"/>
+                                    <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="6" Padding="10,6"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontFamily="{StaticResource MonoFont}" VerticalAlignment="Center"
@@ -613,7 +679,7 @@
                                                  Foreground="{DynamicResource PrimaryBrush}"/>
                                         </TextBlock>
                                     </Border>
-                                    <ComboBox Grid.Column="1" ItemsSource="{Binding HotkeyOptions}"
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding HotkeyOptions}"
                                               SelectedItem="{Binding ShortcutView5}"
                                               Style="{StaticResource Select}"
                                               Opacity="0" Cursor="Hand" IsTabStop="True"/>
@@ -683,7 +749,11 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="&#x1F4CB; 任务列表" Style="{StaticResource Heading3}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconList}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="任务列表" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
                             <TextBlock Text="管理工作项目，记录时可选择" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -728,7 +798,8 @@
                         <Border Visibility="{Binding Projects.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="&#x1F4BC;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <Path Data="{StaticResource IconList}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                 <TextBlock Text="暂无任务项目" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                 <TextBlock Text="点击上方按钮添加任务" FontSize="11"
@@ -755,7 +826,11 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="&#x1F4DD; 工作类型" Style="{StaticResource Heading3}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="工作类型" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
                             <TextBlock Text="分类工作内容，便于统计分析" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -800,7 +875,8 @@
                         <Border Visibility="{Binding WorkTypes.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="&#x1F4DD;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                 <TextBlock Text="暂无工作类型" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                 <TextBlock Text="点击上方按钮添加类型" FontSize="11"
@@ -827,7 +903,11 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="&#x1F4CB; 内容模板" Style="{StaticResource Heading3}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconDoc}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="内容模板" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
                             <TextBlock Text="预设常用工作内容，一键填充" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -883,7 +963,8 @@
                         <Border Visibility="{Binding ContentTemplates.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="&#x1F4CB;" FontSize="28" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <Path Data="{StaticResource IconDoc}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                 <TextBlock Text="暂无内容模板" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                 <TextBlock Text="点击上方按钮添加模板" FontSize="11"

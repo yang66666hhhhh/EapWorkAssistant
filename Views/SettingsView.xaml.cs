@@ -40,12 +40,39 @@ public partial class SettingsView
     // ===== 外观与主题 =====
     private void LightTheme_Click(object sender, MouseButtonEventArgs e)
     {
-        if (VM != null) VM.IsLightTheme = true;
+        if (VM != null)
+        {
+            VM.IsLightTheme = true;
+            RefreshThemeButtonBindings();
+        }
     }
 
     private void DarkTheme_Click(object sender, MouseButtonEventArgs e)
     {
-        if (VM != null) VM.IsDarkTheme = true;
+        if (VM != null)
+        {
+            VM.IsDarkTheme = true;
+            RefreshThemeButtonBindings();
+        }
+    }
+
+    /// <summary>主题切换后强制刷新转换器绑定，使按钮背景色跟随新主题</summary>
+    private void RefreshThemeButtonBindings()
+    {
+        // 等待 DynamicResource 更新完毕后刷新
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (LightThemeBtn != null)
+            {
+                LightThemeBtn.GetBindingExpression(Border.BackgroundProperty)?.UpdateTarget();
+                LightThemeBtn.GetBindingExpression(Border.BorderBrushProperty)?.UpdateTarget();
+            }
+            if (DarkThemeBtn != null)
+            {
+                DarkThemeBtn.GetBindingExpression(Border.BackgroundProperty)?.UpdateTarget();
+                DarkThemeBtn.GetBindingExpression(Border.BorderBrushProperty)?.UpdateTarget();
+            }
+        }, System.Windows.Threading.DispatcherPriority.Background);
     }
 
     private void AccentColor_Click(object sender, MouseButtonEventArgs e)
@@ -73,22 +100,19 @@ public partial class SettingsView
 
     private void UpdateFontSizeButtons(string selected)
     {
-        var primaryBrush = (System.Windows.Media.Brush)FindResource("PrimaryBrush");
-        var primaryLightBrush = (System.Windows.Media.Brush)FindResource("PrimaryLightBrush");
-        var borderBrush = (System.Windows.Media.Brush)FindResource("BorderBrush");
-        var cardBrush = (System.Windows.Media.Brush)FindResource("CardBrush");
-        var textPrimaryBrush = (System.Windows.Media.Brush)FindResource("TextPrimaryBrush");
-        var textSecondaryBrush = (System.Windows.Media.Brush)FindResource("TextSecondaryBrush");
-
         void Highlight(Border btn)
         {
-            btn.Background = primaryLightBrush;
-            btn.BorderBrush = primaryBrush;
+            btn.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
+            btn.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
+            if (btn.Child is TextBlock tb)
+                tb.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
         }
         void Reset(Border btn)
         {
-            btn.Background = cardBrush;
-            btn.BorderBrush = borderBrush;
+            btn.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+            btn.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
+            if (btn.Child is TextBlock tb)
+                tb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
         }
 
         if (FontSizeSmallBtn != null) { if (selected == "Small") Highlight(FontSizeSmallBtn); else Reset(FontSizeSmallBtn); }
@@ -113,20 +137,19 @@ public partial class SettingsView
 
     private void UpdateDensityButtons(string selected)
     {
-        var primaryBrush = (System.Windows.Media.Brush)FindResource("PrimaryBrush");
-        var primaryLightBrush = (System.Windows.Media.Brush)FindResource("PrimaryLightBrush");
-        var borderBrush = (System.Windows.Media.Brush)FindResource("BorderBrush");
-        var cardBrush = (System.Windows.Media.Brush)FindResource("CardBrush");
-
         void Highlight(Border btn)
         {
-            btn.Background = primaryLightBrush;
-            btn.BorderBrush = primaryBrush;
+            btn.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
+            btn.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
+            if (btn.Child is TextBlock tb)
+                tb.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
         }
         void Reset(Border btn)
         {
-            btn.Background = cardBrush;
-            btn.BorderBrush = borderBrush;
+            btn.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+            btn.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
+            if (btn.Child is TextBlock tb)
+                tb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
         }
 
         if (DensityCompactBtn != null) { if (selected == "Compact") Highlight(DensityCompactBtn); else Reset(DensityCompactBtn); }
@@ -262,6 +285,27 @@ public partial class SettingsView
     }
 
     // ===== 通用设置 =====
+    private void ShortcutToggle_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is ToggleButton tb && VM != null && tb.Tag is string tag)
+        {
+            e.Handled = true;
+            var newVal = !(tb.IsChecked == true);
+            tb.IsChecked = newVal;
+            switch (tag)
+            {
+                case "Search": VM.ShortcutSearchEnabled = newVal; break;
+                case "New": VM.ShortcutNewEnabled = newVal; break;
+                case "Save": VM.ShortcutSaveEnabled = newVal; break;
+                case "View1": VM.ShortcutView1Enabled = newVal; break;
+                case "View2": VM.ShortcutView2Enabled = newVal; break;
+                case "View3": VM.ShortcutView3Enabled = newVal; break;
+                case "View4": VM.ShortcutView4Enabled = newVal; break;
+                case "View5": VM.ShortcutView5Enabled = newVal; break;
+            }
+        }
+    }
+
     private void EnableShortcuts_Click(object sender, MouseButtonEventArgs e)
     {
         if (sender is ToggleButton tb && VM != null)

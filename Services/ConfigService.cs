@@ -69,6 +69,16 @@ public class ConfigService
     public string ShortcutView4 { get => _data.ShortcutView4; set { _data.ShortcutView4 = value; Save(); } }
     public string ShortcutView5 { get => _data.ShortcutView5; set { _data.ShortcutView5 = value; Save(); } }
 
+    // 各快捷键独立启用状态
+    public bool ShortcutSearchEnabled { get => _data.ShortcutSearchEnabled; set { _data.ShortcutSearchEnabled = value; Save(); } }
+    public bool ShortcutNewEnabled { get => _data.ShortcutNewEnabled; set { _data.ShortcutNewEnabled = value; Save(); } }
+    public bool ShortcutSaveEnabled { get => _data.ShortcutSaveEnabled; set { _data.ShortcutSaveEnabled = value; Save(); } }
+    public bool ShortcutView1Enabled { get => _data.ShortcutView1Enabled; set { _data.ShortcutView1Enabled = value; Save(); } }
+    public bool ShortcutView2Enabled { get => _data.ShortcutView2Enabled; set { _data.ShortcutView2Enabled = value; Save(); } }
+    public bool ShortcutView3Enabled { get => _data.ShortcutView3Enabled; set { _data.ShortcutView3Enabled = value; Save(); } }
+    public bool ShortcutView4Enabled { get => _data.ShortcutView4Enabled; set { _data.ShortcutView4Enabled = value; Save(); } }
+    public bool ShortcutView5Enabled { get => _data.ShortcutView5Enabled; set { _data.ShortcutView5Enabled = value; Save(); } }
+
     // ===== 外观与主题 =====
     public string ThemeMode { get => _data.ThemeMode; set { _data.ThemeMode = value; Save(); } }
     public string AccentColor { get => _data.AccentColor; set { _data.AccentColor = value; Save(); } }
