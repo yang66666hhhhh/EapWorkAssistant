@@ -73,8 +73,14 @@ public static class DataGridCopyHelper
             else
                 PreviewPopup.Instance.Hide();
         }
+        else if (cell == null)
+        {
+            // 鼠标离开所有单元格（可能在移向浮窗的间隙中），
+            // 不主动触发隐藏，由浮窗自身的 MouseLeave 处理
+        }
         else
         {
+            // 鼠标移到了非内容列，立即隐藏
             PreviewPopup.Instance.Hide();
         }
     }
@@ -517,25 +523,26 @@ internal sealed class PreviewPopup
         content.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
 
         // 多层 Border 模拟阴影（黑色半透明，深浅主题通用）
+        // 注意：顶部 margin 极小以避免浮窗与单元格之间出现不可悬停的间隙
         var shadow1 = new Border
         {
             CornerRadius = new CornerRadius(14),
             Background = new SolidColorBrush(Color.FromArgb(8, 0, 0, 0)),
-            Margin = new Thickness(6, 6, 6, 10),
+            Margin = new Thickness(6, 0, 6, 10),
             Child = content
         };
         var shadow2 = new Border
         {
             CornerRadius = new CornerRadius(15),
             Background = new SolidColorBrush(Color.FromArgb(5, 0, 0, 0)),
-            Margin = new Thickness(4),
+            Margin = new Thickness(4, 0, 4, 4),
             Child = shadow1
         };
         var shadow3 = new Border
         {
             CornerRadius = new CornerRadius(16),
             Background = new SolidColorBrush(Color.FromArgb(3, 0, 0, 0)),
-            Margin = new Thickness(2),
+            Margin = new Thickness(2, 0, 2, 2),
             Child = shadow2
         };
 
@@ -599,7 +606,7 @@ internal sealed class PreviewPopup
         _hideTimer?.Stop();
         _hideTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
         {
-            Interval = TimeSpan.FromMilliseconds(200)
+            Interval = TimeSpan.FromMilliseconds(400)
         };
         _hideTimer.Tick += (_, _) =>
         {
