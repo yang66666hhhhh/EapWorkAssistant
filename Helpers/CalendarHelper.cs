@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace EapWorkAssistant.Helpers;
 
@@ -11,6 +12,7 @@ public static class CalendarHelper
 {
     private const double DefaultWidth = 310;
     private const double DefaultHeight = 290;
+    private const int FadeMs = 150;
 
     /// <summary>
     /// 在锚点按钮附近显示日历浮窗，自动处理边界碰撞
@@ -41,16 +43,44 @@ public static class CalendarHelper
         if (y < 8) y = 8;
 
         container.Margin = new Thickness(x, y, 0, 0);
+
+        // 淡入动画
         backdrop.Visibility = Visibility.Visible;
+        backdrop.Opacity = 0;
+        backdrop.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation
+        {
+            From = 0, To = 1,
+            Duration = new Duration(TimeSpan.FromMilliseconds(FadeMs))
+        });
+
         container.Visibility = Visibility.Visible;
+        container.Opacity = 0;
+        container.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation
+        {
+            From = 0, To = 1,
+            Duration = new Duration(TimeSpan.FromMilliseconds(FadeMs))
+        });
     }
 
     /// <summary>
-    /// 关闭日历浮窗
+    /// 关闭日历浮窗（带淡出动画）
     /// </summary>
     public static void Close(Border backdrop, Border container)
     {
-        container.Visibility = Visibility.Collapsed;
-        backdrop.Visibility = Visibility.Collapsed;
+        var fadeOut = new DoubleAnimation
+        {
+            From = 1, To = 0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(FadeMs)),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+        };
+        fadeOut.Completed += (_, _) =>
+        {
+            container.Visibility = Visibility.Collapsed;
+            container.Opacity = 1;
+            backdrop.Visibility = Visibility.Collapsed;
+            backdrop.Opacity = 1;
+        };
+        container.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+        backdrop.BeginAnimation(UIElement.OpacityProperty, fadeOut.Clone());
     }
 }
