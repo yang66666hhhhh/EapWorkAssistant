@@ -73,14 +73,8 @@ public static class DataGridCopyHelper
             else
                 PreviewPopup.Instance.Hide();
         }
-        else if (cell == null)
-        {
-            // 鼠标离开所有单元格（可能在移向浮窗的间隙中），
-            // 不主动触发隐藏，由浮窗自身的 MouseLeave 处理
-        }
         else
         {
-            // 鼠标移到了非内容列，立即隐藏
             PreviewPopup.Instance.Hide();
         }
     }
@@ -122,7 +116,7 @@ public static class DataGridCopyHelper
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _trackedCell = null;
-        // 不主动调用 Hide()，由浮窗自身的 MouseLeave + 隐藏计时器处理
+        PreviewPopup.Instance.Hide();
     }
 
     private static void OnGridMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -471,7 +465,6 @@ internal sealed class PreviewPopup
     private readonly CopyButton _copyButton;
 
     private DispatcherTimer? _showTimer;
-    private DispatcherTimer? _hideTimer;
     private FrameworkElement? _currentTarget;
     private Border _outerShell = null!;
 
@@ -557,15 +550,12 @@ internal sealed class PreviewPopup
             Focusable = false
         };
 
-        // 鼠标在弹出层上 → 取消隐藏
-        content.MouseEnter += (_, _) => _hideTimer?.Stop();
-        content.MouseLeave += (_, _) => StartHideTimer();
-        _textBox.MouseEnter += (_, _) => _hideTimer?.Stop();
+        // 鼠标离开弹出层 → 立即淡出
+        content.MouseLeave += (_, _) => FadeOutAndClose();
     }
 
     public void Show(FrameworkElement target, string text)
     {
-        _hideTimer?.Stop();
         _showTimer?.Stop();
 
         if (string.IsNullOrWhiteSpace(text))
@@ -593,37 +583,19 @@ internal sealed class PreviewPopup
         _showTimer.Start();
     }
 
-    public void Hide() => StartHideTimer();
+    public void Hide() => FadeOutAndClose();
 
     public void HideImmediate()
     {
         _showTimer?.Stop();
-        _hideTimer?.Stop();
         _outerShell.Opacity = 1;
         _popup.IsOpen = false;
         _currentTarget = null;
     }
 
-    private void StartHideTimer()
-    {
-        _hideTimer?.Stop();
-        _hideTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
-        {
-            Interval = TimeSpan.FromMilliseconds(200)
-        };
-        _hideTimer.Tick += (_, _) =>
-        {
-            _hideTimer.Stop();
-            if (!_popup.IsMouseOver && (_currentTarget == null || !_currentTarget.IsMouseOver))
-            {
-                FadeOutAndClose();
-            }
-        };
-        _hideTimer.Start();
-    }
-
     private void FadeOutAndClose()
     {
+        _showTimer?.Stop();
         var fade = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(150))
         {
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
@@ -688,11 +660,6 @@ public static class ListBoxCopyHelper
             else
                 PreviewPopup.Instance.Hide();
         }
-        else if (item == null)
-        {
-            // 鼠标离开列表项（可能在移向浮窗的间隙中），
-            // 不主动触发隐藏，由浮窗自身的 MouseLeave 处理
-        }
         else
         {
             PreviewPopup.Instance.Hide();
@@ -702,7 +669,7 @@ public static class ListBoxCopyHelper
     private static void OnListBoxMouseLeave(object sender, MouseEventArgs e)
     {
         _trackedItem = null;
-        // 不主动调用 Hide()，由浮窗自身的 MouseLeave + 隐藏计时器处理
+        PreviewPopup.Instance.Hide();
     }
 
     private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
