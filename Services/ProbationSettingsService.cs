@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using EapWorkAssistant.Helpers;
 
 namespace EapWorkAssistant.Services;
 
@@ -23,7 +24,7 @@ public class ProbationSettings
                 return JsonSerializer.Deserialize<ProbationSettings>(json) ?? CreateDefault();
             }
         }
-        catch { }
+        catch (Exception ex) { Logger.Error("加载试用期设置失败，将使用默认值", ex); }
         return CreateDefault();
     }
 

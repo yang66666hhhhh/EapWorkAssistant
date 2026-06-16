@@ -39,7 +39,7 @@
                                 </Border>
                                 <!-- 悬浮编辑遮罩 -->
                                 <Border x:Name="AvatarOverlay" CornerRadius="24"
-                                        Background="#60000000" Visibility="Collapsed">
+                                        Background="{DynamicResource AvatarHeavyOverlayBrush}" Visibility="Collapsed">
                                     <Path Data="{StaticResource IconCamera}" Fill="White"
                                           Width="14" Height="14" Stretch="Uniform"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>

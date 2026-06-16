@@ -265,7 +265,7 @@
                             <TextBlock Text="记录设备问题与解决方案" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
                         </StackPanel>
-                        <Button x:Name="CloseFormBtn" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Click="CloseForm_Click" Style="{StaticResource BtnGhost}"
                                 Padding="8,6">
                             <Button.ToolTip>

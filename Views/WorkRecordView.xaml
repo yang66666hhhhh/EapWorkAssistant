@@ -52,7 +52,7 @@
             </StackPanel>
 
             <!-- ===== Tab 0: 当日记录 ===== -->
-            <Border x:Name="TabDailyContent" Grid.Row="1">
+            <Border Grid.Row="1">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -371,7 +371,7 @@
             </Border>
 
             <!-- ===== Tab 1: 全部记录 ===== -->
-            <Border x:Name="TabAllContent" Grid.Row="1">
+            <Border Grid.Row="1">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -918,7 +918,7 @@
                                 <TextBlock Text="复制上条" FontSize="12"
                                            Foreground="{DynamicResource PrimaryBrush}"/>
                             </Button>
-                            <Button x:Name="CloseFormBtn" Click="CloseForm_Click"
+                            <Button Click="CloseForm_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6">
                                 <Button.ToolTip>
                                     <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板"/>

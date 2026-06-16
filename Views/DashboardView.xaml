@@ -130,7 +130,7 @@
             </Grid>
 
             <!-- ===== 今日提醒 ===== -->
-            <Border x:Name="TodayReminderBorder" CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
+            <Border CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
                     Visibility="{Binding ShowDashReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                     Background="{DynamicResource AccentBannerGradient}">
                 <Border Background="{DynamicResource CardBrush}" CornerRadius="13" Padding="18,14">

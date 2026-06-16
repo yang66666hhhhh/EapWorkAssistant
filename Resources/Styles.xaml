@@ -60,6 +60,10 @@
     <SolidColorBrush x:Key="ScrollThumbBrush" Color="{DynamicResource ScrollThumb}"/>
     <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{DynamicResource ScrollThumbHover}"/>
     <SolidColorBrush x:Key="ScrollThumbActiveBrush" Color="{DynamicResource ScrollThumbActive}"/>
+    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#40000000"/>
+    <SolidColorBrush x:Key="AvatarOverlayBrush" Color="#50000000"/>
+    <SolidColorBrush x:Key="AvatarHeavyOverlayBrush" Color="#60000000"/>
+    <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="#CCFFFFFF"/>
 
     <!-- 渐变画笔 -->
     <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
@@ -1492,7 +1496,7 @@
 
     <!-- 表单遮罩层（深色半透明） -->
     <Style x:Key="OverlayBackdrop" TargetType="Border">
-        <Setter Property="Background" Value="#40000000"/>
+        <Setter Property="Background" Value="{DynamicResource OverlayMaskBrush}"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Cursor" Value="Hand"/>
     </Style>

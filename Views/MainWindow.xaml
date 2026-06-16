@@ -79,7 +79,7 @@
                                     </Border>
                                     <!-- 悬浮编辑提示 -->
                                     <Border x:Name="SidebarAvatarOverlay" CornerRadius="17"
-                                            Background="#50000000" Visibility="Collapsed"
+                                            Background="{DynamicResource AvatarOverlayBrush}" Visibility="Collapsed"
                                             IsHitTestVisible="False">
                                         <Path Data="{StaticResource IconPencil}" Fill="White"
                                               Width="12" Height="12" Stretch="Uniform"
@@ -187,7 +187,7 @@
                  因为 Spotlight 搜索需要 opacity 渐变 + 居中弹出效果，与表单抽屉/日历浮窗的 Visibility 切换机制不同 -->
             <!-- 全屏遮罩 -->
             <Border Panel.ZIndex="50" x:Name="SearchOverlayBorder"
-                    Background="#40000000" MouseLeftButtonDown="SearchOverlay_Click"
+                    Background="{DynamicResource OverlayMaskBrush}" MouseLeftButtonDown="SearchOverlay_Click"
                     Opacity="0">
                 <Border.Style>
                     <Style TargetType="Border">

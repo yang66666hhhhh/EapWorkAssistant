@@ -1,5 +1,6 @@
 using System.Data.SQLite;
 using System.IO;
+using EapWorkAssistant.Helpers;
 
 namespace EapWorkAssistant.Services;
 
@@ -38,9 +39,10 @@ public static class DatabaseBackupService
 
             CleanupOldBackups();
         }
-        catch
+        catch (Exception ex)
         {
-            // Backup failure should not crash the app
+            Logger.Error("数据库备份失败", ex);
+            ToastService.Error("数据库备份失败，数据安全存在风险");
         }
     }
 
@@ -78,9 +80,9 @@ public static class DatabaseBackupService
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Cleanup failure should not crash the app
+            Logger.Error("清理旧备份失败", ex);
         }
     }
 }

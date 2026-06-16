@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:EapWorkAssistant.Models"
-             x:Name="Root"
              FontFamily="{StaticResource DefaultFont}">
 
     <UserControl.Resources>
@@ -187,7 +186,7 @@
                                 <Condition Binding="{Binding IsCurrentMonth}" Value="False"/>
                                 <Condition Binding="{Binding IsSelected}" Value="True"/>
                             </MultiDataTrigger.Conditions>
-                            <Setter TargetName="dayText" Property="Foreground" Value="#CCFFFFFF"/>
+                            <Setter TargetName="dayText" Property="Foreground" Value="{DynamicResource TextOnPrimaryBrush}"/>
                         </MultiDataTrigger>
 
                         <!-- ====== 周末（当月、未选中、非今天）: 柔和灰紫 ====== -->

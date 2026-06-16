@@ -1,3 +1,4 @@
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
@@ -88,7 +89,7 @@ public partial class MainWindow : Window
         AddBinding(cfg.ShortcutSave, Key.S, cfg.ShortcutSaveEnabled, () =>
         {
             if (DataContext is MainViewModel vm && vm.CurrentView is WorkRecordViewModel wr)
-                _ = wr.SaveRecordCommand.ExecuteAsync(null);
+                wr.SaveRecordCommand.ExecuteAsync(null).SafeFire("保存记录失败");
         });
 
         // 视图切换 1~5
@@ -143,7 +144,7 @@ public partial class MainWindow : Window
         {
             if (DataContext is MainViewModel vm)
             {
-                _ = vm.SearchCommand.ExecuteAsync(null);
+                vm.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
             }
         }
     }

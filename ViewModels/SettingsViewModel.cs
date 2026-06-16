@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
@@ -155,7 +156,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         // 监听主题变化
         ThemeService.Instance.PropertyChanged += OnThemeServiceChanged;
 
-        _ = RefreshAsync();
+        RefreshAsync().SafeFire("加载设置失败");
     }
 
     public Task RefreshAsync()

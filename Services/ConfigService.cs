@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using EapWorkAssistant.Helpers;
 
 namespace EapWorkAssistant.Services;
 
@@ -139,7 +140,7 @@ public class ConfigService
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) { Logger.Error("加载配置文件失败，将使用默认配置", ex); }
 
             // 默认配置
             _data = new ConfigData

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using LiveChartsCore;
@@ -412,7 +413,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         var settings = ProbationSettings.Load();
         settings.StartDate = startDate.ToString("yyyy-MM-dd");
         settings.Save();
-        _ = LoadDashboardAsync();
+        LoadDashboardAsync().SafeFire("加载仪表盘数据失败");
     }
 
     /// <summary>柱状图点击：跳转到对应日期的工作记录</summary>
