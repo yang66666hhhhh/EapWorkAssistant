@@ -581,9 +581,8 @@
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                            <Setter Property="TextWrapping" Value="NoWrap"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding Content}"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>

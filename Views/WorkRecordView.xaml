@@ -272,29 +272,12 @@
                                 <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Width="36">
+                                <DataGridTemplateColumn Width="36"
+                                                        CellTemplate="{StaticResource HighlightStarCell}">
                                     <DataGridTemplateColumn.Header>
                                         <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
                                               Width="13" Height="13" Stretch="Uniform"/>
                                     </DataGridTemplateColumn.Header>
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                                  Width="13" Height="13" Stretch="Uniform"
-                                                  HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Path.Style>
-                                                    <Style TargetType="Path">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsHighlight}" Value="1">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Path.Style>
-                                            </Path>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="130"/>
                                 <!-- 类型 - 彩色标签 -->
@@ -303,9 +286,12 @@
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                            <Setter Property="TextWrapping" Value="NoWrap"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip">
+                                                <Setter.Value>
+                                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
+                                                </Setter.Value>
+                                            </Setter>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -547,10 +533,8 @@
                                 <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextSecondaryBrush}"
                                       Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.6"/>
                                 <TextBox Text="{Binding SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource Input}" Width="320"
-                                         FontSize="12.5" Padding="8,6"
-                                         Tag="搜索记录内容、任务、类型..."
-                                         VerticalContentAlignment="Center"/>
+                                         Style="{StaticResource SearchInput}" Width="320"
+                                         FontSize="12.5" Padding="8,6"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -685,13 +669,19 @@
                                                 VerticalAlignment="Center">
                                         <!-- 首页 -->
                                         <Button Command="{Binding FirstPageCommand}"
-                                                Style="{StaticResource PageNavButton}" ToolTip="首页">
+                                                Style="{StaticResource PageNavButton}">
+                                            <Button.ToolTip>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="首页"/>
+                                            </Button.ToolTip>
                                             <Path Data="{StaticResource IconSkipFirst}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="14" Height="14" Stretch="Uniform"/>
                                         </Button>
                                         <!-- 上一页 -->
                                         <Button Command="{Binding PrevPageCommand}"
-                                                Style="{StaticResource PageNavButton}" ToolTip="上一页">
+                                                Style="{StaticResource PageNavButton}">
+                                            <Button.ToolTip>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="上一页"/>
+                                            </Button.ToolTip>
                                             <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="16" Height="16" Stretch="Uniform"/>
                                         </Button>
@@ -710,30 +700,9 @@
                                                     <Button Content="{Binding}"
                                                             Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Margin="1,0" Width="32" Height="32" Padding="0"
-                                                            FontFamily="{StaticResource DefaultFont}" FontSize="12.5"
-                                                            FontWeight="Medium" Cursor="Hand"
-                                                            Foreground="{DynamicResource TextSecondaryBrush}">
-                                                        <Button.Template>
-                                                            <ControlTemplate TargetType="Button">
-                                                                <Border x:Name="pbg" CornerRadius="8"
-                                                                        Background="Transparent"
-                                                                        Padding="{TemplateBinding Padding}">
-                                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                                      VerticalAlignment="Center"/>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter TargetName="pbg" Property="Background"
-                                                                                Value="{DynamicResource SurfaceHoverBrush}"/>
-                                                                        <Setter Property="Foreground"
-                                                                                Value="{DynamicResource PrimaryBrush}"/>
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Button.Template>
+                                                            Margin="1,0">
                                                         <Button.Style>
-                                                            <Style TargetType="Button">
+                                                            <Style TargetType="Button" BasedOn="{StaticResource PageNumberButton}">
                                                                 <Style.Triggers>
                                                                     <!-- 省略号（值为0）禁用点击 -->
                                                                     <DataTrigger Binding="{Binding}" Value="0">
@@ -757,6 +726,7 @@
                                                                         </DataTrigger.Binding>
                                                                         <Setter Property="Foreground" Value="White"/>
                                                                         <Setter Property="FontWeight" Value="Bold"/>
+                                                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                                                                         <Setter Property="Template">
                                                                             <Setter.Value>
                                                                                 <ControlTemplate TargetType="Button">
@@ -782,13 +752,19 @@
 
                                         <!-- 下一页 -->
                                         <Button Command="{Binding NextPageCommand}"
-                                                Style="{StaticResource PageNavButton}" ToolTip="下一页">
+                                                Style="{StaticResource PageNavButton}">
+                                            <Button.ToolTip>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="下一页"/>
+                                            </Button.ToolTip>
                                             <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="16" Height="16" Stretch="Uniform"/>
                                         </Button>
                                         <!-- 末页 -->
                                         <Button Command="{Binding LastPageCommand}"
-                                                Style="{StaticResource PageNavButton}" ToolTip="末页">
+                                                Style="{StaticResource PageNavButton}">
+                                            <Button.ToolTip>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="末页"/>
+                                            </Button.ToolTip>
                                             <Path Data="{StaticResource IconSkipLast}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="14" Height="14" Stretch="Uniform"/>
                                         </Button>
@@ -820,29 +796,12 @@
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="125"/>
-                                    <DataGridTemplateColumn Width="36">
+                                    <DataGridTemplateColumn Width="36"
+                                                            CellTemplate="{StaticResource HighlightStarCell}">
                                         <DataGridTemplateColumn.Header>
                                             <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
                                                   Width="13" Height="13" Stretch="Uniform"/>
                                         </DataGridTemplateColumn.Header>
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                                      Width="13" Height="13" Stretch="Uniform"
-                                                      HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Path.Style>
-                                                        <Style TargetType="Path">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsHighlight}" Value="1">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Path.Style>
-                                                </Path>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                     <!-- 任务（带搜索高亮） -->
                                     <DataGridTemplateColumn Header="任务" Width="120" ClipboardContentBinding="{Binding ProjectName}">
@@ -864,7 +823,11 @@
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center"/>
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.ToolTip>
+                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
+                                                    </TextBlock.ToolTip>
+                                                </TextBlock>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -912,26 +875,15 @@
             </Border>
         </Grid>
 
-        <!-- ===== 日历浮窗（使用覆盖层，避免 Popup 渲染问题） ===== -->
+        <!-- ===== 共享日历浮窗（当日记录 + 全部记录筛选共用） ===== -->
         <Border x:Name="CalendarBackdrop" Style="{StaticResource CalendarOverlay}"
                 MouseLeftButtonDown="CalendarBackdrop_Click"
                 Panel.ZIndex="50"/>
         <Border x:Name="CalendarContainer" Style="{StaticResource FloatingPanel}"
                 Margin="20,90,0,0" Panel.ZIndex="51"
                 Width="310">
-            <views:CustomCalendar x:Name="CustomCal"
+            <views:CustomCalendar x:Name="SharedCal"
                                   SelectedDate="{Binding SelectedDate, Mode=TwoWay}"/>
-        </Border>
-
-        <!-- ===== 筛选日历浮窗（全部记录 Tab 用） ===== -->
-        <Border x:Name="FilterCalendarBackdrop" Style="{StaticResource CalendarOverlay}"
-                MouseLeftButtonDown="FilterCalendarBackdrop_Click"
-                Panel.ZIndex="50" Visibility="Collapsed"/>
-        <Border x:Name="FilterCalendarContainer" Style="{StaticResource FloatingPanel}"
-                Margin="20,90,0,0" Panel.ZIndex="51"
-                Width="310" Visibility="Collapsed">
-            <views:CustomCalendar x:Name="FilterCal"
-                                  SelectedDateChanged="FilterCal_SelectedDateChanged"/>
         </Border>
 
         <!-- ===== 遮罩层 ===== -->
@@ -956,8 +908,10 @@
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <Button x:Name="TemplateBtn" Style="{StaticResource BtnGhost}" Padding="8,6"
-                                    ToolTip="使用模板填充内容">
+                            <Button x:Name="TemplateBtn" Style="{StaticResource BtnGhost}" Padding="8,6">
+                                <Button.ToolTip>
+                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="使用模板填充内容"/>
+                                </Button.ToolTip>
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
                                         <Path Data="{StaticResource IconList}" Fill="{DynamicResource PrimaryBrush}"
@@ -967,12 +921,18 @@
                                 </Button.Content>
                             </Button>
                             <Button x:Name="CopyLastBtn" Click="CopyLast_Click"
-                                    Style="{StaticResource BtnGhost}" Padding="8,6" ToolTip="复制上一条记录的任务和类型">
+                                    Style="{StaticResource BtnGhost}" Padding="8,6">
+                                <Button.ToolTip>
+                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="复制上一条记录的任务和类型"/>
+                                </Button.ToolTip>
                                 <TextBlock Text="复制上条" FontSize="12"
                                            Foreground="{DynamicResource PrimaryBrush}"/>
                             </Button>
                             <Button x:Name="CloseFormBtn" Click="CloseForm_Click"
-                                    Style="{StaticResource BtnGhost}" Padding="8,6" ToolTip="关闭面板">
+                                    Style="{StaticResource BtnGhost}" Padding="8,6">
+                                <Button.ToolTip>
+                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板"/>
+                                </Button.ToolTip>
                                 <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
                                       Width="14" Height="14" Stretch="Uniform"/>
                             </Button>

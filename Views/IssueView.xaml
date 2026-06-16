@@ -36,12 +36,8 @@
                                 <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextSecondaryBrush}"
                                       Width="13" Height="13" Stretch="Uniform"
                                       VerticalAlignment="Center" Margin="8,0,6,0" Opacity="0.45"/>
-                                <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180" BorderThickness="0"
-                                         Background="Transparent" VerticalContentAlignment="Center"
-                                         Foreground="{DynamicResource TextPrimaryBrush}"
-                                         CaretBrush="{DynamicResource PrimaryBrush}"
-                                         Padding="4,7" FontSize="13"
-                                         FontFamily="{StaticResource DefaultFont}"/>
+                                <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180"
+                                         Style="{StaticResource SearchInput}"/>
                             </Grid>
                         </Border>
                         <Button Content="搜索" Command="{Binding SearchCommand}"
@@ -79,17 +75,31 @@
                             <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="120"/>
-                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="160">
+                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="100"/>
+                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="120">
                                 <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                        <Setter Property="TextWrapping" Value="NoWrap"/>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Title}"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" MinWidth="60">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Description}"/>
+                                            </Setter.Value>
+                                        </Setter>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                             <!-- 状态 - 彩色标签 -->
-                            <DataGridTemplateColumn Header="状态" Width="80" ClipboardContentBinding="{Binding Status}">
+                            <DataGridTemplateColumn Header="状态" Width="90" ClipboardContentBinding="{Binding Status}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
@@ -136,7 +146,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <!-- 优先级 -->
-                            <DataGridTemplateColumn Header="优先级" Width="70" ClipboardContentBinding="{Binding Priority}">
+                            <DataGridTemplateColumn Header="优先级" Width="65" ClipboardContentBinding="{Binding Priority}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
@@ -161,21 +171,47 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="80">
+                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="60">
                                 <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                        <Setter Property="TextWrapping" Value="NoWrap"/>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding RootCause}"/>
+                                            </Setter.Value>
+                                        </Setter>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTemplateColumn Header="操作" Width="140">
+                            <DataGridTextColumn Header="解决方案" Binding="{Binding Solution}" Width="*" MinWidth="60">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Solution}"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="关键词" Binding="{Binding Keywords}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Keywords}"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="操作" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
                                             <Button Content="编辑"
                                                     Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
+                                                    Click="EditRow_Click"
                                                     Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"/>
                                             <Button Content="删除"
                                                     Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
@@ -231,7 +267,10 @@
                         </StackPanel>
                         <Button x:Name="CloseFormBtn" HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Click="CloseForm_Click" Style="{StaticResource BtnGhost}"
-                                Padding="8,6" ToolTip="关闭面板">
+                                Padding="8,6">
+                            <Button.ToolTip>
+                                <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板"/>
+                            </Button.ToolTip>
                             <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
                                   Width="14" Height="14" Stretch="Uniform"/>
                         </Button>

@@ -790,6 +790,114 @@
     <!-- 全局隐式 ScrollViewer 样式：所有 ScrollViewer 自动使用现代化滚动条 -->
     <Style TargetType="ScrollViewer" BasedOn="{StaticResource ModernScrollViewer}"/>
 
+    <!-- DataGrid 文本截断基础样式（TextTrimming + NoWrap） -->
+    <!-- 使用方式：BasedOn="{StaticResource GridTextTrim}" 后添加列特有 ToolTip Setter -->
+    <Style x:Key="GridTextTrim" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Setter Property="TextWrapping" Value="NoWrap"/>
+    </Style>
+
+    <!-- 亮点星标单元格模板（用于 DataGridTemplateColumn.CellTemplate） -->
+    <DataTemplate x:Key="HighlightStarCell">
+        <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
+              Width="13" Height="13" Stretch="Uniform"
+              HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Path.Style>
+                <Style TargetType="Path">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsHighlight}" Value="1">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Path.Style>
+        </Path>
+    </DataTemplate>
+
+    <!-- 无边框搜索输入框（嵌入在带搜索图标的容器内使用） -->
+    <Style x:Key="SearchInput" TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Padding" Value="4,7"/>
+    </Style>
+
+    <!-- 侧栏导航按钮 -->
+    <Style x:Key="NavButton" TargetType="RadioButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="item" Background="Transparent" CornerRadius="10" Margin="8,2"
+                            Padding="14,11" Cursor="Hand">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Path x:Name="ico" Data="{TemplateBinding Tag}" Fill="{DynamicResource SidebarTextBrush}"
+                                  Width="16" Height="16" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="txt" Grid.Column="1"
+                                       Text="{TemplateBinding Content}" Margin="12,0,0,0"
+                                       FontSize="13" FontWeight="Medium"
+                                       Foreground="{DynamicResource SidebarTextBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsChecked" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                        </MultiTrigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
+                            <Setter TargetName="ico" Property="Fill" Value="White"/>
+                            <Setter TargetName="txt" Property="Foreground" Value="White"/>
+                            <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 切换芯片按钮（如员工类型选择） -->
+    <Style x:Key="ToggleChip" TargetType="RadioButton">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="chip" CornerRadius="8" Padding="0,8"
+                            Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="chip" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- DataGrid -->
     <Style x:Key="ModernGrid" TargetType="DataGrid">
         <Style.Resources>
@@ -1415,6 +1523,38 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource ShadowLg}"/>
+    </Style>
+
+    <!-- ToolTip（统一悬浮提示样式，卡片风格 + 柔和阴影） -->
+    <Style x:Key="ModernToolTip" TargetType="ToolTip">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="MaxWidth" Value="360"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}"
+                            Effect="{StaticResource ShadowMd}">
+                        <ContentControl Content="{TemplateBinding Content}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"
+                                               FontFamily="{StaticResource DefaultFont}"
+                                               FontSize="{StaticResource SmallFontSize}"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- ==================== 共享表格列模板 ==================== -->

@@ -41,6 +41,18 @@ public partial class IssueView : UserControl
             vm.CurrentItem = new EapWorkAssistant.Models.Issue();
             vm.IsFormDirty = false;
         }
+        OpenDrawer();
+    }
+
+    private void EditRow_Click(object sender, RoutedEventArgs e)
+    {
+        // EditCommand 已通过 Command 绑定执行，此处只需打开抽屉
+        OpenDrawer();
+    }
+
+    private void OpenDrawer()
+    {
+        if (_isDrawerOpen) return;
         _isDrawerOpen = true;
         DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
     }

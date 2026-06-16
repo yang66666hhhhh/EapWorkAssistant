@@ -73,32 +73,7 @@ public partial class DashboardView : UserControl
                 CustomCal.SelectedDate = vm.CalendarDate;
                 CustomCal.SyncDisplay();
             }
-
-            // 计算浮窗位置（响应式：空间不够时向上弹出）
-            var buttonPos = ProbDateBtn.TransformToAncestor(this)
-                .Transform(new System.Windows.Point(0, 0));
-
-            const double calWidth = 310;
-            const double calHeight = 290;
-            double viewWidth = this.ActualWidth;
-            double viewHeight = this.ActualHeight;
-
-            // 水平：默认右对齐到按钮，超出左边界则修正
-            double x = buttonPos.X + ProbDateBtn.ActualWidth - calWidth;
-            if (x < 8) x = 8;
-            if (x + calWidth > viewWidth - 8) x = viewWidth - calWidth - 8;
-
-            // 垂直：优先在按钮下方，空间不够则放在按钮上方
-            double y = buttonPos.Y + ProbDateBtn.ActualHeight + 6;
-            if (y + calHeight > viewHeight - 8)
-            {
-                y = buttonPos.Y - calHeight - 6;
-            }
-            if (y < 8) y = 8;
-
-            CalendarContainer.Margin = new Thickness(x, y, 0, 0);
-            CalendarBackdrop.Visibility = Visibility.Visible;
-            CalendarContainer.Visibility = Visibility.Visible;
+            CalendarHelper.Show(CalendarBackdrop, CalendarContainer, ProbDateBtn, this);
         }
     }
 
@@ -109,7 +84,6 @@ public partial class DashboardView : UserControl
 
     private void CloseCalendar()
     {
-        CalendarContainer.Visibility = Visibility.Collapsed;
-        CalendarBackdrop.Visibility = Visibility.Collapsed;
+        CalendarHelper.Close(CalendarBackdrop, CalendarContainer);
     }
 }

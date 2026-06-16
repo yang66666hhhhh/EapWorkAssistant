@@ -85,7 +85,10 @@
                                     <DataTemplate>
                                         <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,8,0"
                                                 Cursor="Hand" MouseLeftButtonDown="AccentColor_Click"
-                                                Tag="{Binding Name}" ToolTip="{Binding Name}">
+                                                Tag="{Binding Name}">
+                                            <Border.ToolTip>
+                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Name}"/>
+                                            </Border.ToolTip>
                                             <Border.Background>
                                                 <SolidColorBrush Color="{Binding PreviewColor}"/>
                                             </Border.Background>
@@ -119,17 +122,26 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Border x:Name="FontSizeSmallBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click" ToolTip="小号字体">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="小号字体"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="小" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="FontSizeMediumBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click" ToolTip="标准字体">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="标准字体"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="标准" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="FontSizeLargeBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click" ToolTip="大号字体">
+                                        BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="大号字体"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="大" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                             </StackPanel>
@@ -148,17 +160,26 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Border x:Name="DensityCompactBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click" ToolTip="紧凑布局 - 减少间距">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="紧凑布局 - 减少间距"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="紧凑" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="DensityDefaultBtn" CornerRadius="6" Padding="12,6" Margin="0,0,4,0" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click" ToolTip="标准布局 - 默认间距">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="标准布局 - 默认间距"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="标准" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                                 <Border x:Name="DensityComfortableBtn" CornerRadius="6" Padding="12,6" Cursor="Hand"
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click" ToolTip="宽松布局 - 增加间距">
+                                        BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click">
+                                    <Border.ToolTip>
+                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="宽松布局 - 增加间距"/>
+                                    </Border.ToolTip>
                                     <TextBlock Text="宽松" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
                             </StackPanel>

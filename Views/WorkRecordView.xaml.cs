@@ -3,22 +3,21 @@ using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace EapWorkAssistant.Views;
 
 public partial class WorkRecordView : UserControl
 {
     private bool _isDrawerOpen;
-    private enum FilterDateField { Start, End }
-    private FilterDateField _activeFilterField;
+    private enum CalendarMode { Daily, FilterStart, FilterEnd }
+    private CalendarMode _calendarMode;
 
     public WorkRecordView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => SyncDateDisplay();
-        CustomCal.SelectedDateChanged += OnCustomCalendarDateChanged;
+        SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -58,7 +57,7 @@ public partial class WorkRecordView : UserControl
         Dispatcher.Invoke(() =>
         {
             DateDisplayText.Text = date.ToString("yyyy-MM-dd");
-            CustomCal.SelectedDate = date;
+            SharedCal.SelectedDate = date;
         });
     }
 
@@ -67,7 +66,7 @@ public partial class WorkRecordView : UserControl
         if (DataContext is WorkRecordViewModel vm)
         {
             DateDisplayText.Text = vm.SelectedDate.ToString("yyyy-MM-dd");
-            CustomCal.SelectedDate = vm.SelectedDate;
+            SharedCal.SelectedDate = vm.SelectedDate;
             SyncFilterDateDisplay(vm);
         }
     }
@@ -88,14 +87,25 @@ public partial class WorkRecordView : UserControl
         }
     }
 
-    private void OnCustomCalendarDateChanged(object? sender, DateTime date)
+    private void OnSharedCalendarDateChanged(object? sender, DateTime date)
     {
         if (DataContext is WorkRecordViewModel vm)
         {
-            vm.SelectedDate = date;
-            DateDisplayText.Text = date.ToString("yyyy-MM-dd");
-            CloseCalendar();
+            switch (_calendarMode)
+            {
+                case CalendarMode.Daily:
+                    // TwoWay 绑定已自动更新 vm.SelectedDate，只需更新显示文本
+                    DateDisplayText.Text = date.ToString("yyyy-MM-dd");
+                    break;
+                case CalendarMode.FilterStart:
+                    vm.FilterStartDate = date;
+                    break;
+                case CalendarMode.FilterEnd:
+                    vm.FilterEndDate = date;
+                    break;
+            }
         }
+        CloseCalendar();
     }
 
     private void CalendarToggle_Click(object sender, RoutedEventArgs e)
@@ -106,22 +116,19 @@ public partial class WorkRecordView : UserControl
         }
         else
         {
+            _calendarMode = CalendarMode.Daily;
             if (DataContext is WorkRecordViewModel vm)
             {
-                CustomCal.SelectedDate = vm.SelectedDate;
-                CustomCal.SyncDisplay();
+                SharedCal.SelectedDate = vm.SelectedDate;
+                SharedCal.SyncDisplay();
             }
-            // 计算浮窗位置（对齐到按钮下方）
-            UpdateCalendarPosition();
-            CalendarBackdrop.Visibility = Visibility.Visible;
-            CalendarContainer.Visibility = Visibility.Visible;
+            ShowCalendar(CalendarToggleBtn);
         }
     }
 
     private void CloseCalendar()
     {
-        CalendarContainer.Visibility = Visibility.Collapsed;
-        CalendarBackdrop.Visibility = Visibility.Collapsed;
+        CalendarHelper.Close(CalendarBackdrop, CalendarContainer);
     }
 
     private void CalendarBackdrop_Click(object sender, MouseButtonEventArgs e)
@@ -129,30 +136,9 @@ public partial class WorkRecordView : UserControl
         CloseCalendar();
     }
 
-    private void UpdateCalendarPosition()
+    private void ShowCalendar(FrameworkElement anchorButton)
     {
-        // 获取按钮相对于最外层 Grid 的位置
-        var buttonPos = CalendarToggleBtn.TransformToAncestor(this)
-            .Transform(new System.Windows.Point(0, 0));
-
-        const double calWidth = 310;
-        const double calHeight = 290;
-        double viewWidth = this.ActualWidth;
-        double viewHeight = this.ActualHeight;
-
-        // 水平：默认居中于按钮，超出边界则修正
-        double x = Math.Max(8, buttonPos.X - 100);
-        if (x + calWidth > viewWidth - 8) x = viewWidth - calWidth - 8;
-
-        // 垂直：优先在按钮下方，空间不够则放在按钮上方
-        double y = buttonPos.Y + CalendarToggleBtn.ActualHeight + 6;
-        if (y + calHeight > viewHeight - 8)
-        {
-            y = buttonPos.Y - calHeight - 6;
-        }
-        if (y < 8) y = 8;
-
-        CalendarContainer.Margin = new Thickness(x, y, 0, 0);
+        CalendarHelper.Show(CalendarBackdrop, CalendarContainer, anchorButton, this);
     }
 
     // ===== 浮窗抽屉动画 =====
@@ -219,72 +205,28 @@ public partial class WorkRecordView : UserControl
             vm.SelectedTabIndex = 1;
     }
 
-    // ===== 筛选日历 =====
+    // ===== 筛选日历（复用共享日历浮窗） =====
 
     private void FilterStart_Click(object sender, RoutedEventArgs e)
     {
-        _activeFilterField = FilterDateField.Start;
-        OpenFilterCalendar();
+        _calendarMode = CalendarMode.FilterStart;
+        var date = DataContext is WorkRecordViewModel vm
+            ? (vm.FilterStartDate ?? DateTime.Now)
+            : DateTime.Now;
+        SharedCal.SelectedDate = date;
+        SharedCal.SyncDisplay();
+        ShowCalendar(FilterStartBtn);
     }
 
     private void FilterEnd_Click(object sender, RoutedEventArgs e)
     {
-        _activeFilterField = FilterDateField.End;
-        OpenFilterCalendar();
-    }
-
-    private void OpenFilterCalendar()
-    {
-        if (DataContext is WorkRecordViewModel vm)
-        {
-            var currentDate = _activeFilterField == FilterDateField.Start
-                ? (vm.FilterStartDate ?? DateTime.Now)
-                : (vm.FilterEndDate ?? DateTime.Now);
-            FilterCal.SelectedDate = currentDate;
-            FilterCal.SyncDisplay();
-        }
-
-        var button = _activeFilterField == FilterDateField.Start ? FilterStartBtn : FilterEndBtn;
-        var buttonPos = button.TransformToAncestor(this).Transform(new System.Windows.Point(0, 0));
-
-        const double calWidth = 310;
-        const double calHeight = 290;
-        double viewWidth = this.ActualWidth;
-        double viewHeight = this.ActualHeight;
-
-        double x = Math.Max(8, buttonPos.X - 60);
-        if (x + calWidth > viewWidth - 8) x = viewWidth - calWidth - 8;
-
-        double y = buttonPos.Y + button.ActualHeight + 6;
-        if (y + calHeight > viewHeight - 8) y = buttonPos.Y - calHeight - 6;
-        if (y < 8) y = 8;
-
-        FilterCalendarContainer.Margin = new Thickness(x, y, 0, 0);
-        FilterCalendarBackdrop.Visibility = Visibility.Visible;
-        FilterCalendarContainer.Visibility = Visibility.Visible;
-    }
-
-    private void FilterCal_SelectedDateChanged(object? sender, DateTime date)
-    {
-        if (DataContext is WorkRecordViewModel vm)
-        {
-            if (_activeFilterField == FilterDateField.Start)
-                vm.FilterStartDate = date;
-            else
-                vm.FilterEndDate = date;
-        }
-        CloseFilterCalendar();
-    }
-
-    private void FilterCalendarBackdrop_Click(object sender, MouseButtonEventArgs e)
-    {
-        CloseFilterCalendar();
-    }
-
-    private void CloseFilterCalendar()
-    {
-        FilterCalendarBackdrop.Visibility = Visibility.Collapsed;
-        FilterCalendarContainer.Visibility = Visibility.Collapsed;
+        _calendarMode = CalendarMode.FilterEnd;
+        var date = DataContext is WorkRecordViewModel vm
+            ? (vm.FilterEndDate ?? DateTime.Now)
+            : DateTime.Now;
+        SharedCal.SelectedDate = date;
+        SharedCal.SyncDisplay();
+        ShowCalendar(FilterEndBtn);
     }
 
     private void CloseDrawer()

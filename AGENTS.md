@@ -133,17 +133,97 @@ EapWorkAssistant/
 - 密度相关资源键：`DensityCardPad`, `DensityRowPad`, `DensityRowPadSm`, `DensityListPad`, `DensitySectionMargin`, `DensityRowMargin`, `DensityItemMargin`
 - 字号缩放应用于 `MainContentArea` Grid（MainWindow 中 x:Name="MainContentArea"）
 
-### 组件复用规范
-- **禁止使用 WPF 原生控件**：当项目已有自定义组件时，必须优先复用，不得引入 WPF 原生控件（如 `DatePicker`、`Calendar` 等）
-- 已有可复用组件：
-  - `CustomCalendar`（`Views/CustomCalendar.xaml`）：日期选择，支持月份导航、有记录日期标记、今日快捷。所有需要日期选择的场景必须使用此组件，配合浮窗覆盖层模式
-  - `ConfirmDialog`（`Views/ConfirmDialog.xaml`）：确认对话框，支持 Danger/Warning/Info 类型
-  - `ConfigItemDialog`（`Views/ConfigItemDialog.xaml`）：配置项编辑对话框
-  - `ProfileDialog`（`Views/ProfileDialog.xaml`）：个人信息编辑对话框
-- 新增 UI 功能前，先检查 `Views/` 和 `Resources/Styles.xaml` 中是否已有可复用的组件或样式
+### 组件复用规范（核心原则：先查后建）
+
+**强制执行流程 — 任何新增样式或组件前，必须走完以下 3 步：**
+
+1. **查**：先读取 `Resources/Styles.xaml` 全文，搜索是否已有满足需求的样式或模板
+2. **判**：评估已有样式是否能直接使用，或通过 `BasedOn` 扩展 / 局部覆盖满足需求
+3. **建**：仅当确实没有可复用的样式时，才创建新样式，且**必须定义在 `Resources/Styles.xaml` 中作为共享样式**，禁止在 View 中内联定义仅该页面使用的样式
+
+**判断决策树：**
+```
+需要新样式/组件？
+├── Styles.xaml 中已有完全匹配的？→ 直接引用 StaticResource
+├── 已有样式差一点能满足？→ 用 BasedOn 继承扩展，或加参数化变体
+├── 已有类似功能但视觉不同？→ 评估是否可合并为一组变体（如 Tag/TagPrimary/TagSuccess）
+└── 确认不存在任何可复用的？→ 在 Styles.xaml 中新建共享样式，附带中文注释说明用途
+```
+
+**禁止行为：**
+- ❌ 在 View 的 `<UserControl.Resources>` 中定义仅该页面使用的样式（除非确实全局唯一且不会被复用）
+- ❌ 在不同 View 中复制粘贴相同的内联样式而不抽取为共享样式
+- ❌ 创建与 `Styles.xaml` 中已有样式功能重复的新样式
+- ❌ 硬编码颜色值、圆角值、阴影参数（必须引用 Styles.xaml 中定义的资源键）
+
+**已有可复用组件清单（Views/ 目录）：**
+- `CustomCalendar`（`Views/CustomCalendar.xaml`）：日期选择，支持月份导航、有记录日期标记、今日快捷。所有需要日期选择的场景必须使用此组件，配合浮窗覆盖层模式
+- `ConfirmDialog`（`Views/ConfirmDialog.xaml`）：确认对话框，支持 Danger/Warning/Info 类型
+- `ConfigItemDialog`（`Views/ConfigItemDialog.xaml`）：配置项编辑对话框
+- `ProfileDialog`（`Views/ProfileDialog.xaml`）：个人信息编辑对话框
+
+**已有可复用样式清单（Resources/Styles.xaml）：**
+
+| 样式键（x:Key） | 目标控件 | 用途 |
+|---|---|---|
+| `BtnPrimary` | Button | 主操作按钮（紫色实心） |
+| `BtnSecondary` | Button | 次要操作按钮（描边） |
+| `BtnSuccess` | Button | 成功/正向操作按钮 |
+| `BtnWarning` | Button | 警告操作按钮 |
+| `BtnDanger` | Button | 危险操作按钮 |
+| `BtnGhost` | ButtonBase | 幽灵/文字按钮（透明背景） |
+| `Input` | TextBox | 单行输入框 |
+| `TextArea` | TextBox | 多行输入框（基于 Input 扩展） |
+| `Select` | ComboBox | 下拉选择框 |
+| `Label` | TextBlock | 表单字段标签 |
+| `Heading1/2/3` | TextBlock | 三级标题样式 |
+| `Card` | Border | 卡片容器 |
+| `CardElevated` | Border | 带阴影的卡片容器 |
+| `CardHover` | Border | 可交互卡片（悬停高亮） |
+| `Tag` / `TagPrimary/Success/Warning/Danger` | Border | 状态标签（彩色圆角小标签） |
+| `ModernToolTip` | ToolTip | 统一悬浮提示（卡片风格 + 柔和阴影 + 自动换行） |
+| `ModernGrid` | DataGrid | 数据表格基础样式 |
+| `ModernGridColumnHeader` | DataGridColumnHeader | 表格列头样式 |
+| `ModernGridCell` | DataGridCell | 表格单元格样式 |
+| `ModernGridRow` | DataGridRow | 表格行样式 |
+| `WorkTypeBadgeCell` | DataTemplate | 工作类型彩色标签单元格 |
+| `ProgressBarCell` | DataTemplate | 进度条单元格 |
+| `ModernScrollBar` / `ModernScrollViewer` | ScrollBar/ScrollViewer | 现代化滚动条 |
+| `OverlayBackdrop` | Border | 表单遮罩层（深色半透明） |
+| `CalendarOverlay` | Border | 日历遮罩层（浅色半透明） |
+| `SidePanel` | Border | 右侧滑入表单面板 |
+| `FloatingPanel` | Border | 浮层弹出面板（日历等） |
+| `SectionExpander` | Expander | 现代化折叠面板 |
+| `ToggleSwitch` | ToggleButton | 开关控件 |
+| `DayCheckBox` | CheckBox | 休息日选择复选框 |
+| `PageNumberButton` / `PageNumberActive` | Button | 分页页码按钮 |
+| `PageNavButton` | Button | 翻页导航按钮 |
+| `Divider` | Separator | 分隔线 |
+| `DragSplitter` | GridSplitter | 拖拽分割条 |
+| `StatusDot` | Ellipse | 圆点状态指示 |
+| `IconCircle` | Border | 圆形图标背景 |
+| `GridTextTrim` | TextBlock | DataGrid 文本截断基础样式（TextTrimming+NoWrap），列 ElementStyle 用 `BasedOn` 继承后加 ToolTip |
+| `HighlightStarCell` | DataTemplate | 亮点星标单元格（星形图标 + IsHighlight==1 时可见） |
+| `SearchInput` | TextBox | 无边框搜索输入框（嵌入带搜索图标的容器内使用） |
+| `NavButton` | RadioButton | 侧栏导航按钮（选中态渐变背景 + 白色图标文字） |
+| `ToggleChip` | RadioButton | 切换芯片按钮（如员工类型选择，选中态渐变背景） |
+
+**已有可复用辅助类（Helpers/ 目录）：**
+- `IssueStatusConverter`：问题状态英文→中文映射（Open→待处理）
+- `IssuePriorityConverter`：优先级英文→中文映射（Low→低）
+- `CountToVisibilityConverter`：集合 Count==0 时显示空状态
+- `BoolToVisibilityConverter` / `BoolToIntConverter`：布尔值转换
+- `Highlight`：搜索关键词高亮附加属性
+- `DrawerHelper`：抽屉面板动画（OpenDrawer / CloseDrawer）
+- `CalendarHelper`：日历浮窗定位与关闭（Show / Close），所有日历弹出都应通过此工具类
+
+**统一引用规则：**
 - 按钮样式统一使用 `BtnPrimary`、`BtnSecondary`、`BtnSuccess`、`BtnWarning`、`BtnGhost`、`BtnDanger`
 - ComboBox 统一使用 `Select` 样式
-- TextBox 统一使用 `Input`（单行）或 `TextArea`（多行）样式
+- TextBox 统一使用 `Input`（单行）或 `TextArea`（多行）样式；搜索输入框（搭配搜索图标时）使用 `SearchInput` 样式
+- ToolTip 统一使用 `ModernToolTip` 样式，配合 `Content="{Binding 字段名}"` 绑定内容
+- DataGrid 必须使用 `ModernGrid` + `ModernGridColumnHeader` + `ModernGridCell` + `ModernGridRow` 组合
+- 禁止使用 WPF 原生控件：当项目已有自定义组件时，必须优先复用，不得引入 WPF 原生控件（如 `DatePicker`、`Calendar` 等）
 
 ### ToggleButton 陷阱
 - WPF ToggleButton 的 `Click` 事件会在 `IsChecked` 自动切换**之后**触发
@@ -361,6 +441,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 15. **批量数据库写入必须包裹在事务中**：使用 `BeginTransaction/Commit/Rollback`
 16. **禁止移除全局异常处理**：`App.xaml.cs` 中的 `DispatcherUnhandledException`、`AppDomain.UnhandledException`、`TaskScheduler.UnobservedTaskException` 是发布质量的底线保障
 17. **关键服务禁止静默吞异常**：`ConfigService.Save`、`ProfileService.Save/SaveAvatar` 等写操作必须 catch 并用 `ToastService.Error` 通知用户
+18. **禁止创建重复样式**：新增任何样式/组件前，必须先读取 `Resources/Styles.xaml` 检查是否已有可复用的样式。已有则直接引用，差一点则基于扩展，确实不存在才新建且必须放入 Styles.xaml 作为共享样式。详见"组件复用规范"章节
 
 ## 代码审查清单
 
@@ -375,9 +456,18 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 是否有遗留的 TODO 或临时调试代码？
 
 **组件复用：**
+- [ ] 新增样式前是否已读取 `Resources/Styles.xaml`，确认无已有可复用样式？
+- [ ] 新创建的样式是否已放入 `Styles.xaml` 作为共享样式（而非 View 内联）？
 - [ ] 是否复用了已有的自定义组件（CustomCalendar、ConfirmDialog 等），而非引入 WPF 原生控件？
+- [ ] DataGrid 是否使用了 `ModernGrid` 系列样式？ToolTip 是否使用了 `ModernToolTip`？
 - [ ] ToggleButton 是否使用了 PreviewMouseLeftButtonDown？
 - [ ] ComboBox 是否使用了 Select 样式？（包括 Opacity=0 的覆盖层 ComboBox）
+- [ ] 多个 View 中出现相同内联样式时，是否已抽取为 Styles.xaml 中的共享样式？
+- [ ] DataGrid 列的 ElementStyle 是否 `BasedOn="{StaticResource GridTextTrim}"` 后加列特有 ToolTip？
+- [ ] 搜索框是否使用了 `SearchInput` 样式？导航栏是否使用了 `NavButton`？
+- [ ] 星标列是否使用了 `HighlightStarCell` DataTemplate？
+- [ ] 所有 ToolTip 是否统一使用了 `ModernToolTip` 样式（而非纯字符串 `ToolTip="..."`）？
+- [ ] 日历浮窗是否通过 `CalendarHelper.Show()` / `CalendarHelper.Close()` 管理定位与显隐？
 
 **WPF/XAML：**
 - [ ] DynamicResource 是否用于了 Thickness 类型（而非 sys:Double）？
