@@ -286,13 +286,7 @@
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                            <Setter Property="ToolTip">
-                                                <Setter.Value>
-                                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
@@ -823,11 +817,7 @@
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
-                                                    </TextBlock.ToolTip>
-                                                </TextBlock>
+                                                           VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>

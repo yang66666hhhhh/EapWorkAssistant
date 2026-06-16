@@ -581,9 +581,7 @@
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                            <Setter Property="ToolTip" Value="{Binding Content}"/>
-                                        </Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
