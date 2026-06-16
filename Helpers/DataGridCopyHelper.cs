@@ -606,7 +606,7 @@ internal sealed class PreviewPopup
         _hideTimer?.Stop();
         _hideTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
         {
-            Interval = TimeSpan.FromMilliseconds(400)
+            Interval = TimeSpan.FromMilliseconds(200)
         };
         _hideTimer.Tick += (_, _) =>
         {
