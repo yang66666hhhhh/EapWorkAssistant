@@ -579,7 +579,7 @@
                                 <DataGridTemplateColumn Header="类型" Width="80"
                                                         ClipboardContentBinding="{Binding WorkType}"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
-                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
+                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="200">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>

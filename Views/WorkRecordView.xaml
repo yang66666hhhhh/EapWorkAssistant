@@ -284,7 +284,7 @@
                                 <DataGridTemplateColumn Header="类型" Width="80"
                                                         ClipboardContentBinding="{Binding WorkType}"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
-                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="100">
+                                <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="*" MinWidth="200">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
@@ -821,7 +821,7 @@
                                     <DataGridTemplateColumn Header="类型" Width="80"
                                                             CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                     <!-- 内容（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="内容" Width="*" MinWidth="100" ClipboardContentBinding="{Binding Content}">
+                                    <DataGridTemplateColumn Header="内容" Width="*" MinWidth="200" ClipboardContentBinding="{Binding Content}">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Content}"

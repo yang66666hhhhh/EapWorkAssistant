@@ -68,9 +68,14 @@ public static class SmartColumns
     private const double FillRatioThreshold = 0.25;
 
     /// <summary>
-    /// 空列收缩后的最大宽度（像素）。
+    /// 空列收缩后的最小宽度（像素），需保证表头文字可见。
     /// </summary>
-    private const double EmptyColumnMaxWidth = 60;
+    private const double EmptyColumnMinWidth = 80;
+
+    /// <summary>
+    /// 少量内容列的最大宽度（像素）。
+    /// </summary>
+    private const double SparseColumnMaxWidth = 120;
 
     private static void AdjustStarColumns(DataGrid grid)
     {
@@ -105,17 +110,17 @@ public static class SmartColumns
             }
             else if (filledRows == 0)
             {
-                // 完全为空 → 极致收缩
+                // 完全为空 → Auto 宽度 + MinWidth 保证表头可见
                 column.Width = new DataGridLength(0, DataGridLengthUnitType.Auto);
-                column.MinWidth = 36;
-                column.MaxWidth = 36;
+                column.MinWidth = EmptyColumnMinWidth;
+                column.MaxWidth = EmptyColumnMinWidth;
             }
             else
             {
-                // 少量内容 → 收缩但保留可读宽度
+                // 少量内容 → Auto 宽度，有上限
                 column.Width = new DataGridLength(0, DataGridLengthUnitType.Auto);
-                column.MinWidth = 36;
-                column.MaxWidth = EmptyColumnMaxWidth;
+                column.MinWidth = EmptyColumnMinWidth;
+                column.MaxWidth = SparseColumnMaxWidth;
             }
         }
     }
