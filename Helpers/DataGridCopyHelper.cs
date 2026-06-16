@@ -312,6 +312,9 @@ public class CopyButton : Button
     private DispatcherTimer? _resetTimer;
     private bool _copied;
 
+    private const double FadeMs = 180;
+    private static readonly Duration FadeDuration = TimeSpan.FromMilliseconds(FadeMs);
+
     public CopyButton()
     {
         _clipboardGeo = (Geometry)(Application.Current.TryFindResource("IconClipboard")
@@ -349,21 +352,21 @@ public class CopyButton : Button
         {
             CornerRadius = new CornerRadius(6),
             Padding = new Thickness(10, 5, 12, 5),
-            Child = content
+            Child = content,
+            Opacity = 0.85
         };
         _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
         _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
         _bg.BorderThickness = new Thickness(0.8);
-        _bg.Opacity = 0.85;
 
         Content = _bg;
         Cursor = Cursors.Hand;
+        FocusVisualStyle = null;
 
         _bg.MouseEnter += (_, _) =>
         {
             if (_copied) return;
-            _bg.BeginAnimation(OpacityProperty, null);
-            _bg.Opacity = 1;
+            FadeOpacity(1.0);
             _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
             _bg.BorderBrush = Brushes.Transparent;
             _icon.Fill = Brushes.White;
@@ -386,10 +389,21 @@ public class CopyButton : Button
         };
     }
 
-    /// <summary>恢复默认柔和底色风格</summary>
+    // ==================== 动画辅助 ====================
+
+    private void FadeOpacity(double target)
+    {
+        var anim = new DoubleAnimation(target, FadeDuration)
+        {
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+        };
+        _bg.BeginAnimation(UIElement.OpacityProperty, anim);
+    }
+
+    /// <summary>恢复默认柔和底色风格（带渐隐动画）</summary>
     private void ResetStyle()
     {
-        _bg.Opacity = 0.85;
+        FadeOpacity(0.85);
         _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
         _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
         _bg.BorderThickness = new Thickness(0.8);
@@ -419,26 +433,28 @@ public class CopyButton : Button
         _copied = true;
         _bg.SetResourceReference(Border.BackgroundProperty, "SuccessBrush");
         _bg.SetResourceReference(Border.BorderBrushProperty, "SuccessBrush");
-        _bg.Opacity = 1;
+        FadeOpacity(1.0);
         _icon.Fill = Brushes.White;
         _icon.Data = _checkGeo;
         _txt.Foreground = Brushes.White;
         _txt.Text = "已复制";
 
+        // 复用同一个 Timer，避免 Tick handler 累积
         _resetTimer?.Stop();
-        _resetTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(1.2),
-        };
-        _resetTimer.Tick += (_, _) =>
-        {
-            _resetTimer.Stop();
-            _copied = false;
-            _icon.Data = _clipboardGeo;
-            _txt.Text = "复制";
-            ResetStyle();
-        };
+        _resetTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.2) };
+        // 清除旧 handler 再绑定新的
+        _resetTimer.Tick -= OnResetTimerTick;
+        _resetTimer.Tick += OnResetTimerTick;
         _resetTimer.Start();
+    }
+
+    private void OnResetTimerTick(object? sender, EventArgs e)
+    {
+        _resetTimer?.Stop();
+        _copied = false;
+        _icon.Data = _clipboardGeo;
+        _txt.Text = "复制";
+        ResetStyle();
     }
 }
 
