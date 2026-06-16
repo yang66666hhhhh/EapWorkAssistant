@@ -299,21 +299,19 @@ public static class DataGridCopyHelper
 }
 
 /// <summary>
-/// 自定义复制按钮：柔和底色 + 精致描边 + 矢量图标 + 平滑动画反馈。
+/// 自定义复制按钮：无边框文字链风格，悬停时显示下划线。
 /// 所有颜色通过 DynamicResource 跟随主题/强调色变化。
 /// </summary>
 public class CopyButton : Button
 {
-    private readonly Border _bg;
     private readonly TextBlock _txt;
     private readonly Path _icon;
     private readonly Geometry _clipboardGeo;
     private readonly Geometry _checkGeo;
+    private readonly StackPanel _content;
+    private readonly Line _underline;
     private DispatcherTimer? _resetTimer;
     private bool _copied;
-
-    private const double FadeMs = 180;
-    private static readonly Duration FadeDuration = TimeSpan.FromMilliseconds(FadeMs);
 
     public CopyButton()
     {
@@ -325,97 +323,73 @@ public class CopyButton : Button
         _icon = new Path
         {
             Data = _clipboardGeo,
-            Width = 13,
-            Height = 13,
+            Width = 12,
+            Height = 12,
             Stretch = Stretch.Uniform,
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 4, 0)
         };
-        _icon.SetResourceReference(Shape.FillProperty, "PrimaryBrush");
+        _icon.SetResourceReference(Shape.FillProperty, "TextTertiaryBrush");
 
         _txt = new TextBlock
         {
             Text = "复制",
             FontSize = 12,
-            FontWeight = FontWeights.Medium,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(4, 0, 0, 0)
+            FontWeight = FontWeights.Normal,
+            VerticalAlignment = VerticalAlignment.Center
         };
-        _txt.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
+        _txt.SetResourceReference(TextBlock.ForegroundProperty, "TextTertiaryBrush");
 
-        var content = new StackPanel
+        // 下划线（默认隐藏，hover 时显示）
+        _underline = new Line
+        {
+            X1 = 0, X2 = 30,
+            StrokeThickness = 0.8,
+            Visibility = Visibility.Collapsed,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(0, 0, 0, -1)
+        };
+        _underline.SetResourceReference(Line.StrokeProperty, "TextTertiaryBrush");
+
+        var textWithLine = new Grid
+        {
+            Children = { _txt, _underline }
+        };
+
+        _content = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Children = { _icon, _txt }
+            Children = { _icon, textWithLine }
         };
 
-        _bg = new Border
-        {
-            CornerRadius = new CornerRadius(6),
-            Padding = new Thickness(10, 5, 12, 5),
-            Child = content,
-            Opacity = 0.85
-        };
-        _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
-        _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
-        _bg.BorderThickness = new Thickness(0.8);
-
-        Content = _bg;
+        Content = _content;
         Cursor = Cursors.Hand;
         FocusVisualStyle = null;
+        Background = Brushes.Transparent;
+        BorderThickness = new Thickness(0);
+        Padding = new Thickness(0);
 
-        _bg.MouseEnter += (_, _) =>
+        MouseEnter += (_, _) =>
         {
             if (_copied) return;
-            FadeOpacity(1.0);
-            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
-            _bg.BorderBrush = Brushes.Transparent;
-            _icon.Fill = Brushes.White;
-            _txt.Foreground = Brushes.White;
+            _icon.SetResourceReference(Shape.FillProperty, "PrimaryBrush");
+            _txt.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
+            _underline.SetResourceReference(Line.StrokeProperty, "PrimaryBrush");
+            _underline.Visibility = Visibility.Visible;
         };
-        _bg.MouseLeave += (_, _) =>
+        MouseLeave += (_, _) =>
         {
             if (_copied) return;
             ResetStyle();
         };
-        _bg.MouseLeftButtonDown += (_, _) =>
-        {
-            if (_copied) return;
-            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryHoverBrush");
-        };
-        _bg.MouseLeftButtonUp += (_, _) =>
-        {
-            if (_copied) return;
-            _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryBrush");
-        };
     }
 
-    // ==================== 动画辅助 ====================
-
-    private void FadeOpacity(double target)
-    {
-        var anim = new DoubleAnimation(target, FadeDuration)
-        {
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-        };
-        _bg.BeginAnimation(UIElement.OpacityProperty, anim);
-    }
-
-    /// <summary>恢复默认柔和底色风格（带渐隐动画）</summary>
+    /// <summary>恢复默认文字链风格</summary>
     private void ResetStyle()
     {
-        FadeOpacity(0.85);
-        _bg.SetResourceReference(Border.BackgroundProperty, "PrimaryLightBrush");
-        _bg.SetResourceReference(Border.BorderBrushProperty, "PrimaryBrush");
-        _bg.BorderThickness = new Thickness(0.8);
-        _icon.SetResourceReference(Shape.FillProperty, "PrimaryBrush");
-        _txt.SetResourceReference(TextBlock.ForegroundProperty, "PrimaryBrush");
-    }
-
-    /// <summary>设置按钮显示的文字（同时更新 Tag 用于复制）</summary>
-    public void SetContentText(string text)
-    {
-        _txt.Text = text;
-        Tag = text;
+        _icon.SetResourceReference(Shape.FillProperty, "TextTertiaryBrush");
+        _txt.SetResourceReference(TextBlock.ForegroundProperty, "TextTertiaryBrush");
+        _underline.Visibility = Visibility.Collapsed;
     }
 
     protected override void OnClick()
@@ -431,18 +405,14 @@ public class CopyButton : Button
     private void AnimateCopied()
     {
         _copied = true;
-        _bg.SetResourceReference(Border.BackgroundProperty, "SuccessBrush");
-        _bg.SetResourceReference(Border.BorderBrushProperty, "SuccessBrush");
-        FadeOpacity(1.0);
-        _icon.Fill = Brushes.White;
+        _underline.Visibility = Visibility.Collapsed;
+        _icon.Fill = (Brush)Application.Current.TryFindResource("SuccessBrush") ?? Brushes.Green;
         _icon.Data = _checkGeo;
-        _txt.Foreground = Brushes.White;
+        _txt.Foreground = (Brush)Application.Current.TryFindResource("SuccessBrush") ?? Brushes.Green;
         _txt.Text = "已复制";
 
-        // 复用同一个 Timer，避免 Tick handler 累积
         _resetTimer?.Stop();
         _resetTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.2) };
-        // 清除旧 handler 再绑定新的
         _resetTimer.Tick -= OnResetTimerTick;
         _resetTimer.Tick += OnResetTimerTick;
         _resetTimer.Start();
