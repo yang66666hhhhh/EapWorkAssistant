@@ -122,7 +122,7 @@ public static class DataGridCopyHelper
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _trackedCell = null;
-        PreviewPopup.Instance.Hide();
+        // 不主动调用 Hide()，由浮窗自身的 MouseLeave + 隐藏计时器处理
     }
 
     private static void OnGridMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -671,6 +671,11 @@ public static class ListBoxCopyHelper
             else
                 PreviewPopup.Instance.Hide();
         }
+        else if (item == null)
+        {
+            // 鼠标离开列表项（可能在移向浮窗的间隙中），
+            // 不主动触发隐藏，由浮窗自身的 MouseLeave 处理
+        }
         else
         {
             PreviewPopup.Instance.Hide();
@@ -680,7 +685,7 @@ public static class ListBoxCopyHelper
     private static void OnListBoxMouseLeave(object sender, MouseEventArgs e)
     {
         _trackedItem = null;
-        PreviewPopup.Instance.Hide();
+        // 不主动调用 Hide()，由浮窗自身的 MouseLeave + 隐藏计时器处理
     }
 
     private static void OnRightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
