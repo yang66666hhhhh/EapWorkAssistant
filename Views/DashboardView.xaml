@@ -584,6 +584,11 @@
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <DataGridTextColumn Header="工作成果" Binding="{Binding Achievement}" Width="*" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
                                 <DataGridTemplateColumn Header="进度" Width="130"

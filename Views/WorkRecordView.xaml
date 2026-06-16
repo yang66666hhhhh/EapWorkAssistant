@@ -289,6 +289,11 @@
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <DataGridTextColumn Header="工作成果" Binding="{Binding Achievement}" Width="*" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="65"/>
                                 <!-- 进度 - 进度条 -->
                                 <DataGridTemplateColumn Header="进度" Width="130"
@@ -815,6 +820,17 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
+                                                           local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <!-- 工作成果（带搜索高亮） -->
+                                    <DataGridTemplateColumn Header="工作成果" Width="*" MinWidth="80" ClipboardContentBinding="{Binding Achievement}">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock local:Highlight.Text="{Binding Achievement}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
                                                            VerticalAlignment="Center"/>

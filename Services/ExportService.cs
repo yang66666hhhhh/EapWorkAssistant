@@ -64,11 +64,11 @@ public static class ExportService
             // 添加BOM头，确保中文在Excel中正确显示
             sb.Append('\uFEFF');
             // CSV头
-            sb.AppendLine("日期,项目,类型,内容,工时,进度,是否亮点,问题,解决方案");
+            sb.AppendLine("日期,项目,类型,内容,工作成果,工时,进度,是否亮点,问题,解决方案");
             // 数据行
             foreach (var r in records)
             {
-                sb.AppendLine($"{EscapeCsv(r.WorkDate)},{EscapeCsv(r.ProjectName)},{EscapeCsv(r.WorkType)},{EscapeCsv(r.Content)},{r.Hours},{r.Progress},{(r.IsHighlight == 1 ? "是" : "否")},{EscapeCsv(r.Problem)},{EscapeCsv(r.Solution)}");
+                sb.AppendLine($"{EscapeCsv(r.WorkDate)},{EscapeCsv(r.ProjectName)},{EscapeCsv(r.WorkType)},{EscapeCsv(r.Content)},{EscapeCsv(r.Achievement)},{r.Hours},{r.Progress},{(r.IsHighlight == 1 ? "是" : "否")},{EscapeCsv(r.Problem)},{EscapeCsv(r.Solution)}");
             }
             File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
         }
@@ -109,13 +109,30 @@ public static class ExportService
                     ProjectName = fields[1],
                     WorkType = fields[2],
                     Content = fields[3],
-                    Hours = double.TryParse(fields[4], out var h) ? h : 0,
-                    Progress = fields.Count > 5 && int.TryParse(fields[5], out var p) ? p : 0,
-                    IsHighlight = fields.Count > 6 && fields[6] == "是" ? 1 : 0,
-                    Problem = fields.Count > 7 ? fields[7] : "",
-                    Solution = fields.Count > 8 ? fields[8] : "",
-                    CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                 };
+
+                // 兼容新旧两种 CSV 格式：
+                // 新格式(10列): 日期,项目,类型,内容,工作成果,工时,进度,是否亮点,问题,解决方案
+                // 旧格式(9列):  日期,项目,类型,内容,工时,进度,是否亮点,问题,解决方案
+                if (fields.Count >= 10)
+                {
+                    record.Achievement = fields[4];
+                    record.Hours = double.TryParse(fields[5], out var h) ? h : 0;
+                    record.Progress = int.TryParse(fields[6], out var p) ? p : 0;
+                    record.IsHighlight = fields[7] == "是" ? 1 : 0;
+                    record.Problem = fields[8];
+                    record.Solution = fields[9];
+                }
+                else
+                {
+                    record.Hours = double.TryParse(fields[4], out var h) ? h : 0;
+                    record.Progress = fields.Count > 5 && int.TryParse(fields[5], out var p) ? p : 0;
+                    record.IsHighlight = fields.Count > 6 && fields[6] == "是" ? 1 : 0;
+                    record.Problem = fields.Count > 7 ? fields[7] : "";
+                    record.Solution = fields.Count > 8 ? fields[8] : "";
+                }
+
+                record.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 records.Add(record);
             }
 

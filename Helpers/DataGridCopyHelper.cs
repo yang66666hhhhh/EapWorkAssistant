@@ -72,23 +72,26 @@ public static class DataGridCopyHelper
 
     /// <summary>
     /// 自动识别内容列（需要悬停预览的长文本列）。
-    /// 检测 Binding 路径为 Content 的列，所有表格自动生效。
+    /// 检测 Binding 路径为 Content 或 Achievement 的列，所有表格自动生效。
     /// </summary>
+    private static readonly HashSet<string> _contentPaths = new() { "Content", "Achievement" };
+
     private static bool IsContentColumn(DataGridColumn? column)
     {
         if (column == null) return false;
 
         if (column is DataGridTextColumn textCol
             && textCol.Binding is System.Windows.Data.Binding b
-            && b.Path?.Path == "Content")
+            && _contentPaths.Contains(b.Path?.Path ?? ""))
             return true;
 
         if (column is DataGridTemplateColumn tmplCol
             && tmplCol.ClipboardContentBinding is System.Windows.Data.Binding cb
-            && cb.Path?.Path == "Content")
+            && _contentPaths.Contains(cb.Path?.Path ?? ""))
             return true;
 
-        return column.Header?.ToString() == "内容";
+        var header = column.Header?.ToString();
+        return header == "内容" || header == "工作成果";
     }
 
     private static void OnGridMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
