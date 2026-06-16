@@ -161,8 +161,11 @@ public static class DataGridCopyHelper
         while (child != null)
         {
             if (child is T parent) return parent;
-            // LogicalTreeHelper 兼容 Visual 和 ContentElement（如 Run），不会抛异常
-            child = LogicalTreeHelper.GetParent(child);
+            // VisualTreeHelper 可正确穿越 DataTemplate 边界；
+            // ContentElement（如 Run）不是 Visual，需先走 LogicalTree 到 TextBlock
+            child = child is Visual
+                ? VisualTreeHelper.GetParent(child)
+                : LogicalTreeHelper.GetParent(child);
         }
         return null;
     }
