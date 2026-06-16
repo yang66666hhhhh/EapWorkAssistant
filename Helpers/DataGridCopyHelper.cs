@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -80,10 +81,15 @@ public static class DataGridCopyHelper
     }
 
     /// <summary>
-    /// 自动识别内容列（需要悬停预览的长文本列）。
-    /// 检测 Binding 路径为 Content 或 Achievement 的列，所有表格自动生效。
+    /// 自动识别需要悬停预览的长文本列。
+    /// 统一让内容型列走浮窗预览，避免长文本只能依赖系统 ToolTip。
     /// </summary>
-    private static readonly HashSet<string> _contentPaths = new() { "Content", "Achievement", "Problem" };
+    private static readonly HashSet<string> _contentPaths = new()
+    {
+        "Content", "Achievement", "Problem",
+        "Description", "RootCause", "Solution",
+        "Keywords", "Title"
+    };
 
     private static bool IsContentColumn(DataGridColumn? column)
     {
@@ -100,7 +106,9 @@ public static class DataGridCopyHelper
             return true;
 
         var header = column.Header?.ToString();
-        return header == "内容" || header == "工作成果" || header == "问题";
+        return header == "内容" || header == "工作成果" || header == "问题"
+            || header == "描述" || header == "根本原因" || header == "解决方案"
+            || header == "关键词" || header == "标题";
     }
 
     private static bool IsProblemColumn(DataGridColumn? column)
@@ -228,7 +236,7 @@ public static class DataGridCopyHelper
         var textBlock = FindVisualChild<TextBlock>(cell);
         if (textBlock != null)
         {
-            var text = textBlock.Text;
+            var text = ExtractTextBlockText(textBlock);
             if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
         }
 
@@ -237,11 +245,27 @@ public static class DataGridCopyHelper
             return textBox.Text.Trim();
 
         var allTexts = FindAllVisualChildren<TextBlock>(cell)
-            .Select(tb => tb.Text)
+            .Select(ExtractTextBlockText)
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .ToList();
         if (allTexts.Count > 0)
             return string.Join(" ", allTexts).Trim();
+
+        return "";
+    }
+
+    internal static string ExtractTextBlockText(TextBlock textBlock)
+    {
+        if (!string.IsNullOrWhiteSpace(textBlock.Text))
+            return textBlock.Text.Trim();
+
+        // 搜索高亮会把内容拆成 Inlines，Text 属性可能为空。
+        if (textBlock.Inlines.Count > 0)
+        {
+            var inlineText = new TextRange(textBlock.ContentStart, textBlock.ContentEnd).Text;
+            if (!string.IsNullOrWhiteSpace(inlineText))
+                return inlineText.Trim();
+        }
 
         return "";
     }
@@ -723,7 +747,7 @@ public static class ListBoxCopyHelper
         var textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(source);
         while (textBlock != null)
         {
-            var text = textBlock.Text;
+            var text = DataGridCopyHelper.ExtractTextBlockText(textBlock);
             if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
             textBlock = DataGridCopyHelper.FindVisualParent<TextBlock>(
                 VisualTreeHelper.GetParent(textBlock));

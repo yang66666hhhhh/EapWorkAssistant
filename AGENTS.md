@@ -216,7 +216,7 @@ EapWorkAssistant/
 - `Highlight`：搜索关键词高亮附加属性
 - `DrawerHelper`：抽屉面板动画（OpenDrawer / CloseDrawer）
 - `CalendarHelper`：日历浮窗定位与关闭（Show / Close），所有日历弹出都应通过此工具类
-- `DataGridCopyHelper`：DataGrid 悬停预览 + 右键复制（附加属性 `EnableCopy`）。`ModernGrid` 样式已内置启用。内容列自动识别规则：Binding.Path=="Content" 或 Header=="内容"。悬停预览由 `PreviewPopup` 单例提供，**不需要额外设置 TextBlock.ToolTip**
+- `DataGridCopyHelper`：DataGrid 悬停预览 + 右键复制（附加属性 `EnableCopy`）。`ModernGrid` 样式已内置启用。长文本列会按字段路径或中文列头自动识别（如 `Content` / `Achievement` / `Problem` / `Description` / `RootCause` / `Solution` / `Keywords` / `Title`）。悬停预览由 `PreviewPopup` 单例提供，**这些列不需要额外设置 TextBlock.ToolTip**
 - `CopyButton`：无边框文字链风格复制按钮（图标 + 文字，hover 显示下划线，点击变绿 ✓ 已复制）。用于 `PreviewPopup` 浮窗内
 - `PreviewPopup`：通用悬停预览弹出层（单例），替代系统 ToolTip 解决鼠标移到浮窗上即消失的问题。支持 DataGridCell、ListBoxItem 等任意 FrameworkElement
 
@@ -224,7 +224,7 @@ EapWorkAssistant/
 - 按钮样式统一使用 `BtnPrimary`、`BtnSecondary`、`BtnSuccess`、`BtnWarning`、`BtnGhost`、`BtnDanger`
 - ComboBox 统一使用 `Select` 样式
 - TextBox 统一使用 `Input`（单行）或 `TextArea`（多行）样式；搜索输入框（搭配搜索图标时）使用 `SearchInput` 样式
-- ToolTip 统一使用 `ModernToolTip` 样式，配合 `Content="{Binding 字段名}"` 绑定内容。**例外**：DataGrid 中由 `DataGridCopyHelper` 管理悬停预览的"内容"列（Header=="内容"）**不需要**额外设置 ToolTip，`PreviewPopup` 已提供预览 + 复制功能
+- ToolTip 统一使用 `ModernToolTip` 样式，配合 `Content="{Binding 字段名}"` 绑定内容。**例外**：DataGrid 中由 `DataGridCopyHelper` 管理悬停预览的长文本列（如 `内容` / `工作成果` / `问题` / `描述` / `根本原因` / `解决方案` / `关键词` / `标题`）**不需要**额外设置 ToolTip，`PreviewPopup` 已提供预览 + 复制功能
 - DataGrid 必须使用 `ModernGrid` + `ModernGridColumnHeader` + `ModernGridCell` + `ModernGridRow` 组合
 - 禁止使用 WPF 原生控件：当项目已有自定义组件时，必须优先复用，不得引入 WPF 原生控件（如 `DatePicker`、`Calendar` 等）
 
@@ -378,11 +378,11 @@ XAML 中**本地值（precedence 3）优先于 Style Trigger（precedence 5）**
 `DataGridCopyHelper.FindVisualParent<T>` 对 Visual 元素使用 `VisualTreeHelper.GetParent`（可穿越 DataTemplate 边界），对 ContentElement（如 `Run`）先用 `LogicalTreeHelper.GetParent` 回到 `TextBlock` 再切到 VisualTree。**禁止在需要穿越 DataTemplate 时使用 `LogicalTreeHelper`**，它无法从 DataTemplate 内部找到父级 DataGridCell。
 
 ### DataGrid 内容列悬停预览
-`ModernGrid` 样式内置 `DataGridCopyHelper.EnableCopy="True"`，为"内容"列（Header=="内容" 或 Binding.Path=="Content"）自动提供：
+`ModernGrid` 样式内置 `DataGridCopyHelper.EnableCopy="True"`，为长文本列（如 Header 为 `内容` / `工作成果` / `问题` / `描述` / `根本原因` / `解决方案` / `关键词` / `标题`，或 Binding.Path 为 `Content` / `Achievement` / `Problem` / `Description` / `RootCause` / `Solution` / `Keywords` / `Title`）自动提供：
 - **悬停预览**：鼠标停留 300ms 后弹出 `PreviewPopup`，显示完整文本 + 复制按钮
 - **右键菜单**：复制单元格 / 复制整行
 
-**不要**在"内容"列上额外设置 `TextBlock.ToolTip`，否则会出现两个浮窗（PreviewPopup + ToolTip）。
+**不要**在这些由 `DataGridCopyHelper` 接管的长文本列上额外设置 `TextBlock.ToolTip`，否则会出现两个浮窗（PreviewPopup + ToolTip）。
 
 ### 主题切换互斥
 `SettingsViewModel` 中 `IsLightTheme` 和 `IsDarkTheme` 必须互斥联动。在 `OnIsLightThemeChanged(true)` 中设置 `IsDarkTheme = false`，反之亦然。避免两个按钮同时高亮。
@@ -455,7 +455,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 16. **禁止移除全局异常处理**：`App.xaml.cs` 中的 `DispatcherUnhandledException`、`AppDomain.UnhandledException`、`TaskScheduler.UnobservedTaskException` 是发布质量的底线保障
 17. **关键服务禁止静默吞异常**：`ConfigService.Save`、`ProfileService.Save/SaveAvatar` 等写操作必须 catch 并用 `ToastService.Error` 通知用户
 18. **禁止创建重复样式**：新增任何样式/组件前，必须先读取 `Resources/Styles.xaml` 检查是否已有可复用的样式。已有则直接引用，差一点则基于扩展，确实不存在才新建且必须放入 Styles.xaml 作为共享样式。详见"组件复用规范"章节
-19. **禁止在 DataGridCopyHelper 管理的"内容"列上设置额外 ToolTip**：`ModernGrid` 已内置 `EnableCopy`，`PreviewPopup` 会提供悬停预览。额外 ToolTip 会导致两个浮窗同时出现
+19. **禁止在 DataGridCopyHelper 管理的长文本列上设置额外 ToolTip**：`ModernGrid` 已内置 `EnableCopy`，`PreviewPopup` 会提供悬停预览。额外 ToolTip 会导致两个浮窗同时出现
 20. **禁止在需要穿越 DataTemplate 时使用 LogicalTreeHelper**：`FindVisualParent` 必须对 Visual 元素使用 `VisualTreeHelper.GetParent`，否则无法从 DataTemplate 内部找到父级控件
 
 ## 代码审查清单
@@ -482,7 +482,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 搜索框是否使用了 `SearchInput` 样式？导航栏是否使用了 `NavButton`？
 - [ ] 星标列是否使用了 `HighlightStarCell` DataTemplate？
 - [ ] 所有 ToolTip 是否统一使用了 `ModernToolTip` 样式（而非纯字符串 `ToolTip="..."`）？
-- [ ] DataGrid 的"内容"列是否**避免**设置额外 ToolTip（`DataGridCopyHelper.PreviewPopup` 已提供悬停预览）？
+- [ ] DataGrid 的长文本预览列是否**避免**设置额外 ToolTip（`DataGridCopyHelper.PreviewPopup` 已提供悬停预览）？
 - [ ] 日历浮窗是否通过 `CalendarHelper.Show()` / `CalendarHelper.Close()` 管理定位与显隐？
 - [ ] 需要穿越 DataTemplate 查找父控件时，是否使用了 `VisualTreeHelper`（而非 `LogicalTreeHelper`）？
 
