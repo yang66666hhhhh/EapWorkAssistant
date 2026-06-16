@@ -95,12 +95,23 @@
 
 ## 技术栈
 
-- **框架**: .NET 9.0 + WPF
+- **框架**: .NET 10 + WPF
 - **架构**: MVVM (CommunityToolkit.Mvvm 8.4.2)
 - **数据库**: SQLite + Dapper（含索引优化）
 - **图表**: LiveCharts2 (SkiaSharp)
-- **UI**: 自定义现代深色风格控件
+- **UI**: 自定义现代靛蓝风格设计系统
 - **错误处理**: Toast 通知服务，关键操作异常实时反馈
+
+## 最近界面升级
+
+- **全局样式系统精修**
+  - 统一卡片、按钮、输入框、下拉框、Tooltip、浮层的圆角、阴影和留白节奏
+  - 保留现有靛蓝、理性、专业气质，提升页面层级与产品感
+- **主表格阅读体验升级**
+  - 默认列宽更舒展，长文本列优先保证可读性
+  - 主表支持底部横向滚动条自然出现
+  - 支持用户手动拖拽列头调整宽度
+  - 长文本保持单行截断，并通过悬停预览查看完整内容
 
 ## 数据层优化
 
@@ -128,14 +139,14 @@ EapWorkAssistant/
 ## 运行要求
 
 - Windows 10/11
-- .NET 9.0 Runtime（开发调试时需要）
+- .NET 10 Runtime（开发调试时需要）
 - 发布版本已包含运行时，无需额外安装
 
 ## 开发与发布
 
 ### 开发环境
 
-1. 安装 [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+1. 安装 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 2. 克隆项目
    ```bash
    git clone https://github.com/yang66666hhhhh/EapWorkAssistant.git
@@ -188,6 +199,14 @@ dotnet publish -c Release --self-contained true -r win-x64 -o publish
 - 修复 BtnGhost 样式 TargetType 不兼容 ToggleButton 导致的崩溃
 - 修复仪表盘图表点击参数类型不匹配导致的运行时异常
 - 批量修复 19 个 bug，涵盖竞态条件、数据校验、异步异常处理等
+
+### v2.1.1（2026-06）
+
+- 项目目标框架升级到 .NET 10
+- 全局设计系统精修，统一卡片、按钮、表单、表格和浮层节奏
+- 主表格列宽策略升级为“阅读优先”，长文本列默认更舒展
+- 工作记录、问题跟踪、Dashboard 主表支持更自然的横向滚动与手动拖拽列宽
+- 知识库和设置页完成局部信息密度与间距收口
 
 ## 许可证
 

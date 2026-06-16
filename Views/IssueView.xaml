@@ -75,8 +75,8 @@
                             <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="100"/>
-                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="120">
+                            <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="150"/>
+                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="168">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                         <Setter Property="ToolTip">
@@ -87,7 +87,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" MinWidth="60">
+                            <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="280" MinWidth="240">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                         <Setter Property="ToolTip">
@@ -99,7 +99,7 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                             <!-- 状态 - 彩色标签 -->
-                            <DataGridTemplateColumn Header="状态" Width="90" ClipboardContentBinding="{Binding Status}">
+                            <DataGridTemplateColumn Header="状态" Width="92" ClipboardContentBinding="{Binding Status}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
@@ -146,7 +146,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <!-- 优先级 -->
-                            <DataGridTemplateColumn Header="优先级" Width="65" ClipboardContentBinding="{Binding Priority}">
+                            <DataGridTemplateColumn Header="优先级" Width="84" ClipboardContentBinding="{Binding Priority}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
@@ -171,7 +171,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="*" MinWidth="60">
+                            <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="260" MinWidth="220">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                         <Setter Property="ToolTip">
@@ -182,7 +182,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="解决方案" Binding="{Binding Solution}" Width="*" MinWidth="60">
+                            <DataGridTextColumn Header="解决方案" Binding="{Binding Solution}" Width="260" MinWidth="220">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                         <Setter Property="ToolTip">
@@ -193,7 +193,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="关键词" Binding="{Binding Keywords}" Width="100">
+                            <DataGridTextColumn Header="关键词" Binding="{Binding Keywords}" Width="150">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                         <Setter Property="ToolTip">
@@ -204,7 +204,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTemplateColumn Header="操作" Width="120">
+                            <DataGridTemplateColumn Header="操作" Width="136">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">

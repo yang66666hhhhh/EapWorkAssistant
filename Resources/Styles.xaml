@@ -5,9 +5,9 @@
 
     <!-- ==================== 颜色体系（Refined Precision） ==================== -->
     <Color x:Key="Primary">#FF4338CA</Color>
-    <Color x:Key="PrimaryHover">#FF3730A3</Color>
-    <Color x:Key="PrimaryLight">#FFEEF2FF</Color>
-    <Color x:Key="PrimarySoft">#FFF5F3FF</Color>
+    <Color x:Key="PrimaryHover">#FF3630AE</Color>
+    <Color x:Key="PrimaryLight">#FFE9EEFF</Color>
+    <Color x:Key="PrimarySoft">#FFF3F5FF</Color>
     <Color x:Key="Secondary">#FF6B7280</Color>
     <Color x:Key="Success">#FF059669</Color>
     <Color x:Key="SuccessLight">#FFECFDF5</Color>
@@ -15,23 +15,23 @@
     <Color x:Key="WarningLight">#FFFEF3C7</Color>
     <Color x:Key="Danger">#FFDC2626</Color>
     <Color x:Key="DangerLight">#FFFEF2F2</Color>
-    <Color x:Key="Surface">#FFF7F8FA</Color>
-    <Color x:Key="SurfaceHover">#FFEFF1F5</Color>
-    <Color x:Key="SurfaceAlt">#FFFAFBFD</Color>
+    <Color x:Key="Surface">#FFF4F6FB</Color>
+    <Color x:Key="SurfaceHover">#FFECF0F8</Color>
+    <Color x:Key="SurfaceAlt">#FFF8FAFD</Color>
     <Color x:Key="CardColor">#FFFFFFFF</Color>
-    <Color x:Key="TextPrimary">#FF111827</Color>
-    <Color x:Key="TextSecondary">#FF4B5563</Color>
-    <Color x:Key="TextTertiary">#FF9CA3AF</Color>
-    <Color x:Key="Border">#FFE5E7EB</Color>
-    <Color x:Key="BorderHover">#FFD1D5DB</Color>
+    <Color x:Key="TextPrimary">#FF0F172A</Color>
+    <Color x:Key="TextSecondary">#FF475569</Color>
+    <Color x:Key="TextTertiary">#FF94A3B8</Color>
+    <Color x:Key="Border">#FFE2E8F0</Color>
+    <Color x:Key="BorderHover">#FFC7D2E4</Color>
     <Color x:Key="SidebarBg">#FF0B1120</Color>
     <Color x:Key="SidebarText">#FF94A3B8</Color>
     <Color x:Key="SidebarHover">#FF162033</Color>
     <Color x:Key="SidebarCardBg">#FF1E293B</Color>
     <Color x:Key="SidebarActive">#FF4338CA</Color>
-    <Color x:Key="ScrollThumb">#FFD1D5DB</Color>
-    <Color x:Key="ScrollThumbHover">#FF9CA3AF</Color>
-    <Color x:Key="ScrollThumbActive">#FF6B7280</Color>
+    <Color x:Key="ScrollThumb">#FFCBD5E1</Color>
+    <Color x:Key="ScrollThumbHover">#FF94A3B8</Color>
+    <Color x:Key="ScrollThumbActive">#FF64748B</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Primary}"/>
     <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource PrimaryHover}"/>
@@ -60,7 +60,7 @@
     <SolidColorBrush x:Key="ScrollThumbBrush" Color="{DynamicResource ScrollThumb}"/>
     <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{DynamicResource ScrollThumbHover}"/>
     <SolidColorBrush x:Key="ScrollThumbActiveBrush" Color="{DynamicResource ScrollThumbActive}"/>
-    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#40000000"/>
+    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#380B1120"/>
     <SolidColorBrush x:Key="AvatarOverlayBrush" Color="#50000000"/>
     <SolidColorBrush x:Key="AvatarHeavyOverlayBrush" Color="#60000000"/>
     <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="#CCFFFFFF"/>
@@ -108,19 +108,19 @@
     <sys:Double x:Key="UIScale">1.0</sys:Double>
 
     <!-- 界面密度间距（ThemeService 动态修改，Thickness 类型） -->
-    <Thickness x:Key="DensityCardPad">22</Thickness>
-    <Thickness x:Key="DensityRowPad">18,14</Thickness>
-    <Thickness x:Key="DensityRowPadSm">18,12</Thickness>
+    <Thickness x:Key="DensityCardPad">24</Thickness>
+    <Thickness x:Key="DensityRowPad">20,14</Thickness>
+    <Thickness x:Key="DensityRowPadSm">18,11</Thickness>
     <Thickness x:Key="DensityListPad">14,12</Thickness>
-    <Thickness x:Key="DensitySectionMargin">0,0,0,16</Thickness>
+    <Thickness x:Key="DensitySectionMargin">0,0,0,18</Thickness>
     <Thickness x:Key="DensityRowMargin">0,0,0,6</Thickness>
-    <Thickness x:Key="DensityItemMargin">0,0,0,10</Thickness>
+    <Thickness x:Key="DensityItemMargin">0,0,0,12</Thickness>
 
     <!-- ==================== 阴影效果（更精致） ==================== -->
-    <DropShadowEffect x:Key="ShadowSm" BlurRadius="12" ShadowDepth="1" Opacity="0.05" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowMd" BlurRadius="24" ShadowDepth="3" Opacity="0.07" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowLg" BlurRadius="40" ShadowDepth="6" Opacity="0.09" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowFocus" BlurRadius="10" ShadowDepth="0" Opacity="0.15" Color="#FF4338CA"/>
+    <DropShadowEffect x:Key="ShadowSm" BlurRadius="16" ShadowDepth="1" Opacity="0.045" Color="#FF000000"/>
+    <DropShadowEffect x:Key="ShadowMd" BlurRadius="28" ShadowDepth="4" Opacity="0.075" Color="#FF000000"/>
+    <DropShadowEffect x:Key="ShadowLg" BlurRadius="44" ShadowDepth="8" Opacity="0.11" Color="#FF000000"/>
+    <DropShadowEffect x:Key="ShadowFocus" BlurRadius="14" ShadowDepth="0" Opacity="0.16" Color="#FF6366F1"/>
 
     <!-- ==================== 动画 ==================== -->
     <Storyboard x:Key="FadeIn">
@@ -184,13 +184,14 @@
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryGradient}"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="20,11"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="20,10"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="bg" CornerRadius="9"
+                    <Border x:Name="bg" CornerRadius="11"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
                             Background="{DynamicResource PrimaryGradient}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
@@ -199,7 +200,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="bg" Property="Effect" Value="{StaticResource ShadowMd}"/>
-                            <Setter TargetName="bg" Property="Opacity" Value="0.92"/>
+                            <Setter TargetName="bg" Property="Opacity" Value="0.96"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/>
@@ -222,7 +223,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="bg" Background="{DynamicResource SuccessBrush}" CornerRadius="9"
+                    <Border x:Name="bg" Background="{DynamicResource SuccessBrush}" CornerRadius="11"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -249,7 +250,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="bg" Background="{DynamicResource WarningBrush}" CornerRadius="9"
+                    <Border x:Name="bg" Background="{DynamicResource WarningBrush}" CornerRadius="11"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -276,7 +277,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="bg" Background="{DynamicResource DangerBrush}" CornerRadius="9"
+                    <Border x:Name="bg" Background="{DynamicResource DangerBrush}" CornerRadius="11"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -302,17 +303,18 @@
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="20,11"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="18,10"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="9"
+                    <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="11"
                             Padding="{TemplateBinding Padding}" BorderThickness="{TemplateBinding BorderThickness}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
@@ -320,11 +322,12 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource CardBrush}"/>
                             <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
@@ -345,23 +348,24 @@
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="Padding" Value="12,7"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ButtonBase">
-                    <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="7"
+                    <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="9"
                             Padding="{TemplateBinding Padding}"
                             TextElement.Foreground="{TemplateBinding Foreground}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.35"/>
@@ -378,10 +382,11 @@
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="14,12"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="Padding" Value="14,10"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -390,7 +395,7 @@
                 <ControlTemplate TargetType="TextBox">
                     <Grid>
                         <!-- 焦点光晕层（独立渲染，不影响文字清晰度） -->
-                        <Border x:Name="glow" CornerRadius="9"
+                        <Border x:Name="glow" CornerRadius="10"
                                 Background="{DynamicResource PrimaryBrush}"
                                 Opacity="0" IsHitTestVisible="False"
                                 Effect="{DynamicResource ShadowFocus}"
@@ -398,7 +403,7 @@
                         <!-- 主内容层（始终清晰渲染） -->
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10"
                                 Padding="{TemplateBinding Padding}">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
                         </Border>
@@ -439,10 +444,10 @@
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="14,9"/>
+        <Setter Property="Padding" Value="14,10"/>
         <Setter Property="Height" Value="42"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
@@ -493,14 +498,14 @@
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
                         <!-- 焦点光晕层（独立渲染，不影响文字清晰度） -->
-                        <Border x:Name="glow" CornerRadius="9"
+                        <Border x:Name="glow" CornerRadius="10"
                                 Background="{DynamicResource PrimaryBrush}"
                                 Opacity="0" IsHitTestVisible="False"
                                 Effect="{DynamicResource ShadowFocus}"
                                 Margin="-2"/>
                         <Border x:Name="bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9">
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -522,7 +527,7 @@
                                             <Border Background="Transparent">
                                                 <Path x:Name="arrow" Width="12" Height="12"
                                                       Data="M0,4 L6,10 L12,4"
-                                                      Stroke="{DynamicResource TextTertiaryBrush}"
+                                                      Stroke="{DynamicResource TextSecondaryBrush}"
                                                       StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       HorizontalAlignment="Right" VerticalAlignment="Center"
                                                       Margin="0,0,14,0"/>
@@ -537,11 +542,12 @@
                                Placement="Bottom" PlacementTarget="{Binding ElementName=bg}"
                                AllowsTransparency="True" Focusable="False"
                                PopupAnimation="Slide" StaysOpen="False">
-                            <Border Background="{DynamicResource CardBrush}" CornerRadius="11" Padding="5"
+                            <Border Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="5"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                     MinWidth="{Binding ActualWidth, ElementName=bg}"
-                                    Margin="0,4,0,8">
+                                    Margin="0,6,0,10">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="24" ShadowDepth="5" Opacity="0.10" Color="#FF000000"
+                                    <DropShadowEffect BlurRadius="30" ShadowDepth="7" Opacity="0.11" Color="#FF000000"
                                                       Direction="270"/>
                                 </Border.Effect>
                                 <ScrollViewer MaxHeight="240">
@@ -582,7 +588,7 @@
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-        <Setter Property="Margin" Value="0,0,0,6"/>
+        <Setter Property="Margin" Value="0,0,0,7"/>
     </Style>
 
     <!-- 标题层级 -->
@@ -610,15 +616,16 @@
     <!-- 卡片 -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="16"/>
         <Setter Property="Padding" Value="{DynamicResource DensityCardPad}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
     </Style>
 
     <Style x:Key="CardElevated" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="16"/>
         <Setter Property="Padding" Value="{DynamicResource DensityCardPad}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -627,6 +634,7 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -634,11 +642,13 @@
     <!-- 可交互卡片（悬停边框+阴影） -->
     <Style x:Key="CardHover" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="CornerRadius" Value="16"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
             </Trigger>
@@ -830,7 +840,7 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
-        <Setter Property="Padding" Value="4,7"/>
+        <Setter Property="Padding" Value="4,8"/>
     </Style>
 
     <!-- 侧栏导航按钮 -->
@@ -917,27 +927,35 @@
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="RowBackground" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserResizeColumns" Value="True"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="CanUserSortColumns" Value="True"/>
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="MinRowHeight" Value="44"/>
+        <Setter Property="MinColumnWidth" Value="72"/>
+        <Setter Property="ColumnHeaderHeight" Value="44"/>
+        <Setter Property="MinRowHeight" Value="48"/>
     </Style>
 
     <Style x:Key="ModernGridColumnHeader" TargetType="DataGridColumnHeader">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
-        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="Padding" Value="18,12"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
     </Style>
@@ -945,9 +963,10 @@
     <Style x:Key="ModernGridCell" TargetType="DataGridCell">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="Padding" Value="18,12"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
@@ -973,7 +992,7 @@
                 <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -1492,7 +1511,7 @@
     <!-- ==================== 浮层与遮罩 ==================== -->
 
     <!-- 侧滑面板阴影 -->
-    <DropShadowEffect x:Key="ShadowPanel" BlurRadius="32" ShadowDepth="-4" Opacity="0.18"
+    <DropShadowEffect x:Key="ShadowPanel" BlurRadius="46" ShadowDepth="-10" Opacity="0.17"
                       Color="#FF000000" Direction="180"/>
 
     <!-- 表单遮罩层（深色半透明） -->
@@ -1504,7 +1523,7 @@
 
     <!-- 日历遮罩层（浅色半透明） -->
     <Style x:Key="CalendarOverlay" TargetType="Border">
-        <Setter Property="Background" Value="#20000000"/>
+        <Setter Property="Background" Value="#180B1120"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
@@ -1513,8 +1532,10 @@
     <Style x:Key="SidePanel" TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="14,0,0,14"/>
-        <Setter Property="Padding" Value="22"/>
+        <Setter Property="CornerRadius" Value="18,0,0,18"/>
+        <Setter Property="Padding" Value="24"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1,0,0,0"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Effect" Value="{StaticResource ShadowPanel}"/>
     </Style>
@@ -1525,9 +1546,9 @@
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Top"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="Padding" Value="16,12"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="18,14"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource ShadowLg}"/>
     </Style>
@@ -1535,19 +1556,19 @@
     <!-- ToolTip（统一悬浮提示样式，卡片风格 + 柔和阴影） -->
     <Style x:Key="ModernToolTip" TargetType="ToolTip">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="12,8"/>
-        <Setter Property="MaxWidth" Value="360"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="MaxWidth" Value="420"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8"
+                            CornerRadius="10"
                             Padding="{TemplateBinding Padding}"
-                            Effect="{StaticResource ShadowMd}">
+                            Effect="{StaticResource ShadowLg}">
                         <ContentPresenter>
                             <ContentPresenter.Resources>
                                 <DataTemplate DataType="{x:Type sys:String}">
