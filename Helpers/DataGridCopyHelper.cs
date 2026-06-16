@@ -473,6 +473,7 @@ internal sealed class PreviewPopup
     private DispatcherTimer? _showTimer;
     private DispatcherTimer? _hideTimer;
     private FrameworkElement? _currentTarget;
+    private Border _outerShell = null!;
 
     private PreviewPopup()
     {
@@ -538,7 +539,7 @@ internal sealed class PreviewPopup
             Margin = new Thickness(4, 0, 4, 4),
             Child = shadow1
         };
-        var shadow3 = new Border
+        _outerShell = new Border
         {
             CornerRadius = new CornerRadius(16),
             Background = new SolidColorBrush(Color.FromArgb(3, 0, 0, 0)),
@@ -548,7 +549,7 @@ internal sealed class PreviewPopup
 
         _popup = new Popup
         {
-            Child = shadow3,
+            Child = _outerShell,
             StaysOpen = true,
             AllowsTransparency = true,
             Placement = PlacementMode.Bottom,
@@ -577,6 +578,7 @@ internal sealed class PreviewPopup
         _textBox.Text = text;
         _copyButton.Tag = text;
         _popup.PlacementTarget = target;
+        _outerShell.Opacity = 1; // 确保可见（可能上次淡出中途被打断）
 
         _showTimer = new DispatcherTimer(DispatcherPriority.Input, Application.Current.Dispatcher)
         {
@@ -597,6 +599,7 @@ internal sealed class PreviewPopup
     {
         _showTimer?.Stop();
         _hideTimer?.Stop();
+        _outerShell.Opacity = 1;
         _popup.IsOpen = false;
         _currentTarget = null;
     }
@@ -613,11 +616,25 @@ internal sealed class PreviewPopup
             _hideTimer.Stop();
             if (!_popup.IsMouseOver && (_currentTarget == null || !_currentTarget.IsMouseOver))
             {
-                _popup.IsOpen = false;
-                _currentTarget = null;
+                FadeOutAndClose();
             }
         };
         _hideTimer.Start();
+    }
+
+    private void FadeOutAndClose()
+    {
+        var fade = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(150))
+        {
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+        };
+        fade.Completed += (_, _) =>
+        {
+            _popup.IsOpen = false;
+            _outerShell.Opacity = 1; // 重置，下次打开时无残留
+            _currentTarget = null;
+        };
+        _outerShell.BeginAnimation(UIElement.OpacityProperty, fade);
     }
 }
 
