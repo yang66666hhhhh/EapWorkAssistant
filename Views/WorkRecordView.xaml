@@ -299,6 +299,11 @@
                                 <DataGridTemplateColumn Header="进度" Width="130"
                                                         ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
+                                <DataGridTextColumn Header="问题" Binding="{Binding Problem}" Width="*" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="操作" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -841,6 +846,17 @@
                                     <DataGridTemplateColumn Header="进度" Width="130"
                                                             ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                             CellTemplate="{StaticResource ProgressBarCell}"/>
+                                    <!-- 问题（带搜索高亮） -->
+                                    <DataGridTemplateColumn Header="问题" Width="*" MinWidth="80" ClipboardContentBinding="{Binding Problem}">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock local:Highlight.Text="{Binding Problem}"
+                                                           local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTemplateColumn Header="操作" Width="130">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

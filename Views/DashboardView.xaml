@@ -594,6 +594,11 @@
                                 <DataGridTemplateColumn Header="进度" Width="130"
                                                         ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
+                                <DataGridTextColumn Header="问题" Binding="{Binding Problem}" Width="*" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
 
