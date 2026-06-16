@@ -910,6 +910,7 @@
             <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}"/>
         </Style.Resources>
         <Setter Property="local:DataGridCopyHelper.EnableCopy" Value="True"/>
+        <Setter Property="local:SmartColumns.Enable" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
