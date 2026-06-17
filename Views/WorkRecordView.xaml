@@ -78,7 +78,20 @@
                     <!-- 标题行 -->
                     <Grid>
                         <StackPanel>
-                            <TextBlock Text="工作记录" Style="{StaticResource Heading2}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="工作记录" Style="{StaticResource Heading2}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="今日 " FontSize="11" Foreground="{DynamicResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding RecordCount}" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text=" 条" FontSize="11" Foreground="{DynamicResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
                             <TextBlock Text="记录每日工作内容、成果和问题"
                                        Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -259,6 +272,7 @@
                         ClipToBounds="True">
                     <Grid>
                         <DataGrid ItemsSource="{Binding Records}" Style="{StaticResource ModernGrid}"
+                                  SelectedItem="{Binding SelectedDailyRecord, Mode=TwoWay}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
                                   ClipboardCopyMode="IncludeHeader">
@@ -869,6 +883,7 @@
                             </Border>
                             <Grid>
                             <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
+                                      SelectedItem="{Binding SelectedAllRecord, Mode=TwoWay}"
                                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                                       ClipboardCopyMode="IncludeHeader">
                                 <DataGrid.ColumnHeaderStyle>
@@ -882,6 +897,15 @@
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="136"/>
+                                    <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime}" Width="160">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                                <Setter Property="ToolTip" Value="{Binding CreateTime}"/>
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
                                     <DataGridTemplateColumn Width="38"
                                                             CellTemplate="{StaticResource HighlightStarCell}">
                                         <DataGridTemplateColumn.Header>
@@ -1071,17 +1095,30 @@
                         <Button Content="{Binding SaveButtonText}" Command="{Binding SaveRecordCommand}"
                                 Style="{StaticResource BtnPrimary}" HorizontalAlignment="Left"
                                 Padding="32,10" FontSize="13"/>
-                        <Button Content="新建" Command="{Binding NewRecordCommand}"
-                                Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
-                                Padding="20,10">
-                            <Button.Visibility>
-                                <Binding Path="CurrentRecord.Id">
-                                    <Binding.Converter>
-                                        <local:IdToVisibilityConverter/>
-                                    </Binding.Converter>
-                                </Binding>
-                            </Button.Visibility>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="删除" Command="{Binding DeleteCurrentRecordCommand}"
+                                    Style="{StaticResource BtnGhost}" Padding="16,10" FontSize="12"
+                                    Foreground="{DynamicResource DangerBrush}">
+                                <Button.Visibility>
+                                    <Binding Path="CurrentRecord.Id">
+                                        <Binding.Converter>
+                                            <local:IdToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Button.Visibility>
+                            </Button>
+                            <Button Content="新建" Command="{Binding NewRecordCommand}"
+                                    Style="{StaticResource BtnSecondary}" Padding="20,10"
+                                    Margin="8,0,0,0">
+                                <Button.Visibility>
+                                    <Binding Path="CurrentRecord.Id">
+                                        <Binding.Converter>
+                                            <local:IdToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Button.Visibility>
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                     <!-- 状态消息 -->

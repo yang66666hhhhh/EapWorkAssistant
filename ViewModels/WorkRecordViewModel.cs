@@ -70,6 +70,12 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private string _saveButtonText = "保存记录";
 
+    [ObservableProperty]
+    private WorkRecord? _selectedDailyRecord;
+
+    [ObservableProperty]
+    private WorkRecord? _selectedAllRecord;
+
     // ===== 全部记录 Tab =====
     [ObservableProperty]
     private int _selectedTabIndex;
@@ -282,6 +288,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         IsFormDirty = false;
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
+        SelectedDailyRecord = null;
         _suppressDirty = false;
         await LoadRecordsAsync();
         StatusMessage = string.Empty;
@@ -297,8 +304,31 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
 
         await _repo.DeleteAsync(record.Id);
+        SelectedDailyRecord = null;
         await LoadRecordsAsync();
         ToastService.Success("记录已删除");
+    }
+
+    [RelayCommand]
+    private async Task DeleteCurrentRecordAsync()
+    {
+        if (CurrentRecord.Id <= 0) return;
+        if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{CurrentRecord.Content}", "确认删除", ConfirmDialogType.Danger)) return;
+
+        await _repo.DeleteAsync(CurrentRecord.Id);
+        _suppressDirty = true;
+        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
+        HasProblem = false;
+        IsEditing = false;
+        IsFormDirty = false;
+        FormTitle = "新增记录";
+        SaveButtonText = "保存记录";
+        _suppressDirty = false;
+        await LoadRecordsAsync();
+        if (SelectedTabIndex == 1)
+            await LoadAllRecordsAsync();
+        ToastService.Success("记录已删除");
+        RecordSaved?.Invoke(); // 关闭面板
     }
 
     [RelayCommand]
@@ -324,6 +354,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         IsEditing = true;
         FormTitle = "编辑记录";
         SaveButtonText = "更新记录";
+        SelectedDailyRecord = record;
     }
 
     [RelayCommand]
@@ -336,6 +367,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         IsFormDirty = false;
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
+        SelectedDailyRecord = null;
         _suppressDirty = false;
     }
 
@@ -622,6 +654,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (record == null) return;
         if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
         await _repo.DeleteAsync(record.Id);
+        SelectedAllRecord = null;
         // 删除后如果当前页变空，回退到上一页
         if (AllRecords.Count <= 1 && CurrentPage > 1)
             CurrentPage--;
@@ -638,6 +671,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         SelectedDate = DateTime.TryParse(record.WorkDate, out var d) ? d : DateTime.Now;
         SelectedTabIndex = 0;
         EditRecord(record);
+        SelectedAllRecord = record;
         RecordSaved?.Invoke(); // 通知 View 打开抽屉
     }
 
