@@ -286,24 +286,12 @@
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="300" MinWidth="240">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                            <Setter Property="ToolTip">
-                                                <Setter.Value>
-                                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工作成果" Binding="{Binding Achievement}" Width="240" MinWidth="220">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                            <Setter Property="ToolTip">
-                                                <Setter.Value>
-                                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Achievement}"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80"/>
@@ -313,13 +301,7 @@
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
                                 <DataGridTextColumn Header="问题" Binding="{Binding Problem}" Width="240" MinWidth="220">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                            <Setter Property="ToolTip">
-                                                <Setter.Value>
-                                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Problem}"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="操作" Width="136">
@@ -845,11 +827,8 @@
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Content}"/>
-                                                    </TextBlock.ToolTip>
-                                                </TextBlock>
+                                                           VerticalAlignment="Center"/>
+
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -860,11 +839,8 @@
                                                 <TextBlock local:Highlight.Text="{Binding Achievement}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Achievement}"/>
-                                                    </TextBlock.ToolTip>
-                                                </TextBlock>
+                                                           VerticalAlignment="Center"/>
+
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -879,11 +855,8 @@
                                                 <TextBlock local:Highlight.Text="{Binding Problem}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Problem}"/>
-                                                    </TextBlock.ToolTip>
-                                                </TextBlock>
+                                                           VerticalAlignment="Center"/>
+
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -894,6 +867,7 @@
                                                     <Button Content="编辑"
                                                             Command="{Binding DataContext.EditAllRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}"
+                                                            Click="EditRow_Click"
                                                             Style="{StaticResource BtnGhost}" Padding="8,4" FontSize="12"/>
                                                     <Button Content="删除"
                                                             Command="{Binding DataContext.DeleteAllRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"

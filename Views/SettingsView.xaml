@@ -15,7 +15,7 @@
             <TextBlock Text="系统设置" Style="{StaticResource Heading2}" Margin="0,0,0,20"/>
 
             <!-- 状态消息 -->
-            <Border Visibility="{Binding StatusMessage, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+            <Border Visibility="{Binding StatusMessage, Converter={x:Static local:StringToVisibilityConverter.Instance}}"
                     Background="{DynamicResource SuccessLightBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
                 <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
                            FontSize="13" FontWeight="Medium"/>

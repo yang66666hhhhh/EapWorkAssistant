@@ -49,7 +49,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 今日工时 -->
-                <Border Grid.Column="0" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="今日工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -69,7 +69,7 @@
                 </Border>
 
                 <!-- 本周工时 -->
-                <Border Grid.Column="2" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本周工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -89,7 +89,7 @@
                 </Border>
 
                 <!-- 本月工时 -->
-                <Border Grid.Column="4" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
+                <Border Grid.Column="4" Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本月工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -109,7 +109,7 @@
                 </Border>
 
                 <!-- 总记录 -->
-                <Border Grid.Column="6" Style="{StaticResource CardHover}" Padding="18,14" Cursor="Hand">
+                <Border Grid.Column="6" Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="总记录" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
