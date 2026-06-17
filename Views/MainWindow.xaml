@@ -120,40 +120,35 @@
                                    FontFamily="{StaticResource MonoFont}"/>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=0}"
-                                     Content="工作台" Tag="{StaticResource IconChart}"
-                                     Command="{Binding NavigateToCommand}" CommandParameter="Dashboard">
+                                     Content="工作台" Tag="{StaticResource IconChart}">
                             <RadioButton.ToolTip>
                                 <ToolTip Content="工作台"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=1}"
-                                     Content="工作记录" Tag="{StaticResource IconPencil}"
-                                     Command="{Binding NavigateToCommand}" CommandParameter="WorkRecord">
+                                     Content="工作记录" Tag="{StaticResource IconPencil}">
                             <RadioButton.ToolTip>
                                 <ToolTip Content="工作记录"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=2}"
-                                     Content="知识库" Tag="{StaticResource IconBook}"
-                                     Command="{Binding NavigateToCommand}" CommandParameter="Knowledge">
+                                     Content="知识库" Tag="{StaticResource IconBook}">
                             <RadioButton.ToolTip>
                                 <ToolTip Content="知识库"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=3}"
-                                     Content="问题跟踪" Tag="{StaticResource IconWrench}"
-                                     Command="{Binding NavigateToCommand}" CommandParameter="Issue">
+                                     Content="问题跟踪" Tag="{StaticResource IconWrench}">
                             <RadioButton.ToolTip>
                                 <ToolTip Content="问题跟踪"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=4}"
-                                     Content="设置" Tag="{StaticResource IconGear}"
-                                     Command="{Binding NavigateToCommand}" CommandParameter="Settings">
+                                     Content="设置" Tag="{StaticResource IconGear}">
                             <RadioButton.ToolTip>
                                 <ToolTip Content="设置"/>
                             </RadioButton.ToolTip>

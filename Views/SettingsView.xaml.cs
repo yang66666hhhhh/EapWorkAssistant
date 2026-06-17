@@ -166,8 +166,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashStats = newVal;
-            ConfigService.Instance.ShowDashStats = newVal;
-            VM.StatusMessage = newVal ? "统计卡片已显示" : "统计卡片已隐藏";
         }
     }
 
@@ -179,8 +177,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashReminder = newVal;
-            ConfigService.Instance.ShowDashReminder = newVal;
-            VM.StatusMessage = newVal ? "今日提醒已显示" : "今日提醒已隐藏";
         }
     }
 
@@ -192,8 +188,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashProbation = newVal;
-            ConfigService.Instance.ShowDashProbation = newVal;
-            VM.StatusMessage = newVal ? "试用期进度已显示" : "试用期进度已隐藏";
         }
     }
 
@@ -205,8 +199,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashCharts = newVal;
-            ConfigService.Instance.ShowDashCharts = newVal;
-            VM.StatusMessage = newVal ? "图表区域已显示" : "图表区域已隐藏";
         }
     }
 
@@ -218,8 +210,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashHighlights = newVal;
-            ConfigService.Instance.ShowDashHighlights = newVal;
-            VM.StatusMessage = newVal ? "工作亮点已显示" : "工作亮点已隐藏";
         }
     }
 
@@ -231,8 +221,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.ShowDashRecent = newVal;
-            ConfigService.Instance.ShowDashRecent = newVal;
-            VM.StatusMessage = newVal ? "最近记录已显示" : "最近记录已隐藏";
         }
     }
 
@@ -245,9 +233,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.AutoStart = newVal;
-            ConfigService.Instance.AutoStart = newVal;
-            AutoStartService.ApplyAutoStart(newVal);
-            VM.StatusMessage = newVal ? "开机自启动已启用" : "开机自启动已禁用";
         }
     }
 
@@ -259,8 +244,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.MinimizeToTray = newVal;
-            ConfigService.Instance.MinimizeToTray = newVal;
-            VM.StatusMessage = newVal ? "最小化到托盘已启用" : "最小化到托盘已禁用";
         }
     }
 
@@ -269,8 +252,6 @@ public partial class SettingsView
         if (sender is ComboBox cb && cb.SelectedItem is string view && VM != null)
         {
             VM.DefaultView = view;
-            ConfigService.Instance.DefaultView = view;
-            VM.StatusMessage = $"默认视图已设为 {VM.DefaultViewLabel}";
         }
     }
 
@@ -279,8 +260,6 @@ public partial class SettingsView
         if (sender is ComboBox cb && cb.SelectedItem is int interval && VM != null)
         {
             VM.AutoSaveInterval = interval;
-            ConfigService.Instance.AutoSaveInterval = interval;
-            VM.StatusMessage = $"自动保存间隔已设为 {interval} 分钟";
         }
     }
 
@@ -314,8 +293,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.EnableShortcuts = newVal;
-            ConfigService.Instance.EnableShortcuts = newVal;
-            VM.StatusMessage = newVal ? "快捷键已启用" : "快捷键已禁用";
         }
     }
 
@@ -327,8 +304,6 @@ public partial class SettingsView
             var newVal = !(tb.IsChecked == true);
             tb.IsChecked = newVal;
             VM.EnableReminder = newVal;
-            ConfigService.Instance.EnableReminder = newVal;
-            VM.StatusMessage = newVal ? "定时提醒已启用" : "定时提醒已禁用";
         }
     }
 }

@@ -273,16 +273,15 @@ public partial class MainViewModel : ObservableObject
 
         NavigateTo(item.NavigateTo);
 
-        // 知识库/问题跟踪：导航后用搜索关键词过滤，定位到目标条目
+        // 知识库/问题跟踪：导航后设置搜索关键词，OnSearchKeywordChanged 防抖定时器会自动触发搜索
+        // 不再手动调用 SearchCommand，避免与防抖定时器竞态导致双重搜索
         if (item.NavigateTo == "Knowledge")
         {
             Knowledge.SearchKeyword = item.Keyword;
-            Knowledge.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
         }
         else if (item.NavigateTo == "Issue")
         {
             Issue.SearchKeyword = item.Keyword;
-            Issue.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
         }
     }
 

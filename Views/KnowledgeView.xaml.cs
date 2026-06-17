@@ -105,6 +105,10 @@ public partial class KnowledgeView : UserControl
         }
 
         _isDrawerOpen = false;
-        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, null, 500);
+        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
+        {
+            if (DataContext is KnowledgeViewModel vm)
+                vm.NewCommand.Execute(null);
+        }, 500);
     }
 }

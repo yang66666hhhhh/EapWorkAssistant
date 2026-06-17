@@ -82,6 +82,10 @@ public partial class IssueView : UserControl
         }
 
         _isDrawerOpen = false;
-        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, null, 500);
+        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
+        {
+            if (DataContext is IssueViewModel vm)
+                vm.NewCommand.Execute(null);
+        }, 500);
     }
 }
