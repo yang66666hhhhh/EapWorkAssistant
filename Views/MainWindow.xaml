@@ -118,7 +118,8 @@
                         <TextBlock Text="NAVIGATION" FontSize="10" FontWeight="SemiBold"
                                    Foreground="{DynamicResource SidebarTextBrush}" Margin="24,0,0,14"
                                    FontFamily="{StaticResource MonoFont}"/>
-                        <RadioButton Style="{StaticResource NavButton}" IsChecked="True"
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=0}"
                                      Content="工作台" Tag="{StaticResource IconChart}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Dashboard">
                             <RadioButton.ToolTip>
@@ -126,6 +127,7 @@
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=1}"
                                      Content="工作记录" Tag="{StaticResource IconPencil}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="WorkRecord">
                             <RadioButton.ToolTip>
@@ -133,6 +135,7 @@
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=2}"
                                      Content="知识库" Tag="{StaticResource IconBook}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Knowledge">
                             <RadioButton.ToolTip>
@@ -140,6 +143,7 @@
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=3}"
                                      Content="问题跟踪" Tag="{StaticResource IconWrench}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Issue">
                             <RadioButton.ToolTip>
@@ -147,6 +151,7 @@
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=4}"
                                      Content="设置" Tag="{StaticResource IconGear}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Settings">
                             <RadioButton.ToolTip>
