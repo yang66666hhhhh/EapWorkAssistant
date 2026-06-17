@@ -571,7 +571,7 @@
                                                             <Setter Property="Text" Value="{Binding}"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding}" Value="">
-                                                                    <Setter Property="Text" Value="全部项目"/>
+                                                                    <Setter Property="Text" Value="全部任务"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
