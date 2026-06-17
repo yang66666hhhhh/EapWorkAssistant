@@ -18,10 +18,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private ObservableCollection<string> _workTypes = new();
 
     [ObservableProperty]
+    private ObservableCollection<string> _knowledgeCategories = new();
+
+    [ObservableProperty]
     private string? _selectedProject;
 
     [ObservableProperty]
     private string? _selectedWorkType;
+
+    [ObservableProperty]
+    private string? _selectedKnowledgeCategory;
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
@@ -163,6 +169,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     {
         Projects = new ObservableCollection<string>(ConfigService.Instance.Projects);
         WorkTypes = new ObservableCollection<string>(ConfigService.Instance.WorkTypes);
+        KnowledgeCategories = new ObservableCollection<string>(ConfigService.Instance.KnowledgeCategories);
         ContentTemplates = new ObservableCollection<ContentTemplate>(ConfigService.Instance.ContentTemplates);
         EnableShortcuts = ConfigService.Instance.EnableShortcuts;
         EnableReminder = ConfigService.Instance.EnableReminder;
@@ -481,6 +488,44 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveWorkType(workType);
         RefreshAsync();
         StatusMessage = "类型已删除";
+    }
+
+    // ===== 知识分类管理 commands =====
+    [RelayCommand]
+    private void AddKnowledgeCategory()
+    {
+        var dialog = new Views.ConfigItemDialog("添加知识分类", "");
+        dialog.Owner = Application.Current.MainWindow;
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        {
+            ConfigService.Instance.AddKnowledgeCategory(dialog.ItemValue.Trim());
+            RefreshAsync();
+            StatusMessage = "分类已添加";
+        }
+    }
+
+    [RelayCommand]
+    private void EditKnowledgeCategory(string? category)
+    {
+        if (string.IsNullOrWhiteSpace(category)) return;
+        var dialog = new Views.ConfigItemDialog("编辑知识分类", category);
+        dialog.Owner = Application.Current.MainWindow;
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        {
+            ConfigService.Instance.UpdateKnowledgeCategory(category, dialog.ItemValue.Trim());
+            RefreshAsync();
+            StatusMessage = "分类已更新";
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteKnowledgeCategory(string? category)
+    {
+        if (string.IsNullOrWhiteSpace(category)) return;
+        if (!ConfirmDialog.Show($"确定要删除分类「{category}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        ConfigService.Instance.RemoveKnowledgeCategory(category);
+        RefreshAsync();
+        StatusMessage = "分类已删除";
     }
 
     [RelayCommand]

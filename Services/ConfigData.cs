@@ -55,6 +55,9 @@ public class ConfigData
     // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====
     public List<int> RestDays { get; set; } = new() { 0, 6 }; // 默认周六周日
 
+    // ===== 知识分类 =====
+    public List<string> KnowledgeCategories { get; set; } = new();
+
     // ===== 工作记录自定义字段 =====
     public List<CustomField> CustomFields { get; set; } = new();
 }

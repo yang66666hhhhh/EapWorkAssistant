@@ -24,6 +24,7 @@ public class ConfigService
 
     public List<string> Projects => _data.Projects;
     public List<string> WorkTypes => _data.WorkTypes;
+    public List<string> KnowledgeCategories => _data.KnowledgeCategories;
     public List<ContentTemplate> ContentTemplates => _data.ContentTemplates;
 
     public bool EnableShortcuts
@@ -261,6 +262,40 @@ public class ConfigService
             if (index >= 0)
             {
                 _data.WorkTypes[index] = newWorkType;
+                Save();
+            }
+        }
+    }
+
+    public void AddKnowledgeCategory(string category)
+    {
+        lock (_lock)
+        {
+            if (!_data.KnowledgeCategories.Contains(category))
+            {
+                _data.KnowledgeCategories.Add(category);
+                Save();
+            }
+        }
+    }
+
+    public void RemoveKnowledgeCategory(string category)
+    {
+        lock (_lock)
+        {
+            _data.KnowledgeCategories.Remove(category);
+            Save();
+        }
+    }
+
+    public void UpdateKnowledgeCategory(string oldCategory, string newCategory)
+    {
+        lock (_lock)
+        {
+            var index = _data.KnowledgeCategories.IndexOf(oldCategory);
+            if (index >= 0)
+            {
+                _data.KnowledgeCategories[index] = newCategory;
                 Save();
             }
         }
