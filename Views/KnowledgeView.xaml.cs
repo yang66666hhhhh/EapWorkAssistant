@@ -65,6 +65,21 @@ public partial class KnowledgeView : UserControl
         DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
     }
 
+    private void EditItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isDrawerOpen) return;
+        if (DataContext is not KnowledgeViewModel vm) return;
+
+        // 从按钮的 DataContext 获取当前列表项
+        if (sender is FrameworkElement fe && fe.DataContext is EapWorkAssistant.Models.Knowledge item)
+        {
+            // 通过 EditCommand 将条目加载到编辑表单
+            vm.EditCommand.Execute(item);
+            _isDrawerOpen = true;
+            DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
+        }
+    }
+
     private void CloseForm_Click(object sender, RoutedEventArgs e)
     {
         CloseDrawer();
