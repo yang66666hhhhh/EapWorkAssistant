@@ -442,14 +442,84 @@
                                     <!-- 日期快捷 -->
                                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                                         <Button Content="本周" Command="{Binding SetDatePresetCommand}" CommandParameter="thisWeek"
-                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                                Padding="10,6" FontSize="12" Margin="0,0,5,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisWeek">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                         <Button Content="本月" Command="{Binding SetDatePresetCommand}" CommandParameter="thisMonth"
-                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                                Padding="10,6" FontSize="12" Margin="0,0,5,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisMonth">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                         <Button Content="近3月" Command="{Binding SetDatePresetCommand}" CommandParameter="last3Months"
-                                                Style="{StaticResource BtnSecondary}" Padding="10,6" FontSize="12" Margin="0,0,5,0"/>
+                                                Padding="10,6" FontSize="12" Margin="0,0,5,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="last3Months">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                         <Button Content="全部" Command="{Binding SetDatePresetCommand}" CommandParameter="all"
-                                                Style="{StaticResource BtnGhost}" Padding="10,6" FontSize="12"
-                                                Foreground="{DynamicResource PrimaryBrush}"/>
+                                                Padding="10,6" FontSize="12">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="">
+                                                            <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisWeek">
+                                                            <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisMonth">
+                                                            <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ActiveDatePreset}" Value="last3Months">
+                                                            <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                                                            <Setter Property="BorderThickness" Value="1"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </StackPanel>
                                     <!-- 开始日期 -->
                                     <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">

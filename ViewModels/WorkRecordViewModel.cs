@@ -20,6 +20,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private bool _suppressDirty;
     private int _queryGeneration;
     private bool _isAutoSaving;
+    private bool _applyingPreset;
 
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
@@ -114,6 +115,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private int _totalPages = 1;
+
+    [ObservableProperty]
+    private string _activeDatePreset = "";
 
     [ObservableProperty]
     private ObservableCollection<int> _visiblePageNumbers = new();
@@ -581,29 +585,35 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void SetDatePreset(string? preset)
     {
-        var today = DateTime.Now;
-        switch (preset)
+        _applyingPreset = true;
+        try
         {
-            case "thisWeek":
-                int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-                FilterStartDate = today.AddDays(-diff);
-                FilterEndDate = today.AddDays(6 - diff);
-                break;
-            case "thisMonth":
-                FilterStartDate = new DateTime(today.Year, today.Month, 1);
-                FilterEndDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
-                break;
-            case "last3Months":
-                FilterStartDate = today.AddMonths(-3);
-                FilterEndDate = today;
-                break;
-            case "all":
-                FilterStartDate = null;
-                FilterEndDate = null;
-                break;
+            ActiveDatePreset = preset ?? "";
+            var today = DateTime.Now;
+            switch (preset)
+            {
+                case "thisWeek":
+                    int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                    FilterStartDate = today.AddDays(-diff);
+                    FilterEndDate = today.AddDays(6 - diff);
+                    break;
+                case "thisMonth":
+                    FilterStartDate = new DateTime(today.Year, today.Month, 1);
+                    FilterEndDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
+                    break;
+                case "last3Months":
+                    FilterStartDate = today.AddMonths(-3);
+                    FilterEndDate = today;
+                    break;
+                case "all":
+                    FilterStartDate = null;
+                    FilterEndDate = null;
+                    break;
+            }
+            CurrentPage = 1;
+            LoadAllRecordsAsync().SafeFire("加载记录失败");
         }
-        CurrentPage = 1;
-        LoadAllRecordsAsync().SafeFire("加载记录失败");
+        finally { _applyingPreset = false; }
     }
 
     [RelayCommand]
@@ -659,19 +669,25 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             // 首次切到全部记录时，默认显示本月
             if (FilterStartDate == null && FilterEndDate == null)
             {
-                var today = DateTime.Now;
-                FilterStartDate = new DateTime(today.Year, today.Month, 1);
-                FilterEndDate = today;
+                _applyingPreset = true;
+                try
+                {
+                    ActiveDatePreset = "thisMonth";
+                    var today = DateTime.Now;
+                    FilterStartDate = new DateTime(today.Year, today.Month, 1);
+                    FilterEndDate = today;
+                }
+                finally { _applyingPreset = false; }
             }
             CurrentPage = 1;
             LoadAllRecordsAsync().SafeFire("加载记录失败");
         }
     }
 
-    partial void OnFilterProjectChanged(string value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
-    partial void OnFilterWorkTypeChanged(string value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
-    partial void OnFilterStartDateChanged(DateTime? value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
-    partial void OnFilterEndDateChanged(DateTime? value) { CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterProjectChanged(string value) { ActiveDatePreset = ""; CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterWorkTypeChanged(string value) { ActiveDatePreset = ""; CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterStartDateChanged(DateTime? value) { if (!_applyingPreset) ActiveDatePreset = ""; CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
+    partial void OnFilterEndDateChanged(DateTime? value) { if (!_applyingPreset) ActiveDatePreset = ""; CurrentPage = 1; LoadAllRecordsAsync().SafeFire("筛选失败"); }
 
     partial void OnSearchKeywordChanged(string value)
     {
