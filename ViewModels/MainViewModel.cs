@@ -111,6 +111,22 @@ public partial class MainViewModel : ObservableObject
             _ => Dashboard
         };
 
+        // 同步 SelectedIndex 以更新导航栏选中状态
+        var newIndex = viewName switch
+        {
+            "Dashboard" => 0,
+            "WorkRecord" => 1,
+            "Knowledge" => 2,
+            "Issue" => 3,
+            "Settings" => 4,
+            _ => 0
+        };
+        if (newIndex != SelectedIndex)
+            SelectedIndex = newIndex;
+
+        // 视图未实际切换时跳过后续逻辑（防止 OnSelectedIndexChanged 回调导致重复刷新）
+        if (CurrentView == previousView) return;
+
         // 离开工作记录时暂停自动保存，进入时恢复
         if (previousView == WorkRecord && CurrentView != WorkRecord)
             WorkRecord.PauseAutoSaveTimer();
