@@ -117,6 +117,7 @@
                 <Grid>
                     <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
                              Style="{StaticResource ModernListBox}"
+                             local:ListBoxCopyHelper.EnableCopy="False"
                              ItemContainerStyle="{StaticResource ModernListBoxItem}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -147,9 +148,6 @@
                                                 <Button Click="EditItem_Click"
                                                         Style="{StaticResource BtnGhost}" Padding="4,2"
                                                         Opacity="0.6" Margin="0,0,4,0">
-                                                    <Button.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="编辑此条目"/>
-                                                    </Button.ToolTip>
                                                     <Path Width="14" Height="14" Stretch="Uniform"
                                                           Fill="{DynamicResource TextSecondaryBrush}"
                                                           Data="M3,17.25V21h3.75L17.81,9.94l-3.75,-3.75L3,17.25z M20.71,7.04c0.39,-0.39 0.39,-1.02 0,-1.41l-2.34,-2.34c-0.39,-0.39 -1.02,-0.39 -1.41,0l-1.83,1.83 3.75,3.75 1.83,-1.83z"/>
@@ -160,9 +158,6 @@
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource BtnGhost}" Padding="4,2" FontSize="12"
                                                         Opacity="0.6">
-                                                    <Button.ToolTip>
-                                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="切换收藏"/>
-                                                    </Button.ToolTip>
                                                     <Path Width="14" Height="14" Stretch="Uniform" Fill="{DynamicResource TextSecondaryBrush}">
                                                         <Path.Style>
                                                             <Style TargetType="Path">
