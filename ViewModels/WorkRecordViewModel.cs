@@ -427,8 +427,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (!string.IsNullOrWhiteSpace(ReportText))
         {
-            ExportService.SaveToFile(ReportText, "工作日报");
-            ToastService.Success("报告已保存");
+            if (ExportService.SaveToFile(ReportText, "工作日报"))
+                ToastService.Success("报告已保存");
         }
     }
 
@@ -441,8 +441,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             _statusTimer.Start();
             return;
         }
-        ExportService.ExportToCsv(Records, $"工作记录_{SelectedDate:yyyyMMdd}");
-        ToastService.Success("CSV 文件已导出");
+        if (ExportService.ExportToCsv(Records, $"工作记录_{SelectedDate:yyyyMMdd}"))
+            ToastService.Success("CSV 文件已导出");
     }
 
     [RelayCommand]
@@ -476,8 +476,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (!string.IsNullOrWhiteSpace(ReportText))
         {
-            ExportService.SaveAsMarkdown("工作日报", ReportText, "工作日报");
-            ToastService.Success("Markdown 文件已保存");
+            if (ExportService.SaveAsMarkdown("工作日报", ReportText, "工作日报"))
+                ToastService.Success("Markdown 文件已保存");
         }
     }
 
@@ -657,9 +657,11 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             SearchKeyword, FilterProject, FilterWorkType, start, end, 0, int.MaxValue);
         var startStr = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
         var endStr = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
-        ExportService.ExportToCsv(new ObservableCollection<WorkRecord>(records), $"工作记录_{startStr}_{endStr}");
-        StatusMessage = "已导出CSV文件";
-        _statusTimer.Start();
+        if (ExportService.ExportToCsv(new ObservableCollection<WorkRecord>(records), $"工作记录_{startStr}_{endStr}"))
+        {
+            StatusMessage = "已导出CSV文件";
+            _statusTimer.Start();
+        }
     }
 
     partial void OnSelectedTabIndexChanged(int value)

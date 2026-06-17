@@ -12,7 +12,7 @@ public static class ExportService
         System.Windows.Clipboard.SetText(text);
     }
 
-    public static void SaveToFile(string content, string defaultName = "report")
+    public static bool SaveToFile(string content, string defaultName = "report")
     {
         var dialog = new SaveFileDialog
         {
@@ -23,10 +23,12 @@ public static class ExportService
         if (dialog.ShowDialog() == true)
         {
             File.WriteAllText(dialog.FileName, content, Encoding.UTF8);
+            return true;
         }
+        return false;
     }
 
-    public static void SaveAsMarkdown(string title, string content, string defaultName = "report")
+    public static bool SaveAsMarkdown(string title, string content, string defaultName = "report")
     {
         var markdown = ExportToMarkdown(title, content);
         var dialog = new SaveFileDialog
@@ -38,7 +40,9 @@ public static class ExportService
         if (dialog.ShowDialog() == true)
         {
             File.WriteAllText(dialog.FileName, markdown, Encoding.UTF8);
+            return true;
         }
+        return false;
     }
 
     public static string ExportToMarkdown(string title, string content)
@@ -50,7 +54,7 @@ public static class ExportService
         return sb.ToString();
     }
 
-    public static void ExportToCsv(IEnumerable<WorkRecord> records, string defaultName = "工作记录")
+    public static bool ExportToCsv(IEnumerable<WorkRecord> records, string defaultName = "工作记录")
     {
         var dialog = new SaveFileDialog
         {
@@ -71,7 +75,9 @@ public static class ExportService
                 sb.AppendLine($"{EscapeCsv(r.WorkDate)},{EscapeCsv(r.ProjectName)},{EscapeCsv(r.WorkType)},{EscapeCsv(r.Content)},{EscapeCsv(r.Achievement)},{r.Hours},{r.Progress},{(r.IsHighlight == 1 ? "是" : "否")},{EscapeCsv(r.Problem)},{EscapeCsv(r.Solution)}");
             }
             File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
+            return true;
         }
+        return false;
     }
 
     /// <summary>
