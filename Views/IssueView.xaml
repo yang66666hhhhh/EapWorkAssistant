@@ -257,7 +257,7 @@
                         <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Click="CloseForm_Click" Style="{StaticResource BtnGhost}" Padding="8,6">
                             <Button.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板 (Esc)"/>
+                                <ToolTip Content="关闭面板 (Esc)"/>
                             </Button.ToolTip>
                             <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
                                   Width="14" Height="14" Stretch="Uniform"/>

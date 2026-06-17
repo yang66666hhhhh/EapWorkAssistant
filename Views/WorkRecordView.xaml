@@ -751,7 +751,7 @@
                                         <Button Command="{Binding FirstPageCommand}"
                                                 Style="{StaticResource PageNavButton}">
                                             <Button.ToolTip>
-                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="首页"/>
+                                                <ToolTip Content="首页"/>
                                             </Button.ToolTip>
                                             <Path Data="{StaticResource IconSkipFirst}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="14" Height="14" Stretch="Uniform"/>
@@ -760,7 +760,7 @@
                                         <Button Command="{Binding PrevPageCommand}"
                                                 Style="{StaticResource PageNavButton}">
                                             <Button.ToolTip>
-                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="上一页"/>
+                                                <ToolTip Content="上一页"/>
                                             </Button.ToolTip>
                                             <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="16" Height="16" Stretch="Uniform"/>
@@ -834,7 +834,7 @@
                                         <Button Command="{Binding NextPageCommand}"
                                                 Style="{StaticResource PageNavButton}">
                                             <Button.ToolTip>
-                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="下一页"/>
+                                                <ToolTip Content="下一页"/>
                                             </Button.ToolTip>
                                             <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="16" Height="16" Stretch="Uniform"/>
@@ -843,7 +843,7 @@
                                         <Button Command="{Binding LastPageCommand}"
                                                 Style="{StaticResource PageNavButton}">
                                             <Button.ToolTip>
-                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="末页"/>
+                                                <ToolTip Content="末页"/>
                                             </Button.ToolTip>
                                             <Path Data="{StaticResource IconSkipLast}" Fill="{DynamicResource TextSecondaryBrush}"
                                                   Width="14" Height="14" Stretch="Uniform"/>
@@ -1025,7 +1025,7 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Button x:Name="TemplateBtn" Style="{StaticResource BtnGhost}" Padding="8,6">
                                 <Button.ToolTip>
-                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="使用模板填充内容"/>
+                                    <ToolTip Content="使用模板填充内容"/>
                                 </Button.ToolTip>
                                 <Button.Content>
                                     <StackPanel Orientation="Horizontal">
@@ -1038,7 +1038,7 @@
                             <Button x:Name="CopyLastBtn" Click="CopyLast_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6">
                                 <Button.ToolTip>
-                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="复制上一条记录的任务和类型"/>
+                                    <ToolTip Content="复制上一条记录的任务和类型"/>
                                 </Button.ToolTip>
                                 <TextBlock Text="复制上条" FontSize="12"
                                            Foreground="{DynamicResource PrimaryBrush}"/>
@@ -1046,7 +1046,7 @@
                             <Button Click="CloseForm_Click"
                                     Style="{StaticResource BtnGhost}" Padding="8,6" Margin="4,0,0,0">
                                 <Button.ToolTip>
-                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板 (Esc)"/>
+                                    <ToolTip Content="关闭面板 (Esc)"/>
                                 </Button.ToolTip>
                                 <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
                                       Width="14" Height="14" Stretch="Uniform"/>

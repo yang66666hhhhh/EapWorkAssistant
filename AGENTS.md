@@ -181,7 +181,7 @@ EapWorkAssistant/
 | `CardElevated` | Border | 带阴影的卡片容器 |
 | `CardHover` | Border | 可交互卡片（悬停高亮） |
 | `Tag` / `TagPrimary/Success/Warning/Danger` | Border | 状态标签（彩色圆角小标签） |
-| `ModernToolTip` | ToolTip | 统一悬浮提示（卡片风格 + 柔和阴影 + 自动换行，模板使用 `ContentPresenter` 避免嵌套渲染） |
+| `ModernToolTip` | ToolTip | **全局隐式样式**（深色紧凑风格 + 自动换行），无需指定 `Style`，所有 ToolTip 自动应用。响应速度已全局优化（`InitialShowDelay=150ms`） |
 | `ModernGrid` | DataGrid | 数据表格基础样式 |
 | `ModernGridColumnHeader` | DataGridColumnHeader | 表格列头样式 |
 | `ModernGridCell` | DataGridCell | 表格单元格样式 |
@@ -224,7 +224,7 @@ EapWorkAssistant/
 - 按钮样式统一使用 `BtnPrimary`、`BtnSecondary`、`BtnSuccess`、`BtnWarning`、`BtnGhost`、`BtnDanger`
 - ComboBox 统一使用 `Select` 样式
 - TextBox 统一使用 `Input`（单行）或 `TextArea`（多行）样式；搜索输入框（搭配搜索图标时）使用 `SearchInput` 样式
-- ToolTip 统一使用 `ModernToolTip` 样式，配合 `Content="{Binding 字段名}"` 绑定内容。**例外**：DataGrid 中由 `DataGridCopyHelper` 管理悬停预览的长文本列（如 `内容` / `工作成果` / `问题` / `描述` / `根本原因` / `解决方案` / `关键词` / `标题`）**不需要**额外设置 ToolTip，`PreviewPopup` 已提供预览 + 复制功能
+- ToolTip 为全局隐式样式（深色紧凑风格），直接使用 `<ToolTip Content="..."/>` 或 `ToolTip="{Binding Field}"` 即可，**无需指定 Style**。**例外**：DataGrid 中由 `DataGridCopyHelper` 管理悬停预览的长文本列（如 `内容` / `工作成果` / `问题` / `描述` / `根本原因` / `解决方案` / `关键词` / `标题`）**不需要**额外设置 ToolTip，`PreviewPopup` 已提供预览 + 复制功能
 - DataGrid 必须使用 `ModernGrid` + `ModernGridColumnHeader` + `ModernGridCell` + `ModernGridRow` 组合
 - 禁止使用 WPF 原生控件：当项目已有自定义组件时，必须优先复用，不得引入 WPF 原生控件（如 `DatePicker`、`Calendar` 等）
 
@@ -474,14 +474,14 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 新增样式前是否已读取 `Resources/Styles.xaml`，确认无已有可复用样式？
 - [ ] 新创建的样式是否已放入 `Styles.xaml` 作为共享样式（而非 View 内联）？
 - [ ] 是否复用了已有的自定义组件（CustomCalendar、ConfirmDialog 等），而非引入 WPF 原生控件？
-- [ ] DataGrid 是否使用了 `ModernGrid` 系列样式？ToolTip 是否使用了 `ModernToolTip`？
+- [ ] DataGrid 是否使用了 `ModernGrid` 系列样式？ToolTip 是否为全局隐式样式（无需指定 Style）？
 - [ ] ToggleButton 是否使用了 PreviewMouseLeftButtonDown？
 - [ ] ComboBox 是否使用了 Select 样式？（包括 Opacity=0 的覆盖层 ComboBox）
 - [ ] 多个 View 中出现相同内联样式时，是否已抽取为 Styles.xaml 中的共享样式？
 - [ ] DataGrid 列的 ElementStyle 是否 `BasedOn="{StaticResource GridTextTrim}"` 后加列特有 ToolTip？
 - [ ] 搜索框是否使用了 `SearchInput` 样式？导航栏是否使用了 `NavButton`？
 - [ ] 星标列是否使用了 `HighlightStarCell` DataTemplate？
-- [ ] 所有 ToolTip 是否统一使用了 `ModernToolTip` 样式（而非纯字符串 `ToolTip="..."`）？
+- [ ] 所有 ToolTip 是否为全局隐式样式（直接使用 `ToolTip="..."` 或 `<ToolTip Content="..."/>` 即可，无需指定 Style）？
 - [ ] DataGrid 的长文本预览列是否**避免**设置额外 ToolTip（`DataGridCopyHelper.PreviewPopup` 已提供悬停预览）？
 - [ ] 日历浮窗是否通过 `CalendarHelper.Show()` / `CalendarHelper.Close()` 管理定位与显隐？
 - [ ] 需要穿越 DataTemplate 查找父控件时，是否使用了 `VisualTreeHelper`（而非 `LogicalTreeHelper`）？

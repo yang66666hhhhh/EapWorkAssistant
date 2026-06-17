@@ -1552,29 +1552,34 @@
         <Setter Property="Effect" Value="{StaticResource ShadowLg}"/>
     </Style>
 
-    <!-- ToolTip（统一悬浮提示样式，卡片风格 + 柔和阴影） -->
-    <Style x:Key="ModernToolTip" TargetType="ToolTip">
-        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+    <!-- ToolTip 全局隐式样式（深色紧凑风格 + 快速响应） -->
+    <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="#FF1E293B"/>
+        <Setter Property="Foreground" Value="#F1F5F9"/>
+        <Setter Property="BorderBrush" Value="#FF334155"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="14,10"/>
-        <Setter Property="MaxWidth" Value="420"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="MaxWidth" Value="400"/>
+        <Setter Property="ToolTipService.InitialShowDelay" Value="150"/>
+        <Setter Property="ToolTipService.BetweenShowDelay" Value="50"/>
+        <Setter Property="ToolTipService.ShowDuration" Value="15000"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="HasDropShadow" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10"
-                            Padding="{TemplateBinding Padding}"
-                            Effect="{StaticResource ShadowLg}">
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
                         <ContentPresenter>
                             <ContentPresenter.Resources>
                                 <DataTemplate DataType="{x:Type sys:String}">
                                     <TextBlock Text="{Binding}" TextWrapping="Wrap"
                                                FontFamily="{StaticResource DefaultFont}"
-                                               FontSize="{StaticResource SmallFontSize}"
-                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                               FontSize="12"
+                                               Foreground="#F1F5F9"/>
                                 </DataTemplate>
                             </ContentPresenter.Resources>
                         </ContentPresenter>

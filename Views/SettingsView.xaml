@@ -87,7 +87,7 @@
                                                 Cursor="Hand" MouseLeftButtonDown="AccentColor_Click"
                                                 Tag="{Binding Name}">
                                             <Border.ToolTip>
-                                                <ToolTip Style="{StaticResource ModernToolTip}" Content="{Binding Name}"/>
+                                                <ToolTip Content="{Binding Name}"/>
                                             </Border.ToolTip>
                                             <Border.Background>
                                                 <SolidColorBrush Color="{Binding PreviewColor}"/>
@@ -124,7 +124,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="FontSizeSmall_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="小号字体"/>
+                                        <ToolTip Content="小号字体"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="小" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
@@ -132,7 +132,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="FontSizeMedium_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="标准字体"/>
+                                        <ToolTip Content="标准字体"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="标准" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
@@ -140,7 +140,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="FontSizeLarge_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="大号字体"/>
+                                        <ToolTip Content="大号字体"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="大" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
@@ -162,7 +162,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="DensityCompact_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="紧凑布局 - 减少间距"/>
+                                        <ToolTip Content="紧凑布局 - 减少间距"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="紧凑" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
@@ -170,7 +170,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="DensityDefault_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="标准布局 - 默认间距"/>
+                                        <ToolTip Content="标准布局 - 默认间距"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="标准" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>
@@ -178,7 +178,7 @@
                                         Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1" MouseLeftButtonDown="DensityComfortable_Click">
                                     <Border.ToolTip>
-                                        <ToolTip Style="{StaticResource ModernToolTip}" Content="宽松布局 - 增加间距"/>
+                                        <ToolTip Content="宽松布局 - 增加间距"/>
                                     </Border.ToolTip>
                                     <TextBlock Text="宽松" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Border>

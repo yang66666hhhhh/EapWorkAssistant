@@ -10,7 +10,9 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource SurfaceBrush}"
         FontFamily="{StaticResource DefaultFont}"
-        TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
+        TextElement.Foreground="{DynamicResource TextPrimaryBrush}"
+        ToolTipService.InitialShowDelay="150"
+        ToolTipService.BetweenShowDelay="50">
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
@@ -120,35 +122,35 @@
                                      Content="工作台" Tag="{StaticResource IconChart}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Dashboard">
                             <RadioButton.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="工作台"/>
+                                <ToolTip Content="工作台"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      Content="工作记录" Tag="{StaticResource IconPencil}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="WorkRecord">
                             <RadioButton.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="工作记录"/>
+                                <ToolTip Content="工作记录"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      Content="知识库" Tag="{StaticResource IconBook}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Knowledge">
                             <RadioButton.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="知识库"/>
+                                <ToolTip Content="知识库"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      Content="问题跟踪" Tag="{StaticResource IconWrench}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Issue">
                             <RadioButton.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="问题跟踪"/>
+                                <ToolTip Content="问题跟踪"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                         <RadioButton Style="{StaticResource NavButton}"
                                      Content="设置" Tag="{StaticResource IconGear}"
                                      Command="{Binding NavigateToCommand}" CommandParameter="Settings">
                             <RadioButton.ToolTip>
-                                <ToolTip Style="{StaticResource ModernToolTip}" Content="设置"/>
+                                <ToolTip Content="设置"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
                     </StackPanel>
