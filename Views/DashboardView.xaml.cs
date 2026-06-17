@@ -86,4 +86,50 @@ public partial class DashboardView : UserControl
     {
         CalendarHelper.Close(CalendarBackdrop, CalendarContainer);
     }
+
+    // ===== 统计卡片点击导航 =====
+    private void StatCard_Today_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToWorkRecord(DateTime.Now);
+    }
+
+    private void StatCard_Week_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToPage("WorkRecord");
+    }
+
+    private void StatCard_Month_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToPage("WorkRecord");
+    }
+
+    private void StatCard_Records_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToPage("WorkRecord");
+    }
+
+    private void StatCard_Issues_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToPage("Issue");
+    }
+
+    private void StatCard_Knowledge_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+            vm.RaiseNavigateToPage("Knowledge");
+    }
+
+    private void Refresh_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is DashboardViewModel vm)
+        {
+            vm.LoadDashboardAsync().SafeFire("刷新仪表盘失败");
+            ToastService.Success("数据已刷新");
+        }
+    }
 }

@@ -6,11 +6,13 @@ using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject, IRefreshable
 {
+    private readonly DispatcherTimer _statusTimer;
     [ObservableProperty]
     private ObservableCollection<string> _projects = new();
 
@@ -31,6 +33,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
+
+    partial void OnStatusMessageChanged(string value)
+    {
+        _statusTimer.Stop();
+        if (!string.IsNullOrEmpty(value))
+            _statusTimer.Start();
+    }
 
     [ObservableProperty]
     private ObservableCollection<ContentTemplate> _contentTemplates = new();
@@ -149,6 +158,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
 
     public SettingsViewModel()
     {
+        _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
+
         // 初始化强调色列表
         foreach (var name in ThemeService.GetAccentColorNames)
         {

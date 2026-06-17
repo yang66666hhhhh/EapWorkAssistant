@@ -21,17 +21,27 @@
                                    Foreground="{DynamicResource TextTertiaryBrush}"
                                    FontSize="13" Margin="0,4,0,0"/>
                     </StackPanel>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
-                            Padding="14,9" BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding CurrentDate, Mode=OneWay}"
-                                       FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
-                                       VerticalAlignment="Center" FontWeight="Medium"/>
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border Cursor="Hand" Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                Padding="10,9" BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1" Margin="0,0,8,0"
+                                MouseLeftButtonDown="Refresh_Click">
+                            <Border.ToolTip>
+                                <ToolTip Content="刷新数据"/>
+                            </Border.ToolTip>
+                            <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                Padding="14,9" BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding CurrentDate, Mode=OneWay}"
+                                           FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -49,7 +59,8 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 今日工时 -->
-                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,14">
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,14"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Today_Click">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="今日工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -69,7 +80,8 @@
                 </Border>
 
                 <!-- 本周工时 -->
-                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,14">
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,14"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Week_Click">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本周工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -89,7 +101,8 @@
                 </Border>
 
                 <!-- 本月工时 -->
-                <Border Grid.Column="4" Style="{StaticResource Card}" Padding="18,14">
+                <Border Grid.Column="4" Style="{StaticResource Card}" Padding="18,14"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Month_Click">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="本月工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -109,7 +122,8 @@
                 </Border>
 
                 <!-- 记录数 -->
-                <Border Grid.Column="6" Style="{StaticResource Card}" Padding="18,14">
+                <Border Grid.Column="6" Style="{StaticResource Card}" Padding="18,14"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Records_Click">
                     <Grid>
                         <StackPanel>
                             <TextBlock Text="记录数" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -186,7 +200,8 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Issues_Click">
                     <Grid>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="待解决问题" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -206,7 +221,8 @@
                 </Border>
 
                 <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Cursor="Hand" MouseLeftButtonDown="StatCard_Knowledge_Click">
                     <Grid>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="知识条目" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -440,6 +456,11 @@
                                 <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="工作亮点" FontSize="16" FontWeight="Bold"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Highlights.Count}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                </Border>
                             </StackPanel>
                             <TextBlock Text="标记的重要成果" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
@@ -560,6 +581,7 @@
 
                     <Grid>
                         <DataGrid ItemsSource="{Binding RecentRecords}" Style="{StaticResource ModernGrid}"
+                                  SelectedItem="{Binding SelectedRecentRecord, Mode=TwoWay}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
                                   ClipboardCopyMode="IncludeHeader">

@@ -408,7 +408,7 @@
             </Border>
 
             <!-- ===== 自定义字段（功能开发中） ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}" Opacity="0.6">
+            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}" Opacity="0.7">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -416,18 +416,23 @@
                     <Grid Grid.Row="0">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
+                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextTertiaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="自定义字段" Style="{StaticResource Heading3}"/>
+                                <TextBlock Text="自定义字段" FontSize="15" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
                             </StackPanel>
-                            <TextBlock Text="为工作记录添加额外的自定义字段（功能开发中，敬请期待）" FontSize="12"
+                            <TextBlock Text="为工作记录添加额外的自定义字段" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                         </StackPanel>
-                        <Border CornerRadius="6" Padding="10,4" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                Background="{DynamicResource SurfaceBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                            <TextBlock Text="Coming Soon" FontSize="10.5" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        <Border CornerRadius="10" Padding="12,5" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{DynamicResource Primary}" Offset="0"/>
+                                    <GradientStop Color="{DynamicResource AccentViolet}" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="Coming Soon" FontSize="10.5" FontWeight="Bold"
+                                       Foreground="White"/>
                         </Border>
                     </Grid>
                 </Grid>
@@ -774,6 +779,11 @@
                                 <Path Data="{StaticResource IconList}" Fill="{DynamicResource TextPrimaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock Text="任务列表" Style="{StaticResource Heading3}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Projects.Count}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                </Border>
                             </StackPanel>
                             <TextBlock Text="管理工作项目，记录时可选择" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
@@ -851,6 +861,11 @@
                                 <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock Text="工作类型" Style="{StaticResource Heading3}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding WorkTypes.Count}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                </Border>
                             </StackPanel>
                             <TextBlock Text="分类工作内容，便于统计分析" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
@@ -928,6 +943,11 @@
                                 <Path Data="{StaticResource IconBook}" Fill="{DynamicResource TextPrimaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock Text="知识分类" Style="{StaticResource Heading3}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding KnowledgeCategories.Count}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                </Border>
                             </StackPanel>
                             <TextBlock Text="管理知识库分类，在知识库页面可选择分类" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
@@ -1005,6 +1025,11 @@
                                 <Path Data="{StaticResource IconDoc}" Fill="{DynamicResource TextPrimaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock Text="内容模板" Style="{StaticResource Heading3}"/>
+                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ContentTemplates.Count}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                </Border>
                             </StackPanel>
                             <TextBlock Text="预设常用工作内容，一键填充" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>

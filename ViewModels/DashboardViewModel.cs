@@ -30,6 +30,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private string _probationReport = string.Empty;
     [ObservableProperty] private string _currentDate = DateTime.Now.ToString("yyyy-MM-dd dddd");
     [ObservableProperty] private ObservableCollection<RecentRecordItem> _recentRecords = new();
+    [ObservableProperty] private RecentRecordItem? _selectedRecentRecord;
 
     // 试用期进度
     [ObservableProperty] private int _probationDaysPassed;
@@ -451,6 +452,15 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     /// <summary>请求导航到工作记录并按项目筛选</summary>
     public event Action<string>? NavigateToWorkRecordFilter;
+
+    /// <summary>请求导航到指定页面（由 MainViewModel 订阅）</summary>
+    public event Action<string>? NavigateToPage;
+
+    /// <summary>触发导航到工作记录（供外部调用）</summary>
+    public void RaiseNavigateToWorkRecord(DateTime date) => NavigateToWorkRecord?.Invoke(date);
+
+    /// <summary>触发导航到指定页面（供外部调用）</summary>
+    public void RaiseNavigateToPage(string page) => NavigateToPage?.Invoke(page);
 }
 
 public class RecentRecordItem

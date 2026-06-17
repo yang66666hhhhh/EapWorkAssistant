@@ -91,6 +91,10 @@ public partial class MainViewModel : ObservableObject
             WorkRecord.SelectedTabIndex = 1;
             NavigateTo("WorkRecord");
         };
+        Dashboard.NavigateToPage += (page) =>
+        {
+            NavigateTo(page);
+        };
     }
 
     [RelayCommand]
