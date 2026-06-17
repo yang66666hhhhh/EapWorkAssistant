@@ -943,23 +943,32 @@
                 MouseLeftButtonDown="Backdrop_Click"/>
 
         <!-- ===== 浮窗表单（右侧滑入） ===== -->
-        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="500">
+        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520">
             <DockPanel>
-                <!-- 表单标题 -->
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+
+                <!-- ── 面板头部 ── -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,4">
                     <Grid>
-                        <StackPanel>
-                            <TextBlock Text="{Binding FormTitle}" FontSize="18" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4"/>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding SelectedDate, StringFormat='yyyy-MM-dd ddd'}" FontSize="12"
-                                           Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"/>
-                                <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="10,2,10,2"/>
-                                <TextBlock Text="记录每日工作内容与成果" FontSize="12"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="{DynamicResource PrimaryLightBrush}"
+                                    CornerRadius="8" Width="32" Height="32" Margin="0,0,12,0">
+                                <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource PrimaryBrush}"
+                                      Width="15" Height="15" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FormTitle}" FontSize="17" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding SelectedDate, StringFormat='yyyy-MM-dd ddd'}" FontSize="11.5"
+                                               Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"/>
+                                    <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="8,2,8,2"/>
+                                    <TextBlock Text="记录每日工作内容与成果" FontSize="11.5"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Button x:Name="TemplateBtn" Style="{StaticResource BtnGhost}" Padding="8,6">
                                 <Button.ToolTip>
                                     <ToolTip Style="{StaticResource ModernToolTip}" Content="使用模板填充内容"/>
@@ -981,176 +990,222 @@
                                            Foreground="{DynamicResource PrimaryBrush}"/>
                             </Button>
                             <Button Click="CloseForm_Click"
-                                    Style="{StaticResource BtnGhost}" Padding="8,6">
+                                    Style="{StaticResource BtnGhost}" Padding="8,6" Margin="4,0,0,0">
                                 <Button.ToolTip>
-                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板"/>
+                                    <ToolTip Style="{StaticResource ModernToolTip}" Content="关闭面板 (Esc)"/>
                                 </Button.ToolTip>
                                 <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
                                       Width="14" Height="14" Stretch="Uniform"/>
                             </Button>
                         </StackPanel>
                     </Grid>
+                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,14,0,0" Opacity="0.5"/>
                 </StackPanel>
 
-                <!-- 操作按钮 -->
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+                <!-- ── 底部操作栏 ── -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,14" Opacity="0.5"/>
+
+                    <!-- 操作按钮 -->
                     <Grid>
                         <Button Content="{Binding SaveButtonText}" Command="{Binding SaveRecordCommand}"
                                 Style="{StaticResource BtnPrimary}" HorizontalAlignment="Left"
-                                Padding="26,10"/>
+                                Padding="32,10" FontSize="13"/>
                         <Button Content="新建" Command="{Binding NewRecordCommand}"
                                 Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
                                 Padding="20,10"/>
                     </Grid>
-                    <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="10"
-                            Padding="14,10" Margin="0,10,0,0">
-                        <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
-                                   FontSize="13" FontWeight="Medium"/>
+
+                    <!-- 状态消息 -->
+                    <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0"
+                            Background="{DynamicResource SuccessLightBrush}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessBrush}"
+                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
+                                       FontSize="12.5" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 
-                <!-- 表单字段 -->
+                <!-- ── 表单字段区域（滚动） ── -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               Style="{StaticResource ModernScrollViewer}">
-                    <StackPanel Margin="0,0,0,16">
+                    <StackPanel Margin="0,16,0,16">
 
-                        <!-- 任务 + 类型 -->
-                        <Grid Margin="0,0,0,14">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="任务 *" Style="{StaticResource Label}"/>
-                                <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding CurrentRecord.ProjectName}"
-                                          Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="类型 *" Style="{StaticResource Label}"/>
-                                <ComboBox ItemsSource="{Binding WorkTypes}" SelectedItem="{Binding CurrentRecord.WorkType}"
-                                          Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,14"/>
-
-                        <!-- 快捷模板 -->
-                        <TextBlock Text="快捷模板" Style="{StaticResource Label}"/>
-                        <ItemsControl ItemsSource="{Binding ContentTemplates}" Margin="0,0,0,10">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Content="{Binding Name}" Style="{StaticResource BtnGhost}"
-                                            Padding="10,5" Margin="0,0,6,6" FontSize="12"
-                                            Command="{Binding DataContext.ApplyTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                            CommandParameter="{Binding}"
-                                            Foreground="{DynamicResource PrimaryBrush}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- 工作内容 -->
-                        <TextBlock Text="工作内容 *" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentRecord.Content}" Height="160"
-                                 Style="{StaticResource TextArea}" Margin="0,0,0,6"
-                                 TextWrapping="Wrap" AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
-                        <TextBlock Text="描述做了什么、关键产出和交付物" FontSize="11"
-                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,18"/>
-
-                        <!-- 工作成果 -->
-                        <TextBlock Text="工作成果" Style="{StaticResource Label}"/>
-                        <TextBox Text="{Binding CurrentRecord.Achievement}" Height="80"
-                                 Style="{StaticResource TextArea}" Margin="0,0,0,6"
-                                 TextWrapping="Wrap" AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
-                        <TextBlock Text="记录本项工作的具体成果和产出（可选，用于转正述职报告）" FontSize="11"
-                                   Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,18"/>
-
-                        <!-- 问题与解决方案 -->
-                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                                Padding="14,10" Margin="0,0,0,18" Cursor="Hand">
+                        <!-- ═══ 基本信息 ═══ -->
+                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
+                                Padding="18,16" Margin="0,0,0,16">
                             <StackPanel>
-                                <CheckBox x:Name="ProblemToggle" Content="遇到了问题？点击展开记录"
-                                          IsChecked="{Binding HasProblem, Mode=TwoWay}"
-                                          FontSize="13" FontWeight="SemiBold" Cursor="Hand"
-                                          Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                <StackPanel Visibility="{Binding IsChecked, ElementName=ProblemToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                                            Margin="0,10,0,4">
-                                    <TextBlock Text="问题描述" Style="{StaticResource Label}"/>
-                                    <TextBox Text="{Binding CurrentRecord.Problem}" Height="64"
-                                             Style="{StaticResource TextArea}" Margin="0,0,0,10"
-                                             VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
-                                    <TextBlock Text="解决方案" Style="{StaticResource Label}"/>
-                                    <TextBox Text="{Binding CurrentRecord.Solution}" Height="64"
-                                             Style="{StaticResource TextArea}" Margin="0,0,0,4"
-                                             VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
-                                </StackPanel>
+                                <TextBlock Text="基本信息" FontSize="12.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,14"/>
+
+                                <!-- 任务 + 类型 -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="14"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="任务" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                        <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding CurrentRecord.ProjectName}"
+                                                  Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="类型" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                        <ComboBox ItemsSource="{Binding WorkTypes}" SelectedItem="{Binding CurrentRecord.WorkType}"
+                                                  Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- 快捷模板 -->
+                                <TextBlock Text="快捷模板" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                <ItemsControl ItemsSource="{Binding ContentTemplates}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding Name}" Style="{StaticResource BtnGhost}"
+                                                    Padding="10,5" Margin="0,0,6,6" FontSize="12"
+                                                    Command="{Binding DataContext.ApplyTemplateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
 
-                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,2,0,18"/>
-
-                        <!-- 工时与进度 -->
-                        <Grid Margin="0,0,0,18">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
-                                    CornerRadius="10" Padding="14,10"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Text="工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding CurrentRecord.Hours}" Style="{StaticResource Input}"
-                                             BorderThickness="0" Background="Transparent" Padding="0,4"
-                                             PreviewTextInput="HoursInput_PreviewTextInput"
-                                             TextChanged="FormField_Changed"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Grid.Column="2" Background="{DynamicResource SurfaceBrush}"
-                                    CornerRadius="10" Padding="14,10"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Text="进度 (%)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding CurrentRecord.Progress}" Style="{StaticResource Input}"
-                                             BorderThickness="0" Background="Transparent" Padding="0,4"
-                                             PreviewTextInput="ProgressInput_PreviewTextInput"
-                                             TextChanged="FormField_Changed"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-
-                        <!-- 亮点标记 -->
-                        <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="10"
-                                Padding="14,12" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1">
+                        <!-- ═══ 工作记录 ═══ -->
+                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
+                                Padding="18,16" Margin="0,0,0,16">
                             <StackPanel>
-                                <CheckBox x:Name="HighlightToggle"
-                                          IsChecked="{Binding CurrentRecord.IsHighlight, Converter={x:Static local:BoolToIntConverter.Instance}}"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          Margin="0,0,0,8" Cursor="Hand" FontSize="13" FontWeight="SemiBold"
-                                          Checked="FormField_Changed" Unchecked="FormField_Changed">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                              Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <TextBlock Text="标记为工作亮点" FontSize="13" FontWeight="SemiBold"/>
+                                <TextBlock Text="工作记录" FontSize="12.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,14"/>
+
+                                <!-- 工作内容 -->
+                                <TextBlock Text="工作内容" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding CurrentRecord.Content}" Height="160"
+                                         Style="{StaticResource TextArea}" Margin="0,0,0,6"
+                                         TextWrapping="Wrap" AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
+                                <TextBlock Text="描述做了什么、关键产出和交付物" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,16"/>
+
+                                <!-- 工作成果 -->
+                                <TextBlock Text="工作成果" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                <TextBox Text="{Binding CurrentRecord.Achievement}" Height="80"
+                                         Style="{StaticResource TextArea}" Margin="0,0,0,6"
+                                         TextWrapping="Wrap" AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
+                                <TextBlock Text="记录本项工作的具体成果和产出（可选，用于转正述职报告）" FontSize="11"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ═══ 其他信息 ═══ -->
+                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
+                                Padding="18,16">
+                            <StackPanel>
+                                <TextBlock Text="其他信息" FontSize="12.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,0,14"/>
+
+                                <!-- 问题与解决方案 -->
+                                <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                        Padding="14,10" Margin="0,0,0,14" Cursor="Hand">
+                                    <StackPanel>
+                                        <CheckBox x:Name="ProblemToggle" Content="遇到了问题？点击展开记录"
+                                                  IsChecked="{Binding HasProblem, Mode=TwoWay}"
+                                                  FontSize="13" FontWeight="SemiBold" Cursor="Hand"
+                                                  Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <StackPanel Visibility="{Binding IsChecked, ElementName=ProblemToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                                    Margin="0,10,0,4">
+                                            <TextBlock Text="问题描述" Style="{StaticResource Label}"/>
+                                            <TextBox Text="{Binding CurrentRecord.Problem}" Height="64"
+                                                     Style="{StaticResource TextArea}" Margin="0,0,0,10"
+                                                     VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
+                                            <TextBlock Text="解决方案" Style="{StaticResource Label}"/>
+                                            <TextBox Text="{Binding CurrentRecord.Solution}" Height="64"
+                                                     Style="{StaticResource TextArea}" Margin="0,0,0,4"
+                                                     VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
+                                        </StackPanel>
                                     </StackPanel>
-                                </CheckBox>
-                                <StackPanel Visibility="{Binding IsChecked, ElementName=HighlightToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                    <TextBox Text="{Binding CurrentRecord.HighlightNote, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource TextArea}" Height="56"
-                                             VerticalScrollBarVisibility="Auto"/>
-                                    <TextBlock Text="简要描述这项工作的亮点和成果" FontSize="11"
-                                               Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,6,0,0"/>
-                                </StackPanel>
+                                </Border>
+
+                                <!-- 工时与进度 -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="14"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
+                                            CornerRadius="10" Padding="14,10"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+                                            <TextBox Text="{Binding CurrentRecord.Hours}" Style="{StaticResource Input}"
+                                                     BorderThickness="0" Background="Transparent" Padding="0,4"
+                                                     PreviewTextInput="HoursInput_PreviewTextInput"
+                                                     TextChanged="FormField_Changed"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="2" Background="{DynamicResource SurfaceBrush}"
+                                            CornerRadius="10" Padding="14,10"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="进度 (%)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+                                            <TextBox Text="{Binding CurrentRecord.Progress}" Style="{StaticResource Input}"
+                                                     BorderThickness="0" Background="Transparent" Padding="0,4"
+                                                     PreviewTextInput="ProgressInput_PreviewTextInput"
+                                                     TextChanged="FormField_Changed"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <!-- 亮点标记 -->
+                                <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="10"
+                                        Padding="14,12" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1">
+                                    <StackPanel>
+                                        <CheckBox x:Name="HighlightToggle"
+                                                  IsChecked="{Binding CurrentRecord.IsHighlight, Converter={x:Static local:BoolToIntConverter.Instance}}"
+                                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                                  Margin="0,0,0,8" Cursor="Hand" FontSize="13" FontWeight="SemiBold"
+                                                  Checked="FormField_Changed" Unchecked="FormField_Changed">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
+                                                      Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                <TextBlock Text="标记为工作亮点" FontSize="13" FontWeight="SemiBold"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <StackPanel Visibility="{Binding IsChecked, ElementName=HighlightToggle, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                            <TextBox Text="{Binding CurrentRecord.HighlightNote, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource TextArea}" Height="56"
+                                                     VerticalScrollBarVisibility="Auto"/>
+                                            <TextBlock Text="简要描述这项工作的亮点和成果" FontSize="11"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Border>
 
