@@ -574,19 +574,29 @@
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="136"/>
-                                <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="156"/>
+                                <DataGridTextColumn Header="任务" Binding="{Binding ProjectName}" Width="156">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding ProjectName}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <!-- 类型 - 彩色标签 -->
                                 <DataGridTemplateColumn Header="类型" Width="96"
                                                         ClipboardContentBinding="{Binding WorkType}"
                                                         CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
                                 <DataGridTextColumn Header="内容" Binding="{Binding Content}" Width="260" MinWidth="220">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding Content}"/>
+                                        </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工作成果" Binding="{Binding Achievement}" Width="220" MinWidth="200">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding Achievement}"/>
+                                        </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80"/>
@@ -596,7 +606,9 @@
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
                                 <DataGridTextColumn Header="问题" Binding="{Binding Problem}" Width="220" MinWidth="200">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding Problem}"/>
+                                        </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
