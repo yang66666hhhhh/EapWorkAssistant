@@ -145,16 +145,9 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             var tags = await _repo.GetAllTagsAsync();
             AllTags = new ObservableCollection<string>(tags);
 
-            // 合并：以 ConfigService 中的分类为主，同时保留数据库中已有但配置中没有的分类
-            var configCategories = new HashSet<string>(ConfigService.Instance.KnowledgeCategories);
-            var dbCategories = await _repo.GetAllCategoriesAsync();
-            var merged = new HashSet<string>(configCategories);
-            foreach (var cat in dbCategories)
-            {
-                if (!string.IsNullOrWhiteSpace(cat))
-                    merged.Add(cat);
-            }
-            AllCategories = new ObservableCollection<string>(merged.OrderBy(c => c));
+            // 仅使用设置页面维护的分类列表
+            AllCategories = new ObservableCollection<string>(
+                ConfigService.Instance.KnowledgeCategories.OrderBy(c => c));
             OnPropertyChanged(nameof(FilterCategories));
         }
         catch { }
