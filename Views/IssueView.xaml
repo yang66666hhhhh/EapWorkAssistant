@@ -21,11 +21,64 @@
                     Margin="0,0,0,14">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="问题跟踪" Style="{StaticResource Heading2}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="问题跟踪" Style="{StaticResource Heading2}"/>
+                            <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="10,3"
+                                    Margin="10,0,0,0" VerticalAlignment="Center"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontWeight="Medium" VerticalAlignment="Center">
+                                    <Run Text="{Binding Items.Count, Mode=OneWay}"/>
+                                    <Run Text=" 条"/>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text="记录设备问题、根本原因和解决方案"
                                    Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <!-- 状态筛选 -->
+                        <ComboBox ItemsSource="{Binding FilterStatuses}"
+                                  SelectedItem="{Binding FilterStatus, Mode=TwoWay}"
+                                  Style="{StaticResource Select}" Width="110" FontSize="12" Margin="0,0,8,0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Converter={x:Static local:IssueStatusConverter.Instance}}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="">
+                                                        <Setter Property="Text" Value="全部状态"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <!-- 优先级筛选 -->
+                        <ComboBox ItemsSource="{Binding FilterPriorities}"
+                                  SelectedItem="{Binding FilterPriority, Mode=TwoWay}"
+                                  Style="{StaticResource Select}" Width="100" FontSize="12" Margin="0,0,10,0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Converter={x:Static local:IssuePriorityConverter.Instance}}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="">
+                                                        <Setter Property="Text" Value="全部优先级"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="4,2">
                             <Grid>
@@ -59,7 +112,8 @@
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0"
                     ClipToBounds="True">
                 <Grid>
-                    <DataGrid ItemsSource="{Binding Items}" Style="{StaticResource ModernGrid}"
+                    <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+                              Style="{StaticResource ModernGrid}"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Auto"
                               ClipboardCopyMode="IncludeHeader">
@@ -188,6 +242,11 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
+                            <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime}" Width="140">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTemplateColumn Header="操作" Width="136">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -275,17 +334,30 @@
                         <Button Content="保存" Command="{Binding SaveCommand}"
                                 Style="{StaticResource BtnPrimary}" HorizontalAlignment="Left"
                                 Padding="32,10" FontSize="13"/>
-                        <Button Content="新建" Command="{Binding NewCommand}"
-                                Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
-                                Padding="20,10">
-                            <Button.Visibility>
-                                <Binding Path="CurrentItem.Id">
-                                    <Binding.Converter>
-                                        <local:IdToVisibilityConverter/>
-                                    </Binding.Converter>
-                                </Binding>
-                            </Button.Visibility>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="新建" Command="{Binding NewCommand}"
+                                    Style="{StaticResource BtnSecondary}" Padding="20,10">
+                                <Button.Visibility>
+                                    <Binding Path="CurrentItem.Id">
+                                        <Binding.Converter>
+                                            <local:IdToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Button.Visibility>
+                            </Button>
+                            <Button Content="删除" Command="{Binding DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem}"
+                                    Style="{StaticResource BtnDanger}" Margin="8,0,0,0"
+                                    Padding="20,10">
+                                <Button.Visibility>
+                                    <Binding Path="CurrentItem.Id">
+                                        <Binding.Converter>
+                                            <local:IdToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Button.Visibility>
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                     <!-- 状态消息 -->

@@ -27,6 +27,9 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     private Issue _currentItem = new();
 
     [ObservableProperty]
+    private Issue? _selectedItem;
+
+    [ObservableProperty]
     private string _searchKeyword = string.Empty;
 
     [ObservableProperty]
@@ -40,6 +43,16 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     public string[] StatusLabels => ["待处理", "进行中", "已解决", "已关闭"];
     public string[] Priorities => ["Low", "Medium", "High", "Critical"];
     public string[] PriorityLabels => ["低", "中", "高", "紧急"];
+
+    // 筛选
+    [ObservableProperty]
+    private string _filterStatus = "";
+
+    [ObservableProperty]
+    private string _filterPriority = "";
+
+    public string[] FilterStatuses => ["", .. Statuses];
+    public string[] FilterPriorities => ["", .. Priorities];
 
     public IssueViewModel()
     {
@@ -63,6 +76,16 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
             _searchTimer.Start();
     }
 
+    partial void OnFilterStatusChanged(string value)
+    {
+        LoadAsync().SafeFire("加载问题失败");
+    }
+
+    partial void OnFilterPriorityChanged(string value)
+    {
+        LoadAsync().SafeFire("加载问题失败");
+    }
+
     [RelayCommand]
     private void ClosePanel()
     {
@@ -81,6 +104,13 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     private async Task LoadAsync()
     {
         var items = await _repo.GetAllAsync();
+
+        // 应用筛选
+        if (!string.IsNullOrEmpty(FilterStatus))
+            items = items.Where(i => i.Status == FilterStatus);
+        if (!string.IsNullOrEmpty(FilterPriority))
+            items = items.Where(i => i.Priority == FilterPriority);
+
         Items = new ObservableCollection<Issue>(items);
     }
 
@@ -90,6 +120,13 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         var items = string.IsNullOrWhiteSpace(SearchKeyword)
             ? await _repo.GetAllAsync()
             : await _repo.SearchAsync(SearchKeyword);
+
+        // 应用筛选
+        if (!string.IsNullOrEmpty(FilterStatus))
+            items = items.Where(i => i.Status == FilterStatus);
+        if (!string.IsNullOrEmpty(FilterPriority))
+            items = items.Where(i => i.Priority == FilterPriority);
+
         Items = new ObservableCollection<Issue>(items);
     }
 
