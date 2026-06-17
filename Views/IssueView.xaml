@@ -293,7 +293,15 @@
                                 Padding="32,10" FontSize="13"/>
                         <Button Content="新建" Command="{Binding NewCommand}"
                                 Style="{StaticResource BtnSecondary}" HorizontalAlignment="Right"
-                                Padding="20,10"/>
+                                Padding="20,10">
+                            <Button.Visibility>
+                                <Binding Path="CurrentItem.Id">
+                                    <Binding.Converter>
+                                        <local:IdToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
                     </Grid>
 
                     <!-- 状态消息 -->

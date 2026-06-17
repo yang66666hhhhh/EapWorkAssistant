@@ -287,7 +287,15 @@
                                 Padding="32,10" FontSize="13"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="新建" Command="{Binding NewCommand}"
-                                    Style="{StaticResource BtnSecondary}" Padding="20,10"/>
+                                    Style="{StaticResource BtnSecondary}" Padding="20,10">
+                                <Button.Visibility>
+                                    <Binding Path="CurrentItem.Id">
+                                        <Binding.Converter>
+                                            <local:IdToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Button.Visibility>
+                            </Button>
                             <Button Content="删除" Command="{Binding DeleteCommand}"
                                     CommandParameter="{Binding SelectedItem}"
                                     Style="{StaticResource BtnDanger}" Margin="8,0,0,0"
