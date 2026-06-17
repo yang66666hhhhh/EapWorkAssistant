@@ -218,7 +218,7 @@
                                   Width="40" Height="40" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                             <TextBlock Text="暂无问题记录" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                        HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium"/>
-                            <TextBlock Text="点击右上角「新增问题」按钮记录设备问题和解决方案" FontSize="12"
+                            <TextBlock Text="点击右上角「新增问题」按钮记录设备问题、根本原因和解决方案" FontSize="12"
                                        Foreground="{DynamicResource TextTertiaryBrush}"
                                        HorizontalAlignment="Center" Margin="0,6,0,0"/>
                         </StackPanel>
@@ -248,9 +248,9 @@
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="问题详情" FontSize="17" FontWeight="Bold"
+                                <TextBlock Text="问题条目" FontSize="17" FontWeight="Bold"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="记录设备问题与解决方案" FontSize="11.5"
+                                <TextBlock Text="记录设备问题、根本原因和解决方案" FontSize="11.5"
                                            Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>

@@ -417,12 +417,12 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- ═══ 文章内容 ═══ -->
+                        <!-- ═══ 知识内容 ═══ -->
                         <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
                                 Padding="18,16">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="文章内容" FontSize="12.5" FontWeight="SemiBold"
+                                    <TextBlock Text="知识内容" FontSize="12.5" FontWeight="SemiBold"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
                                                VerticalAlignment="Center"/>
                                     <TextBlock Text="支持多行文本编辑"

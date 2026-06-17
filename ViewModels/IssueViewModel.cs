@@ -105,7 +105,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
 
         if (string.IsNullOrWhiteSpace(CurrentItem.ProjectName))
         {
-            StatusMessage = "请选择项目";
+            StatusMessage = "请选择任务";
             _statusTimer.Start();
             return;
         }
