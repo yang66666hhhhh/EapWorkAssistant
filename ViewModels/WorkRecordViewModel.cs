@@ -263,7 +263,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         StatusMessage = "正在保存...";
 
-        CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
+        // 新建记录使用当前选中日期，编辑记录保留原日期
+        if (CurrentRecord.Id == 0)
+            CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
         try
         {
             if (CurrentRecord.Id > 0)
@@ -289,10 +291,14 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         FormTitle = "新增记录";
         SaveButtonText = "保存记录";
         SelectedDailyRecord = null;
+        SelectedAllRecord = null;
         _suppressDirty = false;
-        await LoadRecordsAsync();
+        if (SelectedTabIndex == 1)
+            await LoadAllRecordsAsync();
+        else
+            await LoadRecordsAsync();
         StatusMessage = string.Empty;
-        ToastService.Success($"工作记录已保存 · 今日共 {RecordCount} 条");
+        ToastService.Success("工作记录已保存");
         RecordSaved?.Invoke();
     }
 
@@ -667,12 +673,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private void EditAllRecord(WorkRecord? record)
     {
         if (record == null) return;
-        // 切换到当日记录 Tab 并定位到该日期
-        SelectedDate = DateTime.TryParse(record.WorkDate, out var d) ? d : DateTime.Now;
-        SelectedTabIndex = 0;
+        // 不切换 Tab 和日期，直接在全部记录页打开编辑抽屉
         EditRecord(record);
         SelectedAllRecord = record;
-        RecordSaved?.Invoke(); // 通知 View 打开抽屉
     }
 
     [RelayCommand]
