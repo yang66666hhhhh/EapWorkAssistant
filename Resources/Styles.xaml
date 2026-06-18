@@ -543,17 +543,25 @@
                                Placement="Bottom" PlacementTarget="{Binding ElementName=bg}"
                                AllowsTransparency="True" Focusable="False"
                                PopupAnimation="Slide" StaysOpen="False">
-                            <Border Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="5"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            <!-- 多层柔和阴影：外层大范围扩散 + 内层近距离轮廓 -->
+                            <Border CornerRadius="14" Padding="5"
                                     MinWidth="{Binding ActualWidth, ElementName=bg}"
-                                    Margin="0,6,0,10">
+                                    Margin="0,4,0,14"
+                                    Background="Transparent">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="30" ShadowDepth="7" Opacity="0.11" Color="#FF000000"
-                                                      Direction="270"/>
+                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="#FF000000"
+                                                      Direction="270" RenderingBias="Quality"/>
                                 </Border.Effect>
-                                <ScrollViewer MaxHeight="240">
-                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                </ScrollViewer>
+                                <Border Background="{DynamicResource CardBrush}" CornerRadius="12"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#FF000000"
+                                                          Direction="270" RenderingBias="Quality"/>
+                                    </Border.Effect>
+                                    <ScrollViewer MaxHeight="240">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
                             </Border>
                         </Popup>
                     </Grid>
@@ -1368,20 +1376,28 @@
                                Placement="Bottom" PlacementTarget="{Binding ElementName=bg}"
                                AllowsTransparency="True" Focusable="False"
                                StaysOpen="False" PopupAnimation="Slide">
-                            <Border Background="{DynamicResource CardBrush}" CornerRadius="11" Padding="10,8"
-                                    Width="340" Margin="0,2,0,8"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                                    SnapsToDevicePixels="True">
+                            <!-- 多层柔和阴影 -->
+                            <Border CornerRadius="13" Padding="10,8"
+                                    Width="340" Margin="0,2,0,14"
+                                    Background="Transparent">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.10" Color="#FF000000"
-                                                      Direction="270"/>
+                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="#FF000000"
+                                                      Direction="270" RenderingBias="Quality"/>
                                 </Border.Effect>
-                                <Calendar x:Name="PART_Calendar"
-                                          Style="{StaticResource ModernCalendar}"
-                                          SelectedDate="{Binding SelectedDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          DisplayDate="{Binding DisplayDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          DisplayDateStart="{Binding DisplayDateStart, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          DisplayDateEnd="{Binding DisplayDateEnd, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Border Background="{DynamicResource CardBrush}" CornerRadius="11"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                        SnapsToDevicePixels="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#FF000000"
+                                                          Direction="270" RenderingBias="Quality"/>
+                                    </Border.Effect>
+                                    <Calendar x:Name="PART_Calendar"
+                                              Style="{StaticResource ModernCalendar}"
+                                              SelectedDate="{Binding SelectedDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                              DisplayDate="{Binding DisplayDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                              DisplayDateStart="{Binding DisplayDateStart, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                              DisplayDateEnd="{Binding DisplayDateEnd, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                </Border>
                             </Border>
                         </Popup>
                     </Grid>
