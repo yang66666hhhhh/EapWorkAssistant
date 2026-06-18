@@ -141,13 +141,6 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="280" MinWidth="240">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                        <Setter Property="ToolTip" Value="{Binding Description}"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
                             <!-- 状态 - 彩色标签 -->
                             <DataGridTemplateColumn Header="状态" Width="92" ClipboardContentBinding="{Binding Status}">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -221,6 +214,13 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="280" MinWidth="240">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                        <Setter Property="ToolTip" Value="{Binding Description}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn Header="根本原因" Binding="{Binding RootCause}" Width="260" MinWidth="220">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
