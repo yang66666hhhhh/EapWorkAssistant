@@ -54,11 +54,13 @@ public partial class WorkRecordView : UserControl
 
     private void OnSelectedDateChanged(DateTime date)
     {
-        Dispatcher.Invoke(() =>
-        {
-            DateDisplayText.Text = date.ToString("yyyy-MM-dd");
-            SharedCal.SelectedDate = date;
-        });
+        // 日历浮窗可见时跳过：用户正在选日期，TwoWay 绑定已同步，无需回写
+        if (CalendarContainer.Visibility == Visibility.Visible) return;
+        DateDisplayText.Text = date.ToString("yyyy-MM-dd");
+        // 临时解绑事件，防止设置 SelectedDate 触发事件链 → CloseCalendar → 闪退
+        SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
+        SharedCal.SelectedDate = date;
+        SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
     }
 
     private void SyncDateDisplay()
@@ -66,7 +68,10 @@ public partial class WorkRecordView : UserControl
         if (DataContext is WorkRecordViewModel vm)
         {
             DateDisplayText.Text = vm.SelectedDate.ToString("yyyy-MM-dd");
+            // 临时解绑事件，防止程序设置 SelectedDate 触发事件链 → CloseCalendar
+            SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
             SharedCal.SelectedDate = vm.SelectedDate;
+            SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
             SyncFilterDateDisplay(vm);
         }
     }
@@ -105,6 +110,8 @@ public partial class WorkRecordView : UserControl
                     break;
             }
         }
+        // 仅日历可见时（用户点选日期）才关闭；不可见时（初始化/外部事件）关闭是空操作但需避免
+        if (CalendarContainer.Visibility != Visibility.Visible) return;
         CloseCalendar();
     }
 
@@ -119,8 +126,11 @@ public partial class WorkRecordView : UserControl
             _calendarMode = CalendarMode.Daily;
             if (DataContext is WorkRecordViewModel vm)
             {
+                // 临时解绑事件，防止程序设置 SelectedDate 触发事件链 → CloseCalendar → 闪退
+                SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
                 SharedCal.SelectedDate = vm.SelectedDate;
                 SharedCal.SyncDisplay();
+                SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
             }
             ShowCalendar(CalendarToggleBtn);
         }
@@ -213,8 +223,11 @@ public partial class WorkRecordView : UserControl
         var date = DataContext is WorkRecordViewModel vm
             ? (vm.FilterStartDate ?? DateTime.Now)
             : DateTime.Now;
+        // 临时解绑事件，防止程序设置 SelectedDate 触发事件链 → CloseCalendar → 闪退
+        SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
         SharedCal.SelectedDate = date;
         SharedCal.SyncDisplay();
+        SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
         ShowCalendar(FilterStartBtn);
     }
 
@@ -224,8 +237,11 @@ public partial class WorkRecordView : UserControl
         var date = DataContext is WorkRecordViewModel vm
             ? (vm.FilterEndDate ?? DateTime.Now)
             : DateTime.Now;
+        // 临时解绑事件，防止程序设置 SelectedDate 触发事件链 → CloseCalendar → 闪退
+        SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
         SharedCal.SelectedDate = date;
         SharedCal.SyncDisplay();
+        SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
         ShowCalendar(FilterEndBtn);
     }
 

@@ -70,8 +70,11 @@ public partial class DashboardView : UserControl
         {
             if (DataContext is DashboardViewModel vm)
             {
+                // 临时取消事件订阅，防止程序设置 SelectedDate 触发 SaveProbationStartDate + CloseCalendar
+                CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
                 CustomCal.SelectedDate = vm.CalendarDate;
                 CustomCal.SyncDisplay();
+                CustomCal.SelectedDateChanged += OnCalendarDateChanged;
             }
             CalendarHelper.Show(CalendarBackdrop, CalendarContainer, ProbDateBtn, this);
         }
