@@ -1123,17 +1123,8 @@
 
                     <!-- 状态消息 -->
                     <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0"
-                            Background="{DynamicResource SuccessLightBrush}">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding StatusMessage}" Value="">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
+                            Background="{DynamicResource SuccessLightBrush}"
+                            Visibility="{Binding StatusMessage, Converter={x:Static local:StringToVisibilityConverter.Instance}}">
                         <StackPanel Orientation="Horizontal">
                             <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessBrush}"
                                      VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -1166,12 +1157,12 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="任务" Style="{StaticResource Label}" Margin="0,0,0,6"/>
-                                        <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding CurrentRecord.ProjectName}"
+                                        <ComboBox ItemsSource="{Binding Projects}" SelectedValue="{Binding CurrentRecord.ProjectName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="类型" Style="{StaticResource Label}" Margin="0,0,0,6"/>
-                                        <ComboBox ItemsSource="{Binding WorkTypes}" SelectedItem="{Binding CurrentRecord.WorkType}"
+                                        <ComboBox ItemsSource="{Binding WorkTypes}" SelectedValue="{Binding CurrentRecord.WorkType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Style="{StaticResource Select}" SelectionChanged="FormField_Changed"/>
                                     </StackPanel>
                                 </Grid>

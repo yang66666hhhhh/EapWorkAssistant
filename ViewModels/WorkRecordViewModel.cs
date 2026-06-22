@@ -225,9 +225,17 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         HighlightCount = Records.Count(r => r.IsHighlight == 1);
     }
 
+    // ===== 企业级校验常量 =====
+    private const double MinRecordHours = 0.5;
+    private const double DailyHoursHardCap = 15;
+    private const double DailyHoursWarnCap = 12;
+    private const double DailyHoursSoftCap = 10;
+    private const int MinContentLength = 5;
+
     [RelayCommand]
     private async Task SaveRecordAsync()
     {
+        // ── 1. 必填字段校验 ──
         if (string.IsNullOrWhiteSpace(CurrentRecord.ProjectName))
         {
             StatusMessage = "请选择任务";
@@ -247,18 +255,67 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
-        if (CurrentRecord.Hours < 0 || CurrentRecord.Hours > 24)
+        // ── 2. 工作内容长度校验 ──
+        if (CurrentRecord.Content.Trim().Length < MinContentLength)
         {
-            StatusMessage = "工时应在 0-24 小时之间";
+            StatusMessage = $"工作内容至少需要 {MinContentLength} 个字符，请补充更多细节";
             _statusTimer.Start();
             return;
         }
 
+        // ── 3. 工时范围校验 ──
+        if (CurrentRecord.Hours <= 0)
+        {
+            StatusMessage = "工时必须大于 0";
+            _statusTimer.Start();
+            return;
+        }
+        if (CurrentRecord.Hours < MinRecordHours)
+        {
+            StatusMessage = $"单条工时不应少于 {MinRecordHours} 小时，过短的请合并到其他记录";
+            _statusTimer.Start();
+            return;
+        }
+
+        // ── 4. 进度范围校验 ──
         if (CurrentRecord.Progress < 0 || CurrentRecord.Progress > 100)
         {
             StatusMessage = "进度应在 0-100% 之间";
             _statusTimer.Start();
             return;
+        }
+
+        // ── 5. 当日累计工时校验（三级防护） ──
+        var existingHours = Records
+            .Where(r => r.Id != CurrentRecord.Id)
+            .Sum(r => r.Hours);
+        var projectedTotal = existingHours + CurrentRecord.Hours;
+
+        if (projectedTotal > DailyHoursHardCap)
+        {
+            StatusMessage = $"当日累计工时将达 {projectedTotal:F1}h，超过每日上限 {DailyHoursHardCap} 小时";
+            _statusTimer.Start();
+            return;
+        }
+
+        if (projectedTotal > DailyHoursWarnCap)
+        {
+            bool proceed = ConfirmDialog.Show(
+                $"当日累计工时将达 {projectedTotal:F1} 小时，已超过 {DailyHoursWarnCap} 小时。\n\n确定要继续保存吗？",
+                "工时偏长提醒",
+                ConfirmDialogType.Warning,
+                "继续保存", "取消");
+            if (!proceed) return;
+        }
+        else if (projectedTotal > DailyHoursSoftCap)
+        {
+            ToastService.Info($"当日累计工时将达 {projectedTotal:F1} 小时，请注意合理安排休息");
+        }
+
+        // ── 6. 休息日提醒 ──
+        if (ConfigService.Instance.IsRestDay(SelectedDate))
+        {
+            ToastService.Info($"{SelectedDate:yyyy-MM-dd} 是休息日，已记录加班工时");
         }
 
         StatusMessage = "正在保存...";
