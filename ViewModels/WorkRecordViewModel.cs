@@ -160,7 +160,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 _isAutoSaving = true;
                 try
                 {
-                    await SaveRecordAsync();
+                    await AutoSaveRecordAsync();
                     StatusMessage = "已自动保存";
                     _statusTimer.Start();
                 }
@@ -357,6 +357,37 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         StatusMessage = string.Empty;
         ToastService.Success("工作记录已保存");
         RecordSaved?.Invoke();
+    }
+
+    /// <summary>
+    /// 自动保存专用：跳过严格校验，直接持久化，不重置表单。
+    /// 确保用户正在编辑的数据不会因校验失败而丢失。
+    /// </summary>
+    private async Task AutoSaveRecordAsync()
+    {
+        // 新建记录使用当前选中日期
+        if (CurrentRecord.Id == 0)
+            CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
+
+        if (CurrentRecord.Id > 0)
+        {
+            await _repo.UpdateAsync(CurrentRecord);
+        }
+        else
+        {
+            // 自动插入：WorkType 为空时填占位值以满足 DB NOT NULL 约束
+            if (string.IsNullOrWhiteSpace(CurrentRecord.WorkType))
+                CurrentRecord.WorkType = "其他";
+            if (string.IsNullOrWhiteSpace(CurrentRecord.CreateTime))
+                CurrentRecord.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            // InsertAsync 内部会回写 record.Id，后续自动保存将走 Update 分支
+            await _repo.InsertAsync(CurrentRecord);
+
+            // 将新记录加入列表以便统计和显示
+            Records.Add(CurrentRecord);
+            UpdateStats();
+        }
     }
 
     [RelayCommand]

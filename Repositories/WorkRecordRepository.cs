@@ -60,10 +60,13 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
-            return await connection.ExecuteAsync(@"
+            var id = await connection.QuerySingleAsync<int>(@"
                 INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
-                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime)",
+                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime);
+                SELECT last_insert_rowid();",
                 record);
+            record.Id = id;
+            return id;
         });
     }
 
