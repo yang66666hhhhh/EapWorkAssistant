@@ -160,6 +160,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 _isAutoSaving = true;
                 try
                 {
+                    StatusMessage = "正在保存...";
                     await AutoSaveRecordAsync();
                     StatusMessage = "已自动保存";
                     _statusTimer.Start();
@@ -187,8 +188,13 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         _autoSaveTimer.Start();
     }
 
-    /// <summary>暂停自动保存（离开工作记录页面时调用）</summary>
-    public void PauseAutoSaveTimer() => _autoSaveTimer.Stop();
+    /// <summary>暂停自动保存（离开工作记录页面时调用），同时刷出未保存的编辑数据</summary>
+    public void PauseAutoSaveTimer()
+    {
+        _autoSaveTimer.Stop();
+        if (IsFormDirty)
+            FlushPendingChangesAsync().SafeFire("自动保存失败");
+    }
 
     private void WorkRecordViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -232,71 +238,46 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private const double DailyHoursSoftCap = 10;
     private const int MinContentLength = 5;
 
-    [RelayCommand]
-    private async Task SaveRecordAsync()
+    /// <summary>
+    /// 硬性校验：不满足则绝对不能保存。
+    /// 用于手动保存、关闭面板、导航离开等场景。
+    /// </summary>
+    private (bool IsValid, string? Error) ValidateStrict()
     {
-        // ── 1. 必填字段校验 ──
         if (string.IsNullOrWhiteSpace(CurrentRecord.ProjectName))
-        {
-            StatusMessage = "请选择任务";
-            _statusTimer.Start();
-            return;
-        }
+            return (false, "请选择任务");
         if (string.IsNullOrWhiteSpace(CurrentRecord.WorkType))
-        {
-            StatusMessage = "请选择类型";
-            _statusTimer.Start();
-            return;
-        }
+            return (false, "请选择类型");
         if (string.IsNullOrWhiteSpace(CurrentRecord.Content))
-        {
-            StatusMessage = "请输入工作内容";
-            _statusTimer.Start();
-            return;
-        }
-
-        // ── 2. 工作内容长度校验 ──
+            return (false, "请输入工作内容");
         if (CurrentRecord.Content.Trim().Length < MinContentLength)
-        {
-            StatusMessage = $"工作内容至少需要 {MinContentLength} 个字符，请补充更多细节";
-            _statusTimer.Start();
-            return;
-        }
-
-        // ── 3. 工时范围校验 ──
+            return (false, $"工作内容至少需要 {MinContentLength} 个字符，请补充更多细节");
         if (CurrentRecord.Hours <= 0)
-        {
-            StatusMessage = "工时必须大于 0";
-            _statusTimer.Start();
-            return;
-        }
+            return (false, "工时必须大于 0");
         if (CurrentRecord.Hours < MinRecordHours)
-        {
-            StatusMessage = $"单条工时不应少于 {MinRecordHours} 小时，过短的请合并到其他记录";
-            _statusTimer.Start();
-            return;
-        }
-
-        // ── 4. 进度范围校验 ──
+            return (false, $"单条工时不应少于 {MinRecordHours} 小时，过短的请合并到其他记录");
         if (CurrentRecord.Progress < 0 || CurrentRecord.Progress > 100)
-        {
-            StatusMessage = "进度应在 0-100% 之间";
-            _statusTimer.Start();
-            return;
-        }
+            return (false, "进度应在 0-100% 之间");
 
-        // ── 5. 当日累计工时校验（三级防护） ──
         var existingHours = Records
             .Where(r => r.Id != CurrentRecord.Id)
             .Sum(r => r.Hours);
         var projectedTotal = existingHours + CurrentRecord.Hours;
-
         if (projectedTotal > DailyHoursHardCap)
-        {
-            StatusMessage = $"当日累计工时将达 {projectedTotal:F1}h，超过每日上限 {DailyHoursHardCap} 小时";
-            _statusTimer.Start();
-            return;
-        }
+            return (false, $"当日累计工时将达 {projectedTotal:F1}h，超过每日上限 {DailyHoursHardCap} 小时");
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// 软性校验：仅发出警告，不阻止保存。仅在手动保存时调用。
+    /// </summary>
+    private async Task<bool> ValidateSoftAsync()
+    {
+        var existingHours = Records
+            .Where(r => r.Id != CurrentRecord.Id)
+            .Sum(r => r.Hours);
+        var projectedTotal = existingHours + CurrentRecord.Hours;
 
         if (projectedTotal > DailyHoursWarnCap)
         {
@@ -305,22 +286,27 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 "工时偏长提醒",
                 ConfirmDialogType.Warning,
                 "继续保存", "取消");
-            if (!proceed) return;
+            if (!proceed) return false;
         }
         else if (projectedTotal > DailyHoursSoftCap)
         {
             ToastService.Info($"当日累计工时将达 {projectedTotal:F1} 小时，请注意合理安排休息");
         }
 
-        // ── 6. 休息日提醒 ──
         if (ConfigService.Instance.IsRestDay(SelectedDate))
         {
             ToastService.Info($"{SelectedDate:yyyy-MM-dd} 是休息日，已记录加班工时");
         }
 
-        StatusMessage = "正在保存...";
+        return true;
+    }
 
-        // 新建记录使用当前选中日期，编辑记录保留原日期
+    /// <summary>
+    /// 将当前记录持久化到数据库（仅 DB 操作，不重置表单、不校验）。
+    /// 新建记录会设置 CreateTime 并调用 InsertAsync（内部回写 Id）。
+    /// </summary>
+    private async Task<bool> PersistCurrentRecordAsync()
+    {
         if (CurrentRecord.Id == 0)
             CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");
         try
@@ -332,14 +318,39 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 CurrentRecord.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 await _repo.InsertAsync(CurrentRecord);
             }
+            return true;
         }
         catch (Exception ex)
         {
-            StatusMessage = string.Empty;
             ToastService.Error($"保存失败：{ex.Message}");
+            return false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveRecordAsync()
+    {
+        // ── 硬性校验 ──
+        var (isValid, error) = ValidateStrict();
+        if (!isValid)
+        {
+            StatusMessage = error!;
+            _statusTimer.Start();
             return;
         }
 
+        // ── 软性校验（可弹出确认对话框） ──
+        if (!await ValidateSoftAsync()) return;
+
+        StatusMessage = "正在保存...";
+
+        if (!await PersistCurrentRecordAsync())
+        {
+            StatusMessage = string.Empty;
+            return;
+        }
+
+        // 重置表单状态
         _suppressDirty = true;
         CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
         HasProblem = false;
@@ -388,6 +399,38 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             Records.Add(CurrentRecord);
             UpdateStats();
         }
+    }
+
+    /// <summary>
+    /// 判断当前表单数据是否可直接保存（无需用户交互确认）。
+    /// 已入库的记录（Id > 0）总是可以保存；新记录需满足最低必填要求。
+    /// </summary>
+    public bool CanQuickSave()
+    {
+        if (!IsFormDirty) return false;
+        if (CurrentRecord.Id > 0) return true;
+        return !string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
+            && !string.IsNullOrWhiteSpace(CurrentRecord.Content)
+            && CurrentRecord.Content.Trim().Length >= MinContentLength;
+    }
+
+    /// <summary>
+    /// 刷出未保存的编辑数据。用于导航离开或关闭面板前调用。
+    /// 仅做硬性校验 + 持久化，不弹出确认对话框，不重置表单。
+    /// </summary>
+    public async Task FlushPendingChangesAsync()
+    {
+        if (!IsFormDirty) return;
+
+        var (isValid, error) = ValidateStrict();
+        if (!isValid)
+        {
+            ToastService.Info($"数据未保存：{error}");
+            return;
+        }
+
+        await PersistCurrentRecordAsync();
+        IsFormDirty = false;
     }
 
     [RelayCommand]

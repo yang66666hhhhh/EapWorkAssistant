@@ -1,4 +1,5 @@
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -245,25 +246,42 @@ public partial class WorkRecordView : UserControl
         ShowCalendar(FilterEndBtn);
     }
 
-    private void CloseDrawer()
+    private async void CloseDrawer()
     {
         if (!_isDrawerOpen) return;
 
         if (DataContext is WorkRecordViewModel vm && vm.IsFormDirty)
         {
-            bool confirmed = ConfirmDialog.Show(
-                "当前表单有未保存的修改，确定要放弃吗？",
-                "放弃修改？",
-                ConfirmDialogType.Warning,
-                "放弃", "取消");
-            if (!confirmed) return;
+            if (vm.CanQuickSave())
+            {
+                // 数据满足保存条件 → 自动保存后关闭，无需用户确认
+                try
+                {
+                    await vm.FlushPendingChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    ToastService.Error($"保存失败：{ex.Message}");
+                    return; // 保存异常时不关闭，让用户继续编辑
+                }
+            }
+            else
+            {
+                // 数据不完整，无法自动保存 → 警告用户
+                bool confirmed = ConfirmDialog.Show(
+                    "当前表单数据不完整，无法自动保存。\n确定要放弃这些修改吗？",
+                    "放弃修改？",
+                    ConfirmDialogType.Warning,
+                    "放弃", "继续编辑");
+                if (!confirmed) return;
+            }
         }
 
         _isDrawerOpen = false;
         DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
         {
-            if (DataContext is WorkRecordViewModel vm)
-                vm.NewRecordCommand.Execute(null);
+            if (DataContext is WorkRecordViewModel vm2)
+                vm2.NewRecordCommand.Execute(null);
         }, 540);
     }
 
