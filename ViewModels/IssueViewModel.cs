@@ -147,6 +147,27 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        // 状态枚举校验
+        if (!Statuses.Contains(CurrentItem.Status))
+        {
+            StatusMessage = "请选择有效的状态";
+            _statusTimer.Start();
+            return;
+        }
+
+        // 优先级枚举校验
+        if (!Priorities.Contains(CurrentItem.Priority))
+        {
+            StatusMessage = "请选择有效的优先级";
+            _statusTimer.Start();
+            return;
+        }
+
+        // 去除首尾空白
+        CurrentItem.Title = CurrentItem.Title.Trim();
+        if (CurrentItem.Description != null)
+            CurrentItem.Description = CurrentItem.Description.Trim();
+
         StatusMessage = "正在保存...";
 
         try

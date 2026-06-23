@@ -183,6 +183,12 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        // 去除首尾空白
+        CurrentItem.Title = CurrentItem.Title.Trim();
+        CurrentItem.Content = CurrentItem.Content.Trim();
+        if (CurrentItem.Tags != null)
+            CurrentItem.Tags = CurrentItem.Tags.Trim();
+
         StatusMessage = "正在保存...";
 
         try

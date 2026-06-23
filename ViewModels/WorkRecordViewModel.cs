@@ -551,14 +551,58 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
-        if (!ConfirmDialog.Show($"确定要导入 {records.Count} 条工作记录吗？\n导入后不可撤销。", "确认导入", ConfirmDialogType.Warning))
+        // ── CSV 数据清洗与校验 ──
+        var valid = new List<WorkRecord>();
+        var skipped = new List<string>();
+        foreach (var r in records)
+        {
+            // 日期格式校验
+            if (!DateTime.TryParseExact(r.WorkDate, "yyyy-MM-dd",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out _))
+            {
+                skipped.Add($"日期格式错误「{r.WorkDate}」，已跳过");
+                continue;
+            }
+            // 必填字段
+            if (string.IsNullOrWhiteSpace(r.ProjectName) || string.IsNullOrWhiteSpace(r.Content))
+            {
+                skipped.Add($"{r.WorkDate} 记录缺少任务或内容，已跳过");
+                continue;
+            }
+            // 工时范围
+            if (r.Hours <= 0 || r.Hours > 24)
+            {
+                skipped.Add($"{r.WorkDate}「{r.ProjectName}」工时 {r.Hours}h 不合理，已跳过");
+                continue;
+            }
+            // 进度范围
+            if (r.Progress < 0 || r.Progress > 100)
+                r.Progress = Math.Clamp(r.Progress, 0, 100);
+
+            valid.Add(r);
+        }
+
+        if (valid.Count == 0)
+        {
+            ToastService.Error("导入失败：所有记录均未通过校验");
+            return;
+        }
+
+        var msg = $"共解析 {records.Count} 条，{valid.Count} 条有效";
+        if (skipped.Count > 0)
+            msg += $"\n\n已跳过 {skipped.Count} 条异常记录：\n{string.Join("\n", skipped.Take(5))}"
+                 + (skipped.Count > 5 ? $"\n...及其他 {skipped.Count - 5} 条" : "");
+
+        if (!ConfirmDialog.Show($"{msg}\n\n确定要导入吗？", "确认导入", ConfirmDialogType.Warning))
             return;
 
         try
         {
-            var count = await _repo.BatchInsertAsync(records);
+            var count = await _repo.BatchInsertAsync(valid);
             await LoadRecordsAsync();
-            ToastService.Success($"已导入 {count} 条工作记录");
+            ToastService.Success($"已导入 {count} 条工作记录" +
+                (skipped.Count > 0 ? $"，跳过 {skipped.Count} 条" : ""));
         }
         catch
         {

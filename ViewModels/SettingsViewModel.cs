@@ -435,7 +435,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.AddProject(dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (ConfigService.Instance.Projects.Contains(value))
+            {
+                StatusMessage = $"任务「{value}」已存在，无需重复添加";
+                return;
+            }
+            ConfigService.Instance.AddProject(value);
             RefreshAsync();
             StatusMessage = "任务已添加";
         }
@@ -449,7 +455,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.UpdateProject(project, dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (value != project && ConfigService.Instance.Projects.Contains(value))
+            {
+                StatusMessage = $"任务「{value}」已存在，无法重命名";
+                return;
+            }
+            ConfigService.Instance.UpdateProject(project, value);
             RefreshAsync();
             StatusMessage = "任务已更新";
         }
@@ -472,7 +484,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.AddWorkType(dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (ConfigService.Instance.WorkTypes.Contains(value))
+            {
+                StatusMessage = $"类型「{value}」已存在，无需重复添加";
+                return;
+            }
+            ConfigService.Instance.AddWorkType(value);
             RefreshAsync();
             StatusMessage = "类型已添加";
         }
@@ -486,7 +504,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.UpdateWorkType(workType, dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (value != workType && ConfigService.Instance.WorkTypes.Contains(value))
+            {
+                StatusMessage = $"类型「{value}」已存在，无法重命名";
+                return;
+            }
+            ConfigService.Instance.UpdateWorkType(workType, value);
             RefreshAsync();
             StatusMessage = "类型已更新";
         }
@@ -510,7 +534,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.AddKnowledgeCategory(dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (ConfigService.Instance.KnowledgeCategories.Contains(value))
+            {
+                StatusMessage = $"分类「{value}」已存在，无需重复添加";
+                return;
+            }
+            ConfigService.Instance.AddKnowledgeCategory(value);
             RefreshAsync();
             StatusMessage = "分类已添加";
         }
@@ -524,7 +554,13 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         dialog.Owner = Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
         {
-            ConfigService.Instance.UpdateKnowledgeCategory(category, dialog.ItemValue.Trim());
+            var value = dialog.ItemValue.Trim();
+            if (value != category && ConfigService.Instance.KnowledgeCategories.Contains(value))
+            {
+                StatusMessage = $"分类「{value}」已存在，无法重命名";
+                return;
+            }
+            ConfigService.Instance.UpdateKnowledgeCategory(category, value);
             RefreshAsync();
             StatusMessage = "分类已更新";
         }
