@@ -33,8 +33,49 @@ namespace EapWorkAssistant.Views
             set => SetValue(HasRecordDatesProperty, value);
         }
 
+        // ===== DependencyProperty: HolidayDates =====
+        public static readonly DependencyProperty HolidayDatesProperty =
+            DependencyProperty.Register(nameof(HolidayDates), typeof(IList<DateTime>), typeof(CustomCalendar),
+                new PropertyMetadata(null, OnCalendarDataChanged));
+
+        public IList<DateTime> HolidayDates
+        {
+            get => (IList<DateTime>)GetValue(HolidayDatesProperty);
+            set => SetValue(HolidayDatesProperty, value);
+        }
+
+        // ===== DependencyProperty: LeaveDateMap =====
+        public static readonly DependencyProperty LeaveDateMapProperty =
+            DependencyProperty.Register(nameof(LeaveDateMap), typeof(Dictionary<DateTime, string>), typeof(CustomCalendar),
+                new PropertyMetadata(null, OnCalendarDataChanged));
+
+        public Dictionary<DateTime, string> LeaveDateMap
+        {
+            get => (Dictionary<DateTime, string>)GetValue(LeaveDateMapProperty);
+            set => SetValue(LeaveDateMapProperty, value);
+        }
+
+        // ===== DependencyProperty: MakeupDates =====
+        public static readonly DependencyProperty MakeupDatesProperty =
+            DependencyProperty.Register(nameof(MakeupDates), typeof(IList<DateTime>), typeof(CustomCalendar),
+                new PropertyMetadata(null, OnCalendarDataChanged));
+
+        public IList<DateTime> MakeupDates
+        {
+            get => (IList<DateTime>)GetValue(MakeupDatesProperty);
+            set => SetValue(MakeupDatesProperty, value);
+        }
+
+        private static void OnCalendarDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var cal = (CustomCalendar)d;
+            cal.GenerateCalendarDays();
+        }
+
         // ===== 事件 =====
         public event EventHandler<DateTime>? SelectedDateChanged;
+        /// <summary>月份显示发生变化时触发（用户点击上/下月或跳转到新月份）</summary>
+        public event EventHandler<DateTime>? DisplayMonthChanged;
 
         // ===== 内部属性 =====
         private DateTime _displayMonth;
@@ -47,6 +88,16 @@ namespace EapWorkAssistant.Views
             GenerateCalendarDays();
         }
 
+        /// <summary>更新显示月份并在月份变化时触发事件</summary>
+        private void SetDisplayMonth(DateTime newMonth)
+        {
+            var normalized = new DateTime(newMonth.Year, newMonth.Month, 1);
+            if (normalized == _displayMonth) return;
+            _displayMonth = normalized;
+            GenerateCalendarDays();
+            DisplayMonthChanged?.Invoke(this, _displayMonth);
+        }
+
         private static void OnSelectedDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var cal = (CustomCalendar)d;
@@ -56,9 +107,12 @@ namespace EapWorkAssistant.Views
                 var newDate = cal.SelectedDate;
                 if (newDate.Year != cal._displayMonth.Year || newDate.Month != cal._displayMonth.Month)
                 {
-                    cal._displayMonth = new DateTime(newDate.Year, newDate.Month, 1);
+                    cal.SetDisplayMonth(newDate);
                 }
-                cal.GenerateCalendarDays();
+                else
+                {
+                    cal.GenerateCalendarDays();
+                }
                 cal.SelectedDateChanged?.Invoke(cal, cal.SelectedDate);
             }
         }
@@ -71,22 +125,19 @@ namespace EapWorkAssistant.Views
 
         private void PrevMonth_Click(object sender, RoutedEventArgs e)
         {
-            _displayMonth = _displayMonth.AddMonths(-1);
-            GenerateCalendarDays();
+            SetDisplayMonth(_displayMonth.AddMonths(-1));
         }
 
         private void NextMonth_Click(object sender, RoutedEventArgs e)
         {
-            _displayMonth = _displayMonth.AddMonths(1);
-            GenerateCalendarDays();
+            SetDisplayMonth(_displayMonth.AddMonths(1));
         }
 
         private void Today_Click(object sender, RoutedEventArgs e)
         {
             var wasToday = SelectedDate == DateTime.Today;
             SelectedDate = DateTime.Today;
-            _displayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            GenerateCalendarDays();
+            SetDisplayMonth(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1));
             // 如果已经是今天，OnSelectedDateChanged 不会触发，手动通知以关闭 Popup
             if (wasToday)
                 SelectedDateChanged?.Invoke(this, DateTime.Today);
@@ -98,8 +149,7 @@ namespace EapWorkAssistant.Views
         public void SyncDisplay()
         {
             var date = SelectedDate;
-            _displayMonth = new DateTime(date.Year, date.Month, 1);
-            GenerateCalendarDays();
+            SetDisplayMonth(new DateTime(date.Year, date.Month, 1));
         }
 
         private void Day_Click(object sender, MouseButtonEventArgs e)
@@ -139,24 +189,21 @@ namespace EapWorkAssistant.Views
             var firstDay = new DateTime(year, month, 1);
             var today = DateTime.Today;
             var recordDates = HasRecordDates ?? new List<DateTime>();
+            var holidayDates = HolidayDates ?? new List<DateTime>();
+            var makeupDates = MakeupDates ?? new List<DateTime>();
+            var leaveMap = LeaveDateMap ?? new Dictionary<DateTime, string>();
 
             // 更新月份标题
             MonthTitle.Text = $"{year}年{month}月";
 
             // 计算第一天是星期几（周一=0, 周日=6）
-            int startWeekday = ((int)firstDay.DayOfWeek + 6) % 7; // 转换：Sunday(0)→6, Monday(1)→0
+            int startWeekday = ((int)firstDay.DayOfWeek + 6) % 7;
 
             // 前面填充上月日期
             for (int i = startWeekday - 1; i >= 0; i--)
             {
                 var date = firstDay.AddDays(-(i + 1));
-                CalendarDays.Add(new CalendarDayItem
-                {
-                    Day = date.Day, Date = date,
-                    IsToday = date == today, IsSelected = date == SelectedDate,
-                    IsCurrentMonth = false, HasRecords = recordDates.Contains(date.Date),
-                    IsWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday
-                });
+                CalendarDays.Add(CreateDayItem(date, false, recordDates, holidayDates, makeupDates, leaveMap));
             }
 
             // 当月所有日期
@@ -164,13 +211,7 @@ namespace EapWorkAssistant.Views
             for (int d = 1; d <= daysInMonth; d++)
             {
                 var date = new DateTime(year, month, d);
-                CalendarDays.Add(new CalendarDayItem
-                {
-                    Day = d, Date = date,
-                    IsToday = date == today, IsSelected = date == SelectedDate,
-                    IsCurrentMonth = true, HasRecords = recordDates.Contains(date.Date),
-                    IsWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday
-                });
+                CalendarDays.Add(CreateDayItem(date, true, recordDates, holidayDates, makeupDates, leaveMap));
             }
 
             // 后面填充下月日期（凑满所需行数：5行=35格 或 6行=42格）
@@ -179,14 +220,67 @@ namespace EapWorkAssistant.Views
             for (int i = 1; i <= remaining; i++)
             {
                 var date = firstDay.AddMonths(1).AddDays(i - 1);
-                CalendarDays.Add(new CalendarDayItem
-                {
-                    Day = date.Day, Date = date,
-                    IsToday = date == today, IsSelected = date == SelectedDate,
-                    IsCurrentMonth = false, HasRecords = recordDates.Contains(date.Date),
-                    IsWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday
-                });
+                CalendarDays.Add(CreateDayItem(date, false, recordDates, holidayDates, makeupDates, leaveMap));
             }
+        }
+
+        private CalendarDayItem CreateDayItem(
+            DateTime date, bool isCurrentMonth,
+            IList<DateTime> recordDates, IList<DateTime> holidayDates,
+            IList<DateTime> makeupDates, Dictionary<DateTime, string> leaveMap)
+        {
+            var today = DateTime.Today;
+            var isWeekend = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
+            var hasRecord = recordDates.Contains(date.Date);
+            var dotColor = "";
+            var leaveLabel = "";
+
+            if (isCurrentMonth)
+            {
+                // 优先级判定
+                if (hasRecord && !isWeekend)
+                {
+                    dotColor = "green"; // 工作日已填
+                }
+                else if (leaveMap.TryGetValue(date.Date, out var lt))
+                {
+                    dotColor = lt;       // 假期类型（年假/事假/病假/调休/出差/婚假）
+                    leaveLabel = lt.Length > 2 ? lt[..2] : lt;
+                }
+                else if (hasRecord && isWeekend)
+                {
+                    dotColor = "blue";   // 周末加班已记录
+                }
+                else if (isWeekend)
+                {
+                    dotColor = "gray";   // 普通周末
+                }
+                else if (holidayDates.Contains(date.Date))
+                {
+                    dotColor = "purple"; // 法定假日
+                }
+                else if (makeupDates.Contains(date.Date))
+                {
+                    dotColor = "red";    // 补班日未填
+                }
+                else
+                {
+                    dotColor = "red";    // 普通工作日未填
+                }
+            }
+
+            return new CalendarDayItem
+            {
+                Day = date.Day,
+                Date = date,
+                IsToday = date == today,
+                IsSelected = date == SelectedDate,
+                IsCurrentMonth = isCurrentMonth,
+                HasRecords = hasRecord,
+                IsWeekend = isWeekend,
+                DotColor = dotColor,
+                LeaveLabel = leaveLabel
+            };
         }
     }
 }

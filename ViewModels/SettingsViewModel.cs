@@ -247,6 +247,15 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 DefaultValue = f.DefaultValue
             }));
 
+        // AI 服务配置
+        var aiSettings = AiSettings.Load();
+        _isSavingAiSettings = true;
+        AiEndpoint = aiSettings.Endpoint;
+        AiApiKey = aiSettings.ApiKey;
+        AiModel = aiSettings.Model;
+        AiTimeoutSeconds = aiSettings.TimeoutSeconds;
+        _isSavingAiSettings = false;
+
         return Task.CompletedTask;
     }
 
@@ -654,6 +663,70 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveCustomField(field.Name);
         RefreshAsync();
         StatusMessage = $"字段「{field.Name}」已删除";
+    }
+
+    // ===== AI 服务配置 =====
+    [ObservableProperty] private string _aiEndpoint = "https://api.deepseek.com/v1";
+    [ObservableProperty] private string _aiApiKey = string.Empty;
+    [ObservableProperty] private string _aiModel = "deepseek-chat";
+    [ObservableProperty] private int _aiTimeoutSeconds = 120;
+    [ObservableProperty] private bool _isTestingAi;
+
+    public List<int> AiTimeoutOptions { get; } = new() { 60, 120, 180, 300 };
+
+    private bool _isSavingAiSettings;
+
+    private void SaveAiSettings()
+    {
+        if (_isSavingAiSettings) return;
+        _isSavingAiSettings = true;
+        try
+        {
+            var settings = new AiSettings
+            {
+                Endpoint = AiEndpoint,
+                ApiKey = AiApiKey,
+                Model = AiModel,
+                TimeoutSeconds = AiTimeoutSeconds
+            };
+            settings.Save();
+            StatusMessage = "AI 配置已保存";
+        }
+        finally
+        {
+            _isSavingAiSettings = false;
+        }
+    }
+
+    partial void OnAiEndpointChanged(string value) => SaveAiSettings();
+    partial void OnAiApiKeyChanged(string value) => SaveAiSettings();
+    partial void OnAiModelChanged(string value) => SaveAiSettings();
+    partial void OnAiTimeoutSecondsChanged(int value) => SaveAiSettings();
+
+    [RelayCommand]
+    private async Task TestAiConnectionAsync()
+    {
+        IsTestingAi = true;
+        try
+        {
+            SaveAiSettings();
+            var aiService = new AiService();
+            var result = await aiService.SendChatAsync(
+                "你是一位测试助手。",
+                "请回复'连接成功'四个字。");
+            var preview = result.Length > 50 ? result[..50] + "..." : result;
+            ToastService.Success($"AI 服务连接成功！回复：{preview}");
+            StatusMessage = "AI 服务连接测试通过";
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"AI 服务连接失败：{ex.Message}");
+            StatusMessage = "AI 服务连接测试失败";
+        }
+        finally
+        {
+            IsTestingAi = false;
+        }
     }
 
     [RelayCommand]

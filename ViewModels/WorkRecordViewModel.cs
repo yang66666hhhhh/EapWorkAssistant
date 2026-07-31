@@ -14,6 +14,7 @@ namespace EapWorkAssistant.ViewModels;
 public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 {
     private readonly WorkRecordRepository _repo = new();
+    private readonly LeaveRecordRepository _leaveRepo = new();
     private readonly DispatcherTimer _statusTimer;
     private readonly DispatcherTimer _searchTimer;
     private readonly DispatcherTimer _autoSaveTimer;
@@ -21,6 +22,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private int _queryGeneration;
     private bool _isAutoSaving;
     private bool _applyingPreset;
+    private string _lastCalendarMonth = "";
 
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
@@ -30,6 +32,12 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     /// <summary>SelectedDate 变化时触发，通知 View 更新日期显示</summary>
     public event Action<DateTime>? SelectedDateChanged;
+
+    /// <summary>请求打开请假对话框（新增模式）</summary>
+    public event Action? OpenLeaveDialogRequested;
+
+    /// <summary>请求打开请假对话框（编辑模式），参数为要编辑的记录</summary>
+    public event Action<LeaveRecord>? EditLeaveRecordRequested;
 
     [ObservableProperty]
     private ObservableCollection<WorkRecord> _records = new();
@@ -60,6 +68,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private bool _isFormDirty;
+
+    /// <summary>表单抽屉是否打开（由 View 同步），用于判断用户是否正在编辑</summary>
+    [ObservableProperty]
+    private bool _isDrawerOpen;
 
     [ObservableProperty]
     private bool _isEditing;
@@ -128,6 +140,31 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private ObservableCollection<int> _visiblePageNumbers = new();
 
+    // ===== 日历状态圆点数据 =====
+    /// <summary>日历当前显示的月份（由 View 同步），用于加载对应月份的日历状态</summary>
+    public DateTime CalendarDisplayMonth { get; set; } = DateTime.Today;
+
+    [ObservableProperty]
+    private List<DateTime> _recordDates = new();
+
+    [ObservableProperty]
+    private List<DateTime> _holidayDates = new();
+
+    [ObservableProperty]
+    private Dictionary<DateTime, string> _leaveDateMap = new();
+
+    [ObservableProperty]
+    private List<DateTime> _makeupDates = new();
+
+    // ===== 请假管理（整合到工作记录页面） =====
+
+    /// <summary>当日请假记录</summary>
+    [ObservableProperty]
+    private ObservableCollection<LeaveRecord> _dailyLeaveRecords = new();
+
+    /// <summary>请假类型列表</summary>
+    public string[] LeaveTypes { get; } = ["年假", "事假", "病假", "调休", "出差", "婚假"];
+
     public int[] PageSizeOptions => [10, 20, 50, 100];
 
     public string[] Projects => ProjectInfo.Projects;
@@ -192,7 +229,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     public void PauseAutoSaveTimer()
     {
         _autoSaveTimer.Stop();
-        if (IsFormDirty)
+        if (IsFormDirty && IsDrawerOpen)
             FlushPendingChangesAsync().SafeFire("自动保存失败");
     }
 
@@ -213,6 +250,97 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         StartAutoSaveTimer(); // 重新读取配置并重启自动保存
         await LoadRecordsAsync();
+        await LoadCalendarStatusAsync();
+    }
+
+    /// <summary>
+    /// 加载当前选中日期所在月份的日历状态数据（记录日期、假日、请假、补班）
+    /// </summary>
+    public async Task LoadCalendarStatusAsync()
+    {
+        var year = CalendarDisplayMonth.Year;
+        var month = CalendarDisplayMonth.Month;
+        var yearMonth = $"{year:D4}-{month:D2}";
+
+        try
+        {
+            // 1. 加载有工作记录的日期
+            var dates = await _repo.GetDistinctDatesByMonthAsync(yearMonth);
+            RecordDates = dates
+                .Select(d => DateTime.Parse(d))
+                .ToList();
+
+            // 2. 加载法定假日和补班日
+            await HolidayService.Instance.LoadYearAsync(year);
+            var holidays = HolidayService.Instance.GetHolidaysForMonth(year, month);
+            HolidayDates = holidays.Select(h => h.Date).ToList();
+            var makeups = HolidayService.Instance.GetMakeupDaysForMonth(year, month);
+            MakeupDates = makeups.Select(m => m.Date).ToList();
+
+            // 3. 加载请假记录
+            var leaves = await _leaveRepo.GetByMonthAsync(year, month);
+            LeaveDateMap = leaves.ToDictionary(
+                l => DateTime.Parse(l.Date),
+                l => l.LeaveType);
+        }
+        catch (Exception ex)
+        {
+            // 日历状态加载失败不影响核心功能，静默降级
+            System.Diagnostics.Debug.WriteLine($"加载日历状态失败：{ex.Message}");
+        }
+    }
+
+    // ===== 请假管理方法 =====
+
+    /// <summary>加载选中日期的请假记录</summary>
+    public async Task LoadDailyLeaveRecordsAsync()
+    {
+        try
+        {
+            var dateStr = SelectedDate.ToString("yyyy-MM-dd");
+            var allMonth = await _leaveRepo.GetByMonthAsync(SelectedDate.Year, SelectedDate.Month);
+            var daily = allMonth.Where(l => l.Date == dateStr).ToList();
+            DailyLeaveRecords = new ObservableCollection<LeaveRecord>(daily);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"加载请假记录失败：{ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private void ShowLeaveForm()
+    {
+        OpenLeaveDialogRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void EditLeaveRecord(LeaveRecord? record)
+    {
+        if (record == null) return;
+        EditLeaveRecordRequested?.Invoke(record);
+    }
+
+    [RelayCommand]
+    private async Task DeleteLeaveRecordAsync(LeaveRecord? record)
+    {
+        if (record == null) return;
+        if (!ConfirmDialog.Show(
+            $"确定要删除 {record.Date} 的「{record.LeaveType}」请假记录吗？",
+            "确认删除", ConfirmDialogType.Danger))
+            return;
+
+        try
+        {
+            await _leaveRepo.DeleteAsync(record.Id);
+            DailyLeaveRecords.Remove(record);
+            ToastService.Success("请假记录已删除");
+            await LoadCalendarStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"删除请假记录失败：{ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -365,6 +493,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             await LoadAllRecordsAsync();
         else
             await LoadRecordsAsync();
+        await LoadCalendarStatusAsync();
         StatusMessage = string.Empty;
         ToastService.Success("工作记录已保存");
         RecordSaved?.Invoke();
@@ -443,6 +572,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         await _repo.DeleteAsync(record.Id);
         SelectedDailyRecord = null;
         await LoadRecordsAsync();
+        await LoadCalendarStatusAsync();
         ToastService.Success("记录已删除");
     }
 
@@ -464,6 +594,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         await LoadRecordsAsync();
         if (SelectedTabIndex == 1)
             await LoadAllRecordsAsync();
+        await LoadCalendarStatusAsync();
         ToastService.Success("记录已删除");
         RecordSaved?.Invoke(); // 关闭面板
     }
@@ -929,5 +1060,15 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         SelectedDateChanged?.Invoke(value);
         LoadRecordsAsync().SafeFire("加载记录失败");
+        LoadDailyLeaveRecordsAsync().SafeFire("加载请假记录失败");
+
+        // 月份变化时重新加载日历状态数据
+        var ym = value.ToString("yyyy-MM");
+        if (ym != _lastCalendarMonth)
+        {
+            _lastCalendarMonth = ym;
+            CalendarDisplayMonth = value;
+            LoadCalendarStatusAsync().SafeFire("加载日历状态失败");
+        }
     }
 }

@@ -44,6 +44,15 @@
     <SolidColorBrush x:Key="WarningLightBrush" Color="{DynamicResource WarningLight}"/>
     <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Danger}"/>
     <SolidColorBrush x:Key="DangerLightBrush" Color="{DynamicResource DangerLight}"/>
+    <!-- 信息蓝（日历周末加班蓝点） -->
+    <SolidColorBrush x:Key="InfoBrush" Color="#FF3B82F6"/>
+    <!-- 假期类型圆点颜色 -->
+    <SolidColorBrush x:Key="LeaveAnnualBrush" Color="#FF06B6D4"/>   <!-- 年假：青色 -->
+    <SolidColorBrush x:Key="LeavePersonalBrush" Color="#FFF59E0B"/> <!-- 事假：琥珀 -->
+    <SolidColorBrush x:Key="LeaveSickBrush" Color="#FF10B981"/>     <!-- 病假：翠绿 -->
+    <SolidColorBrush x:Key="LeaveCompBrush" Color="#FFA78BFA"/>     <!-- 调休：紫罗兰 -->
+    <SolidColorBrush x:Key="LeaveTravelBrush" Color="#FF3B82F6"/>   <!-- 出差：蓝色 -->
+    <SolidColorBrush x:Key="LeaveMarriageBrush" Color="#FFEC4899"/> <!-- 婚假：粉色 -->
     <SolidColorBrush x:Key="SurfaceBrush" Color="{DynamicResource Surface}"/>
     <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{DynamicResource SurfaceHover}"/>
     <SolidColorBrush x:Key="SurfaceAltBrush" Color="{DynamicResource SurfaceAlt}"/>

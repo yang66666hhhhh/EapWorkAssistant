@@ -553,6 +553,108 @@
                 </DockPanel>
             </Border>
 
+            <!-- ===== AI 工作总结 ===== -->
+            <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    Margin="0,0,0,14">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource IconSparkle}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="AI 工作总结" FontSize="16"
+                                       FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                        <TextBlock Text="智能生成专业工作总结报告，输出 Word 文档"
+                                   FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                   Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <!-- 时间范围选择 -->
+                    <StackPanel Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="时间范围" FontSize="13" FontWeight="Medium"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox ItemsSource="{Binding AiTimeRangeOptions}"
+                                          SelectedItem="{Binding AiReportTimeRange, Mode=TwoWay}"
+                                          Style="{StaticResource Select}" Width="100"
+                                          Cursor="Hand"/>
+                            </StackPanel>
+
+                            <!-- 自定义日期区域（仅"自定义"时可见） -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                        Margin="16,0,0,0"
+                                        Visibility="{Binding AiReportTimeRange, Converter={x:Static local:StringEqualsToVisibilityConverter.Instance}, ConverterParameter=自定义}">
+                                <TextBlock Text="开始:" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Border x:Name="AiStartDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                        Padding="10,0" Height="32" VerticalAlignment="Center"
+                                        Cursor="Hand" MouseLeftButtonDown="AiStartDateBtn_Click">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.7"/>
+                                        <TextBlock x:Name="AiStartDateText" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="结束:" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Center" Margin="12,0,4,0"/>
+                                <Border x:Name="AiEndDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                        Padding="10,0" Height="32" VerticalAlignment="Center"
+                                        Cursor="Hand" MouseLeftButtonDown="AiEndDateBtn_Click">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}" Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.7"/>
+                                        <TextBlock x:Name="AiEndDateText" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- 状态文本 -->
+                            <TextBlock Grid.Column="3" Text="{Binding AiReportStatus}"
+                                       FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
+                                       VerticalAlignment="Center" Margin="16,0,0,0"
+                                       Visibility="{Binding AiReportStatus, Converter={x:Static local:StringToVisibilityConverter.Instance}}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 生成按钮 -->
+                    <Button Command="{Binding GenerateAiReportCommand}"
+                            Style="{StaticResource BtnPrimary}"
+                            HorizontalAlignment="Center" Padding="28,10"
+                            IsEnabled="{Binding CanGenerateAiReport}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource IconSparkle}" Fill="White" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="生成 AI 报告"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsGeneratingAiReport}" Value="True">
+                                                <Setter Property="Text" Value="生成中..."/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+            </Border>
+
             <!-- ===== 最近工作记录 ===== -->
             <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"

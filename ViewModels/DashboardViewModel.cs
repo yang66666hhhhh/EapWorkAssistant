@@ -9,6 +9,8 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -29,6 +31,15 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private int _totalKnowledge;
     [ObservableProperty] private string _probationReport = string.Empty;
     [ObservableProperty] private string _currentDate = DateTime.Now.ToString("yyyy-MM-dd dddd");
+
+    // ===== AI 工作总结报告 =====
+    public List<string> AiTimeRangeOptions { get; } = new() { "今天", "本周", "本月", "自定义" };
+    [ObservableProperty] private string _aiReportTimeRange = "本月";
+    [ObservableProperty] private string _aiReportStartDate = DateTimeHelper.GetMonthStart(DateTime.Now).ToString("yyyy-MM-dd");
+    [ObservableProperty] private string _aiReportEndDate = DateTime.Now.ToString("yyyy-MM-dd");
+    [ObservableProperty] private bool _isGeneratingAiReport;
+    [ObservableProperty] private bool _canGenerateAiReport = true;
+    [ObservableProperty] private string _aiReportStatus = string.Empty;
     [ObservableProperty] private ObservableCollection<RecentRecordItem> _recentRecords = new();
     [ObservableProperty] private RecentRecordItem? _selectedRecentRecord;
 
@@ -397,6 +408,221 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     {
         if (!string.IsNullOrWhiteSpace(ProbationReport))
             ExportService.SaveToFile(ProbationReport, "转正述职");
+    }
+
+    // ===== AI 报告：时间范围切换自动计算日期 =====
+    partial void OnAiReportTimeRangeChanged(string value)
+    {
+        var today = DateTime.Now;
+        switch (value)
+        {
+            case "今天":
+                AiReportStartDate = today.ToString("yyyy-MM-dd");
+                AiReportEndDate = today.ToString("yyyy-MM-dd");
+                break;
+            case "本周":
+                AiReportStartDate = Helpers.DateTimeHelper.GetWeekStart(today).ToString("yyyy-MM-dd");
+                AiReportEndDate = Helpers.DateTimeHelper.GetWeekEnd(today).ToString("yyyy-MM-dd");
+                break;
+            case "本月":
+                AiReportStartDate = Helpers.DateTimeHelper.GetMonthStart(today).ToString("yyyy-MM-dd");
+                AiReportEndDate = today.ToString("yyyy-MM-dd");
+                break;
+            // "自定义" 不自动计算，用户手动选择
+        }
+    }
+
+    // ===== AI 报告：生成命令 =====
+    [RelayCommand]
+    private async Task GenerateAiReportAsync()
+    {
+        // 1. 校验 AI 配置
+        var aiSettings = AiSettings.Load();
+        if (!aiSettings.IsConfigured)
+        {
+            ToastService.Info("请先在设置中配置 AI 服务（API 地址和密钥）");
+            return;
+        }
+
+        // 2. 进入生成状态
+        IsGeneratingAiReport = true;
+        CanGenerateAiReport = false;
+        AiReportStatus = "正在收集工作数据...";
+
+        try
+        {
+            // 3. 收集工作数据
+            var workData = await GatherWorkDataAsync(AiReportStartDate, AiReportEndDate);
+            if (string.IsNullOrWhiteSpace(workData))
+            {
+                ToastService.Error("所选日期范围内暂无工作记录，请先添加工作记录。");
+                return;
+            }
+
+            // 4. 调用 AI 生成报告
+            AiReportStatus = "正在调用 AI 生成报告...";
+            var aiService = new AiService();
+            var systemPrompt = BuildSystemPrompt();
+            var userMessage = BuildUserMessage(AiReportStartDate, AiReportEndDate, workData);
+            var aiContent = await aiService.SendChatAsync(systemPrompt, userMessage);
+
+            // 5. 生成 DOCX 文件
+            AiReportStatus = "正在生成 Word 文档...";
+            var docxService = new DocxReportService();
+            var dateRange = $"{AiReportStartDate} ~ {AiReportEndDate}";
+            var tempPath = docxService.GenerateDocx("AI 工作总结报告", dateRange, aiContent);
+
+            // 6. 弹出保存对话框
+            AiReportStatus = "请保存文档...";
+            var saved = DocxReportService.SaveDocxFile(tempPath, "AI工作总结");
+
+            if (saved)
+            {
+                ToastService.Success("AI 工作总结报告已生成并保存");
+                AiReportStatus = "报告已生成";
+            }
+            else
+            {
+                AiReportStatus = "已取消保存";
+            }
+
+            // 清理临时文件
+            try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
+        }
+        catch (InvalidOperationException ex)
+        {
+            ToastService.Error(ex.Message);
+            AiReportStatus = "生成失败";
+        }
+        catch (TaskCanceledException ex)
+        {
+            ToastService.Error(ex.Message);
+            AiReportStatus = "请求超时";
+        }
+        catch (HttpRequestException ex)
+        {
+            ToastService.Error(ex.Message);
+            AiReportStatus = "请求失败";
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"生成报告失败：{ex.Message}");
+            AiReportStatus = "生成失败";
+        }
+        finally
+        {
+            IsGeneratingAiReport = false;
+            CanGenerateAiReport = true;
+        }
+    }
+
+    /// <summary>
+    /// 收集指定日期范围内的工作数据，构建给 AI 的原始文本
+    /// </summary>
+    private async Task<string> GatherWorkDataAsync(string startDate, string endDate)
+    {
+        var records = (await _recordRepo.GetByDateRangeAsync(startDate, endDate)).ToList();
+        if (!records.Any()) return string.Empty;
+
+        var sb = new System.Text.StringBuilder();
+
+        // 工作记录明细
+        sb.AppendLine("=== 工作记录明细 ===");
+        foreach (var r in records)
+        {
+            sb.AppendLine($"日期: {r.WorkDate} | 项目: {r.ProjectName} | 类型: {r.WorkType} | 工时: {r.Hours}h");
+            sb.AppendLine($"  内容: {r.Content}");
+            if (!string.IsNullOrWhiteSpace(r.Achievement))
+                sb.AppendLine($"  成果: {r.Achievement}");
+            if (!string.IsNullOrWhiteSpace(r.Problem))
+                sb.AppendLine($"  问题: {r.Problem}");
+            if (!string.IsNullOrWhiteSpace(r.Solution))
+                sb.AppendLine($"  解决方案: {r.Solution}");
+            if (r.IsHighlight == 1)
+                sb.AppendLine($"  ★ 亮点: {(!string.IsNullOrWhiteSpace(r.HighlightNote) ? r.HighlightNote : r.Content)}");
+            sb.AppendLine();
+        }
+
+        // 统计概览
+        var totalHours = records.Sum(r => r.Hours);
+        var workDays = records.Select(r => r.WorkDate).Distinct().Count();
+        var highlightCount = records.Count(r => r.IsHighlight == 1);
+
+        sb.AppendLine("=== 统计概览 ===");
+        sb.AppendLine($"总工时: {totalHours:F1} 小时");
+        sb.AppendLine($"工作天数: {workDays} 天");
+        sb.AppendLine($"记录条数: {records.Count} 条");
+        sb.AppendLine($"工作亮点: {highlightCount} 个");
+
+        // 项目分布
+        var projectStats = (await _recordRepo.GetProjectStatsAsync(startDate, endDate)).ToList();
+        if (projectStats.Any())
+        {
+            sb.AppendLine("\n=== 项目投入分布 ===");
+            foreach (var ps in projectStats)
+                sb.AppendLine($"  {ps.ProjectName}: {ps.TotalHours}h ({ps.cnt}条记录)");
+        }
+
+        // 类型分布
+        var typeStats = (await _recordRepo.GetTypeStatsAsync(startDate, endDate)).ToList();
+        if (typeStats.Any())
+        {
+            sb.AppendLine("\n=== 工作类型分布 ===");
+            foreach (var ts in typeStats)
+                sb.AppendLine($"  {ts.WorkType}: {ts.TotalHours}h ({ts.cnt}条记录)");
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 构建 AI 系统提示词（角色 + 格式要求 + 用户信息）
+    /// </summary>
+    private string BuildSystemPrompt()
+    {
+        var profile = ProfileService.Instance;
+        return $"""
+            你是一位专业的工作总结撰写助手，擅长将零散的工作记录整理为结构清晰、语言精炼的专业工作总结报告。
+
+            ## 用户信息
+            - 姓名：{profile.Name}
+            - 角色：{profile.Role}
+            - 部门：{profile.Department}
+            - 行业：{profile.Industry}
+            - 工作方向：{profile.Focus}
+
+            ## 输出要求
+            请使用 Markdown 格式输出，包含以下五个章节（每个章节以 ## 开头）：
+
+            ## 一、工作概述
+            简要概括本阶段的主要工作内容和整体工作状态，2-3 段文字。
+
+            ## 二、重点工作成果
+            提炼出 3-5 项重点工作成果，每项包含成果描述和具体贡献。使用有序列表。
+
+            ## 三、项目投入分析
+            基于项目和工作类型的工时分布数据，分析工作重心和投入比例。可以引用具体数据。
+
+            ## 四、问题与解决方案
+            归纳遇到的问题及对应的解决方案，展现问题解决能力。如果数据中没有明确问题，可以从工作内容中合理推断潜在挑战。
+
+            ## 五、下一步工作计划
+            基于当前工作进展和行业背景，提出 3-5 条具体可行的后续工作建议。
+
+            ## 约束
+            - 严格基于提供的数据撰写，不编造不存在的工作内容
+            - 语言专业精炼，适合提交给领导审阅
+            - 合理归纳同类工作，避免逐条罗列
+            - 突出工作亮点和价值贡献
+            """;
+    }
+
+    /// <summary>
+    /// 构建给 AI 的用户消息（包含日期范围和原始工作数据）
+    /// </summary>
+    private static string BuildUserMessage(string startDate, string endDate, string workData)
+    {
+        return $"请根据以下 {startDate} ~ {endDate} 期间的工作数据，生成一份专业的工作总结报告：\n\n{workData}";
     }
 
     [RelayCommand]

@@ -55,6 +55,14 @@ public static class DatabaseInitializer
                 Keywords TEXT,
                 CreateTime TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS LeaveRecord (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Date TEXT NOT NULL,
+                LeaveType TEXT NOT NULL,
+                Note TEXT DEFAULT '',
+                Hours REAL DEFAULT 8
+            );
         ";
         cmd.ExecuteNonQuery();
 
@@ -115,6 +123,7 @@ public static class DatabaseInitializer
                 CREATE INDEX IF NOT EXISTS idx_issue_status ON Issue(Status);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_category ON Knowledge(Category);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_favorite ON Knowledge(IsFavorite);
+                CREATE INDEX IF NOT EXISTS idx_leaverecord_date ON LeaveRecord(Date);
             ";
             migrateCmd.ExecuteNonQuery();
         }

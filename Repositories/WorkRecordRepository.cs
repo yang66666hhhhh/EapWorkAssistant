@@ -167,6 +167,18 @@ public class WorkRecordRepository
         });
     }
 
+    public async Task<IEnumerable<string>> GetDistinctDatesByMonthAsync(string yearMonth)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<string>(
+                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE WorkDate LIKE @Month",
+                new { Month = $"{yearMonth}%" });
+        });
+    }
+
     public async Task<IEnumerable<dynamic>> GetDailyStatsAsync(string startDate, string endDate)
     {
         return await Task.Run(async () =>

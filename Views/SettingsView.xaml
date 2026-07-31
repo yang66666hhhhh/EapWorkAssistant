@@ -371,6 +371,100 @@
                 </StackPanel>
             </Border>
 
+            <!-- ===== AI 服务配置 ===== -->
+            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Path Data="{StaticResource IconSparkle}" Fill="{DynamicResource TextPrimaryBrush}"
+                              Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="AI 服务配置" Style="{StaticResource Heading3}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="配置 OpenAI 兼容 API，用于智能生成工作总结报告（支持 DeepSeek、Ollama、LM Studio 等）"
+                               FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,12"/>
+
+                    <!-- API 地址 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10"
+                            Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="API 地址" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="OpenAI 兼容 API 的基础地址（如 https://api.deepseek.com/v1）"
+                                           FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <TextBox Text="{Binding AiEndpoint, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource Input}" Width="320"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- API 密钥 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10"
+                            Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="API 密钥" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="你的 API Key 或 Token" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <TextBox Text="{Binding AiApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource Input}" Width="320"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 模型名称 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10"
+                            Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="模型名称" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="如 deepseek-chat、gpt-4o-mini、qwen-turbo 等"
+                                           FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <TextBox Text="{Binding AiModel, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource Input}" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 超时时间 -->
+                    <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10"
+                            Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="请求超时" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding AiTimeoutSeconds, StringFormat=等待 AI 响应最长 {0} 秒}"
+                                           FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <ComboBox ItemsSource="{Binding AiTimeoutOptions}"
+                                      SelectedItem="{Binding AiTimeoutSeconds, Mode=TwoWay}"
+                                      Style="{StaticResource Select}" Width="120"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding StringFormat={}{0} 秒}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- 测试连接按钮 -->
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="测试连接" Command="{Binding TestAiConnectionCommand}"
+                                Style="{StaticResource BtnPrimary}" Padding="16,8"/>
+                        <TextBlock Text="发送一条测试消息验证 AI 服务是否可用" FontSize="12"
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- ===== 休息日设置 ===== -->
             <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>

@@ -1,6 +1,8 @@
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,6 +21,7 @@ public partial class WorkRecordView : UserControl
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => SyncDateDisplay();
         SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
+        SharedCal.DisplayMonthChanged += OnCalendarDisplayMonthChanged;
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -29,6 +32,8 @@ public partial class WorkRecordView : UserControl
             oldVm.ReportGenerated -= OnReportGenerated;
             oldVm.SelectedDateChanged -= OnSelectedDateChanged;
             oldVm.PropertyChanged -= OnFilterPropertyChanged;
+            oldVm.OpenLeaveDialogRequested -= OnOpenLeaveDialog;
+            oldVm.EditLeaveRecordRequested -= OnEditLeaveRecord;
         }
         if (e.NewValue is WorkRecordViewModel newVm)
         {
@@ -36,6 +41,8 @@ public partial class WorkRecordView : UserControl
             newVm.ReportGenerated += OnReportGenerated;
             newVm.SelectedDateChanged += OnSelectedDateChanged;
             newVm.PropertyChanged += OnFilterPropertyChanged;
+            newVm.OpenLeaveDialogRequested += OnOpenLeaveDialog;
+            newVm.EditLeaveRecordRequested += OnEditLeaveRecord;
         }
         SyncDateDisplay();
     }
@@ -73,7 +80,9 @@ public partial class WorkRecordView : UserControl
             SharedCal.SelectedDateChanged -= OnSharedCalendarDateChanged;
             SharedCal.SelectedDate = vm.SelectedDate;
             SharedCal.SelectedDateChanged += OnSharedCalendarDateChanged;
+            vm.CalendarDisplayMonth = vm.SelectedDate;
             SyncFilterDateDisplay(vm);
+            SyncCalendarData();
         }
     }
 
@@ -83,13 +92,42 @@ public partial class WorkRecordView : UserControl
         FilterEndText.Text = vm.FilterEndDate?.ToString("yyyy-MM-dd") ?? "结束日期";
     }
 
-    private void OnFilterPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void OnFilterPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(WorkRecordViewModel.FilterStartDate)
             or nameof(WorkRecordViewModel.FilterEndDate))
         {
             if (DataContext is WorkRecordViewModel vm)
                 SyncFilterDateDisplay(vm);
+        }
+
+        // 日历状态数据变化时同步到日历控件
+        if (e.PropertyName is nameof(WorkRecordViewModel.RecordDates)
+            or nameof(WorkRecordViewModel.HolidayDates)
+            or nameof(WorkRecordViewModel.LeaveDateMap)
+            or nameof(WorkRecordViewModel.MakeupDates))
+        {
+            SyncCalendarData();
+        }
+    }
+
+    /// <summary>将 ViewModel 的日历状态数据同步到 SharedCal 控件的 DependencyProperty</summary>
+    private void SyncCalendarData()
+    {
+        if (DataContext is not WorkRecordViewModel vm) return;
+        SharedCal.HasRecordDates = vm.RecordDates;
+        SharedCal.HolidayDates = vm.HolidayDates;
+        SharedCal.LeaveDateMap = vm.LeaveDateMap;
+        SharedCal.MakeupDates = vm.MakeupDates;
+    }
+
+    /// <summary>日历月份导航变化时，通知 ViewModel 重新加载该月数据</summary>
+    private void OnCalendarDisplayMonthChanged(object? sender, DateTime displayMonth)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+        {
+            vm.CalendarDisplayMonth = displayMonth;
+            vm.LoadCalendarStatusAsync().SafeFire("加载日历状态失败");
         }
     }
 
@@ -177,6 +215,8 @@ public partial class WorkRecordView : UserControl
     {
         if (_isDrawerOpen) return;
         _isDrawerOpen = true;
+        if (DataContext is WorkRecordViewModel vm)
+            vm.IsDrawerOpen = true;
         DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 540);
     }
 
@@ -278,6 +318,8 @@ public partial class WorkRecordView : UserControl
         }
 
         _isDrawerOpen = false;
+        if (DataContext is WorkRecordViewModel vmClose)
+            vmClose.IsDrawerOpen = false;
         DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
         {
             if (DataContext is WorkRecordViewModel vm2)
@@ -298,5 +340,39 @@ public partial class WorkRecordView : UserControl
     private void ProgressInput_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
         e.Handled = !int.TryParse(e.Text, out _);
+    }
+
+    // ===== 请假对话框 =====
+
+    private void OnOpenLeaveDialog()
+    {
+        if (DataContext is WorkRecordViewModel vm)
+            OpenLeaveDialogForDate(vm);
+    }
+
+    private void OnEditLeaveRecord(LeaveRecord record)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+            OpenLeaveDialogForDate(vm, record);
+    }
+
+    private void OpenLeaveDialogForDate(WorkRecordViewModel vm, LeaveRecord? editRecord = null)
+    {
+        var dialog = new LeaveDialog(vm.SelectedDate.Year, vm.SelectedDate.Month)
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        // 如果是编辑模式，让对话框加载后自动进入编辑状态
+        if (editRecord != null)
+            dialog.PendingEditRecord = editRecord;
+
+        dialog.ShowDialog();
+
+        if (dialog.HasChanges)
+        {
+            vm.LoadDailyLeaveRecordsAsync().SafeFire("加载请假记录失败");
+            vm.LoadCalendarStatusAsync().SafeFire("加载日历状态失败");
+        }
     }
 }

@@ -13,11 +13,15 @@ public partial class DashboardView : UserControl
 {
     private PropertyChangedEventHandler? _profileHandler;
 
+    /// <summary>日历浮窗目标：区分试用期日期 / AI 报告开始 / AI 报告结束</summary>
+    private enum CalendarTarget { ProbationStart, AiReportStart, AiReportEnd }
+    private CalendarTarget _calendarTarget = CalendarTarget.ProbationStart;
+
     public DashboardView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-        Loaded += (_, _) => SyncProbationDate();
+        Loaded += (_, _) => SyncDates();
         CustomCal.SelectedDateChanged += OnCalendarDateChanged;
 
         // 监听个人资料变更，身份切换时立即刷新仪表盘
@@ -34,15 +38,18 @@ public partial class DashboardView : UserControl
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        SyncProbationDate();
+        SyncDates();
     }
 
-    private void SyncProbationDate()
+    private void SyncDates()
     {
         if (DataContext is DashboardViewModel vm)
         {
             ProbDateText.Text = vm.ProbationStartDate;
-            // 临时取消事件订阅，防止初始同步触发 SaveProbationStartDate 校验
+            AiStartDateText.Text = vm.AiReportStartDate;
+            AiEndDateText.Text = vm.AiReportEndDate;
+
+            // 临时取消事件订阅，防止初始同步触发回调
             CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
             CustomCal.SelectedDate = vm.CalendarDate;
             CustomCal.SelectedDateChanged += OnCalendarDateChanged;
@@ -53,13 +60,30 @@ public partial class DashboardView : UserControl
     {
         if (DataContext is DashboardViewModel vm)
         {
-            vm.SaveProbationStartDateCommand.Execute(date);
-            ProbDateText.Text = date.ToString("yyyy-MM-dd");
+            switch (_calendarTarget)
+            {
+                case CalendarTarget.ProbationStart:
+                    vm.SaveProbationStartDateCommand.Execute(date);
+                    ProbDateText.Text = date.ToString("yyyy-MM-dd");
+                    break;
+
+                case CalendarTarget.AiReportStart:
+                    vm.AiReportStartDate = date.ToString("yyyy-MM-dd");
+                    AiStartDateText.Text = date.ToString("yyyy-MM-dd");
+                    break;
+
+                case CalendarTarget.AiReportEnd:
+                    vm.AiReportEndDate = date.ToString("yyyy-MM-dd");
+                    AiEndDateText.Text = date.ToString("yyyy-MM-dd");
+                    break;
+            }
+
             CustomCal.SyncDisplay();
             CloseCalendar();
         }
     }
 
+    // ===== 试用期开始日期 =====
     private void ProbDateBtn_Click(object sender, MouseButtonEventArgs e)
     {
         if (CalendarContainer.Visibility == Visibility.Visible)
@@ -68,15 +92,57 @@ public partial class DashboardView : UserControl
         }
         else
         {
+            _calendarTarget = CalendarTarget.ProbationStart;
             if (DataContext is DashboardViewModel vm)
             {
-                // 临时取消事件订阅，防止程序设置 SelectedDate 触发 SaveProbationStartDate + CloseCalendar
                 CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
                 CustomCal.SelectedDate = vm.CalendarDate;
                 CustomCal.SyncDisplay();
                 CustomCal.SelectedDateChanged += OnCalendarDateChanged;
             }
             CalendarHelper.Show(CalendarBackdrop, CalendarContainer, ProbDateBtn, this);
+        }
+    }
+
+    // ===== AI 报告：开始日期 =====
+    private void AiStartDateBtn_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (CalendarContainer.Visibility == Visibility.Visible)
+        {
+            CloseCalendar();
+        }
+        else
+        {
+            _calendarTarget = CalendarTarget.AiReportStart;
+            if (DataContext is DashboardViewModel vm && DateTime.TryParse(vm.AiReportStartDate, out var dt))
+            {
+                CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
+                CustomCal.SelectedDate = dt;
+                CustomCal.SyncDisplay();
+                CustomCal.SelectedDateChanged += OnCalendarDateChanged;
+            }
+            CalendarHelper.Show(CalendarBackdrop, CalendarContainer, AiStartDateBtn, this);
+        }
+    }
+
+    // ===== AI 报告：结束日期 =====
+    private void AiEndDateBtn_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (CalendarContainer.Visibility == Visibility.Visible)
+        {
+            CloseCalendar();
+        }
+        else
+        {
+            _calendarTarget = CalendarTarget.AiReportEnd;
+            if (DataContext is DashboardViewModel vm && DateTime.TryParse(vm.AiReportEndDate, out var dt))
+            {
+                CustomCal.SelectedDateChanged -= OnCalendarDateChanged;
+                CustomCal.SelectedDate = dt;
+                CustomCal.SyncDisplay();
+                CustomCal.SelectedDateChanged += OnCalendarDateChanged;
+            }
+            CalendarHelper.Show(CalendarBackdrop, CalendarContainer, AiEndDateBtn, this);
         }
     }
 
