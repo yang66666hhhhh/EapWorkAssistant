@@ -128,11 +128,12 @@
                                             NextPageCommand="{Binding NextPageCommand}"
                                             LastPageCommand="{Binding LastPageCommand}"/>
                     <Grid>
-                        <DataGrid ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
+                        <DataGrid x:Name="ItemsGrid" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
                                   Style="{StaticResource ModernGrid}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
-                                  ClipboardCopyMode="IncludeHeader">
+                                  ClipboardCopyMode="IncludeHeader"
+                                  MouseDoubleClick="ItemsGrid_MouseDoubleClick">
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                             </DataGrid.ColumnHeaderStyle>
@@ -310,7 +311,8 @@
                 MouseLeftButtonDown="Backdrop_Click"/>
 
         <!-- ===== 浮窗表单（从右侧滑入覆盖） ===== -->
-        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520">
+        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520"
+                PreviewKeyDown="FormPanel_PreviewKeyDown">
             <DockPanel>
 
                 <!-- ── 面板头部 ── -->

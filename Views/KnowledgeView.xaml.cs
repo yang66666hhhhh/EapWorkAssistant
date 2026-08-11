@@ -1,4 +1,5 @@
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,9 +59,15 @@ public partial class KnowledgeView : UserControl
         // 新增模式：重置表单
         if (DataContext is KnowledgeViewModel vm)
         {
-            vm.CurrentItem = new EapWorkAssistant.Models.Knowledge();
+            vm.CurrentItem = new Knowledge();
             vm.IsFormDirty = false;
         }
+        OpenDrawer();
+    }
+
+    private void OpenDrawer()
+    {
+        if (_isDrawerOpen) return;
         _isDrawerOpen = true;
         DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
     }
@@ -110,5 +117,38 @@ public partial class KnowledgeView : UserControl
             if (DataContext is KnowledgeViewModel vm)
                 vm.NewCommand.Execute(null);
         }, 500);
+    }
+
+    // ===== 列表交互打磨：双击编辑 =====
+
+    private void ItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDrawerOpen) return;
+        if (DataContext is not KnowledgeViewModel vm) return;
+        if (sender is ListBox lb
+            && lb.ContainerFromElement(e.OriginalSource as DependencyObject) is ListBoxItem
+            && lb.SelectedItem is Knowledge item)
+        {
+            vm.EditCommand.Execute(item);
+            OpenDrawer();
+        }
+    }
+
+    // ===== 抽屉内键盘快捷键：Esc 关闭 / Ctrl+S 保存 =====
+
+    private void FormPanel_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (!_isDrawerOpen) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            CloseDrawer();
+        }
+        else if (e.Key == Key.S && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            e.Handled = true;
+            if (DataContext is KnowledgeViewModel vm)
+                vm.SaveCommand.Execute(null);
+        }
     }
 }

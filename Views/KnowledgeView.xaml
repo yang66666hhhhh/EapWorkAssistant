@@ -142,10 +142,11 @@
                                             NextPageCommand="{Binding NextPageCommand}"
                                             LastPageCommand="{Binding LastPageCommand}"/>
                     <Grid>
-                        <ListBox ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
+                        <ListBox x:Name="ItemsList" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
                                  Style="{StaticResource ModernListBox}"
                                  local:ListBoxCopyHelper.EnableCopy="False"
-                                 ItemContainerStyle="{StaticResource ModernListBoxItem}">
+                                 ItemContainerStyle="{StaticResource ModernListBoxItem}"
+                                 MouseDoubleClick="ItemsList_MouseDoubleClick">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="20,16">
@@ -281,7 +282,8 @@
                 MouseLeftButtonDown="Backdrop_Click"/>
 
         <!-- ===== 浮窗表单（从右侧滑入覆盖） ===== -->
-        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520">
+        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520"
+                PreviewKeyDown="FormPanel_PreviewKeyDown">
             <DockPanel>
 
                 <!-- ── 面板头部 ── -->

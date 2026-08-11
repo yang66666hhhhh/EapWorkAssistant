@@ -1,4 +1,5 @@
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -87,5 +88,38 @@ public partial class IssueView : UserControl
             if (DataContext is IssueViewModel vm)
                 vm.NewCommand.Execute(null);
         }, 500);
+    }
+
+    // ===== 表格交互打磨：双击编辑 =====
+
+    private void ItemsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDrawerOpen) return;
+        if (DataContext is not IssueViewModel vm) return;
+        if (sender is DataGrid dg
+            && dg.ContainerFromElement(e.OriginalSource as DependencyObject) is DataGridRow
+            && dg.SelectedItem is Issue item)
+        {
+            vm.EditCommand.Execute(item);
+            OpenDrawer();
+        }
+    }
+
+    // ===== 抽屉内键盘快捷键：Esc 关闭 / Ctrl+S 保存 =====
+
+    private void FormPanel_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (!_isDrawerOpen) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            CloseDrawer();
+        }
+        else if (e.Key == Key.S && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            e.Handled = true;
+            if (DataContext is IssueViewModel vm)
+                vm.SaveCommand.Execute(null);
+        }
     }
 }
