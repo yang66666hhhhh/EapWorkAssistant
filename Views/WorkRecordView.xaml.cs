@@ -211,6 +211,21 @@ public partial class WorkRecordView : UserControl
         OpenDrawer();
     }
 
+    // ===== 表格交互打磨：双击编辑 =====
+
+    private void RecordsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDrawerOpen) return;
+        if (DataContext is not WorkRecordViewModel vm) return;
+        if (sender is DataGrid dg
+            && dg.ContainerFromElement(e.OriginalSource as DependencyObject) is DataGridRow
+            && dg.SelectedItem is WorkRecord record)
+        {
+            vm.EditRecordCommand.Execute(record);
+            OpenDrawer();
+        }
+    }
+
     private void OpenDrawer()
     {
         if (_isDrawerOpen) return;

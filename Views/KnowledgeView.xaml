@@ -141,6 +141,9 @@
                                             PrevPageCommand="{Binding PrevPageCommand}"
                                             NextPageCommand="{Binding NextPageCommand}"
                                             LastPageCommand="{Binding LastPageCommand}"/>
+                    <TextBlock DockPanel.Dock="Bottom" Margin="16,8,0,4"
+                               Text="双击列表项可快速编辑 · 编辑中按 Ctrl+S 保存、Esc 关闭"
+                               Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5"/>
                     <Grid>
                         <ListBox x:Name="ItemsList" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
                                  Style="{StaticResource ModernListBox}"
@@ -323,7 +326,11 @@
                     <Grid>
                         <Button Content="保存" Command="{Binding SaveCommand}"
                                 Style="{StaticResource BtnPrimary}" HorizontalAlignment="Left"
-                                Padding="32,10" FontSize="13"/>
+                                Padding="32,10" FontSize="13">
+                            <Button.ToolTip>
+                                <ToolTip Content="保存 (Ctrl+S)"/>
+                            </Button.ToolTip>
+                        </Button>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="新建" Command="{Binding NewCommand}"
                                     Style="{StaticResource BtnSecondary}" Padding="20,10">

@@ -95,6 +95,8 @@
                             </StackPanel>
                             <TextBlock Text="记录每日工作内容、成果和问题"
                                        Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
+                            <TextBlock Text="双击条目可快速编辑 · 编辑中按 Ctrl+S 保存、Esc 关闭"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5" Margin="0,4,0,0"/>
                         </StackPanel>
                         <Button x:Name="OpenFormBtn" HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Click="OpenForm_Click" Style="{StaticResource BtnPrimary}" Padding="16,9">
@@ -421,11 +423,12 @@
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0"
                         ClipToBounds="True">
                     <Grid>
-                        <DataGrid ItemsSource="{Binding Records}" Style="{StaticResource ModernGrid}"
-                                  SelectedItem="{Binding SelectedDailyRecord, Mode=TwoWay}"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  ClipboardCopyMode="IncludeHeader">
+                    <DataGrid ItemsSource="{Binding Records}" Style="{StaticResource ModernGrid}"
+                              SelectedItem="{Binding SelectedDailyRecord, Mode=TwoWay}"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto"
+                              ClipboardCopyMode="IncludeHeader"
+                              MouseDoubleClick="RecordsGrid_MouseDoubleClick">
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                             </DataGrid.ColumnHeaderStyle>
@@ -1531,7 +1534,11 @@
                     <Grid>
                         <Button Content="{Binding SaveButtonText}" Command="{Binding SaveRecordCommand}"
                                 Style="{StaticResource BtnPrimary}" HorizontalAlignment="Left"
-                                Padding="32,10" FontSize="13"/>
+                                Padding="32,10" FontSize="13">
+                            <Button.ToolTip>
+                                <ToolTip Content="保存 (Ctrl+S)"/>
+                            </Button.ToolTip>
+                        </Button>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="删除" Command="{Binding DeleteCurrentRecordCommand}"
                                     Style="{StaticResource BtnGhost}" Padding="16,10" FontSize="12"
