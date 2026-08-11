@@ -16,5 +16,6 @@ public partial class WorkRecord : ObservableObject
     [ObservableProperty] private int _progress;
     [ObservableProperty] private int _isHighlight;
     [ObservableProperty] private string _highlightNote = string.Empty;
+    [ObservableProperty] private int _isDeleted;
     [ObservableProperty] private string _createTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 }

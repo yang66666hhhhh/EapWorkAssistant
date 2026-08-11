@@ -38,6 +38,14 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
     protected override async Task<IEnumerable<Issue>> GetAllAsync()
         => await _repo.GetAllAsync();
 
+    /// <summary>DB 级分页：关键词 + 状态/优先级筛选全部下推到 SQL。</summary>
+    protected override async Task<(List<Issue> PageItems, int Total)> LoadPageAsync(int page, int pageSize, string keyword)
+    {
+        var skip = (page - 1) * pageSize;
+        var result = await _repo.GetFilteredPagedAsync(keyword, FilterStatus, FilterPriority, skip, pageSize);
+        return (result.Items.ToList(), result.Total);
+    }
+
     protected override IEnumerable<Issue> ApplyExtraFilters(IEnumerable<Issue> source)
     {
         var q = source;
@@ -57,8 +65,8 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
                (item.Solution != null && item.Solution.Contains(kw, System.StringComparison.OrdinalIgnoreCase));
     }
 
-    partial void OnFilterStatusChanged(string value) => ApplyFilter();
-    partial void OnFilterPriorityChanged(string value) => ApplyFilter();
+    partial void OnFilterStatusChanged(string value) => ReloadPageAsync(true).SafeFire(LoadFailureMessage);
+    partial void OnFilterPriorityChanged(string value) => ReloadPageAsync(true).SafeFire(LoadFailureMessage);
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -144,7 +152,7 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
     {
         try
         {
-            await InsertAsync(deleted);
+            await _repo.RestoreAsync(deleted.Id);
             await LoadAsync();
             ToastService.Success("已恢复");
         }

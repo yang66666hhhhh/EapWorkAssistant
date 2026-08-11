@@ -10,7 +10,11 @@ public static class DatabaseInitializer
         "EapWorkAssistant",
         "eapwork.db");
 
-    public static string ConnectionString => $"Data Source={DbPath}";
+    // 仅供单元测试使用：重定向连接字符串到临时库，避免污染用户数据。
+    private static string? _testConnectionString;
+    public static void SetTestConnectionString(string? connectionString) => _testConnectionString = connectionString;
+
+    public static string ConnectionString => _testConnectionString ?? $"Data Source={DbPath}";
 
     public static void Initialize()
     {
@@ -112,6 +116,28 @@ public static class DatabaseInitializer
         }
         catch { /* 列已存在 */ }
 
+        // 迁移：为三张表添加软删除标记（回收站功能）
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE WorkRecord ADD COLUMN IsDeleted INTEGER DEFAULT 0";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Knowledge ADD COLUMN IsDeleted INTEGER DEFAULT 0";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE Issue ADD COLUMN IsDeleted INTEGER DEFAULT 0";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
         // 创建索引以优化查询性能
         try
         {
@@ -119,10 +145,13 @@ public static class DatabaseInitializer
                 CREATE INDEX IF NOT EXISTS idx_workrecord_workdate ON WorkRecord(WorkDate);
                 CREATE INDEX IF NOT EXISTS idx_workrecord_project ON WorkRecord(ProjectName);
                 CREATE INDEX IF NOT EXISTS idx_workrecord_highlight ON WorkRecord(IsHighlight);
+                CREATE INDEX IF NOT EXISTS idx_workrecord_deleted ON WorkRecord(IsDeleted);
                 CREATE INDEX IF NOT EXISTS idx_issue_project ON Issue(ProjectName);
                 CREATE INDEX IF NOT EXISTS idx_issue_status ON Issue(Status);
+                CREATE INDEX IF NOT EXISTS idx_issue_deleted ON Issue(IsDeleted);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_category ON Knowledge(Category);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_favorite ON Knowledge(IsFavorite);
+                CREATE INDEX IF NOT EXISTS idx_knowledge_deleted ON Knowledge(IsDeleted);
                 CREATE INDEX IF NOT EXISTS idx_leaverecord_date ON LeaveRecord(Date);
             ";
             migrateCmd.ExecuteNonQuery();

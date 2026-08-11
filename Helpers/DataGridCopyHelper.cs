@@ -351,7 +351,7 @@ public static class DataGridCopyHelper
 public class CopyButton : Button
 {
     private readonly TextBlock _txt;
-    private readonly Path _icon;
+    private readonly System.Windows.Shapes.Path _icon;
     private readonly Geometry _clipboardGeo;
     private readonly Geometry _checkGeo;
     private readonly StackPanel _content;
@@ -366,7 +366,7 @@ public class CopyButton : Button
         _checkGeo = (Geometry)(Application.Current.TryFindResource("IconCheck")
             ?? Geometry.Parse("M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"));
 
-        _icon = new Path
+        _icon = new System.Windows.Shapes.Path
         {
             Data = _clipboardGeo,
             Width = 12,

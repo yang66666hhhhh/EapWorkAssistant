@@ -11,5 +11,6 @@ public class Issue
     public string Keywords { get; set; } = string.Empty;
     public string Status { get; set; } = "Open";         // Open, InProgress, Resolved, Closed
     public string Priority { get; set; } = "Medium";     // Low, Medium, High, Critical
+    public int IsDeleted { get; set; }
     public string CreateTime { get; set; } = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 }

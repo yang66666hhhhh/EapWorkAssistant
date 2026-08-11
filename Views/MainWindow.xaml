@@ -153,6 +153,13 @@
                                 <ToolTip Content="设置"/>
                             </RadioButton.ToolTip>
                         </RadioButton>
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=5}"
+                                     Content="回收站" Tag="{StaticResource IconClipboard}">
+                            <RadioButton.ToolTip>
+                                <ToolTip Content="回收站"/>
+                            </RadioButton.ToolTip>
+                        </RadioButton>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>
@@ -179,6 +186,9 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                             <views:SettingsView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:RecycleBinViewModel}">
+                            <views:RecycleBinView/>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>

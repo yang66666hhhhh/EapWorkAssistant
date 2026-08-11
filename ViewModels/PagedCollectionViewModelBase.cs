@@ -18,7 +18,6 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     protected readonly UiTimer _statusTimer;
     protected readonly UiTimer _searchTimer;
     protected bool _suppressDirty;
-    protected List<T> _allItems = new();
 
     public event Action? PanelCloseRequested;
 
@@ -56,7 +55,7 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     {
         _searchTimer.Stop();
         if (string.IsNullOrWhiteSpace(value))
-            LoadAsync().SafeFire(LoadFailureMessage);
+            ReloadPageAsync(true).SafeFire(LoadFailureMessage);
         else
             _searchTimer.Start();
     }
@@ -87,73 +86,69 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     [RelayCommand]
     protected async Task LoadAsync()
     {
-        // 一次性加载全量，后续搜索/筛选均在内存中进行，避免重复查询数据库
-        _allItems = (await GetAllAsync()).ToList();
-        ApplyFilter();
+        await ReloadPageAsync();
         await OnAfterLoadAsync();
     }
 
-    protected void ApplyFilter()
+    /// <summary>
+    /// 从数据源加载单页数据（DB 级分页）。子类（Knowledge/Issue）重写以走数据库分页；
+    /// 默认实现为内存分页（兼容其他潜在子类）。
+    /// </summary>
+    protected virtual async Task<(List<T> PageItems, int Total)> LoadPageAsync(int page, int pageSize, string keyword)
     {
-        CurrentPage = 1;
-        var q = _allItems.AsEnumerable();
-        q = ApplyExtraFilters(q);
-        if (!string.IsNullOrWhiteSpace(SearchKeyword))
-        {
-            var kw = SearchKeyword.Trim();
-            q = q.Where(item => MatchesSearch(item, kw));
-        }
-        Items = new ObservableCollection<T>(q);
-        UpdatePager();
+        var all = (await GetAllAsync()).ToList();
+        var q = ApplyExtraFilters(all.AsEnumerable());
+        if (!string.IsNullOrWhiteSpace(keyword))
+            q = q.Where(item => MatchesSearch(item, keyword));
+        var filtered = q.ToList();
+        var pageItems = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        return (pageItems, filtered.Count);
     }
 
-    private void UpdatePager()
+    /// <summary>导出用全量数据（非删除态）。默认走 GetAllAsync。</summary>
+    protected virtual async Task<List<T>> GetAllForExportAsync()
+        => (await GetAllAsync()).ToList();
+
+    /// <summary>重新加载当前页（DB 级）。resetPage=true 表示搜索/筛选变化，回到第 1 页。</summary>
+    protected async Task ReloadPageAsync(bool resetPage = false)
     {
-        TotalCount = Items.Count;
-        TotalPages = TotalCount > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 1;
-        if (CurrentPage < 1) CurrentPage = 1;
-        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
-        var pageItems = Items.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+        if (resetPage && CurrentPage != 1) CurrentPage = 1;
+        var kw = SearchKeyword?.Trim() ?? "";
+        var (pageItems, total) = await LoadPageAsync(CurrentPage, PageSize, kw);
         PagedItems = new ObservableCollection<T>(pageItems);
+        Items = new ObservableCollection<T>(pageItems);
+        TotalCount = total;
+        TotalPages = total > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        if (CurrentPage < 1) CurrentPage = 1;
     }
 
-    partial void OnCurrentPageChanged(int value) => UpdatePager();
-    partial void OnPageSizeChanged(int value) => UpdatePager();
+    partial void OnCurrentPageChanged(int value) => ReloadPageAsync().SafeFire(LoadFailureMessage);
+    partial void OnPageSizeChanged(int value) => ReloadPageAsync().SafeFire(LoadFailureMessage);
 
     [RelayCommand]
-    private void SearchAsync() => ApplyFilter();
+    private void SearchAsync() => ReloadPageAsync(true).SafeFire(LoadFailureMessage);
 
-    // ===== 分页命令 =====
+    // ===== 分页命令（仅改变 CurrentPage，由 OnCurrentPageChanged 触发重新加载） =====
     [RelayCommand]
-    private void FirstPage()
-    {
-        if (CurrentPage != 1) { CurrentPage = 1; UpdatePager(); }
-    }
+    private void FirstPage() { if (CurrentPage != 1) CurrentPage = 1; }
 
     [RelayCommand]
-    private void PrevPage()
-    {
-        if (CurrentPage > 1) CurrentPage--;
-    }
+    private void PrevPage() { if (CurrentPage > 1) CurrentPage--; }
 
     [RelayCommand]
-    private void NextPage()
-    {
-        if (CurrentPage < TotalPages) CurrentPage++;
-    }
+    private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
 
     [RelayCommand]
-    private void LastPage()
-    {
-        if (CurrentPage != TotalPages) { CurrentPage = TotalPages; UpdatePager(); }
-    }
+    private void LastPage() { if (CurrentPage != TotalPages) CurrentPage = TotalPages; }
 
     // ===== JSON 导出 / 导入 =====
     [RelayCommand]
-    private void ExportJson()
+    private async Task ExportJsonAsync()
     {
-        if (_allItems.Count == 0) { ToastService.Warning(EmptyExportMessage); return; }
-        if (ExportItems(_allItems))
+        var all = await GetAllForExportAsync();
+        if (all.Count == 0) { ToastService.Warning(EmptyExportMessage); return; }
+        if (ExportItems(all))
             ToastService.Success(ExportSuccessMessage);
     }
 

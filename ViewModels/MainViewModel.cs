@@ -68,6 +68,7 @@ public partial class MainViewModel : ObservableObject
     public KnowledgeViewModel Knowledge { get; } = new();
     public IssueViewModel Issue { get; } = new();
     public SettingsViewModel Settings { get; } = new();
+    public RecycleBinViewModel RecycleBin { get; } = new();
 
     public MainViewModel()
     {
@@ -86,6 +87,7 @@ public partial class MainViewModel : ObservableObject
             ViewNames.Knowledge => Knowledge,
             ViewNames.Issue => Issue,
             ViewNames.Settings => Settings,
+            ViewNames.RecycleBin => RecycleBin,
             _ => Dashboard
         };
         SelectedIndex = defaultView switch
@@ -94,6 +96,7 @@ public partial class MainViewModel : ObservableObject
             ViewNames.Knowledge => 2,
             ViewNames.Issue => 3,
             ViewNames.Settings => 4,
+            ViewNames.RecycleBin => 5,
                 _ => 0
         };
         Dashboard.LoadDashboardAsync().SafeFire("加载仪表盘失败");
@@ -128,6 +131,7 @@ public partial class MainViewModel : ObservableObject
             ViewNames.Knowledge => Knowledge,
             ViewNames.Issue => Issue,
             ViewNames.Settings => Settings,
+            ViewNames.RecycleBin => RecycleBin,
             _ => Dashboard
         };
 
@@ -139,6 +143,7 @@ public partial class MainViewModel : ObservableObject
             ViewNames.Knowledge => 2,
             ViewNames.Issue => 3,
             ViewNames.Settings => 4,
+            ViewNames.RecycleBin => 5,
             _ => 0
         };
         if (newIndex != SelectedIndex)
@@ -339,7 +344,7 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedIndexChanged(int value)
     {
-        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
+        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings, ViewNames.RecycleBin };
         if (value >= 0 && views.Length > value)
             NavigateTo(views[value]);
     }

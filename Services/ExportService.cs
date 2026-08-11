@@ -1,10 +1,13 @@
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using EapWorkAssistant.Models;
+
+[assembly: InternalsVisibleTo("EapWorkAssistant.Tests")]
 
 namespace EapWorkAssistant.Services;
 
@@ -156,7 +159,7 @@ public static class ExportService
     /// <summary>
     /// CSV 状态机解析器：正确处理引号内的逗号、换行、转义引号
     /// </summary>
-    private static List<List<string>> ParseCsvRows(string content)
+    internal static List<List<string>> ParseCsvRows(string content)
     {
         var rows = new List<List<string>>();
         var currentField = new StringBuilder();
@@ -225,7 +228,7 @@ public static class ExportService
         return rows;
     }
 
-    private static string EscapeCsv(string? value)
+    internal static string EscapeCsv(string? value)
     {
         if (string.IsNullOrEmpty(value)) return "";
         if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))

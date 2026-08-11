@@ -14,7 +14,7 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<Knowledge>(
-                "SELECT * FROM Knowledge ORDER BY CreateTime DESC");
+                "SELECT * FROM Knowledge WHERE IsDeleted = 0 ORDER BY CreateTime DESC");
         });
     }
 
@@ -25,7 +25,7 @@ public class KnowledgeRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Knowledge");
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Knowledge WHERE IsDeleted = 0");
         });
     }
 
@@ -36,7 +36,7 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<Knowledge>(
-                "SELECT * FROM Knowledge WHERE Title LIKE @Kw OR Content LIKE @Kw OR Tags LIKE @Kw ORDER BY CreateTime DESC",
+                "SELECT * FROM Knowledge WHERE IsDeleted = 0 AND (Title LIKE @Kw OR Content LIKE @Kw OR Tags LIKE @Kw) ORDER BY CreateTime DESC",
                 new { Kw = $"%{keyword}%" });
         });
     }
@@ -73,7 +73,7 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "DELETE FROM Knowledge WHERE Id = @Id", new { Id = id });
+                "UPDATE Knowledge SET IsDeleted = 1 WHERE Id = @Id", new { Id = id });
         });
     }
 
@@ -83,7 +83,7 @@ public class KnowledgeRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
-            var rows = await connection.QueryAsync<string>("SELECT Tags FROM Knowledge WHERE Tags != '' ORDER BY CreateTime DESC");
+            var rows = await connection.QueryAsync<string>("SELECT Tags FROM Knowledge WHERE IsDeleted = 0 AND Tags != '' ORDER BY CreateTime DESC");
             return rows.SelectMany(t => t.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)).Distinct();
         });
     }
@@ -95,7 +95,7 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<string>(
-                "SELECT DISTINCT Category FROM Knowledge WHERE Category != '' ORDER BY Category");
+                "SELECT DISTINCT Category FROM Knowledge WHERE IsDeleted = 0 AND Category != '' ORDER BY Category");
         });
     }
 
@@ -106,7 +106,81 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<Knowledge>(
-                "SELECT * FROM Knowledge WHERE IsFavorite = 1 ORDER BY CreateTime DESC");
+                "SELECT * FROM Knowledge WHERE IsDeleted = 0 AND IsFavorite = 1 ORDER BY CreateTime DESC");
+        });
+    }
+
+    /// <summary>
+    /// 带筛选和分页的查询，返回当前页知识 + 总条数（DB 级分页，避免全量载入内存）。
+    /// 筛选条件：关键词（标题/内容/标签/分类）、仅收藏、分类。
+    /// </summary>
+    public async Task<(IEnumerable<Knowledge> Items, int Total)> GetFilteredPagedAsync(
+        string? keyword, bool favoritesOnly, string? category, int offset, int limit)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            var where = new List<string> { "IsDeleted = 0" };
+            var param = new DynamicParameters();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                where.Add("(Title LIKE @Kw OR Content LIKE @Kw OR Tags LIKE @Kw OR Category LIKE @Kw)");
+                param.Add("Kw", $"%{keyword.Trim()}%");
+            }
+            if (favoritesOnly)
+                where.Add("IsFavorite = 1");
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                where.Add("Category = @Category");
+                param.Add("Category", category);
+            }
+
+            var whereSql = "WHERE " + string.Join(" AND ", where);
+            var total = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM Knowledge {whereSql}", param);
+
+            var dataSql = $"SELECT * FROM Knowledge {whereSql} ORDER BY CreateTime DESC LIMIT @Limit OFFSET @Offset";
+            param.Add("Limit", limit);
+            param.Add("Offset", offset);
+            var items = await connection.QueryAsync<Knowledge>(dataSql, param);
+            return (items, total);
+        });
+    }
+
+    /// <summary>取回收站中的已删除知识（IsDeleted = 1）</summary>
+    public async Task<IEnumerable<Knowledge>> GetDeletedAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<Knowledge>(
+                "SELECT * FROM Knowledge WHERE IsDeleted = 1 ORDER BY Id DESC");
+        });
+    }
+
+    /// <summary>从回收站恢复（软删除还原）</summary>
+    public async Task<int> RestoreAsync(int id)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "UPDATE Knowledge SET IsDeleted = 0 WHERE Id = @Id", new { Id = id });
+        });
+    }
+
+    /// <summary>彻底删除（回收站清空 / 单条永久删除用）</summary>
+    public async Task<int> HardDeleteAsync(int id)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "DELETE FROM Knowledge WHERE Id = @Id", new { Id = id });
         });
     }
 }

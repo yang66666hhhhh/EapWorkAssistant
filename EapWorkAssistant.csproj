@@ -37,4 +37,16 @@
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
   </ItemGroup>
 
+  <!-- 测试子项目有独立的 EapWorkAssistant.Tests.csproj，不应被主项目编译（避免其 xUnit [Fact] 在主程序集中找不到引用） -->
+  <ItemGroup>
+    <Compile Remove="EapWorkAssistant.Tests\**\*.cs" />
+  </ItemGroup>
+
+  <!-- 隔离构建（中间目录重定向到项目外）时，显式排除默认 obj 下所有生成代码，
+       避免 WPF 临时项目把过期的 .g.i.cs 一并收编造成“重复定义”。
+       默认构建（BaseIntermediateOutputPath 仍为 obj\）时此规则不生效，不影响 Visual Studio 正常构建。 -->
+  <ItemGroup Condition="'$(BaseIntermediateOutputPath)' != 'obj\'">
+    <Compile Remove="obj\**\*.cs" />
+  </ItemGroup>
+
 </Project>

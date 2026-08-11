@@ -12,4 +12,5 @@ public static class ViewNames
     public const string Knowledge = "Knowledge";
     public const string Issue = "Issue";
     public const string Settings = "Settings";
+    public const string RecycleBin = "RecycleBin";
 }

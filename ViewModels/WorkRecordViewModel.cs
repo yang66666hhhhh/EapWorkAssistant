@@ -1103,7 +1103,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         try
         {
-            await _repo.InsertAsync(deleted);
+            await _repo.RestoreAsync(deleted.Id);
             await LoadRecordsAsync();
             if (SelectedTabIndex == 1)
                 await LoadAllRecordsAsync();

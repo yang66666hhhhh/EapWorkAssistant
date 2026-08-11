@@ -62,6 +62,14 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
     protected override async Task<IEnumerable<Knowledge>> GetAllAsync()
         => await _repo.GetAllAsync();
 
+    /// <summary>DB 级分页：关键词 + 收藏/分类筛选全部下推到 SQL。</summary>
+    protected override async Task<(List<Knowledge> PageItems, int Total)> LoadPageAsync(int page, int pageSize, string keyword)
+    {
+        var skip = (page - 1) * pageSize;
+        var result = await _repo.GetFilteredPagedAsync(keyword, ShowFavoritesOnly, FilterCategory, skip, pageSize);
+        return (result.Items.ToList(), result.Total);
+    }
+
     protected override async Task OnAfterLoadAsync()
         => await RefreshTagsAndCategoriesAsync();
 
@@ -97,8 +105,8 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
                (item.Tags != null && item.Tags.Contains(kw, System.StringComparison.OrdinalIgnoreCase));
     }
 
-    partial void OnFilterCategoryChanged(string value) => ApplyFilter();
-    partial void OnShowFavoritesOnlyChanged(bool value) => ApplyFilter();
+    partial void OnFilterCategoryChanged(string value) => ReloadPageAsync(true).SafeFire(LoadFailureMessage);
+    partial void OnShowFavoritesOnlyChanged(bool value) => ReloadPageAsync(true).SafeFire(LoadFailureMessage);
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -185,7 +193,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
     {
         try
         {
-            await InsertAsync(deleted);
+            await _repo.RestoreAsync(deleted.Id);
             await LoadAsync();
             ToastService.Success("已恢复");
         }

@@ -14,7 +14,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord ORDER BY WorkDate DESC, Id DESC");
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC");
         });
     }
 
@@ -25,7 +25,7 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM WorkRecord");
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0");
         });
     }
 
@@ -37,7 +37,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord ORDER BY WorkDate DESC, Id DESC LIMIT @Count",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC LIMIT @Count",
                 new { Count = count });
         });
     }
@@ -49,7 +49,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE WorkDate = @Date ORDER BY Id",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate = @Date ORDER BY Id",
                 new { Date = date });
         });
     }
@@ -61,7 +61,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -73,7 +73,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE WorkDate LIKE @Month ORDER BY WorkDate",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month ORDER BY WorkDate",
                 new { Month = $"{yearMonth}%" });
         });
     }
@@ -115,7 +115,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "DELETE FROM WorkRecord WHERE Id = @Id", new { Id = id });
+                "UPDATE WorkRecord SET IsDeleted = 1 WHERE Id = @Id", new { Id = id });
         });
     }
 
@@ -150,7 +150,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteScalarAsync<double>(
-                "SELECT COALESCE(SUM(Hours), 0) FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End",
+                "SELECT COALESCE(SUM(Hours), 0) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -162,7 +162,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync(
-                "SELECT ProjectName, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End GROUP BY ProjectName",
+                "SELECT ProjectName, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY ProjectName",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -174,7 +174,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync(
-                "SELECT WorkType, SUM(Hours) as TotalHours FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
+                "SELECT WorkType, SUM(Hours) as TotalHours FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -186,7 +186,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsHighlight = 1 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate DESC",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND IsHighlight = 1 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate DESC",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -198,7 +198,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<string>(
-                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE WorkDate LIKE @Month",
+                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month",
                 new { Month = $"{yearMonth}%" });
         });
     }
@@ -210,7 +210,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync(
-                "SELECT WorkDate, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End GROUP BY WorkDate ORDER BY WorkDate",
+                "SELECT WorkDate, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkDate ORDER BY WorkDate",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -222,7 +222,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryFirstOrDefaultAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE WorkDate <= @Date ORDER BY WorkDate DESC, Id DESC LIMIT 1",
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate <= @Date ORDER BY WorkDate DESC, Id DESC LIMIT 1",
                 new { Date = date });
         });
     }
@@ -234,7 +234,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(DISTINCT WorkDate) FROM WorkRecord WHERE WorkDate BETWEEN @Start AND @End",
+                "SELECT COUNT(DISTINCT WorkDate) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
                 new { Start = startDate, End = endDate });
         });
     }
@@ -250,7 +250,7 @@ public class WorkRecordRepository
             if (keywords.Length <= 1)
             {
                 return await connection.QueryAsync<WorkRecord>(
-                    "SELECT * FROM WorkRecord WHERE Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw ORDER BY WorkDate DESC, Id DESC LIMIT 50",
+                    "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND (Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw) ORDER BY WorkDate DESC, Id DESC LIMIT 50",
                     new { Kw = $"%{keyword}%" });
             }
 
@@ -260,7 +260,7 @@ public class WorkRecordRepository
             for (int i = 0; i < keywords.Length; i++)
                 param.Add($"Kw{i}", $"%{keywords[i]}%");
             return await connection.QueryAsync<WorkRecord>(
-                $"SELECT * FROM WorkRecord WHERE {where} ORDER BY WorkDate DESC, Id DESC LIMIT 50", param);
+                $"SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND {where} ORDER BY WorkDate DESC, Id DESC LIMIT 50", param);
         });
     }
 
@@ -283,7 +283,7 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
-            var where = new List<string>();
+            var where = new List<string> { "IsDeleted = 0" };
             var param = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(keyword))
@@ -347,6 +347,42 @@ public class WorkRecordRepository
             var records = await connection.QueryAsync<WorkRecord>(dataSql, param);
 
             return (records, (int)stats.TotalCount, (double)stats.TotalHours, (int)stats.HighlightCount);
+        });
+    }
+
+    /// <summary>取回收站中的已删除记录（IsDeleted = 1）</summary>
+    public async Task<IEnumerable<WorkRecord>> GetDeletedAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<WorkRecord>(
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 1 ORDER BY Id DESC");
+        });
+    }
+
+    /// <summary>从回收站恢复（软删除还原）</summary>
+    public async Task<int> RestoreAsync(int id)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "UPDATE WorkRecord SET IsDeleted = 0 WHERE Id = @Id", new { Id = id });
+        });
+    }
+
+    /// <summary>彻底删除（回收站清空 / 单条永久删除用）</summary>
+    public async Task<int> HardDeleteAsync(int id)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "DELETE FROM WorkRecord WHERE Id = @Id", new { Id = id });
         });
     }
 }
