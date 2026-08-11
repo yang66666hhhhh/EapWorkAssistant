@@ -410,13 +410,27 @@
                         <!-- 底部提示栏 -->
                         <Border Grid.Row="2" Padding="16,8" BorderThickness="0,1,0,0"
                                 BorderBrush="{DynamicResource BorderBrush}">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text="Ctrl+F 打开 · "/>
-                                <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
-                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 立即搜索 · "/>
-                                <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
-                                <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
-                            </StackPanel>
+                            <Grid>
+                                <!-- 结果统计（结果态显示） -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                            Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                               Text="{Binding SearchSummary}"/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"
+                                               Margin="8,0,0,0"
+                                               Visibility="{Binding SearchTruncated, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                               Text="仅显示前 20 条，缩小关键词查看全部"/>
+                                </StackPanel>
+                                <!-- 键盘提示（非结果态显示） -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                            Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}, ConverterParameter=Inverse}">
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text="Ctrl+F 打开 · "/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 立即搜索 · "/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Border>
@@ -503,6 +517,11 @@
                                         <TextBlock Text="{Binding Message}" FontSize="12"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                        <Button Visibility="{Binding HasAction, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                                Command="{Binding ActionCommand}"
+                                                Style="{StaticResource BtnGhost}"
+                                                HorizontalAlignment="Left" Margin="0,6,0,0" Padding="10,4"
+                                                Content="{Binding ActionText}"/>
                                     </StackPanel>
 
                                     <Button Grid.Column="2" FontSize="11"

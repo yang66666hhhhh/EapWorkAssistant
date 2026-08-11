@@ -686,12 +686,14 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         if (!DialogService.Instance.ShowConfirm($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmType.Danger)) return;
 
-        await _repo.DeleteAsync(record.Id);
+        var deleted = record; // 保留引用用于撤销
+        await _repo.DeleteAsync(deleted.Id);
         SelectedDailyRecord = null;
         await LoadRecordsAsync();
         await LoadCalendarStatusAsync();
         await LoadCompLeaveBalanceAsync();
-        ToastService.Success("记录已删除");
+        ToastService.WithAction("记录已删除", "已删除", ToastType.Success, "撤销",
+            () => _ = RestoreWorkRecordAsync(deleted));
     }
 
     [RelayCommand]
@@ -1093,6 +1095,26 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         await LoadAllRecordsAsync();
         StatusMessage = "删除成功";
         _statusTimer.Start();
+        ToastService.WithAction("记录已删除", "已删除", ToastType.Success, "撤销",
+            () => _ = RestoreWorkRecordAsync(record));
+    }
+
+    private async Task RestoreWorkRecordAsync(WorkRecord deleted)
+    {
+        try
+        {
+            await _repo.InsertAsync(deleted);
+            await LoadRecordsAsync();
+            if (SelectedTabIndex == 1)
+                await LoadAllRecordsAsync();
+            await LoadCalendarStatusAsync();
+            await LoadCompLeaveBalanceAsync();
+            ToastService.Success("记录已恢复");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"恢复失败：{ex.Message}");
+        }
     }
 
     [RelayCommand]

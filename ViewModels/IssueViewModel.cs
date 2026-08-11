@@ -133,9 +133,25 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
 
         if (!DialogService.Instance.ShowConfirm($"确定要删除 \"{item.Title}\" 吗？", "确认删除", ConfirmType.Danger)) return;
 
-        await _repo.DeleteAsync(item.Id);
+        var deleted = item; // 保留引用用于撤销
+        await _repo.DeleteAsync(deleted.Id);
         await LoadAsync();
-        ToastService.Success("已删除");
+        ToastService.WithAction("已删除问题跟踪条目", "已删除", ToastType.Success, "撤销",
+            () => _ = RestoreAsync(deleted));
+    }
+
+    private async Task RestoreAsync(Issue deleted)
+    {
+        try
+        {
+            await InsertAsync(deleted);
+            await LoadAsync();
+            ToastService.Success("已恢复");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"恢复失败：{ex.Message}");
+        }
     }
 
     [RelayCommand]

@@ -37,30 +37,60 @@ public class ToastService
                 Message = message,
                 Type = type
             };
-
-            while (Items.Count >= MaxToasts)
-                RemoveItem(Items[0]);
-
-            Items.Add(toast);
-
-            var delay = duration ?? DefaultDuration;
-            var timer = new DispatcherTimer { Interval = delay };
-            timer.Tick += (_, _) =>
-            {
-                timer.Stop();
-                _timers.Remove(toast.Id);
-                toast.IsDismissing = true;
-                var removeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-                removeTimer.Tick += (_, _) =>
-                {
-                    removeTimer.Stop();
-                    RemoveItem(toast);
-                };
-                removeTimer.Start();
-            };
-            _timers[toast.Id] = timer;
-            timer.Start();
+            AddToast(toast, duration);
         });
+    }
+
+    /// <summary>
+    /// 带动作的提示（如「撤销删除」）。点击动作后自动关闭。
+    /// 撤销类提示默认时长更长（6 秒），给用户反应时间。
+    /// </summary>
+    public void ShowWithAction(string message, string title, ToastType type,
+        string actionText, Action onAction, TimeSpan? duration = null)
+    {
+        EnsureUiThread(() =>
+        {
+            var toast = new ToastMessage
+            {
+                Title = title,
+                Message = message,
+                Type = type,
+                ActionText = actionText,
+                HasAction = !string.IsNullOrEmpty(actionText)
+            };
+            toast.ActionCommand = new RelayCommand(_ =>
+            {
+                try { onAction(); }
+                finally { Dismiss(toast); }
+            });
+            AddToast(toast, duration ?? TimeSpan.FromSeconds(6));
+        });
+    }
+
+    private void AddToast(ToastMessage toast, TimeSpan? duration)
+    {
+        while (Items.Count >= MaxToasts)
+            RemoveItem(Items[0]);
+
+        Items.Add(toast);
+
+        var delay = duration ?? DefaultDuration;
+        var timer = new DispatcherTimer { Interval = delay };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            _timers.Remove(toast.Id);
+            toast.IsDismissing = true;
+            var removeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+            removeTimer.Tick += (_, _) =>
+            {
+                removeTimer.Stop();
+                RemoveItem(toast);
+            };
+            removeTimer.Start();
+        };
+        _timers[toast.Id] = timer;
+        timer.Start();
     }
 
     public void Dismiss(ToastMessage toast)
@@ -106,6 +136,11 @@ public class ToastService
 
     public static void Warning(string message, string title = "警告")
         => Instance.Show(message, title, ToastType.Warning);
+
+    /// <summary>带「撤销」类动作的提示（点击动作后自动关闭）。</summary>
+    public static void WithAction(string message, string title, ToastType type,
+        string actionText, Action onAction, TimeSpan? duration = null)
+        => Instance.ShowWithAction(message, title, type, actionText, onAction, duration);
 
     private void RemoveItem(ToastMessage toast)
     {

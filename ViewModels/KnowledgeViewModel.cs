@@ -169,14 +169,30 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
 
         if (!DialogService.Instance.ShowConfirm($"确定要删除 \"{item.Title}\" 吗？", "确认删除", ConfirmType.Danger)) return;
 
-        await _repo.DeleteAsync(item.Id);
-        if (SelectedItem?.Id == item.Id)
+        var deleted = item; // 保留引用用于撤销
+        await _repo.DeleteAsync(deleted.Id);
+        if (SelectedItem?.Id == deleted.Id)
         {
             SelectedItem = null;
             CurrentItem = new Knowledge();
         }
         await LoadAsync();
-        ToastService.Success("已删除");
+        ToastService.WithAction("已删除知识库条目", "已删除", ToastType.Success, "撤销",
+            () => _ = RestoreAsync(deleted));
+    }
+
+    private async Task RestoreAsync(Knowledge deleted)
+    {
+        try
+        {
+            await InsertAsync(deleted);
+            await LoadAsync();
+            ToastService.Success("已恢复");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"恢复失败：{ex.Message}");
+        }
     }
 
     [RelayCommand]

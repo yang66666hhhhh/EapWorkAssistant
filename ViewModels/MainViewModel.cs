@@ -42,6 +42,27 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<SearchResultItem> _searchResults = new();
 
+    // 搜索结果分类计数（用于结果区顶部汇总）
+    [ObservableProperty] private int _recordResultCount;
+    [ObservableProperty] private int _knowledgeResultCount;
+    [ObservableProperty] private int _issueResultCount;
+    [ObservableProperty] private int _totalResultCount;
+    [ObservableProperty] private bool _searchTruncated;
+
+    private string _searchSummary = string.Empty;
+    public string SearchSummary
+    {
+        get => _searchSummary;
+        private set => SetProperty(ref _searchSummary, value);
+    }
+
+    private void ResetSearchStats()
+    {
+        RecordResultCount = KnowledgeResultCount = IssueResultCount = TotalResultCount = 0;
+        SearchTruncated = false;
+        SearchSummary = string.Empty;
+    }
+
     public DashboardViewModel Dashboard { get; } = new();
     public WorkRecordViewModel WorkRecord { get; } = new();
     public KnowledgeViewModel Knowledge { get; } = new();
@@ -143,6 +164,7 @@ public partial class MainViewModel : ObservableObject
         IsSearchOpen = true;
         SearchKeyword = string.Empty;
         SearchResults.Clear();
+        ResetSearchStats();
         ShowInitial = true;
         ShowNoResults = false;
         ShowResults = false;
@@ -156,6 +178,7 @@ public partial class MainViewModel : ObservableObject
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
         SearchResults.Clear();
+        ResetSearchStats();
         ShowInitial = true;
         ShowNoResults = false;
         ShowResults = false;
@@ -167,6 +190,7 @@ public partial class MainViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(SearchKeyword))
         {
             SearchResults.Clear();
+            ResetSearchStats();
             ShowInitial = true;
             ShowNoResults = false;
             ShowResults = false;
@@ -237,6 +261,16 @@ public partial class MainViewModel : ObservableObject
         {
             ToastService.Error($"搜索出错：{ex.Message}");
         }
+
+        // 分类计数汇总（用于结果区顶部提示，并标识是否被截断）
+        RecordResultCount = results.Count(r => r.Type == "工作记录");
+        KnowledgeResultCount = results.Count(r => r.Type == "知识库");
+        IssueResultCount = results.Count(r => r.Type == "问题跟踪");
+        TotalResultCount = results.Count;
+        SearchTruncated = TotalResultCount > 20;
+        SearchSummary = TotalResultCount > 0
+            ? $"工作 {RecordResultCount} · 知识 {KnowledgeResultCount} · 问题 {IssueResultCount}"
+            : string.Empty;
 
         SearchResults = new ObservableCollection<SearchResultItem>(results.Take(20));
         IsSearching = false;
