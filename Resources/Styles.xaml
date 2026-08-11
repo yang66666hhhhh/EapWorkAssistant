@@ -1449,7 +1449,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Expander">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                    <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="16">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -1463,7 +1463,7 @@
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
                                         <Border x:Name="headerBorder" Background="Transparent"
-                                                CornerRadius="10" Padding="12,10">
+                                                CornerRadius="10" Padding="18,12">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -1492,7 +1492,7 @@
                                                 <!-- 标题内容 -->
                                                 <ContentPresenter Grid.Column="1"
                                                                   VerticalAlignment="Center"
-                                                                  ContentSource="Content"/>
+                                                                  ContentSource="Header"/>
 
                                                 <!-- 展开状态指示点 -->
                                                 <Border x:Name="statusDot" Grid.Column="2"
@@ -1524,7 +1524,7 @@
 
                             <!-- 折叠内容区 -->
                             <Border x:Name="contentBorder" Grid.Row="1"
-                                    Visibility="Collapsed" Padding="12,4,12,12">
+                                    Visibility="Collapsed" Padding="18,2,18,16">
                                 <ContentPresenter Margin="{TemplateBinding Padding}"/>
                             </Border>
                         </Grid>

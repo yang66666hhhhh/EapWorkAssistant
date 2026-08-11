@@ -22,14 +22,15 @@
             </Border>
 
             <!-- ===== 外观与主题 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource IconPalette}" Fill="{DynamicResource TextPrimaryBrush}"
                               Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="外观与主题" Style="{StaticResource Heading3}"/>
                     </StackPanel>
-
+                </Expander.Header>
+                <StackPanel>
                     <!-- 主题模式 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
                         <Grid>
@@ -186,13 +187,17 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== Dashboard 布局 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <Grid Margin="0,0,0,16">
-                        <StackPanel>
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
                             <StackPanel Orientation="Horizontal">
                                 <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}"
                                       Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -206,7 +211,8 @@
                                 HorizontalAlignment="Right"
                                 Command="{Binding ResetDashboardLayoutCommand}"/>
                     </Grid>
-
+                </Expander.Header>
+                <StackPanel>
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="0">
                         <StackPanel>
                             <!-- 统计卡片 -->
@@ -290,17 +296,18 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== 启动与行为 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource IconLightning}" Fill="{DynamicResource TextPrimaryBrush}"
                               Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="启动与行为" Style="{StaticResource Heading3}"/>
                     </StackPanel>
-
+                </Expander.Header>
+                <StackPanel>
                     <!-- 开机自启动 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="{DynamicResource DensityRowPad}" Margin="{DynamicResource DensityItemMargin}">
                         <Grid>
@@ -369,17 +376,18 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== AI 服务配置 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource IconSparkle}" Fill="{DynamicResource TextPrimaryBrush}"
                               Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="AI 服务配置" Style="{StaticResource Heading3}"/>
                     </StackPanel>
-
+                </Expander.Header>
+                <StackPanel>
                     <TextBlock Text="配置 OpenAI 兼容 API，用于智能生成工作总结报告（支持 DeepSeek、Ollama、LM Studio 等）"
                                FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,12"/>
 
@@ -463,16 +471,18 @@
                                    VerticalAlignment="Center" Margin="12,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== 休息日设置 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextPrimaryBrush}"
                               Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="休息日设置" Style="{StaticResource Heading3}"/>
                     </StackPanel>
+                </Expander.Header>
+                <StackPanel>
                     <TextBlock Text="选择每周的休息日，仪表盘提示和试用期覆盖率计算将跳过休息日" FontSize="12"
                                Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,16"/>
 
@@ -499,17 +509,18 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== 通用设置 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource IconGear}" Fill="{DynamicResource TextPrimaryBrush}"
                               Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock Text="通用设置" Style="{StaticResource Heading3}"/>
                     </StackPanel>
-
+                </Expander.Header>
+                <StackPanel>
                     <!-- 键盘快捷键 -->
                     <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12" Padding="0" Margin="{DynamicResource DensityItemMargin}">
                         <Grid>
@@ -822,17 +833,12 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-            </Border>
+            </Expander>
 
             <!-- ===== 任务管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -855,8 +861,14 @@
                                 Padding="16,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddProjectCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
-                    <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
+                </Expander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <ScrollViewer Grid.Row="1" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <StackPanel>
                         <ItemsControl ItemsSource="{Binding Projects}">
@@ -904,17 +916,12 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </Border>
+            </Expander>
 
             <!-- ===== 工作类型管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -937,8 +944,14 @@
                                 Padding="16,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddWorkTypeCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
-                    <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
+                </Expander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <ScrollViewer Grid.Row="1" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <StackPanel>
                         <ItemsControl ItemsSource="{Binding WorkTypes}">
@@ -986,17 +999,12 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </Border>
+            </Expander>
 
             <!-- ===== 知识分类管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -1019,8 +1027,14 @@
                                 Padding="16,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddKnowledgeCategoryCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
-                    <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
+                </Expander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <ScrollViewer Grid.Row="1" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <StackPanel>
                         <ItemsControl ItemsSource="{Binding KnowledgeCategories}">
@@ -1068,17 +1082,12 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </Border>
+            </Expander>
 
             <!-- ===== 内容模板管理 ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -1101,8 +1110,14 @@
                                 Padding="16,8" FontSize="12" VerticalAlignment="Center"
                                 Command="{Binding AddTemplateCommand}"/>
                     </Grid>
-                    <Border Grid.Row="1" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
-                    <ScrollViewer Grid.Row="2" MaxHeight="250" VerticalScrollBarVisibility="Auto"
+                </Expander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+                    <ScrollViewer Grid.Row="1" MaxHeight="250" VerticalScrollBarVisibility="Auto"
                                   Style="{StaticResource ModernScrollViewer}">
                         <StackPanel>
                         <ItemsControl ItemsSource="{Binding ContentTemplates}">
@@ -1161,7 +1176,7 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-            </Border>
+            </Expander>
 
         </StackPanel>
     </ScrollViewer>
