@@ -9,6 +9,8 @@ namespace EapWorkAssistant.Services;
 
 public class ReportService
 {
+    public static ReportService Instance { get; } = new();
+
     private readonly WorkRecordRepository _repo = new();
     private readonly KnowledgeRepository _knowledgeRepo = new();
     private readonly IssueRepository _issueRepo = new();

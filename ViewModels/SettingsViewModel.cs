@@ -710,7 +710,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         try
         {
             SaveAiSettings();
-            var aiService = new AiService();
+            var aiService = AiService.Instance;
             var result = await aiService.SendChatAsync(
                 "你是一位测试助手。",
                 "请回复'连接成功'四个字。");

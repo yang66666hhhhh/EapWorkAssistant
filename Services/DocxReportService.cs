@@ -12,6 +12,8 @@ namespace EapWorkAssistant.Services;
 /// </summary>
 public class DocxReportService
 {
+    public static DocxReportService Instance { get; } = new();
+
     // 颜色常量
     private const string PrimaryColor = "4338CA";
     private const string TextColor = "0F172A";

@@ -394,7 +394,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             }
         }
 
-        var service = new ReportService();
+        var service = ReportService.Instance;
         ProbationReport = await service.GenerateProbationReportAsync(startDate, endDate);
     }
 
@@ -463,14 +463,14 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
             // 4. 调用 AI 生成报告
             AiReportStatus = "正在调用 AI 生成报告...";
-            var aiService = new AiService();
+            var aiService = AiService.Instance;
             var systemPrompt = BuildSystemPrompt();
             var userMessage = BuildUserMessage(AiReportStartDate, AiReportEndDate, workData);
             var aiContent = await aiService.SendChatAsync(systemPrompt, userMessage);
 
             // 5. 生成 DOCX 文件
             AiReportStatus = "正在生成 Word 文档...";
-            var docxService = new DocxReportService();
+            var docxService = DocxReportService.Instance;
             var dateRange = $"{AiReportStartDate} ~ {AiReportEndDate}";
             var tempPath = docxService.GenerateDocx("AI 工作总结报告", dateRange, aiContent);
 

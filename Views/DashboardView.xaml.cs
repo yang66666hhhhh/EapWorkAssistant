@@ -34,6 +34,13 @@ public partial class DashboardView : UserControl
             }
         };
         ProfileService.Instance.PropertyChanged += _profileHandler;
+
+        // 视图卸载时解绑单例事件，避免 DashboardView 实例被单例 ProfileService 持有而无法回收
+        Unloaded += (_, _) =>
+        {
+            if (_profileHandler != null)
+                ProfileService.Instance.PropertyChanged -= _profileHandler;
+        };
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

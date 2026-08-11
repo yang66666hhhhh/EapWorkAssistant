@@ -11,6 +11,8 @@ namespace EapWorkAssistant.Services;
 /// </summary>
 public class AiService
 {
+    public static AiService Instance { get; } = new();
+
     private static readonly HttpClient _http = new()
     {
         Timeout = TimeSpan.FromSeconds(120)

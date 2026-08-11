@@ -333,7 +333,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         catch (Exception ex)
         {
             // 日历状态加载失败不影响核心功能，静默降级
-            System.Diagnostics.Debug.WriteLine($"加载日历状态失败：{ex.Message}");
+            ToastService.Error($"加载日历状态失败：{ex.Message}");
         }
     }
 
@@ -382,7 +382,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"加载调休余额失败：{ex.Message}");
+            ToastService.Error($"加载调休余额失败：{ex.Message}");
         }
     }
 
@@ -400,7 +400,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"加载请假记录失败：{ex.Message}");
+            ToastService.Error($"加载请假记录失败：{ex.Message}");
         }
     }
 
@@ -790,7 +790,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task GenerateDailyReportAsync()
     {
-        var service = new ReportService();
+        var service = ReportService.Instance;
         ReportText = await service.GenerateDailyReportAsync(SelectedDate.ToString("yyyy-MM-dd"));
         ReportGenerated?.Invoke();
     }
@@ -798,7 +798,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task GenerateWeeklyReportAsync()
     {
-        var service = new ReportService();
+        var service = ReportService.Instance;
         ReportText = await service.GenerateWeeklyReportAsync(SelectedDate);
         ReportGenerated?.Invoke();
     }
@@ -806,7 +806,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task GenerateMonthlyReportAsync()
     {
-        var service = new ReportService();
+        var service = ReportService.Instance;
         var yearMonth = SelectedDate.ToString("yyyy-MM");
         ReportText = await service.GenerateMonthlyReportAsync(yearMonth);
         ReportGenerated?.Invoke();
