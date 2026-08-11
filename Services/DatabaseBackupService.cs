@@ -33,8 +33,12 @@ public static class DatabaseBackupService
 
             if (!File.Exists(backupFile))
             {
+                var isFirstBackup = !Directory.Exists(BackupDir)
+                    || Directory.GetFiles(BackupDir, "eapwork_*.db").Length == 0;
                 SafeBackup(backupFile);
-                ToastService.Info("数据库已自动备份", "数据安全");
+                // 日常备份静默进行；仅首次备份提示一次，避免每次启动打扰
+                if (isFirstBackup)
+                    ToastService.Info("已创建首次数据库备份", "数据安全");
             }
 
             CleanupOldBackups();

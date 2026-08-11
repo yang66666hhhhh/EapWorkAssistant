@@ -51,7 +51,7 @@
                             <TextBlock Text="EAP Work" FontSize="17" FontWeight="Bold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                        FontFamily="{StaticResource DefaultFont}"/>
-                            <TextBlock Text="Assistant v2.0" FontSize="11"
+                            <TextBlock Text="Assistant v2.1" FontSize="11"
                                        Foreground="{DynamicResource SidebarTextBrush}"
                                        FontFamily="{StaticResource MonoFont}"/>
                         </StackPanel>

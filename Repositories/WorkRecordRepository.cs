@@ -18,6 +18,30 @@ public class WorkRecordRepository
         });
     }
 
+    /// <summary>仅取总条数，避免为计数全表拉取（Dashboard 统计用）</summary>
+    public async Task<int> GetTotalCountAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM WorkRecord");
+        });
+    }
+
+    /// <summary>取最近 N 条记录（Dashboard 最近记录列表用），避免全表载入</summary>
+    public async Task<IEnumerable<WorkRecord>> GetRecentAsync(int count)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<WorkRecord>(
+                "SELECT * FROM WorkRecord ORDER BY WorkDate DESC, Id DESC LIMIT @Count",
+                new { Count = count });
+        });
+    }
+
     public async Task<IEnumerable<WorkRecord>> GetByDateAsync(string date)
     {
         return await Task.Run(async () =>

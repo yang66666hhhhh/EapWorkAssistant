@@ -158,17 +158,13 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 : "今天还没有记录工作，点击「工作记录」开始记录吧！";
         }
 
-        var allRecords = (await _recordRepo.GetAllAsync()).ToList();
-        TotalRecords = allRecords.Count;
+        // 计数走轻量 COUNT(*) 查询，避免为几个数字全表拉取
+        TotalRecords = await _recordRepo.GetTotalCountAsync();
+        TotalIssues = await _issueRepo.GetTotalCountAsync();
+        TotalKnowledge = await _knowledgeRepo.GetTotalCountAsync();
 
-        var allIssues = await _issueRepo.GetAllAsync();
-        TotalIssues = allIssues.Count();
-
-        var allKnowledge = await _knowledgeRepo.GetAllAsync();
-        TotalKnowledge = allKnowledge.Count();
-
-        // 最近5条工作记录
-        var recent = allRecords.Take(5).Select(r => new RecentRecordItem
+        // 最近5条工作记录（只取所需的 5 条，而非全表载入）
+        var recent = (await _recordRepo.GetRecentAsync(5)).Select(r => new RecentRecordItem
         {
             ProjectName = r.ProjectName,
             WorkType = r.WorkType,

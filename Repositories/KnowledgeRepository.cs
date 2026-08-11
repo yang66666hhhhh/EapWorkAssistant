@@ -18,6 +18,17 @@ public class KnowledgeRepository
         });
     }
 
+    /// <summary>仅取总条数，避免为计数全表拉取（Dashboard 统计用）</summary>
+    public async Task<int> GetTotalCountAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Knowledge");
+        });
+    }
+
     public async Task<IEnumerable<Knowledge>> SearchAsync(string keyword)
     {
         return await Task.Run(async () =>
