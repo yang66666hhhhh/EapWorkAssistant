@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using System;
 using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -236,6 +237,16 @@ public static class ExportService
 
     #region JSON 导出 / 导入（知识库 / 问题库）
 
+    /// <summary>
+    /// JSON 导入结果：区分「用户取消」「解析失败」「成功」，避免把文件损坏误报成"文件为空"。
+    /// </summary>
+    public sealed class ImportResult<T>
+    {
+        public List<T>? Items { get; init; }
+        public bool Canceled { get; init; }
+        public string? Error { get; init; }
+    }
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -255,22 +266,23 @@ public static class ExportService
         return true;
     }
 
-    public static List<Knowledge>? ImportKnowledgeFromJson()
+    public static ImportResult<Knowledge> ImportKnowledgeFromJson()
     {
         var dialog = new OpenFileDialog
         {
             Filter = "JSON 文件|*.json|所有文件|*.*",
             Title = "选择要导入的知识库 JSON 文件"
         };
-        if (dialog.ShowDialog() != true) return null;
+        if (dialog.ShowDialog() != true) return new ImportResult<Knowledge> { Canceled = true };
         try
         {
             var json = File.ReadAllText(dialog.FileName, Encoding.UTF8);
-            return JsonSerializer.Deserialize<List<Knowledge>>(json) ?? new List<Knowledge>();
+            var items = JsonSerializer.Deserialize<List<Knowledge>>(json);
+            return new ImportResult<Knowledge> { Items = items ?? new List<Knowledge>() };
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            return new ImportResult<Knowledge> { Error = ex.Message };
         }
     }
 
@@ -287,22 +299,23 @@ public static class ExportService
         return true;
     }
 
-    public static List<Issue>? ImportIssuesFromJson()
+    public static ImportResult<Issue> ImportIssuesFromJson()
     {
         var dialog = new OpenFileDialog
         {
             Filter = "JSON 文件|*.json|所有文件|*.*",
             Title = "选择要导入的问题库 JSON 文件"
         };
-        if (dialog.ShowDialog() != true) return null;
+        if (dialog.ShowDialog() != true) return new ImportResult<Issue> { Canceled = true };
         try
         {
             var json = File.ReadAllText(dialog.FileName, Encoding.UTF8);
-            return JsonSerializer.Deserialize<List<Issue>>(json) ?? new List<Issue>();
+            var items = JsonSerializer.Deserialize<List<Issue>>(json);
+            return new ImportResult<Issue> { Items = items ?? new List<Issue>() };
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            return new ImportResult<Issue> { Error = ex.Message };
         }
     }
 

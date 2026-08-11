@@ -301,8 +301,15 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task ImportJsonAsync()
     {
-        var list = ExportService.ImportIssuesFromJson();
-        if (list == null || list.Count == 0) { ToastService.Warning("未选择文件或文件为空"); return; }
+        var result = ExportService.ImportIssuesFromJson();
+        if (result.Canceled) return;
+        if (result.Error != null)
+        {
+            ToastService.Error($"文件解析失败：{result.Error}");
+            return;
+        }
+        var list = result.Items!;
+        if (list.Count == 0) { ToastService.Warning("文件为空，没有可导入的问题"); return; }
         try
         {
             foreach (var it in list)
