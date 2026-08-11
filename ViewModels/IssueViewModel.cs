@@ -4,48 +4,18 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace EapWorkAssistant.ViewModels;
 
-public partial class IssueViewModel : ObservableObject, IRefreshable
+public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
 {
     private readonly IssueRepository _repo = new();
-    private readonly UiTimer _statusTimer;
-    private readonly UiTimer _searchTimer;
-    private bool _suppressDirty;
-    private List<Issue> _allItems = new();
-
-    public event Action? PanelCloseRequested;
-
-    [ObservableProperty]
-    private ObservableCollection<Issue> _items = new();
-
-    [ObservableProperty]
-    private ObservableCollection<Issue> _pagedItems = new();
-
-    // 分页
-    [ObservableProperty] private int _currentPage = 1;
-    [ObservableProperty] private int _pageSize = 20;
-    [ObservableProperty] private int _totalPages = 1;
-    [ObservableProperty] private int _totalCount;
-    public int[] PageSizeOptions => [10, 20, 50, 100];
 
     [ObservableProperty]
     private Issue _currentItem = new();
 
     [ObservableProperty]
     private Issue? _selectedItem;
-
-    [ObservableProperty]
-    private string _searchKeyword = string.Empty;
-
-    [ObservableProperty]
-    private string _statusMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool _isFormDirty;
 
     public string[] Projects => ProjectInfo.Projects;
     public string[] Statuses => ["Open", "InProgress", "Resolved", "Closed"];
@@ -63,100 +33,32 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     public string[] FilterStatuses => ["", .. Statuses];
     public string[] FilterPriorities => ["", .. Priorities];
 
-    public IssueViewModel()
+    protected override string LoadFailureMessage => "加载问题失败";
+
+    protected override async Task<IEnumerable<Issue>> GetAllAsync()
+        => await _repo.GetAllAsync();
+
+    protected override IEnumerable<Issue> ApplyExtraFilters(IEnumerable<Issue> source)
     {
-        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
-        _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
-
-        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        _searchTimer.Tick += (_, _) =>
-        {
-            _searchTimer.Stop();
-            SearchAsync();
-        };
-    }
-
-    partial void OnSearchKeywordChanged(string value)
-    {
-        _searchTimer.Stop();
-        if (string.IsNullOrWhiteSpace(value))
-            LoadAsync().SafeFire("加载问题失败");
-        else
-            _searchTimer.Start();
-    }
-
-    partial void OnFilterStatusChanged(string value)
-    {
-        ApplyFilter();
-    }
-
-    partial void OnFilterPriorityChanged(string value)
-    {
-        ApplyFilter();
-    }
-
-    [RelayCommand]
-    private void ClosePanel()
-    {
-        PanelCloseRequested?.Invoke();
-    }
-
-    [RelayCommand]
-    private void ClearSearch()
-    {
-        SearchKeyword = "";
-    }
-
-    public async Task RefreshAsync() => await LoadAsync();
-
-    [RelayCommand]
-    private async Task LoadAsync()
-    {
-        // 一次性加载全量，后续搜索/筛选均在内存中进行，避免重复查询数据库
-        _allItems = (await _repo.GetAllAsync()).ToList();
-        ApplyFilter();
-    }
-
-    private void ApplyFilter()
-    {
-        CurrentPage = 1;
-        var q = _allItems.AsEnumerable();
+        var q = source;
         if (!string.IsNullOrEmpty(FilterStatus))
             q = q.Where(i => i.Status == FilterStatus);
         if (!string.IsNullOrEmpty(FilterPriority))
             q = q.Where(i => i.Priority == FilterPriority);
-        if (!string.IsNullOrWhiteSpace(SearchKeyword))
-        {
-            var kw = SearchKeyword.Trim();
-            q = q.Where(i =>
-                (i.Title != null && i.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (i.Description != null && i.Description.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (i.Keywords != null && i.Keywords.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (i.RootCause != null && i.RootCause.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (i.Solution != null && i.Solution.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
-        }
-        Items = new ObservableCollection<Issue>(q);
-        UpdatePager();
+        return q;
     }
 
-    private void UpdatePager()
+    protected override bool MatchesSearch(Issue item, string kw)
     {
-        TotalCount = Items.Count;
-        TotalPages = TotalCount > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 1;
-        if (CurrentPage < 1) CurrentPage = 1;
-        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
-        var pageItems = Items.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
-        PagedItems = new ObservableCollection<Issue>(pageItems);
+        return (item.Title != null && item.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.Description != null && item.Description.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.Keywords != null && item.Keywords.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.RootCause != null && item.RootCause.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.Solution != null && item.Solution.Contains(kw, System.StringComparison.OrdinalIgnoreCase));
     }
 
-    partial void OnCurrentPageChanged(int value) => UpdatePager();
-    partial void OnPageSizeChanged(int value) => UpdatePager();
-
-    [RelayCommand]
-    private void SearchAsync()
-    {
-        ApplyFilter();
-    }
+    partial void OnFilterStatusChanged(string value) => ApplyFilter();
+    partial void OnFilterPriorityChanged(string value) => ApplyFilter();
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -264,73 +166,25 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         _suppressDirty = false;
     }
 
-    // ===== 分页命令 =====
-    [RelayCommand]
-    private void FirstPage()
-    {
-        if (CurrentPage != 1) { CurrentPage = 1; UpdatePager(); }
-    }
-
-    [RelayCommand]
-    private void PrevPage()
-    {
-        if (CurrentPage > 1) CurrentPage--;
-    }
-
-    [RelayCommand]
-    private void NextPage()
-    {
-        if (CurrentPage < TotalPages) CurrentPage++;
-    }
-
-    [RelayCommand]
-    private void LastPage()
-    {
-        if (CurrentPage != TotalPages) { CurrentPage = TotalPages; UpdatePager(); }
-    }
-
     // ===== JSON 导出 / 导入 =====
-    [RelayCommand]
-    private void ExportJson()
+    protected override string EmptyExportMessage => "没有可导出的问题";
+    protected override string ExportSuccessMessage => "问题库已导出为 JSON";
+    protected override bool ExportItems(List<Issue> items)
+        => ExportService.ExportIssuesToJson(items);
+
+    protected override ExportService.ImportResult<Issue> GetImportResult()
+        => ExportService.ImportIssuesFromJson();
+
+    protected override void SetImportDefaults(Issue item)
     {
-        if (_allItems.Count == 0) { ToastService.Warning("没有可导出的问题"); return; }
-        if (ExportService.ExportIssuesToJson(_allItems))
-            ToastService.Success("问题库已导出为 JSON");
+        item.Id = 0;
+        if (string.IsNullOrWhiteSpace(item.CreateTime))
+            item.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
-    [RelayCommand]
-    private async Task ImportJsonAsync()
-    {
-        var result = ExportService.ImportIssuesFromJson();
-        if (result.Canceled) return;
-        if (result.Error != null)
-        {
-            ToastService.Error($"文件解析失败：{result.Error}");
-            return;
-        }
-        var list = result.Items!;
-        if (list.Count == 0) { ToastService.Warning("文件为空，没有可导入的问题"); return; }
-        try
-        {
-            foreach (var it in list)
-            {
-                it.Id = 0;
-                if (string.IsNullOrWhiteSpace(it.CreateTime))
-                    it.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                await _repo.InsertAsync(it);
-            }
-            await LoadAsync();
-            ToastService.Success($"已导入 {list.Count} 个问题");
-        }
-        catch (Exception ex)
-        {
-            ToastService.Error($"导入失败：{ex.Message}");
-        }
-    }
+    protected override async Task InsertAsync(Issue item)
+        => await _repo.InsertAsync(item);
 
-    public void MarkDirty()
-    {
-        if (!_suppressDirty)
-            IsFormDirty = true;
-    }
+    protected override string EmptyImportMessage => "文件为空，没有可导入的问题";
+    protected override string ImportSuccessMessage => "已导入 {0} 条问题";
 }

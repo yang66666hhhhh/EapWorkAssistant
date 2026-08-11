@@ -6,46 +6,19 @@ using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace EapWorkAssistant.ViewModels;
 
-public partial class KnowledgeViewModel : ObservableObject, IRefreshable
+public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge>
 {
     private readonly KnowledgeRepository _repo = new();
-    private readonly UiTimer _statusTimer;
-    private readonly UiTimer _searchTimer;
-    private bool _suppressDirty;
-    private List<Knowledge> _allItems = new();
-
-    public event Action? PanelCloseRequested;
-
-    [ObservableProperty]
-    private ObservableCollection<Knowledge> _items = new();
-
-    [ObservableProperty]
-    private ObservableCollection<Knowledge> _pagedItems = new();
-
-    // 分页
-    [ObservableProperty] private int _currentPage = 1;
-    [ObservableProperty] private int _pageSize = 20;
-    [ObservableProperty] private int _totalPages = 1;
-    [ObservableProperty] private int _totalCount;
-    public int[] PageSizeOptions => [10, 20, 50, 100];
 
     [ObservableProperty]
     private Knowledge _currentItem = new();
 
     [ObservableProperty]
     private Knowledge? _selectedItem;
-
-    [ObservableProperty]
-    private string _searchKeyword = string.Empty;
-
-    [ObservableProperty]
-    private string _statusMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool _isFormDirty;
 
     // 分类和标签建议
     [ObservableProperty]
@@ -62,51 +35,7 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 
     public string[] FilterCategories => ["", .. AllCategories];
 
-    public KnowledgeViewModel()
-    {
-        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
-        _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
-
-        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        _searchTimer.Tick += (_, _) =>
-        {
-            _searchTimer.Stop();
-            SearchAsync();
-        };
-    }
-
-    partial void OnSearchKeywordChanged(string value)
-    {
-        _searchTimer.Stop();
-        if (string.IsNullOrWhiteSpace(value))
-            LoadAsync().SafeFire("加载知识失败");
-        else
-            _searchTimer.Start();
-    }
-
-    partial void OnFilterCategoryChanged(string value)
-    {
-        ApplyFilter();
-    }
-
-    partial void OnShowFavoritesOnlyChanged(bool value)
-    {
-        ApplyFilter();
-    }
-
-    [RelayCommand]
-    private void ClosePanel()
-    {
-        PanelCloseRequested?.Invoke();
-    }
-
-    [RelayCommand]
-    private void ClearSearch()
-    {
-        SearchKeyword = "";
-    }
-
-    public async Task RefreshAsync() => await LoadAsync();
+    protected override string LoadFailureMessage => "加载知识失败";
 
     partial void OnSelectedItemChanged(Knowledge? value)
     {
@@ -130,47 +59,11 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         IsFormDirty = false;
     }
 
-    [RelayCommand]
-    private async Task LoadAsync()
-    {
-        // 一次性加载全量，后续搜索/筛选均在内存中进行，避免重复查询数据库
-        _allItems = (await _repo.GetAllAsync()).ToList();
-        ApplyFilter();
-        await RefreshTagsAndCategoriesAsync();
-    }
+    protected override async Task<IEnumerable<Knowledge>> GetAllAsync()
+        => await _repo.GetAllAsync();
 
-    private void ApplyFilter()
-    {
-        CurrentPage = 1;
-        var q = _allItems.AsEnumerable();
-        if (ShowFavoritesOnly)
-            q = q.Where(k => k.IsFavorite == 1);
-        if (!string.IsNullOrEmpty(FilterCategory))
-            q = q.Where(k => k.Category == FilterCategory);
-        if (!string.IsNullOrWhiteSpace(SearchKeyword))
-        {
-            var kw = SearchKeyword.Trim();
-            q = q.Where(k =>
-                (k.Title != null && k.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (k.Content != null && k.Content.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
-                (k.Tags != null && k.Tags.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
-        }
-        Items = new ObservableCollection<Knowledge>(q);
-        UpdatePager();
-    }
-
-    private void UpdatePager()
-    {
-        TotalCount = Items.Count;
-        TotalPages = TotalCount > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 1;
-        if (CurrentPage < 1) CurrentPage = 1;
-        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
-        var pageItems = Items.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
-        PagedItems = new ObservableCollection<Knowledge>(pageItems);
-    }
-
-    partial void OnCurrentPageChanged(int value) => UpdatePager();
-    partial void OnPageSizeChanged(int value) => UpdatePager();
+    protected override async Task OnAfterLoadAsync()
+        => await RefreshTagsAndCategoriesAsync();
 
     private async Task RefreshTagsAndCategoriesAsync()
     {
@@ -187,11 +80,25 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         catch { }
     }
 
-    [RelayCommand]
-    private void SearchAsync()
+    protected override IEnumerable<Knowledge> ApplyExtraFilters(IEnumerable<Knowledge> source)
     {
-        ApplyFilter();
+        var q = source.AsEnumerable();
+        if (ShowFavoritesOnly)
+            q = q.Where(k => k.IsFavorite == 1);
+        if (!string.IsNullOrEmpty(FilterCategory))
+            q = q.Where(k => k.Category == FilterCategory);
+        return q;
     }
+
+    protected override bool MatchesSearch(Knowledge item, string kw)
+    {
+        return (item.Title != null && item.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.Content != null && item.Content.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+               (item.Tags != null && item.Tags.Contains(kw, System.StringComparison.OrdinalIgnoreCase));
+    }
+
+    partial void OnFilterCategoryChanged(string value) => ApplyFilter();
+    partial void OnShowFavoritesOnlyChanged(bool value) => ApplyFilter();
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -297,73 +204,25 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         _suppressDirty = false;
     }
 
-    // ===== 分页命令 =====
-    [RelayCommand]
-    private void FirstPage()
-    {
-        if (CurrentPage != 1) { CurrentPage = 1; UpdatePager(); }
-    }
-
-    [RelayCommand]
-    private void PrevPage()
-    {
-        if (CurrentPage > 1) CurrentPage--;
-    }
-
-    [RelayCommand]
-    private void NextPage()
-    {
-        if (CurrentPage < TotalPages) CurrentPage++;
-    }
-
-    [RelayCommand]
-    private void LastPage()
-    {
-        if (CurrentPage != TotalPages) { CurrentPage = TotalPages; UpdatePager(); }
-    }
-
     // ===== JSON 导出 / 导入 =====
-    [RelayCommand]
-    private void ExportJson()
+    protected override string EmptyExportMessage => "没有可导出的知识";
+    protected override string ExportSuccessMessage => "知识库已导出为 JSON";
+    protected override bool ExportItems(List<Knowledge> items)
+        => ExportService.ExportKnowledgeToJson(items);
+
+    protected override ExportService.ImportResult<Knowledge> GetImportResult()
+        => ExportService.ImportKnowledgeFromJson();
+
+    protected override void SetImportDefaults(Knowledge item)
     {
-        if (_allItems.Count == 0) { ToastService.Warning("没有可导出的知识"); return; }
-        if (ExportService.ExportKnowledgeToJson(_allItems))
-            ToastService.Success("知识库已导出为 JSON");
+        item.Id = 0;
+        if (string.IsNullOrWhiteSpace(item.CreateTime))
+            item.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
-    [RelayCommand]
-    private async Task ImportJsonAsync()
-    {
-        var result = ExportService.ImportKnowledgeFromJson();
-        if (result.Canceled) return;
-        if (result.Error != null)
-        {
-            ToastService.Error($"文件解析失败：{result.Error}");
-            return;
-        }
-        var list = result.Items!;
-        if (list.Count == 0) { ToastService.Warning("文件为空，没有可导入的知识"); return; }
-        try
-        {
-            foreach (var k in list)
-            {
-                k.Id = 0;
-                if (string.IsNullOrWhiteSpace(k.CreateTime))
-                    k.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                await _repo.InsertAsync(k);
-            }
-            await LoadAsync();
-            ToastService.Success($"已导入 {list.Count} 条知识");
-        }
-        catch (Exception ex)
-        {
-            ToastService.Error($"导入失败：{ex.Message}");
-        }
-    }
+    protected override async Task InsertAsync(Knowledge item)
+        => await _repo.InsertAsync(item);
 
-    public void MarkDirty()
-    {
-        if (!_suppressDirty)
-            IsFormDirty = true;
-    }
+    protected override string EmptyImportMessage => "文件为空，没有可导入的知识";
+    protected override string ImportSuccessMessage => "已导入 {0} 条知识";
 }
