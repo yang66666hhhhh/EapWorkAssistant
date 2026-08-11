@@ -78,7 +78,17 @@ public partial class App : Application
                 Directory.CreateDirectory(logDir);
 
             var logFile = Path.Combine(logDir, $"error_{DateTime.Now:yyyyMMdd}.log");
-            var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}\n\n";
+            var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}\n";
+            // 递归记录内部异常（XamlParseException 的 InnerException 才是真正原因）
+            var inner = ex.InnerException;
+            var level = 1;
+            while (inner != null)
+            {
+                logEntry += $"  [Inner #{level}] {inner.GetType().Name}: {inner.Message}\n  {inner.StackTrace}\n";
+                inner = inner.InnerException;
+                level++;
+            }
+            logEntry += "\n";
             File.AppendAllText(logFile, logEntry);
         }
         catch { /* 日志写入失败不应阻塞 */ }

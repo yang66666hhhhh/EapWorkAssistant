@@ -1458,6 +1458,7 @@
 
                             <!-- 标题栏 -->
                             <ToggleButton x:Name="HeaderToggle" Grid.Row="0"
+                                          Content="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
                                           IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Cursor="Hand" Focusable="False">
                                 <ToggleButton.Template>
@@ -1489,10 +1490,9 @@
                                                     </Path>
                                                 </Border>
 
-                                                <!-- 标题内容 -->
+                                                <!-- 标题内容（ToggleButton 的 Content 即 Expander 的 Header） -->
                                                 <ContentPresenter Grid.Column="1"
-                                                                  VerticalAlignment="Center"
-                                                                  ContentSource="Header"/>
+                                                                  VerticalAlignment="Center"/>
 
                                                 <!-- 展开状态指示点 -->
                                                 <Border x:Name="statusDot" Grid.Column="2"
