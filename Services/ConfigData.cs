@@ -58,21 +58,10 @@ public class ConfigData
 
     // ===== 知识分类 =====
     public List<string> KnowledgeCategories { get; set; } = new();
-
-    // ===== 工作记录自定义字段 =====
-    public List<CustomField> CustomFields { get; set; } = new();
 }
 
 public class ContentTemplate
 {
     public string Name { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
-}
-
-public class CustomField
-{
-    public string Name { get; set; } = string.Empty;
-    public string FieldType { get; set; } = "Text";       // Text, Number, Dropdown
-    public string DefaultValue { get; set; } = string.Empty;
-    public List<string> Options { get; set; } = new();     // Dropdown 选项
 }

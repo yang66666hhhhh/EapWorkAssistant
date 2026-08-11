@@ -121,9 +121,6 @@ public class ConfigService
     /// </summary>
     public bool IsTodayRestDay => IsRestDay(DateTime.Now);
 
-    // ===== 自定义字段 =====
-    public List<CustomField> CustomFields => _data.CustomFields;
-
     public void Load()
     {
         lock (_lock)
@@ -334,44 +331,6 @@ public class ConfigService
             if (index >= 0)
             {
                 _data.ContentTemplates[index] = newTemplate;
-                Save();
-            }
-        }
-    }
-
-    public void AddCustomField(CustomField field)
-    {
-        lock (_lock)
-        {
-            if (!_data.CustomFields.Any(f => f.Name == field.Name))
-            {
-                _data.CustomFields.Add(field);
-                Save();
-            }
-        }
-    }
-
-    public void RemoveCustomField(string name)
-    {
-        lock (_lock)
-        {
-            var field = _data.CustomFields.FirstOrDefault(f => f.Name == name);
-            if (field != null)
-            {
-                _data.CustomFields.Remove(field);
-                Save();
-            }
-        }
-    }
-
-    public void UpdateCustomField(string oldName, CustomField newField)
-    {
-        lock (_lock)
-        {
-            var index = _data.CustomFields.FindIndex(f => f.Name == oldName);
-            if (index >= 0)
-            {
-                _data.CustomFields[index] = newField;
                 Save();
             }
         }

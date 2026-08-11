@@ -501,37 +501,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- ===== 自定义字段（功能开发中） ===== -->
-            <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}" Opacity="0.7">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextTertiaryBrush}"
-                                      Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="自定义字段" FontSize="15" FontWeight="Bold"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
-                            </StackPanel>
-                            <TextBlock Text="为工作记录添加额外的自定义字段" FontSize="12"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <Border CornerRadius="10" Padding="12,5" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="{DynamicResource Primary}" Offset="0"/>
-                                    <GradientStop Color="{DynamicResource AccentViolet}" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <TextBlock Text="Coming Soon" FontSize="10.5" FontWeight="Bold"
-                                       Foreground="White"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
-
             <!-- ===== 通用设置 ===== -->
             <Border Style="{StaticResource Card}" Padding="24" Margin="{DynamicResource DensitySectionMargin}">
                 <StackPanel>

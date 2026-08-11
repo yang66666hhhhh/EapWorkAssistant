@@ -21,6 +21,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private bool _applyingPreset;
     private string _lastCalendarMonth = "";
 
+    /// <summary>已提示过"节假日数据缺失"的年份，避免重复打扰</summary>
+    private static readonly HashSet<int> _holidayUnavailableWarned = new();
+
     /// <summary>保存成功后触发，通知 View 关闭抽屉</summary>
     public event Action? RecordSaved;
 
@@ -235,7 +238,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         {
             if (_isAutoSaving) return; // 防止重入
             if (IsFormDirty && !string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
-                && !string.IsNullOrWhiteSpace(CurrentRecord.Content))
+                && !string.IsNullOrWhiteSpace(CurrentRecord.Content)
+                && !string.IsNullOrWhiteSpace(CurrentRecord.WorkType))
             {
                 _isAutoSaving = true;
                 try
@@ -316,6 +320,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
             // 2. 加载法定假日和补班日
             await HolidayService.Instance.LoadYearAsync(year);
+            if (!HolidayService.Instance.IsYearAvailable(year))
+                NotifyHolidayDataUnavailable(year);
             var holidays = HolidayService.Instance.GetHolidaysForMonth(year, month);
             HolidayDates = holidays.Select(h => h.Date).ToList();
             var makeups = HolidayService.Instance.GetMakeupDaysForMonth(year, month);
@@ -335,6 +341,15 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     }
 
     /// <summary>
+    /// 节假日数据离线缺失时，按年份去重提示一次，避免调休余额/日历标记算错却无感知。
+    /// </summary>
+    private void NotifyHolidayDataUnavailable(int year)
+    {
+        if (_holidayUnavailableWarned.Add(year))
+            ToastService.Info($"{year} 年节假日数据离线缺失，调休余额与日历标记可能不准确");
+    }
+
+    /// <summary>
     /// 计算年度调休余额：加班工时（周末 + 法定假日）- 已使用调休工时
     /// </summary>
     public async Task LoadCompLeaveBalanceAsync()
@@ -347,6 +362,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         {
             // 确保假日数据已加载
             await HolidayService.Instance.LoadYearAsync(year);
+            if (!HolidayService.Instance.IsYearAvailable(year))
+                NotifyHolidayDataUnavailable(year);
 
             // 1. 获取全年工作记录
             var allRecords = await _repo.GetByDateRangeAsync(yearStart, yearEnd);
@@ -610,9 +627,14 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
         else
         {
-            // 自动插入：WorkType 为空时填占位值以满足 DB NOT NULL 约束
-            if (string.IsNullOrWhiteSpace(CurrentRecord.WorkType))
-                CurrentRecord.WorkType = "其他";
+            // 新记录必须已选类型才落库：避免把半成品以占位类型（如"其他"）污染数据。
+            // 类型/任务/内容未齐时仅在内存保留，由用户在表单中补全后手动保存
+            // （手动保存走 ValidateStrict 强制校验）。
+            if (string.IsNullOrWhiteSpace(CurrentRecord.WorkType)
+                || string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
+                || string.IsNullOrWhiteSpace(CurrentRecord.Content))
+                return;
+
             if (string.IsNullOrWhiteSpace(CurrentRecord.CreateTime))
                 CurrentRecord.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 

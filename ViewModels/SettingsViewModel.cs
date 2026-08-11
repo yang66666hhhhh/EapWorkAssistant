@@ -138,9 +138,6 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         _ => "工作台"
     };
 
-    // ===== 自定义字段 =====
-    [ObservableProperty] private ObservableCollection<CustomFieldItem> _customFields = new();
-
     public List<string> HotkeyOptions { get; } = new()
     {
         "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","U","W",
@@ -234,15 +231,6 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         IsRestDay4 = restDays.Contains(4);
         IsRestDay5 = restDays.Contains(5);
         IsRestDay6 = restDays.Contains(6);
-
-        // 自定义字段
-        CustomFields = new ObservableCollection<CustomFieldItem>(
-            ConfigService.Instance.CustomFields.Select(f => new CustomFieldItem
-            {
-                Name = f.Name,
-                FieldType = f.FieldType,
-                DefaultValue = f.DefaultValue
-            }));
 
         // AI 服务配置
         var aiSettings = AiSettings.Load();
@@ -630,31 +618,6 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         StatusMessage = "模板已删除";
     }
 
-    // ===== 自定义字段 commands =====
-    [RelayCommand]
-    private void AddCustomField()
-    {
-        var value = DialogService.Instance.ShowInputDialog("添加自定义字段名称", "");
-        if (!string.IsNullOrWhiteSpace(value))
-        {
-            value = value.Trim();
-            var field = new CustomField { Name = value, FieldType = "Text" };
-            ConfigService.Instance.AddCustomField(field);
-            RefreshAsync();
-            StatusMessage = $"字段「{field.Name}」已添加";
-        }
-    }
-
-    [RelayCommand]
-    private void DeleteCustomField(CustomFieldItem? field)
-    {
-        if (field == null) return;
-        if (!DialogService.Instance.ShowConfirm($"确定要删除字段「{field.Name}」吗？", "确认删除", ConfirmType.Danger)) return;
-        ConfigService.Instance.RemoveCustomField(field.Name);
-        RefreshAsync();
-        StatusMessage = $"字段「{field.Name}」已删除";
-    }
-
     // ===== AI 服务配置 =====
     [ObservableProperty] private string _aiEndpoint = "https://api.deepseek.com/v1";
     [ObservableProperty] private string _aiApiKey = string.Empty;
@@ -740,14 +703,4 @@ public partial class AccentColorItem : ObservableObject
     public string Name { get; set; } = string.Empty;
     public string PreviewColor { get; set; } = "#4F46E5";
     [ObservableProperty] private bool _isSelected;
-}
-
-/// <summary>
-/// 自定义字段 UI 模型
-/// </summary>
-public class CustomFieldItem
-{
-    public string Name { get; set; } = string.Empty;
-    public string FieldType { get; set; } = "Text";
-    public string DefaultValue { get; set; } = string.Empty;
 }
