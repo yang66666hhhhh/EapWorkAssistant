@@ -372,9 +372,9 @@
             <Grid Margin="0,0,0,14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="8"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="8"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -446,67 +446,71 @@
                     </DockPanel>
                 </Border>
 
-                <!-- 亮点列表 -->
+                <!-- 亮点列表（可滚动） -->
                 <Border Grid.Column="4" Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="22"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        Visibility="{Binding ShowDashHighlights, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <TextBlock Text="工作亮点" FontSize="16" FontWeight="Bold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
-                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Highlights.Count}" FontSize="11" FontWeight="Bold"
-                                               Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
-                                </Border>
-                            </StackPanel>
-                            <TextBlock Text="标记的重要成果" FontSize="12"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
-                        </StackPanel>
-
-                        <Grid>
-                            <ItemsControl ItemsSource="{Binding Highlights}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
-                                                Padding="14,10" Margin="0,0,0,6"
-                                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Note}" FontSize="13"
-                                                           Foreground="{DynamicResource TextPrimaryBrush}"
-                                                           TextTrimming="CharacterEllipsis" MaxHeight="38"
-                                                           TextWrapping="Wrap"/>
-                                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                                    <Border Style="{StaticResource TagPrimary}">
-                                                        <TextBlock Text="{Binding ProjectName}" FontSize="10"
-                                                                   Foreground="{DynamicResource PrimaryBrush}"/>
-                                                    </Border>
-                                                    <TextBlock Text="{Binding WorkDate}" FontSize="11"
-                                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                                               Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <!-- 空状态 -->
-                            <Border Visibility="{Binding Highlights.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
-                                    Padding="20">
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                    <TextBlock Text="暂无亮点记录" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                    <TextBlock Text="在「工作记录」中勾选&#x201C;亮点&#x201D;标记" FontSize="11"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                        Visibility="{Binding ShowDashHighlights, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                        MaxHeight="480">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Style="{StaticResource ModernScrollViewer}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="工作亮点" FontSize="16" FontWeight="Bold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                            Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Highlights.Count}" FontSize="11" FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                    </Border>
                                 </StackPanel>
-                            </Border>
-                        </Grid>
-                    </DockPanel>
+                                <TextBlock Text="标记的重要成果" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
+                            </StackPanel>
+
+                            <Grid>
+                                <ItemsControl ItemsSource="{Binding Highlights}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                                    Padding="14,10" Margin="0,0,0,6"
+                                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Note}" FontSize="13"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               TextTrimming="CharacterEllipsis" MaxHeight="38"
+                                                               TextWrapping="Wrap"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                        <Border Style="{StaticResource TagPrimary}">
+                                                            <TextBlock Text="{Binding ProjectName}" FontSize="10"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding WorkDate}" FontSize="11"
+                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                   Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- 空状态 -->
+                                <Border Visibility="{Binding Highlights.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
+                                        Padding="20">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
+                                        <TextBlock Text="暂无亮点记录" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock Text="在「工作记录」中勾选&#x201C;亮点&#x201D;标记" FontSize="11"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </DockPanel>
+                    </ScrollViewer>
                 </Border>
             </Grid>
 

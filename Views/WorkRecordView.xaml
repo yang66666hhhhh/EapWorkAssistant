@@ -175,6 +175,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="8"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- 今日工时 -->
@@ -263,6 +265,44 @@
                             <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="8"
                                     Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
+                                      Width="14" Height="14" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- 调休余额 -->
+                <Border Grid.Column="6" Background="{DynamicResource CardBrush}" CornerRadius="11"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        ClipToBounds="True" Padding="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{DynamicResource InfoBrush}" CornerRadius="11,0,0,11"/>
+                        <Grid Grid.Column="1" Margin="14,10">
+                            <StackPanel>
+                                <TextBlock Text="调休余额" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           FontWeight="Medium"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <TextBlock Text="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" FontSize="22"
+                                               FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
+                                </StackPanel>
+                                <TextBlock Margin="0,1,0,0" FontSize="9.5" Foreground="{DynamicResource TextTertiaryBrush}">
+                                    <Run Text="加班"/>
+                                    <Run Text="{Binding OvertimeHours, StringFormat={}{0:F1}, Mode=OneWay}"/>
+                                    <Run Text="h · 已休"/>
+                                    <Run Text="{Binding CompLeaveUsed, StringFormat={}{0:F1}, Mode=OneWay}"/>
+                                    <Run Text="h"/>
+                                </TextBlock>
+                            </StackPanel>
+                            <Border Background="{DynamicResource InfoLightBrush}" CornerRadius="8"
+                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource InfoBrush}"
                                       Width="14" Height="14" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -433,10 +473,17 @@
                                 <DataGridTemplateColumn Header="进度" Width="144"
                                                         ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
                                                         CellTemplate="{StaticResource ProgressBarCell}"/>
-                                <DataGridTextColumn Header="问题" Binding="{Binding Problem}" Width="240" MinWidth="220">
+                                <DataGridTextColumn Header="问题描述" Binding="{Binding Problem}" Width="240" MinWidth="220">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                             <Setter Property="ToolTip" Value="{Binding Problem}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="解决方案" Binding="{Binding Solution}" Width="240" MinWidth="220">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
+                                            <Setter Property="ToolTip" Value="{Binding Solution}"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -995,7 +1042,8 @@
                             <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
                                       SelectedItem="{Binding SelectedAllRecord, Mode=TwoWay}"
                                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                                      ClipboardCopyMode="IncludeHeader">
+                                      ClipboardCopyMode="IncludeHeader"
+                                      Sorting="AllRecordsGrid_Sorting">
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
                                 </DataGrid.ColumnHeaderStyle>
@@ -1006,16 +1054,88 @@
                                     <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="日期" Binding="{Binding WorkDate}" Width="136"/>
+                                    <!-- 日期 -->
+                                    <DataGridTextColumn Binding="{Binding WorkDate}" Width="136">
+                                        <DataGridTextColumn.SortMemberPath>WorkDate</DataGridTextColumn.SortMemberPath>
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="日期" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="WorkDate"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="WorkDate"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <!-- ★ 亮点 -->
                                     <DataGridTemplateColumn Width="38"
                                                             CellTemplate="{StaticResource HighlightStarCell}">
+                                        <DataGridTemplateColumn.SortMemberPath>IsHighlight</DataGridTemplateColumn.SortMemberPath>
                                         <DataGridTemplateColumn.Header>
-                                            <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                                  Width="13" Height="13" Stretch="Uniform"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
+                                                      Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="7" Height="4" Stretch="Uniform" Margin="3,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="IsHighlight"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="7" Height="4" Stretch="Uniform" Margin="3,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="IsHighlight"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
                                         </DataGridTemplateColumn.Header>
                                     </DataGridTemplateColumn>
                                     <!-- 任务（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="任务" Width="160" ClipboardContentBinding="{Binding ProjectName}">
+                                    <DataGridTemplateColumn Width="160" ClipboardContentBinding="{Binding ProjectName}">
+                                        <DataGridTemplateColumn.SortMemberPath>ProjectName</DataGridTemplateColumn.SortMemberPath>
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="任务" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="ProjectName"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="ProjectName"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding ProjectName}"
@@ -1026,10 +1146,60 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="类型" Width="100"
-                                                            CellTemplate="{StaticResource WorkTypeBadgeCell}"/>
+                                    <!-- 类型 -->
+                                    <DataGridTemplateColumn Width="100"
+                                                            CellTemplate="{StaticResource WorkTypeBadgeCell}">
+                                        <DataGridTemplateColumn.SortMemberPath>WorkType</DataGridTemplateColumn.SortMemberPath>
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="类型" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="WorkType"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="WorkType"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
+                                    </DataGridTemplateColumn>
                                     <!-- 内容（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="内容" Width="300" MinWidth="240" ClipboardContentBinding="{Binding Content}">
+                                    <DataGridTemplateColumn Width="300" MinWidth="240" ClipboardContentBinding="{Binding Content}">
+                                        <DataGridTemplateColumn.SortMemberPath>Content</DataGridTemplateColumn.SortMemberPath>
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="内容" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Content"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Content"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Content}"
@@ -1042,7 +1212,31 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                     <!-- 工作成果（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="工作成果" Width="240" MinWidth="220" ClipboardContentBinding="{Binding Achievement}">
+                                    <DataGridTemplateColumn Width="240" MinWidth="220" ClipboardContentBinding="{Binding Achievement}">
+                                        <DataGridTemplateColumn.SortMemberPath>Achievement</DataGridTemplateColumn.SortMemberPath>
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="工作成果" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Achievement"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Achievement"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Achievement}"
@@ -1054,24 +1248,158 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80"/>
-                                    <DataGridTemplateColumn Header="进度" Width="144"
+                                    <!-- 工时 -->
+                                    <DataGridTextColumn Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80">
+                                        <DataGridTextColumn.SortMemberPath>Hours</DataGridTextColumn.SortMemberPath>
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="工时" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Hours"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Hours"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <!-- 进度 -->
+                                    <DataGridTemplateColumn Width="144"
                                                             ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
-                                                            CellTemplate="{StaticResource ProgressBarCell}"/>
-                                    <!-- 问题（带搜索高亮） -->
-                                    <DataGridTemplateColumn Header="问题" Width="240" MinWidth="220" ClipboardContentBinding="{Binding Problem}">
+                                                            CellTemplate="{StaticResource ProgressBarCell}">
+                                        <DataGridTemplateColumn.SortMemberPath>Progress</DataGridTemplateColumn.SortMemberPath>
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="进度" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Progress"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Progress"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
+                                    </DataGridTemplateColumn>
+                                    <!-- 问题描述（带搜索高亮） -->
+                                    <DataGridTemplateColumn Width="240" MinWidth="220" ClipboardContentBinding="{Binding Problem}">
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="问题描述" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Problem"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Problem"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock local:Highlight.Text="{Binding Problem}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           ToolTip="{Binding Problem}"
                                                            VerticalAlignment="Center"/>
 
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="创建时间" Binding="{Binding CreateTime}" Width="160">
+                                    <!-- 解决方案（带搜索高亮） -->
+                                    <DataGridTemplateColumn Width="240" MinWidth="220" ClipboardContentBinding="{Binding Solution}">
+                                        <DataGridTemplateColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="解决方案" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Solution"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="Solution"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock local:Highlight.Text="{Binding Solution}"
+                                                           local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                           VerticalAlignment="Center"/>
+
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <!-- 创建时间 -->
+                                    <DataGridTextColumn Binding="{Binding CreateTime}" Width="160">
+                                        <DataGridTextColumn.SortMemberPath>CreateTime</DataGridTextColumn.SortMemberPath>
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="创建时间" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="CreateTime"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="CreateTime"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
                                                 <Setter Property="ToolTip" Value="{Binding CreateTime}"/>
@@ -1080,6 +1408,7 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
+                                    <!-- 操作（不可排序） -->
                                     <DataGridTemplateColumn Header="操作" Width="136">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

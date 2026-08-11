@@ -63,6 +63,19 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private int _highlightCount;
 
+    // ===== 调休余额 =====
+    /// <summary>年度累计加班工时（周末 + 法定假日）</summary>
+    [ObservableProperty]
+    private double _overtimeHours;
+
+    /// <summary>年度已使用调休工时</summary>
+    [ObservableProperty]
+    private double _compLeaveUsed;
+
+    /// <summary>可用调休余额（加班工时 - 已调休）</summary>
+    [ObservableProperty]
+    private double _compLeaveAvailable;
+
     [ObservableProperty]
     private bool _hasProblem;
 
@@ -139,6 +152,39 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private ObservableCollection<int> _visiblePageNumbers = new();
+
+    // ===== 全部记录排序 =====
+    /// <summary>当前排序列名（对应 WorkRecord 属性名）</summary>
+    [ObservableProperty]
+    private string _sortColumn = "WorkDate";
+
+    /// <summary>当前排序方向：true=升序，false=降序</summary>
+    [ObservableProperty]
+    private bool _sortAscending = false;
+
+    /// <summary>每列的默认排序方向</summary>
+    private static readonly Dictionary<string, bool> DefaultSortAscending = new()
+    {
+        ["WorkDate"] = false, ["IsHighlight"] = false, ["Hours"] = false,
+        ["Progress"] = false, ["CreateTime"] = false,
+        ["ProjectName"] = true, ["WorkType"] = true, ["Content"] = true, ["Achievement"] = true
+    };
+
+    /// <summary>切换排序：同列反转方向，异列设为默认方向并回到第 1 页</summary>
+    public void ToggleSort(string column)
+    {
+        if (column == SortColumn)
+        {
+            SortAscending = !SortAscending;
+        }
+        else
+        {
+            SortColumn = column;
+            SortAscending = DefaultSortAscending.GetValueOrDefault(column, true);
+        }
+        CurrentPage = 1;
+        LoadAllRecordsAsync().SafeFire("排序失败");
+    }
 
     // ===== 日历状态圆点数据 =====
     /// <summary>日历当前显示的月份（由 View 同步），用于加载对应月份的日历状态</summary>
@@ -251,6 +297,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         StartAutoSaveTimer(); // 重新读取配置并重启自动保存
         await LoadRecordsAsync();
         await LoadCalendarStatusAsync();
+        await LoadCompLeaveBalanceAsync();
     }
 
     /// <summary>
@@ -287,6 +334,55 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         {
             // 日历状态加载失败不影响核心功能，静默降级
             System.Diagnostics.Debug.WriteLine($"加载日历状态失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 计算年度调休余额：加班工时（周末 + 法定假日）- 已使用调休工时
+    /// </summary>
+    public async Task LoadCompLeaveBalanceAsync()
+    {
+        var year = SelectedDate.Year;
+        var yearStart = $"{year:D4}-01-01";
+        var yearEnd = $"{year:D4}-12-31";
+
+        try
+        {
+            // 确保假日数据已加载
+            await HolidayService.Instance.LoadYearAsync(year);
+
+            // 1. 获取全年工作记录
+            var allRecords = await _repo.GetByDateRangeAsync(yearStart, yearEnd);
+
+            // 2. 筛选加班记录：周六/周日 + 法定假日（排除补班日，补班日算正常工作日不计入调休）
+            double overtimeHours = 0;
+            foreach (var r in allRecords)
+            {
+                if (!DateTime.TryParse(r.WorkDate, out var date)) continue;
+                var dow = date.DayOfWeek;
+                bool isWeekend = dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday;
+                bool isHoliday = HolidayService.Instance.IsHoliday(date);
+                bool isMakeup = HolidayService.Instance.IsMakeupWorkday(date);
+
+                // 周末或法定假日工作 → 计入可调休加班；补班日虽在周末但属正常工作日，不计入
+                if ((isWeekend || isHoliday) && !isMakeup)
+                    overtimeHours += r.Hours;
+            }
+
+            // 3. 获取全年调休请假记录
+            var leaves = await _leaveRepo.GetByYearAsync(year);
+            double compUsed = leaves
+                .Where(l => l.LeaveType == "调休")
+                .Sum(l => l.Hours);
+
+            // 4. 计算余额
+            OvertimeHours = overtimeHours;
+            CompLeaveUsed = compUsed;
+            CompLeaveAvailable = Math.Max(0, overtimeHours - compUsed);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"加载调休余额失败：{ex.Message}");
         }
     }
 
@@ -336,6 +432,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             DailyLeaveRecords.Remove(record);
             ToastService.Success("请假记录已删除");
             await LoadCalendarStatusAsync();
+            await LoadCompLeaveBalanceAsync();
         }
         catch (Exception ex)
         {
@@ -494,6 +591,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         else
             await LoadRecordsAsync();
         await LoadCalendarStatusAsync();
+        await LoadCompLeaveBalanceAsync();
         StatusMessage = string.Empty;
         ToastService.Success("工作记录已保存");
         RecordSaved?.Invoke();
@@ -573,6 +671,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         SelectedDailyRecord = null;
         await LoadRecordsAsync();
         await LoadCalendarStatusAsync();
+        await LoadCompLeaveBalanceAsync();
         ToastService.Success("记录已删除");
     }
 
@@ -595,6 +694,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         if (SelectedTabIndex == 1)
             await LoadAllRecordsAsync();
         await LoadCalendarStatusAsync();
+        await LoadCompLeaveBalanceAsync();
         ToastService.Success("记录已删除");
         RecordSaved?.Invoke(); // 关闭面板
     }
@@ -834,7 +934,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         var offset = (CurrentPage - 1) * PageSize;
 
         var (records, totalCount, totalHours, highlightCount) = await _repo.GetFilteredPagedAsync(
-            SearchKeyword, FilterProject, FilterWorkType, start, end, offset, PageSize);
+            SearchKeyword, FilterProject, FilterWorkType, start, end, offset, PageSize,
+            SortColumn, SortAscending);
 
         // 如果已有更新的查询启动，丢弃本次结果
         if (gen != _queryGeneration) return;
@@ -997,7 +1098,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         var start = FilterStartDate?.ToString("yyyy-MM-dd");
         var end = FilterEndDate?.ToString("yyyy-MM-dd");
         var (records, _, _, _) = await _repo.GetFilteredPagedAsync(
-            SearchKeyword, FilterProject, FilterWorkType, start, end, 0, int.MaxValue);
+            SearchKeyword, FilterProject, FilterWorkType, start, end, 0, int.MaxValue,
+            SortColumn, SortAscending);
         var startStr = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
         var endStr = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
         if (ExportService.ExportToCsv(new ObservableCollection<WorkRecord>(records), $"工作记录_{startStr}_{endStr}"))

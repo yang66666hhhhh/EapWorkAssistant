@@ -47,6 +47,19 @@ public class LeaveRecordRepository
         });
     }
 
+    /// <summary>获取指定年份的所有请假记录（用于调休余额计算）</summary>
+    public async Task<IEnumerable<LeaveRecord>> GetByYearAsync(int year)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<LeaveRecord>(
+                "SELECT Id, Date, LeaveType, Note, Hours FROM LeaveRecord WHERE strftime('%Y', Date) = @Year ORDER BY Date",
+                new { Year = year.ToString() });
+        });
+    }
+
     /// <summary>删除请假记录</summary>
     public async Task<int> DeleteAsync(int id)
     {

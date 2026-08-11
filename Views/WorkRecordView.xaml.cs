@@ -373,6 +373,17 @@ public partial class WorkRecordView : UserControl
         {
             vm.LoadDailyLeaveRecordsAsync().SafeFire("加载请假记录失败");
             vm.LoadCalendarStatusAsync().SafeFire("加载日历状态失败");
+            vm.LoadCompLeaveBalanceAsync().SafeFire("加载调休余额失败");
         }
+    }
+
+    // ===== 全部记录表格排序 =====
+
+    /// <summary>DataGrid 列头点击排序：拦截 WPF 默认排序，委托给 ViewModel 执行服务端排序</summary>
+    private void AllRecordsGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+        e.Handled = true;
+        if (DataContext is WorkRecordViewModel vm && !string.IsNullOrEmpty(e.Column.SortMemberPath))
+            vm.ToggleSort(e.Column.SortMemberPath);
     }
 }

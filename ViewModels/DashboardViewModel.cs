@@ -140,8 +140,10 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             ProjectName = r.ProjectName,
             WorkType = r.WorkType,
             Content = r.Content,
+            Achievement = r.Achievement,
             Hours = r.Hours,
             Progress = r.Progress,
+            Problem = r.Problem,
             WorkDate = r.WorkDate
         }).ToList();
         RecentRecords = new ObservableCollection<RecentRecordItem>(recent);
@@ -695,8 +697,10 @@ public class RecentRecordItem
     public string ProjectName { get; set; } = string.Empty;
     public string WorkType { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+    public string Achievement { get; set; } = string.Empty;
     public double Hours { get; set; }
     public int Progress { get; set; }
+    public string Problem { get; set; } = string.Empty;
 }
 
 public class HighlightItem

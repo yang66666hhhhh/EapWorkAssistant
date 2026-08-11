@@ -243,9 +243,17 @@ public class WorkRecordRepository
     /// <summary>
     /// 带筛选和分页的查询，返回当前页记录 + 统计信息（总条数、总工时、亮点数）
     /// </summary>
+    /// <summary>允许排序的列名白名单（防 SQL 注入）</summary>
+    private static readonly HashSet<string> AllowedSortColumns = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "WorkDate", "IsHighlight", "ProjectName", "WorkType", "Content",
+        "Achievement", "Hours", "Progress", "CreateTime"
+    };
+
     public async Task<(IEnumerable<WorkRecord> Records, int TotalCount, double TotalHours, int HighlightCount)>
         GetFilteredPagedAsync(string? keyword, string? project, string? workType,
-            string? startDate, string? endDate, int offset, int limit)
+            string? startDate, string? endDate, int offset, int limit,
+            string sortColumn = "WorkDate", bool sortAscending = false)
     {
         return await Task.Run(async () =>
         {
@@ -303,9 +311,13 @@ public class WorkRecordRepository
                               FROM WorkRecord {whereSql}";
             var stats = await connection.QuerySingleAsync(statsSql, param);
 
+            // 动态排序（白名单校验列名，防 SQL 注入）
+            var safeColumn = AllowedSortColumns.Contains(sortColumn) ? sortColumn : "WorkDate";
+            var direction = sortAscending ? "ASC" : "DESC";
+
             // 分页查询
             var dataSql = $@"SELECT * FROM WorkRecord {whereSql}
-                             ORDER BY WorkDate DESC, Id DESC LIMIT @Limit OFFSET @Offset";
+                             ORDER BY [{safeColumn}] {direction}, Id DESC LIMIT @Limit OFFSET @Offset";
             param.Add("Limit", limit);
             param.Add("Offset", offset);
             var records = await connection.QueryAsync<WorkRecord>(dataSql, param);
