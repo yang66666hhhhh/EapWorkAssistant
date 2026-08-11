@@ -36,4 +36,15 @@ public static class DateTimeHelper
     {
         return GetMonthStart(date).AddMonths(1).AddDays(-1);
     }
+
+    /// <summary>
+    /// 返回指定日期所在自然季度的起止日期（季度首日 ~ 季度末日）。
+    /// </summary>
+    public static (DateTime Start, DateTime End) GetQuarterRange(DateTime date)
+    {
+        var quarterStartMonth = date.Month / 3 * 3 - 2; // 1,4,7,10
+        var start = new DateTime(date.Year, quarterStartMonth, 1);
+        var end = start.AddMonths(3).AddDays(-1);
+        return (start, end);
+    }
 }

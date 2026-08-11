@@ -285,7 +285,6 @@
                                 <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- 时间进度 -->
@@ -349,20 +348,6 @@
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
-
-                            <!-- 转正述职按钮 -->
-                            <Border Grid.Column="4" Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
-                                    Padding="18" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                                    VerticalAlignment="Center">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}" Width="32" Height="32" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                    <TextBlock Text="转正述职报告" FontSize="14" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                                    <Button Content="一键生成" Command="{Binding GenerateProbationReportCommand}"
-                                            Style="{StaticResource BtnPrimary}" Margin="0,14,0,0"
-                                            HorizontalAlignment="Center" Padding="22,9"/>
-                                </StackPanel>
-                            </Border>
                         </Grid>
                     </DockPanel>
                 </Border>
@@ -383,15 +368,31 @@
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Visibility="{Binding ShowDashCharts, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconTrend}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <TextBlock Text="本周工时趋势" FontSize="16" FontWeight="Bold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
+                            <StackPanel VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconTrend}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding ChartTrendTitle}" FontSize="16" FontWeight="Bold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="每日工时分布" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                             </StackPanel>
-                            <TextBlock Text="每日工时分布" FontSize="12"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
-                        </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                <RadioButton Content="周" GroupName="ChartRange" Style="{StaticResource ToggleChip}"
+                                             Margin="0,0,4,0" Padding="14,6"
+                                             IsChecked="{Binding ChartRange, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=周, Mode=OneWay}"
+                                             Command="{Binding SetChartRangeCommand}" CommandParameter="周"/>
+                                <RadioButton Content="月" GroupName="ChartRange" Style="{StaticResource ToggleChip}"
+                                             Margin="0,0,4,0" Padding="14,6"
+                                             IsChecked="{Binding ChartRange, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=月, Mode=OneWay}"
+                                             Command="{Binding SetChartRangeCommand}" CommandParameter="月"/>
+                                <RadioButton Content="季" GroupName="ChartRange" Style="{StaticResource ToggleChip}"
+                                             Padding="14,6"
+                                             IsChecked="{Binding ChartRange, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=季, Mode=OneWay}"
+                                             Command="{Binding SetChartRangeCommand}" CommandParameter="季"/>
+                            </StackPanel>
+                        </Grid>
                         <Grid>
                             <lvc:CartesianChart Series="{Binding ChartSeries}"
                                                 XAxes="{Binding ChartXAxes}"
@@ -421,7 +422,7 @@
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
                             <StackPanel Orientation="Horizontal">
                                 <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <TextBlock Text="本月项目分布" FontSize="16" FontWeight="Bold"
+                                <TextBlock Text="{Binding ChartPieTitle}" FontSize="16" FontWeight="Bold"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
                             </StackPanel>
                             <TextBlock Text="各项目工时占比" FontSize="12"
@@ -548,11 +549,7 @@
                     <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                             Padding="18">
-                        <TextBox Text="{Binding ProbationReport}" IsReadOnly="True" TextWrapping="Wrap"
-                                 AcceptsReturn="True" MinHeight="180" MaxHeight="360"
-                                 VerticalScrollBarVisibility="Auto" BorderThickness="0"
-                                 Background="Transparent" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
-                                 FontFamily="{StaticResource MonoFont}"/>
+                        <views:MarkdownViewer MarkdownText="{Binding ProbationReport}"/>
                     </Border>
                 </DockPanel>
             </Border>

@@ -104,6 +104,9 @@ public class ToastService
     public static void Info(string message, string title = "提示")
         => Instance.Show(message, title, ToastType.Info);
 
+    public static void Warning(string message, string title = "警告")
+        => Instance.Show(message, title, ToastType.Warning);
+
     private void RemoveItem(ToastMessage toast)
     {
         if (Items.Contains(toast))

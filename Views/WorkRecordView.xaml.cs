@@ -56,7 +56,7 @@ public partial class WorkRecordView : UserControl
     {
         Dispatcher.Invoke(() =>
         {
-            ReportTextBox.BringIntoView();
+            ReportViewer.BringIntoView();
         });
     }
 

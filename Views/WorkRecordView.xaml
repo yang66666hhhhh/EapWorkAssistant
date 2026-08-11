@@ -551,11 +551,7 @@
                         <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="9"
                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 Margin="10,0,10,10" Padding="12">
-                            <TextBox x:Name="ReportTextBox" Text="{Binding ReportText}" IsReadOnly="True" TextWrapping="Wrap"
-                                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
-                                     BorderThickness="0" Background="Transparent"
-                                     FontFamily="{StaticResource MonoFont}" FontSize="11.5"
-                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <views:MarkdownViewer x:Name="ReportViewer" MarkdownText="{Binding ReportText}"/>
                         </Border>
                     </DockPanel>
                 </Border>

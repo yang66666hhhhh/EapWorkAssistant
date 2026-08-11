@@ -1,6 +1,8 @@
 using Microsoft.Win32;
 using System.IO;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using EapWorkAssistant.Models;
 
 namespace EapWorkAssistant.Services;
@@ -231,4 +233,78 @@ public static class ExportService
         }
         return value;
     }
+
+    #region JSON 导出 / 导入（知识库 / 问题库）
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
+    public static bool ExportKnowledgeToJson(IEnumerable<Knowledge> items)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Filter = "JSON 文件|*.json|所有文件|*.*",
+            FileName = $"知识库_{DateTime.Now:yyyyMMdd}.json"
+        };
+        if (dialog.ShowDialog() != true) return false;
+        var json = JsonSerializer.Serialize(items, JsonOptions);
+        File.WriteAllText(dialog.FileName, json, Encoding.UTF8);
+        return true;
+    }
+
+    public static List<Knowledge>? ImportKnowledgeFromJson()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "JSON 文件|*.json|所有文件|*.*",
+            Title = "选择要导入的知识库 JSON 文件"
+        };
+        if (dialog.ShowDialog() != true) return null;
+        try
+        {
+            var json = File.ReadAllText(dialog.FileName, Encoding.UTF8);
+            return JsonSerializer.Deserialize<List<Knowledge>>(json) ?? new List<Knowledge>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static bool ExportIssuesToJson(IEnumerable<Issue> items)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Filter = "JSON 文件|*.json|所有文件|*.*",
+            FileName = $"问题库_{DateTime.Now:yyyyMMdd}.json"
+        };
+        if (dialog.ShowDialog() != true) return false;
+        var json = JsonSerializer.Serialize(items, JsonOptions);
+        File.WriteAllText(dialog.FileName, json, Encoding.UTF8);
+        return true;
+    }
+
+    public static List<Issue>? ImportIssuesFromJson()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "JSON 文件|*.json|所有文件|*.*",
+            Title = "选择要导入的问题库 JSON 文件"
+        };
+        if (dialog.ShowDialog() != true) return null;
+        try
+        {
+            var json = File.ReadAllText(dialog.FileName, Encoding.UTF8);
+            return JsonSerializer.Deserialize<List<Issue>>(json) ?? new List<Issue>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    #endregion
 }

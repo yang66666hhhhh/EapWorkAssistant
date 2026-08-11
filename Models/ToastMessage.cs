@@ -6,7 +6,8 @@ public enum ToastType
 {
     Success,
     Error,
-    Info
+    Info,
+    Warning
 }
 
 public partial class ToastMessage : ObservableObject

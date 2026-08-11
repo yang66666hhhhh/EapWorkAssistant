@@ -63,6 +63,41 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     public bool HasChartData => ChartSeries != null && ChartSeries.Length > 0;
     public bool HasPieData => ProjectPieSeries != null && ProjectPieSeries.Length > 0;
 
+    // 工时趋势图表区间：周 / 月 / 季
+    [ObservableProperty]
+    private string _chartRange = "周";
+
+    [ObservableProperty]
+    private string _chartTrendTitle = "本周工时趋势";
+
+    [ObservableProperty]
+    private string _chartPieTitle = "本月项目分布";
+
+    public string[] ChartRanges => ["周", "月", "季"];
+
+    [RelayCommand]
+    private async Task SetChartRangeAsync(string range)
+    {
+        if (ChartRange == range) return;
+        ChartRange = range;
+        await LoadChartAsync();
+        await LoadProjectPieChartAsync();
+    }
+
+    /// <summary>
+    /// 根据当前选择的区间返回统计起止日期。
+    /// </summary>
+    private (DateTime Start, DateTime End) GetChartRangeDates()
+    {
+        var now = DateTime.Now;
+        return ChartRange switch
+        {
+            "月" => (Helpers.DateTimeHelper.GetMonthStart(now), Helpers.DateTimeHelper.GetMonthEnd(now)),
+            "季" => Helpers.DateTimeHelper.GetQuarterRange(now),
+            _ => (Helpers.DateTimeHelper.GetWeekStart(now), Helpers.DateTimeHelper.GetWeekEnd(now))
+        };
+    }
+
     // 亮点列表
     [ObservableProperty] private ObservableCollection<HighlightItem> _highlights = new();
 
@@ -247,16 +282,15 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     private async Task LoadChartAsync()
     {
-        var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now);
-        var weekEnd = Helpers.DateTimeHelper.GetWeekEnd(DateTime.Now);
+        var (start, end) = GetChartRangeDates();
         var dailyStats = await _recordRepo.GetDailyStatsAsync(
-            weekStart.ToString("yyyy-MM-dd"), weekEnd.ToString("yyyy-MM-dd"));
+            start.ToString("yyyy-MM-dd"), end.ToString("yyyy-MM-dd"));
 
         var statsList = dailyStats.ToList();
 
-        // 补全本周7天（包括没有记录的日期）
+        // 补全区间内每一天（包括没有记录的日期）
         var allDays = new Dictionary<string, double>();
-        for (var d = weekStart; d <= weekEnd; d = d.AddDays(1))
+        for (var d = start.Date; d <= end.Date; d = d.AddDays(1))
         {
             allDays[d.ToString("MM/dd")] = 0;
         }
@@ -300,23 +334,37 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             }
         };
 
+        ChartTrendTitle = ChartRange switch
+        {
+            "月" => "本月工时趋势",
+            "季" => "本季工时趋势",
+            _ => "本周工时趋势"
+        };
+
         OnPropertyChanged(nameof(HasChartData));
     }
 
     private async Task LoadProjectPieChartAsync()
     {
-        var monthStart = Helpers.DateTimeHelper.GetMonthStart(DateTime.Now);
-        var monthEnd = Helpers.DateTimeHelper.GetMonthEnd(DateTime.Now);
+        var (start, end) = GetChartRangeDates();
         var projectStats = await _recordRepo.GetProjectStatsAsync(
-            monthStart.ToString("yyyy-MM-dd"), monthEnd.ToString("yyyy-MM-dd"));
+            start.ToString("yyyy-MM-dd"), end.ToString("yyyy-MM-dd"));
 
         var statsList = projectStats.ToList();
         if (!statsList.Any())
         {
             ProjectPieSeries = Array.Empty<ISeries>();
             OnPropertyChanged(nameof(HasPieData));
-            return;
         }
+
+        ChartPieTitle = ChartRange switch
+        {
+            "月" => "本月项目分布",
+            "季" => "本季项目分布",
+            _ => "本周项目分布"
+        };
+
+        if (!statsList.Any()) return;
 
         var colors = new SKColor[]
         {

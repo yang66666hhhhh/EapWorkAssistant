@@ -23,6 +23,16 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     private ObservableCollection<Issue> _items = new();
 
     [ObservableProperty]
+    private ObservableCollection<Issue> _pagedItems = new();
+
+    // 分页
+    [ObservableProperty] private int _currentPage = 1;
+    [ObservableProperty] private int _pageSize = 20;
+    [ObservableProperty] private int _totalPages = 1;
+    [ObservableProperty] private int _totalCount;
+    public int[] PageSizeOptions => [10, 20, 50, 100];
+
+    [ObservableProperty]
     private Issue _currentItem = new();
 
     [ObservableProperty]
@@ -109,6 +119,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
 
     private void ApplyFilter()
     {
+        CurrentPage = 1;
         var q = _allItems.AsEnumerable();
         if (!string.IsNullOrEmpty(FilterStatus))
             q = q.Where(i => i.Status == FilterStatus);
@@ -125,7 +136,21 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
                 (i.Solution != null && i.Solution.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
         }
         Items = new ObservableCollection<Issue>(q);
+        UpdatePager();
     }
+
+    private void UpdatePager()
+    {
+        TotalCount = Items.Count;
+        TotalPages = TotalCount > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 1;
+        if (CurrentPage < 1) CurrentPage = 1;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        var pageItems = Items.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+        PagedItems = new ObservableCollection<Issue>(pageItems);
+    }
+
+    partial void OnCurrentPageChanged(int value) => UpdatePager();
+    partial void OnPageSizeChanged(int value) => UpdatePager();
 
     [RelayCommand]
     private void SearchAsync()
@@ -237,6 +262,63 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
         CurrentItem = new Issue();
         IsFormDirty = false;
         _suppressDirty = false;
+    }
+
+    // ===== 分页命令 =====
+    [RelayCommand]
+    private void FirstPage()
+    {
+        if (CurrentPage != 1) { CurrentPage = 1; UpdatePager(); }
+    }
+
+    [RelayCommand]
+    private void PrevPage()
+    {
+        if (CurrentPage > 1) CurrentPage--;
+    }
+
+    [RelayCommand]
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages) CurrentPage++;
+    }
+
+    [RelayCommand]
+    private void LastPage()
+    {
+        if (CurrentPage != TotalPages) { CurrentPage = TotalPages; UpdatePager(); }
+    }
+
+    // ===== JSON 导出 / 导入 =====
+    [RelayCommand]
+    private void ExportJson()
+    {
+        if (_allItems.Count == 0) { ToastService.Warning("没有可导出的问题"); return; }
+        if (ExportService.ExportIssuesToJson(_allItems))
+            ToastService.Success("问题库已导出为 JSON");
+    }
+
+    [RelayCommand]
+    private async Task ImportJsonAsync()
+    {
+        var list = ExportService.ImportIssuesFromJson();
+        if (list == null || list.Count == 0) { ToastService.Warning("未选择文件或文件为空"); return; }
+        try
+        {
+            foreach (var it in list)
+            {
+                it.Id = 0;
+                if (string.IsNullOrWhiteSpace(it.CreateTime))
+                    it.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                await _repo.InsertAsync(it);
+            }
+            await LoadAsync();
+            ToastService.Success($"已导入 {list.Count} 个问题");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"导入失败：{ex.Message}");
+        }
     }
 
     public void MarkDirty()

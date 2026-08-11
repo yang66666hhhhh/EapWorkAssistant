@@ -466,6 +466,9 @@
                                                     <DataTrigger Binding="{Binding Type}" Value="Info">
                                                         <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Type}" Value="Warning">
+                                                        <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
@@ -483,6 +486,10 @@
                                                         <DataTrigger Binding="{Binding Type}" Value="Error">
                                                             <Setter Property="Data" Value="{StaticResource IconCancel}"/>
                                                             <Setter Property="Fill" Value="{DynamicResource DangerBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Type}" Value="Warning">
+                                                            <Setter Property="Data" Value="{StaticResource IconWarning}"/>
+                                                            <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

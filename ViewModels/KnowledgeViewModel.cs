@@ -23,6 +23,16 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
     private ObservableCollection<Knowledge> _items = new();
 
     [ObservableProperty]
+    private ObservableCollection<Knowledge> _pagedItems = new();
+
+    // 分页
+    [ObservableProperty] private int _currentPage = 1;
+    [ObservableProperty] private int _pageSize = 20;
+    [ObservableProperty] private int _totalPages = 1;
+    [ObservableProperty] private int _totalCount;
+    public int[] PageSizeOptions => [10, 20, 50, 100];
+
+    [ObservableProperty]
     private Knowledge _currentItem = new();
 
     [ObservableProperty]
@@ -131,6 +141,7 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 
     private void ApplyFilter()
     {
+        CurrentPage = 1;
         var q = _allItems.AsEnumerable();
         if (ShowFavoritesOnly)
             q = q.Where(k => k.IsFavorite == 1);
@@ -145,7 +156,21 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
                 (k.Tags != null && k.Tags.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
         }
         Items = new ObservableCollection<Knowledge>(q);
+        UpdatePager();
     }
+
+    private void UpdatePager()
+    {
+        TotalCount = Items.Count;
+        TotalPages = TotalCount > 0 ? (int)Math.Ceiling(TotalCount / (double)PageSize) : 1;
+        if (CurrentPage < 1) CurrentPage = 1;
+        if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+        var pageItems = Items.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+        PagedItems = new ObservableCollection<Knowledge>(pageItems);
+    }
+
+    partial void OnCurrentPageChanged(int value) => UpdatePager();
+    partial void OnPageSizeChanged(int value) => UpdatePager();
 
     private async Task RefreshTagsAndCategoriesAsync()
     {
@@ -270,6 +295,63 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
         SelectedItem = null;
         IsFormDirty = false;
         _suppressDirty = false;
+    }
+
+    // ===== 分页命令 =====
+    [RelayCommand]
+    private void FirstPage()
+    {
+        if (CurrentPage != 1) { CurrentPage = 1; UpdatePager(); }
+    }
+
+    [RelayCommand]
+    private void PrevPage()
+    {
+        if (CurrentPage > 1) CurrentPage--;
+    }
+
+    [RelayCommand]
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages) CurrentPage++;
+    }
+
+    [RelayCommand]
+    private void LastPage()
+    {
+        if (CurrentPage != TotalPages) { CurrentPage = TotalPages; UpdatePager(); }
+    }
+
+    // ===== JSON 导出 / 导入 =====
+    [RelayCommand]
+    private void ExportJson()
+    {
+        if (_allItems.Count == 0) { ToastService.Warning("没有可导出的知识"); return; }
+        if (ExportService.ExportKnowledgeToJson(_allItems))
+            ToastService.Success("知识库已导出为 JSON");
+    }
+
+    [RelayCommand]
+    private async Task ImportJsonAsync()
+    {
+        var list = ExportService.ImportKnowledgeFromJson();
+        if (list == null || list.Count == 0) { ToastService.Warning("未选择文件或文件为空"); return; }
+        try
+        {
+            foreach (var k in list)
+            {
+                k.Id = 0;
+                if (string.IsNullOrWhiteSpace(k.CreateTime))
+                    k.CreateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                await _repo.InsertAsync(k);
+            }
+            await LoadAsync();
+            ToastService.Success($"已导入 {list.Count} 条知识");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"导入失败：{ex.Message}");
+        }
     }
 
     public void MarkDirty()
