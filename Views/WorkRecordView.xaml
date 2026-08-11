@@ -1334,7 +1334,8 @@
                                                 <TextBlock local:Highlight.Text="{Binding Problem}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center"/>
+                                                           VerticalAlignment="Center"
+                                                           ToolTip="{Binding Problem}"/>
 
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -1369,7 +1370,8 @@
                                                 <TextBlock local:Highlight.Text="{Binding Solution}"
                                                            local:Highlight.Keyword="{Binding DataContext.SearchKeyword, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                                                           VerticalAlignment="Center"/>
+                                                           VerticalAlignment="Center"
+                                                           ToolTip="{Binding Solution}"/>
 
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
