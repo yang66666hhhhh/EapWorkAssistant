@@ -440,7 +440,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 1. **禁止删除用户文件**：不得执行 `rm`、`del` 等永久删除操作
 2. **禁止修改 .csproj 的 NuGet 包版本**：除非用户明确要求
 3. **禁止引入新的 NuGet 包**：除非用户明确要求并确认
-4. **禁止更改项目目标框架**：当前为 `net9.0-windows`
+4. **禁止更改项目目标框架**：当前为 `net10.0-windows`
 5. **禁止破坏单例模式**：不得将 `ThemeService.Instance` 等改为依赖注入或其他模式
 6. **禁止在 ViewModel 中引入 WPF 命名空间**：保持 MVVM 纯净性
 7. **禁止硬编码颜色值**：新代码中颜色必须引用 Styles.xaml 中的资源键

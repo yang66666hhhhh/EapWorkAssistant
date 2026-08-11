@@ -2,17 +2,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
-using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject, IRefreshable
 {
-    private readonly DispatcherTimer _statusTimer;
+    private readonly UiTimer _statusTimer;
     [ObservableProperty]
     private ObservableCollection<string> _projects = new();
 
@@ -116,7 +113,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     // ===== 启动与行为 =====
     [ObservableProperty] private bool _autoStart;
     [ObservableProperty] private bool _minimizeToTray = true;
-    [ObservableProperty] private string _defaultView = "Dashboard";
+    [ObservableProperty] private string _defaultView = ViewNames.Dashboard;
     [ObservableProperty] private int _autoSaveInterval = 5;
 
     // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====
@@ -128,16 +125,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private bool _isRestDay5; // 周五
     [ObservableProperty] private bool _isRestDay6; // 周六
 
-    public List<string> ViewOptions { get; } = new() { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
+    public List<string> ViewOptions { get; } = new() { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
     public List<int> AutoSaveOptions { get; } = new() { 1, 3, 5, 10, 15, 30 };
 
     public string DefaultViewLabel => DefaultView switch
     {
-        "Dashboard" => "工作台",
-        "WorkRecord" => "工作记录",
-        "Knowledge" => "知识库",
-        "Issue" => "问题跟踪",
-        "Settings" => "设置",
+        ViewNames.Dashboard => "工作台",
+        ViewNames.WorkRecord => "工作记录",
+        ViewNames.Knowledge => "知识库",
+        ViewNames.Issue => "问题跟踪",
+        ViewNames.Settings => "设置",
         _ => "工作台"
     };
 
@@ -158,7 +155,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
 
     public SettingsViewModel()
     {
-        _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(3) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
         // 初始化强调色列表
@@ -323,10 +320,11 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     partial void OnShortcutView4EnabledChanged(bool value) { ConfigService.Instance.ShortcutView4Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "问题跟踪快捷键已启用" : "问题跟踪快捷键已禁用"; }
     partial void OnShortcutView5EnabledChanged(bool value) { ConfigService.Instance.ShortcutView5Enabled = value; ReregisterShortcuts(); StatusMessage = value ? "设置快捷键已启用" : "设置快捷键已禁用"; }
 
+    public event System.Action? ShortcutsChanged;
+
     private void ReregisterShortcuts()
     {
-        if (Application.Current?.MainWindow is Views.MainWindow mw)
-            mw.RegisterAllShortcuts();
+        ShortcutsChanged?.Invoke();
     }
 
     // ===== 外观与主题 handlers =====
@@ -440,11 +438,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void AddProject()
     {
-        var dialog = new Views.ConfigItemDialog("添加任务", "");
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("添加任务", "");
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (ConfigService.Instance.Projects.Contains(value))
             {
                 StatusMessage = $"任务「{value}」已存在，无需重复添加";
@@ -460,11 +457,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void EditProject(string? project)
     {
         if (string.IsNullOrWhiteSpace(project)) return;
-        var dialog = new Views.ConfigItemDialog("编辑任务", project);
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("编辑任务", project);
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (value != project && ConfigService.Instance.Projects.Contains(value))
             {
                 StatusMessage = $"任务「{value}」已存在，无法重命名";
@@ -480,7 +476,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void DeleteProject(string? project)
     {
         if (string.IsNullOrWhiteSpace(project)) return;
-        if (!ConfirmDialog.Show($"确定要删除任务「{project}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除任务「{project}」吗？", "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveProject(project);
         RefreshAsync();
         StatusMessage = "任务已删除";
@@ -489,11 +485,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void AddWorkType()
     {
-        var dialog = new Views.ConfigItemDialog("添加工作类型", "");
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("添加工作类型", "");
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (ConfigService.Instance.WorkTypes.Contains(value))
             {
                 StatusMessage = $"类型「{value}」已存在，无需重复添加";
@@ -509,11 +504,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void EditWorkType(string? workType)
     {
         if (string.IsNullOrWhiteSpace(workType)) return;
-        var dialog = new Views.ConfigItemDialog("编辑工作类型", workType);
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("编辑工作类型", workType);
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (value != workType && ConfigService.Instance.WorkTypes.Contains(value))
             {
                 StatusMessage = $"类型「{value}」已存在，无法重命名";
@@ -529,7 +523,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void DeleteWorkType(string? workType)
     {
         if (string.IsNullOrWhiteSpace(workType)) return;
-        if (!ConfirmDialog.Show($"确定要删除类型「{workType}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除类型「{workType}」吗？", "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveWorkType(workType);
         RefreshAsync();
         StatusMessage = "类型已删除";
@@ -539,11 +533,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void AddKnowledgeCategory()
     {
-        var dialog = new Views.ConfigItemDialog("添加知识分类", "");
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("添加知识分类", "");
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (ConfigService.Instance.KnowledgeCategories.Contains(value))
             {
                 StatusMessage = $"分类「{value}」已存在，无需重复添加";
@@ -559,11 +552,10 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void EditKnowledgeCategory(string? category)
     {
         if (string.IsNullOrWhiteSpace(category)) return;
-        var dialog = new Views.ConfigItemDialog("编辑知识分类", category);
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("编辑知识分类", category);
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var value = dialog.ItemValue.Trim();
+            value = value.Trim();
             if (value != category && ConfigService.Instance.KnowledgeCategories.Contains(value))
             {
                 StatusMessage = $"分类「{value}」已存在，无法重命名";
@@ -579,7 +571,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void DeleteKnowledgeCategory(string? category)
     {
         if (string.IsNullOrWhiteSpace(category)) return;
-        if (!ConfirmDialog.Show($"确定要删除分类「{category}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除分类「{category}」吗？", "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveKnowledgeCategory(category);
         RefreshAsync();
         StatusMessage = "分类已删除";
@@ -588,18 +580,17 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void AddTemplate()
     {
-        var dialog = new Views.ConfigItemDialog("添加模板名称", "");
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("添加模板名称", "");
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var contentDialog = new Views.ConfigItemDialog("添加模板内容", "");
-            contentDialog.Owner = Application.Current.MainWindow;
-            if (contentDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(contentDialog.ItemValue))
+            value = value.Trim();
+            var content = DialogService.Instance.ShowInputDialog("添加模板内容", "");
+            if (!string.IsNullOrWhiteSpace(content))
             {
                 ConfigService.Instance.AddContentTemplate(new ContentTemplate
                 {
-                    Name = dialog.ItemValue.Trim(),
-                    Content = contentDialog.ItemValue.Trim()
+                    Name = value,
+                    Content = content.Trim()
                 });
                 RefreshAsync();
                 StatusMessage = "模板已添加";
@@ -611,18 +602,17 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void EditTemplate(ContentTemplate? template)
     {
         if (template == null) return;
-        var dialog = new Views.ConfigItemDialog("编辑模板名称", template.Name);
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("编辑模板名称", template.Name);
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var contentDialog = new Views.ConfigItemDialog("编辑模板内容", template.Content);
-            contentDialog.Owner = Application.Current.MainWindow;
-            if (contentDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(contentDialog.ItemValue))
+            value = value.Trim();
+            var content = DialogService.Instance.ShowInputDialog("编辑模板内容", template.Content);
+            if (!string.IsNullOrWhiteSpace(content))
             {
                 ConfigService.Instance.UpdateContentTemplate(template.Name, new ContentTemplate
                 {
-                    Name = dialog.ItemValue.Trim(),
-                    Content = contentDialog.ItemValue.Trim()
+                    Name = value,
+                    Content = content.Trim()
                 });
                 RefreshAsync();
                 StatusMessage = "模板已更新";
@@ -634,7 +624,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void DeleteTemplate(ContentTemplate? template)
     {
         if (template == null) return;
-        if (!ConfirmDialog.Show($"确定要删除模板「{template.Name}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除模板「{template.Name}」吗？", "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveContentTemplate(template.Name);
         RefreshAsync();
         StatusMessage = "模板已删除";
@@ -644,11 +634,11 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void AddCustomField()
     {
-        var dialog = new Views.ConfigItemDialog("添加自定义字段名称", "");
-        dialog.Owner = Application.Current.MainWindow;
-        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.ItemValue))
+        var value = DialogService.Instance.ShowInputDialog("添加自定义字段名称", "");
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            var field = new CustomField { Name = dialog.ItemValue.Trim(), FieldType = "Text" };
+            value = value.Trim();
+            var field = new CustomField { Name = value, FieldType = "Text" };
             ConfigService.Instance.AddCustomField(field);
             RefreshAsync();
             StatusMessage = $"字段「{field.Name}」已添加";
@@ -659,7 +649,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private void DeleteCustomField(CustomFieldItem? field)
     {
         if (field == null) return;
-        if (!ConfirmDialog.Show($"确定要删除字段「{field.Name}」吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除字段「{field.Name}」吗？", "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveCustomField(field.Name);
         RefreshAsync();
         StatusMessage = $"字段「{field.Name}」已删除";

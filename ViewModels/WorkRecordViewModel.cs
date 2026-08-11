@@ -6,8 +6,6 @@ using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
@@ -15,9 +13,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 {
     private readonly WorkRecordRepository _repo = new();
     private readonly LeaveRecordRepository _leaveRepo = new();
-    private readonly DispatcherTimer _statusTimer;
-    private readonly DispatcherTimer _searchTimer;
-    private readonly DispatcherTimer _autoSaveTimer;
+    private readonly UiTimer _statusTimer;
+    private readonly UiTimer _searchTimer;
+    private readonly UiTimer _autoSaveTimer;
     private bool _suppressDirty;
     private int _queryGeneration;
     private bool _isAutoSaving;
@@ -221,10 +219,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     public WorkRecordViewModel()
     {
-        _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
-        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _searchTimer.Tick += async (_, _) =>
         {
             _searchTimer.Stop();
@@ -233,7 +231,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         };
 
         // 自动保存计时器
-        _autoSaveTimer = new DispatcherTimer();
+        _autoSaveTimer = new UiTimer();
         _autoSaveTimer.Tick += async (_, _) =>
         {
             if (_isAutoSaving) return; // 防止重入

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EapWorkAssistant.Helpers;
 
 namespace EapWorkAssistant.Services;
 
@@ -49,7 +50,7 @@ public class ConfigData
     // ===== 启动与行为 =====
     public bool AutoStart { get; set; } = false;
     public bool MinimizeToTray { get; set; } = true;
-    public string DefaultView { get; set; } = "Dashboard";
+    public string DefaultView { get; set; } = ViewNames.Dashboard;
     public int AutoSaveInterval { get; set; } = 5;  // 分钟
 
     // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====

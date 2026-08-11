@@ -12,11 +12,11 @@ public class ViewNameToLabelConverter : IValueConverter
 
     private static readonly Dictionary<string, string> Labels = new()
     {
-        ["Dashboard"]  = "工作台",
-        ["WorkRecord"] = "工作记录",
-        ["Knowledge"]  = "知识库",
-        ["Issue"]      = "问题跟踪",
-        ["Settings"]   = "设置",
+        [ViewNames.Dashboard]  = "工作台",
+        [ViewNames.WorkRecord] = "工作记录",
+        [ViewNames.Knowledge]  = "知识库",
+        [ViewNames.Issue]      = "问题跟踪",
+        [ViewNames.Settings]   = "设置",
     };
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

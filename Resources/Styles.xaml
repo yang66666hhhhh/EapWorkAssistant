@@ -953,8 +953,10 @@
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserResizeColumns" Value="True"/>
-        <Setter Property="CanUserReorderColumns" Value="False"/>
-        <Setter Property="CanUserSortColumns" Value="True"/>
+            <Setter Property="CanUserReorderColumns" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="True"/>
+            <Setter Property="EnableRowVirtualization" Value="True"/>
+            <Setter Property="EnableColumnVirtualization" Value="True"/>
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>

@@ -5,7 +5,6 @@ using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using System.Collections.ObjectModel;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
@@ -14,7 +13,7 @@ public partial class MainViewModel : ObservableObject
     private readonly WorkRecordRepository _recordRepo = new();
     private readonly KnowledgeRepository _knowledgeRepo = new();
     private readonly IssueRepository _issueRepo = new();
-    private readonly DispatcherTimer _searchTimer;
+    private readonly UiTimer _searchTimer;
 
     [ObservableProperty]
     private object? _currentView;
@@ -51,7 +50,7 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _searchTimer.Tick += async (_, _) =>
         {
             _searchTimer.Stop();
@@ -62,18 +61,18 @@ public partial class MainViewModel : ObservableObject
         var defaultView = ConfigService.Instance.DefaultView;
         CurrentView = defaultView switch
         {
-            "WorkRecord" => WorkRecord,
-            "Knowledge" => Knowledge,
-            "Issue" => Issue,
-            "Settings" => Settings,
+            ViewNames.WorkRecord => WorkRecord,
+            ViewNames.Knowledge => Knowledge,
+            ViewNames.Issue => Issue,
+            ViewNames.Settings => Settings,
             _ => Dashboard
         };
         SelectedIndex = defaultView switch
         {
-            "WorkRecord" => 1,
-            "Knowledge" => 2,
-            "Issue" => 3,
-            "Settings" => 4,
+            ViewNames.WorkRecord => 1,
+            ViewNames.Knowledge => 2,
+            ViewNames.Issue => 3,
+            ViewNames.Settings => 4,
                 _ => 0
         };
         Dashboard.LoadDashboardAsync().SafeFire("加载仪表盘失败");
@@ -83,13 +82,13 @@ public partial class MainViewModel : ObservableObject
         {
             WorkRecord.SelectedDate = date;
             WorkRecord.SelectedTabIndex = 0;
-            NavigateTo("WorkRecord");
+            NavigateTo(ViewNames.WorkRecord);
         };
         Dashboard.NavigateToWorkRecordFilter += (project) =>
         {
             WorkRecord.FilterProject = project;
             WorkRecord.SelectedTabIndex = 1;
-            NavigateTo("WorkRecord");
+            NavigateTo(ViewNames.WorkRecord);
         };
         Dashboard.NavigateToPage += (page) =>
         {
@@ -103,22 +102,22 @@ public partial class MainViewModel : ObservableObject
         var previousView = CurrentView;
         CurrentView = viewName switch
         {
-            "Dashboard" => Dashboard,
-            "WorkRecord" => WorkRecord,
-            "Knowledge" => Knowledge,
-            "Issue" => Issue,
-            "Settings" => Settings,
+            ViewNames.Dashboard => Dashboard,
+            ViewNames.WorkRecord => WorkRecord,
+            ViewNames.Knowledge => Knowledge,
+            ViewNames.Issue => Issue,
+            ViewNames.Settings => Settings,
             _ => Dashboard
         };
 
         // 同步 SelectedIndex 以更新导航栏选中状态
         var newIndex = viewName switch
         {
-            "Dashboard" => 0,
-            "WorkRecord" => 1,
-            "Knowledge" => 2,
-            "Issue" => 3,
-            "Settings" => 4,
+            ViewNames.Dashboard => 0,
+            ViewNames.WorkRecord => 1,
+            ViewNames.Knowledge => 2,
+            ViewNames.Issue => 3,
+            ViewNames.Settings => 4,
             _ => 0
         };
         if (newIndex != SelectedIndex)
@@ -196,7 +195,7 @@ public partial class MainViewModel : ObservableObject
                     Title = $"{r.ProjectName} - {r.WorkDate}",
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DD",
-                    NavigateTo = "WorkRecord",
+                    NavigateTo = ViewNames.WorkRecord,
                     TargetDate = DateTime.TryParse(r.WorkDate, out var d) ? d : null,
                     Keyword = keyword
                 });
@@ -212,7 +211,7 @@ public partial class MainViewModel : ObservableObject
                     Title = k.Title,
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F4DA",
-                    NavigateTo = "Knowledge",
+                    NavigateTo = ViewNames.Knowledge,
                     TargetId = k.Id,
                     Keyword = keyword
                 });
@@ -228,7 +227,7 @@ public partial class MainViewModel : ObservableObject
                     Title = $"[{i.ProjectName}] {i.Title}",
                     Content = content.Length > 60 ? content[..60] + "..." : content,
                     Icon = "\U0001F527",
-                    NavigateTo = "Issue",
+                    NavigateTo = ViewNames.Issue,
                     TargetId = i.Id,
                     Keyword = keyword
                 });
@@ -263,7 +262,7 @@ public partial class MainViewModel : ObservableObject
         SearchKeyword = string.Empty;
 
         // 工作记录：切换到全部记录 Tab 并用关键词筛选
-        if (item.NavigateTo == "WorkRecord")
+        if (item.NavigateTo == ViewNames.WorkRecord)
         {
             if (item.TargetDate.HasValue)
                 WorkRecord.SelectedDate = item.TargetDate.Value;
@@ -275,11 +274,11 @@ public partial class MainViewModel : ObservableObject
 
         // 知识库/问题跟踪：导航后设置搜索关键词，OnSearchKeywordChanged 防抖定时器会自动触发搜索
         // 不再手动调用 SearchCommand，避免与防抖定时器竞态导致双重搜索
-        if (item.NavigateTo == "Knowledge")
+        if (item.NavigateTo == ViewNames.Knowledge)
         {
             Knowledge.SearchKeyword = item.Keyword;
         }
-        else if (item.NavigateTo == "Issue")
+        else if (item.NavigateTo == ViewNames.Issue)
         {
             Issue.SearchKeyword = item.Keyword;
         }
@@ -306,7 +305,7 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedIndexChanged(int value)
     {
-        var views = new[] { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
+        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
         if (value >= 0 && views.Length > value)
             NavigateTo(views[value]);
     }

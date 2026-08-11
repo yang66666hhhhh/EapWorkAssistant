@@ -5,18 +5,18 @@ using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
 public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 {
     private readonly KnowledgeRepository _repo = new();
-    private readonly DispatcherTimer _statusTimer;
-    private readonly DispatcherTimer _searchTimer;
+    private readonly UiTimer _statusTimer;
+    private readonly UiTimer _searchTimer;
     private bool _suppressDirty;
+    private List<Knowledge> _allItems = new();
 
     public event Action? PanelCloseRequested;
 
@@ -55,14 +55,14 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 
     public KnowledgeViewModel()
     {
-        _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
-        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        _searchTimer.Tick += async (_, _) =>
+        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer.Tick += (_, _) =>
         {
             _searchTimer.Stop();
-            await SearchAsync();
+            SearchAsync();
         };
     }
 
@@ -77,12 +77,12 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
 
     partial void OnFilterCategoryChanged(string value)
     {
-        LoadAsync().SafeFire("加载知识失败");
+        ApplyFilter();
     }
 
     partial void OnShowFavoritesOnlyChanged(bool value)
     {
-        LoadAsync().SafeFire("加载知识失败");
+        ApplyFilter();
     }
 
     [RelayCommand]
@@ -124,18 +124,28 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task LoadAsync()
     {
-        IEnumerable<Knowledge> items;
-        if (ShowFavoritesOnly)
-            items = await _repo.GetFavoritesAsync();
-        else
-            items = await _repo.GetAllAsync();
-
-        // 分类筛选
-        if (!string.IsNullOrEmpty(FilterCategory))
-            items = items.Where(k => k.Category == FilterCategory);
-
-        Items = new ObservableCollection<Knowledge>(items);
+        // 一次性加载全量，后续搜索/筛选均在内存中进行，避免重复查询数据库
+        _allItems = (await _repo.GetAllAsync()).ToList();
+        ApplyFilter();
         await RefreshTagsAndCategoriesAsync();
+    }
+
+    private void ApplyFilter()
+    {
+        var q = _allItems.AsEnumerable();
+        if (ShowFavoritesOnly)
+            q = q.Where(k => k.IsFavorite == 1);
+        if (!string.IsNullOrEmpty(FilterCategory))
+            q = q.Where(k => k.Category == FilterCategory);
+        if (!string.IsNullOrWhiteSpace(SearchKeyword))
+        {
+            var kw = SearchKeyword.Trim();
+            q = q.Where(k =>
+                (k.Title != null && k.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (k.Content != null && k.Content.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (k.Tags != null && k.Tags.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
+        }
+        Items = new ObservableCollection<Knowledge>(q);
     }
 
     private async Task RefreshTagsAndCategoriesAsync()
@@ -154,16 +164,9 @@ public partial class KnowledgeViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private async Task SearchAsync()
+    private void SearchAsync()
     {
-        var items = string.IsNullOrWhiteSpace(SearchKeyword)
-            ? await _repo.GetAllAsync()
-            : await _repo.SearchAsync(SearchKeyword);
-
-        if (!string.IsNullOrEmpty(FilterCategory))
-            items = items.Where(k => k.Category == FilterCategory);
-
-        Items = new ObservableCollection<Knowledge>(items);
+        ApplyFilter();
     }
 
     [RelayCommand]

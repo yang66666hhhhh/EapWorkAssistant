@@ -5,18 +5,18 @@ using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.Views;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
 public partial class IssueViewModel : ObservableObject, IRefreshable
 {
     private readonly IssueRepository _repo = new();
-    private readonly DispatcherTimer _statusTimer;
-    private readonly DispatcherTimer _searchTimer;
+    private readonly UiTimer _statusTimer;
+    private readonly UiTimer _searchTimer;
     private bool _suppressDirty;
+    private List<Issue> _allItems = new();
 
     public event Action? PanelCloseRequested;
 
@@ -56,14 +56,14 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
 
     public IssueViewModel()
     {
-        _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
-        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        _searchTimer.Tick += async (_, _) =>
+        _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        _searchTimer.Tick += (_, _) =>
         {
             _searchTimer.Stop();
-            await SearchAsync();
+            SearchAsync();
         };
     }
 
@@ -78,12 +78,12 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
 
     partial void OnFilterStatusChanged(string value)
     {
-        LoadAsync().SafeFire("加载问题失败");
+        ApplyFilter();
     }
 
     partial void OnFilterPriorityChanged(string value)
     {
-        LoadAsync().SafeFire("加载问题失败");
+        ApplyFilter();
     }
 
     [RelayCommand]
@@ -103,31 +103,35 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private async Task LoadAsync()
     {
-        var items = await _repo.GetAllAsync();
+        // 一次性加载全量，后续搜索/筛选均在内存中进行，避免重复查询数据库
+        _allItems = (await _repo.GetAllAsync()).ToList();
+        ApplyFilter();
+    }
 
-        // 应用筛选
+    private void ApplyFilter()
+    {
+        var q = _allItems.AsEnumerable();
         if (!string.IsNullOrEmpty(FilterStatus))
-            items = items.Where(i => i.Status == FilterStatus);
+            q = q.Where(i => i.Status == FilterStatus);
         if (!string.IsNullOrEmpty(FilterPriority))
-            items = items.Where(i => i.Priority == FilterPriority);
-
-        Items = new ObservableCollection<Issue>(items);
+            q = q.Where(i => i.Priority == FilterPriority);
+        if (!string.IsNullOrWhiteSpace(SearchKeyword))
+        {
+            var kw = SearchKeyword.Trim();
+            q = q.Where(i =>
+                (i.Title != null && i.Title.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (i.Description != null && i.Description.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (i.Keywords != null && i.Keywords.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (i.RootCause != null && i.RootCause.Contains(kw, System.StringComparison.OrdinalIgnoreCase)) ||
+                (i.Solution != null && i.Solution.Contains(kw, System.StringComparison.OrdinalIgnoreCase)));
+        }
+        Items = new ObservableCollection<Issue>(q);
     }
 
     [RelayCommand]
-    private async Task SearchAsync()
+    private void SearchAsync()
     {
-        var items = string.IsNullOrWhiteSpace(SearchKeyword)
-            ? await _repo.GetAllAsync()
-            : await _repo.SearchAsync(SearchKeyword);
-
-        // 应用筛选
-        if (!string.IsNullOrEmpty(FilterStatus))
-            items = items.Where(i => i.Status == FilterStatus);
-        if (!string.IsNullOrEmpty(FilterPriority))
-            items = items.Where(i => i.Priority == FilterPriority);
-
-        Items = new ObservableCollection<Issue>(items);
+        ApplyFilter();
     }
 
     [RelayCommand]

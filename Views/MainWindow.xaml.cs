@@ -21,6 +21,10 @@ public partial class MainWindow : Window
         UpdateShortcutState();
         RegisterAllShortcuts();
 
+        // 设置页修改快捷键后由自身重新注册（解耦 ViewModel 对 View 的直接引用）
+        if (DataContext is MainViewModel vm)
+            vm.Settings.ShortcutsChanged += RegisterAllShortcuts;
+
         // 应用当前字体大小缩放（Initialize 时窗口尚未就绪，需在此处补设）
         ApplyUIScale();
     }
@@ -80,7 +84,7 @@ public partial class MainWindow : Window
         {
             if (DataContext is MainViewModel vm)
             {
-                vm.NavigateToCommand.Execute("WorkRecord");
+                vm.NavigateToCommand.Execute(ViewNames.WorkRecord);
                 vm.WorkRecord.NewRecordCommand.Execute(null);
             }
         });
@@ -93,7 +97,7 @@ public partial class MainWindow : Window
         });
 
         // 视图切换 1~5
-        var views = new[] { "Dashboard", "WorkRecord", "Knowledge", "Issue", "Settings" };
+        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
         var defaultKeys = new[] { Key.D1, Key.D2, Key.D3, Key.D4, Key.D5 };
         var cfgKeys = new[] { cfg.ShortcutView1, cfg.ShortcutView2, cfg.ShortcutView3, cfg.ShortcutView4, cfg.ShortcutView5 };
         var enabledFlags = new[] { cfg.ShortcutView1Enabled, cfg.ShortcutView2Enabled, cfg.ShortcutView3Enabled, cfg.ShortcutView4Enabled, cfg.ShortcutView5Enabled };

@@ -173,31 +173,31 @@ public partial class DashboardView : UserControl
     private void StatCard_Week_Click(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
-            vm.RaiseNavigateToPage("WorkRecord");
+            vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
     private void StatCard_Month_Click(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
-            vm.RaiseNavigateToPage("WorkRecord");
+            vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
     private void StatCard_Records_Click(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
-            vm.RaiseNavigateToPage("WorkRecord");
+            vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
     private void StatCard_Issues_Click(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
-            vm.RaiseNavigateToPage("Issue");
+            vm.RaiseNavigateToPage(ViewNames.Issue);
     }
 
     private void StatCard_Knowledge_Click(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
-            vm.RaiseNavigateToPage("Knowledge");
+            vm.RaiseNavigateToPage(ViewNames.Knowledge);
     }
 
     private void Refresh_Click(object sender, MouseButtonEventArgs e)
