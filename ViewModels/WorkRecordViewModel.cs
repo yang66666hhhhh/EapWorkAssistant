@@ -4,7 +4,6 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
-using EapWorkAssistant.Views;
 using System.Collections.ObjectModel;
 
 namespace EapWorkAssistant.ViewModels;
@@ -419,9 +418,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private async Task DeleteLeaveRecordAsync(LeaveRecord? record)
     {
         if (record == null) return;
-        if (!ConfirmDialog.Show(
+        if (!DialogService.Instance.ShowConfirm(
             $"确定要删除 {record.Date} 的「{record.LeaveType}」请假记录吗？",
-            "确认删除", ConfirmDialogType.Danger))
+            "确认删除", ConfirmType.Danger))
             return;
 
         try
@@ -504,10 +503,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         if (projectedTotal > DailyHoursWarnCap)
         {
-            bool proceed = ConfirmDialog.Show(
+            bool proceed = DialogService.Instance.ShowConfirm(
                 $"当日累计工时将达 {projectedTotal:F1} 小时，已超过 {DailyHoursWarnCap} 小时。\n\n确定要继续保存吗？",
                 "工时偏长提醒",
-                ConfirmDialogType.Warning,
+                ConfirmType.Warning,
                 "继续保存", "取消");
             if (!proceed) return false;
         }
@@ -663,7 +662,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (record == null) return;
 
-        if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmType.Danger)) return;
 
         await _repo.DeleteAsync(record.Id);
         SelectedDailyRecord = null;
@@ -677,7 +676,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private async Task DeleteCurrentRecordAsync()
     {
         if (CurrentRecord.Id <= 0) return;
-        if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{CurrentRecord.Content}", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除这条记录吗？\n{CurrentRecord.Content}", "确认删除", ConfirmType.Danger)) return;
 
         await _repo.DeleteAsync(CurrentRecord.Id);
         _suppressDirty = true;
@@ -897,7 +896,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             msg += $"\n\n已跳过 {skipped.Count} 条异常记录：\n{string.Join("\n", skipped.Take(5))}"
                  + (skipped.Count > 5 ? $"\n...及其他 {skipped.Count - 5} 条" : "");
 
-        if (!ConfirmDialog.Show($"{msg}\n\n确定要导入吗？", "确认导入", ConfirmDialogType.Warning))
+        if (!DialogService.Instance.ShowConfirm($"{msg}\n\n确定要导入吗？", "确认导入", ConfirmType.Warning))
             return;
 
         try
@@ -1063,7 +1062,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private async Task DeleteAllRecordAsync(WorkRecord? record)
     {
         if (record == null) return;
-        if (!ConfirmDialog.Show($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除这条记录吗？\n{record.Content}", "确认删除", ConfirmType.Danger)) return;
         await _repo.DeleteAsync(record.Id);
         SelectedAllRecord = null;
         // 删除后如果当前页变空，回退到上一页

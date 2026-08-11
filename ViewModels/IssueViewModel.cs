@@ -4,7 +4,6 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
-using EapWorkAssistant.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -205,7 +204,7 @@ public partial class IssueViewModel : ObservableObject, IRefreshable
     {
         if (item == null) return;
 
-        if (!ConfirmDialog.Show($"确定要删除 \"{item.Title}\" 吗？", "确认删除", ConfirmDialogType.Danger)) return;
+        if (!DialogService.Instance.ShowConfirm($"确定要删除 \"{item.Title}\" 吗？", "确认删除", ConfirmType.Danger)) return;
 
         await _repo.DeleteAsync(item.Id);
         await LoadAsync();

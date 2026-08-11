@@ -20,8 +20,9 @@ public interface IDialogService
     /// <summary>弹出单行输入对话框，返回用户输入（取消或为空时返回 null）。</summary>
     string? ShowInputDialog(string title, string defaultValue);
 
-    /// <summary>弹出确认对话框，返回用户是否确认。</summary>
-    bool ShowConfirm(string message, string title, ConfirmType type = ConfirmType.Info);
+    /// <summary>弹出确认对话框，返回用户是否确认。confirmText/cancelText 为空时使用默认按钮文字。</summary>
+    bool ShowConfirm(string message, string title, ConfirmType type = ConfirmType.Info,
+        string? confirmText = null, string? cancelText = null);
 }
 
 /// <summary>
@@ -41,7 +42,8 @@ public sealed class DialogService : IDialogService
         return dialog.ShowDialog() == true ? dialog.ItemValue : null;
     }
 
-    public bool ShowConfirm(string message, string title, ConfirmType type = ConfirmType.Info)
+    public bool ShowConfirm(string message, string title, ConfirmType type = ConfirmType.Info,
+        string? confirmText = null, string? cancelText = null)
     {
         var mapped = type switch
         {
@@ -49,6 +51,8 @@ public sealed class DialogService : IDialogService
             ConfirmType.Warning => ConfirmDialogType.Warning,
             _ => ConfirmDialogType.Info
         };
-        return ConfirmDialog.Show(message, title, mapped);
+        if (confirmText == null && cancelText == null)
+            return ConfirmDialog.Show(message, title, mapped);
+        return ConfirmDialog.Show(message, title, mapped, confirmText ?? "确认", cancelText ?? "取消");
     }
 }

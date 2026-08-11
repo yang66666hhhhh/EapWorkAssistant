@@ -11,8 +11,6 @@ using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace EapWorkAssistant.ViewModels;
 
