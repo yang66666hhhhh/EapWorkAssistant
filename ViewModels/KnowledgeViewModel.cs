@@ -50,13 +50,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
                 Category = value.Category,
                 IsFavorite = value.IsFavorite
             };
-            IsFormDirty = false;
         }
-    }
-
-    partial void OnCurrentItemChanged(Knowledge value)
-    {
-        IsFormDirty = false;
     }
 
     protected override async Task<IEnumerable<Knowledge>> GetAllAsync()
@@ -216,6 +210,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
             Category = item.Category,
             IsFavorite = item.IsFavorite
         };
+        IsFormDirty = false;
     }
 
     [RelayCommand]

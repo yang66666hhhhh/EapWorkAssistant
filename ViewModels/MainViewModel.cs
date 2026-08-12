@@ -123,10 +123,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateTo(string viewName)
     {
-        var previousView = CurrentView;
-        CurrentView = viewName switch
+        object? targetView = viewName switch
         {
-            ViewNames.Dashboard => Dashboard,
             ViewNames.WorkRecord => WorkRecord,
             ViewNames.Knowledge => Knowledge,
             ViewNames.Issue => Issue,
@@ -135,10 +133,40 @@ public partial class MainViewModel : ObservableObject
             _ => Dashboard
         };
 
-        // 同步 SelectedIndex 以更新导航栏选中状态
+        // 目标与当前视图相同：仅同步导航栏高亮，不拦截、不刷新
+        if (ReferenceEquals(targetView, CurrentView))
+        {
+            SyncSelectedIndex(viewName);
+            return;
+        }
+
+        // 离开前未保存确认：知识库/问题跟踪无自动保存；工作记录校验不过时。
+        // 用户取消离开则还原导航栏选中项，保持当前视图不变。
+        if (!CanLeaveCurrentView())
+        {
+            RevertSelectedIndex();
+            return;
+        }
+
+        var previousView = CurrentView;
+        CurrentView = targetView;
+        SyncSelectedIndex(viewName);
+
+        // 离开工作记录时暂停自动保存（会 flush 合法编辑），进入时恢复
+        if (previousView == WorkRecord && targetView != WorkRecord)
+            WorkRecord.PauseAutoSaveTimer();
+        else if (targetView == WorkRecord && previousView != WorkRecord)
+            WorkRecord.StartAutoSaveTimer();
+
+        // 仅在视图实际切换时才刷新，避免重复加载
+        if (targetView is IRefreshable refreshable)
+            refreshable.RefreshAsync().SafeFire("刷新失败");
+    }
+
+    private void SyncSelectedIndex(string viewName)
+    {
         var newIndex = viewName switch
         {
-            ViewNames.Dashboard => 0,
             ViewNames.WorkRecord => 1,
             ViewNames.Knowledge => 2,
             ViewNames.Issue => 3,
@@ -148,19 +176,49 @@ public partial class MainViewModel : ObservableObject
         };
         if (newIndex != SelectedIndex)
             SelectedIndex = newIndex;
+    }
 
-        // 视图未实际切换时跳过后续逻辑（防止 OnSelectedIndexChanged 回调导致重复刷新）
-        if (CurrentView == previousView) return;
+    /// <summary>检查即将离开的当前视图是否有未保存修改，决定是否允许导航。</summary>
+    private bool CanLeaveCurrentView()
+    {
+        return CurrentView switch
+        {
+            WorkRecordViewModel wr => CanLeaveWorkRecord(wr),
+            KnowledgeViewModel kw => !kw.IsFormDirty || DialogService.Instance.ShowConfirm(
+                "当前知识库页面有未保存的修改，离开后将丢失。确定离开吗？",
+                "未保存的修改", ConfirmType.Warning),
+            IssueViewModel iss => !iss.IsFormDirty || DialogService.Instance.ShowConfirm(
+                "当前问题跟踪页面有未保存的修改，离开后将丢失。确定离开吗？",
+                "未保存的修改", ConfirmType.Warning),
+            _ => true
+        };
+    }
 
-        // 离开工作记录时暂停自动保存，进入时恢复
-        if (previousView == WorkRecord && CurrentView != WorkRecord)
-            WorkRecord.PauseAutoSaveTimer();
-        else if (CurrentView == WorkRecord && previousView != WorkRecord)
-            WorkRecord.StartAutoSaveTimer();
+    /// <summary>工作记录：合法编辑由自动保存落库，直接放行；校验不过才询问，避免静默丢失。</summary>
+    private bool CanLeaveWorkRecord(WorkRecordViewModel wr)
+    {
+        if (!wr.IsFormDirty) return true;
+        var (valid, error) = wr.ValidateStrict();
+        if (valid) return true;
+        return DialogService.Instance.ShowConfirm(
+            $"当前工作记录有未保存内容，但无法通过校验：{error}。离开将丢失，确定离开吗？",
+            "未保存的修改", ConfirmType.Warning);
+    }
 
-        // 仅在视图实际切换时才刷新，避免重复加载
-        if (CurrentView != previousView && CurrentView is IRefreshable refreshable)
-            refreshable.RefreshAsync().SafeFire("刷新失败");
+    /// <summary>用户取消离开时，把导航栏选中项还原到当前实际视图，避免高亮错位。</summary>
+    private void RevertSelectedIndex()
+    {
+        var idx = CurrentView switch
+        {
+            WorkRecordViewModel => 1,
+            KnowledgeViewModel => 2,
+            IssueViewModel => 3,
+            SettingsViewModel => 4,
+            RecycleBinViewModel => 5,
+            _ => 0
+        };
+        if (SelectedIndex != idx)
+            SelectedIndex = idx;
     }
 
     [RelayCommand]

@@ -479,7 +479,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     /// 硬性校验：不满足则绝对不能保存。
     /// 用于手动保存、关闭面板、导航离开等场景。
     /// </summary>
-    private (bool IsValid, string? Error) ValidateStrict()
+    internal (bool IsValid, string? Error) ValidateStrict()
     {
         if (string.IsNullOrWhiteSpace(CurrentRecord.ProjectName))
             return (false, "请选择任务");
