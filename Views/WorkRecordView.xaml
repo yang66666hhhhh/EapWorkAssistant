@@ -93,8 +93,6 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="记录每日工作内容、成果和问题"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,4,0,0"/>
                             <TextBlock Text="双击条目可快速编辑 · 编辑中按 Ctrl+S 保存、Esc 关闭"
                                        Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5" Margin="0,4,0,0"/>
                         </StackPanel>
