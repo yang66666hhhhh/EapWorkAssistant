@@ -42,7 +42,7 @@ public static class DateTimeHelper
     /// </summary>
     public static (DateTime Start, DateTime End) GetQuarterRange(DateTime date)
     {
-        var quarterStartMonth = date.Month / 3 * 3 - 2; // 1,4,7,10
+        var quarterStartMonth = (date.Month - 1) / 3 * 3 + 1; // 1,4,7,10
         var start = new DateTime(date.Year, quarterStartMonth, 1);
         var end = start.AddMonths(3).AddDays(-1);
         return (start, end);

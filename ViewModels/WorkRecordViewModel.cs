@@ -368,31 +368,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             // 1. 获取全年工作记录
             var allRecords = await _repo.GetByDateRangeAsync(yearStart, yearEnd);
 
-            // 2. 筛选加班记录：周六/周日 + 法定假日（排除补班日，补班日算正常工作日不计入调休）
-            double overtimeHours = 0;
+            // 2. 取出可解析日期的工作记录（日期 + 工时）
+            var workTuples = new List<(DateTime Date, double Hours)>();
             foreach (var r in allRecords)
             {
-                if (!DateTime.TryParse(r.WorkDate, out var date)) continue;
-                var dow = date.DayOfWeek;
-                bool isWeekend = dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday;
-                bool isHoliday = HolidayService.Instance.IsHoliday(date);
-                bool isMakeup = HolidayService.Instance.IsMakeupWorkday(date);
-
-                // 周末或法定假日工作 → 计入可调休加班；补班日虽在周末但属正常工作日，不计入
-                if ((isWeekend || isHoliday) && !isMakeup)
-                    overtimeHours += r.Hours;
+                if (DateTime.TryParse(r.WorkDate, out var date))
+                    workTuples.Add((date, r.Hours));
             }
 
-            // 3. 获取全年调休请假记录
-            var leaves = await _leaveRepo.GetByYearAsync(year);
-            double compUsed = leaves
+            // 3. 获取全年调休请假工时（LeaveType == "调休"）
+            var compHours = (await _leaveRepo.GetByYearAsync(year))
                 .Where(l => l.LeaveType == "调休")
-                .Sum(l => l.Hours);
+                .Select(l => l.Hours);
 
-            // 4. 计算余额
+            // 4. 计算余额（假日/补班判定走 HolidayService 单例）
+            var (overtimeHours, compUsed, available) = CompLeaveCalculator.Compute(
+                workTuples,
+                compHours,
+                HolidayService.Instance.IsHoliday,
+                HolidayService.Instance.IsMakeupWorkday);
+
             OvertimeHours = overtimeHours;
             CompLeaveUsed = compUsed;
-            CompLeaveAvailable = Math.Max(0, overtimeHours - compUsed);
+            CompLeaveAvailable = available;
         }
         catch (Exception ex)
         {
