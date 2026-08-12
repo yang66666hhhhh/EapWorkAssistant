@@ -463,12 +463,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void DeleteProject(string? project)
+    private async Task DeleteProject(string? project)
     {
         if (string.IsNullOrWhiteSpace(project)) return;
-        if (!DialogService.Instance.ShowConfirm($"确定要删除任务「{project}」吗？", "确认删除", ConfirmType.Danger)) return;
+        var count = await new WorkRecordRepository().GetCountByProjectAsync(project);
+        var message = count > 0
+            ? $"确定要删除任务「{project}」吗？\n该任务被 {count} 条工作记录引用。删除后这些记录仍保留原任务名「{project}」，但将不再出现在任务筛选下拉中。"
+            : $"确定要删除任务「{project}」吗？";
+        if (!DialogService.Instance.ShowConfirm(message, "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveProject(project);
-        RefreshAsync();
+        await RefreshAsync();
         StatusMessage = "任务已删除";
     }
 
@@ -511,12 +515,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void DeleteWorkType(string? workType)
+    private async Task DeleteWorkType(string? workType)
     {
         if (string.IsNullOrWhiteSpace(workType)) return;
-        if (!DialogService.Instance.ShowConfirm($"确定要删除类型「{workType}」吗？", "确认删除", ConfirmType.Danger)) return;
+        var count = await new WorkRecordRepository().GetCountByWorkTypeAsync(workType);
+        var message = count > 0
+            ? $"确定要删除类型「{workType}」吗？\n该类型被 {count} 条工作记录引用。删除后这些记录仍保留原类型「{workType}」，但将不再出现在类型筛选下拉中。"
+            : $"确定要删除类型「{workType}」吗？";
+        if (!DialogService.Instance.ShowConfirm(message, "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveWorkType(workType);
-        RefreshAsync();
+        await RefreshAsync();
         StatusMessage = "类型已删除";
     }
 
@@ -560,12 +568,16 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void DeleteKnowledgeCategory(string? category)
+    private async Task DeleteKnowledgeCategory(string? category)
     {
         if (string.IsNullOrWhiteSpace(category)) return;
-        if (!DialogService.Instance.ShowConfirm($"确定要删除分类「{category}」吗？", "确认删除", ConfirmType.Danger)) return;
+        var count = await new KnowledgeRepository().GetCountByCategoryAsync(category);
+        var message = count > 0
+            ? $"确定要删除分类「{category}」吗？\n该分类被 {count} 条知识条目引用。删除后这些条目仍保留原分类「{category}」，但将不再出现在分类筛选下拉中。"
+            : $"确定要删除分类「{category}」吗？";
+        if (!DialogService.Instance.ShowConfirm(message, "确认删除", ConfirmType.Danger)) return;
         ConfigService.Instance.RemoveKnowledgeCategory(category);
-        RefreshAsync();
+        await RefreshAsync();
         StatusMessage = "分类已删除";
     }
 

@@ -41,6 +41,7 @@
                 <Button x:Name="CancelButton" Content="取消"
                         Style="{StaticResource BtnSecondary}"
                         Padding="18,9" Margin="0,0,10,0"
+                        IsCancel="True"
                         Click="CancelButton_Click"/>
                 <Button x:Name="ConfirmButton" Content="确认"
                         Style="{StaticResource BtnDanger}"

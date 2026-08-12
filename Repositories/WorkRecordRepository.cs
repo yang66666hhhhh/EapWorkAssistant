@@ -134,6 +134,32 @@ public class WorkRecordRepository
         });
     }
 
+    /// <summary>统计引用指定任务名称的未删除工作记录数（用于删除配置项前的引用提示）</summary>
+    public async Task<int> GetCountByProjectAsync(string projectName)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND ProjectName = @ProjectName",
+                new { ProjectName = projectName });
+        });
+    }
+
+    /// <summary>统计引用指定工作类型的未删除工作记录数（用于删除配置项前的引用提示）</summary>
+    public async Task<int> GetCountByWorkTypeAsync(string workType)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkType = @WorkType",
+                new { WorkType = workType });
+        });
+    }
+
     public async Task<int> DeleteAsync(int id)
     {
         return await Task.Run(async () =>
@@ -276,7 +302,7 @@ public class WorkRecordRepository
             if (keywords.Length <= 1)
             {
                 return await connection.QueryAsync<WorkRecord>(
-                    "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND (Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw) ORDER BY WorkDate DESC, Id DESC LIMIT 50",
+                    "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND (Content LIKE @Kw OR ProjectName LIKE @Kw OR Problem LIKE @Kw OR Solution LIKE @Kw OR Achievement LIKE @Kw OR HighlightNote LIKE @Kw) ORDER BY WorkDate DESC, Id DESC",
                     new { Kw = $"%{keyword}%" });
             }
 
@@ -286,7 +312,7 @@ public class WorkRecordRepository
             for (int i = 0; i < keywords.Length; i++)
                 param.Add($"Kw{i}", $"%{keywords[i]}%");
             return await connection.QueryAsync<WorkRecord>(
-                $"SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND {where} ORDER BY WorkDate DESC, Id DESC LIMIT 50", param);
+                $"SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND {where} ORDER BY WorkDate DESC, Id DESC", param);
         });
     }
 

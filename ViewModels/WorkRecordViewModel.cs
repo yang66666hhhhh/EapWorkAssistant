@@ -615,6 +615,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     /// </summary>
     private async Task AutoSaveRecordAsync()
     {
+        // 工时未填写（<=0）视为未完成记录，不落库，避免污染工时统计。
+        if (CurrentRecord.Hours <= 0)
+            return;
+
         // 新建记录使用当前选中日期
         if (CurrentRecord.Id == 0)
             CurrentRecord.WorkDate = SelectedDate.ToString("yyyy-MM-dd");

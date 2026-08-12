@@ -79,6 +79,19 @@ public class KnowledgeRepository
         });
     }
 
+    /// <summary>统计引用指定分类的未删除知识条目数（用于删除配置项前的引用提示）</summary>
+    public async Task<int> GetCountByCategoryAsync(string category)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Knowledge WHERE IsDeleted = 0 AND Category = @Category",
+                new { Category = category });
+        });
+    }
+
     public async Task<int> DeleteAsync(int id)
     {
         return await Task.Run(async () =>

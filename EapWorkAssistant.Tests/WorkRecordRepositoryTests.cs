@@ -114,4 +114,52 @@ public class WorkRecordRepositoryTests
             TestDb.Cleanup(db);
         }
     }
+
+    [Fact]
+    public async Task SearchAsync_ReturnsAllMatches_NotCappedAt50()
+    {
+        var db = TestDb.NewTempDb();
+        try
+        {
+            var repo = new WorkRecordRepository();
+            // 写入 60 条均含关键词 "common" 的记录，验证搜索不再被 LIMIT 50 截断
+            for (int i = 0; i < 60; i++)
+                await repo.InsertAsync(new WorkRecord
+                {
+                    WorkDate = $"2026-08-{i + 1:00}",
+                    ProjectName = "P",
+                    WorkType = "T",
+                    Content = $"common content {i}"
+                });
+
+            var results = (await repo.SearchAsync("common")).ToList();
+            Assert.Equal(60, results.Count);
+        }
+        finally
+        {
+            TestDb.Cleanup(db);
+        }
+    }
+
+    [Fact]
+    public async Task GetCountByProject_And_WorkType_ReflectReferences()
+    {
+        var db = TestDb.NewTempDb();
+        try
+        {
+            var repo = new WorkRecordRepository();
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-12", ProjectName = "ProjA", WorkType = "TypeX", Content = "c" });
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-13", ProjectName = "ProjA", WorkType = "TypeY", Content = "c" });
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-14", ProjectName = "ProjB", WorkType = "TypeX", Content = "c" });
+
+            Assert.Equal(2, await repo.GetCountByProjectAsync("ProjA"));
+            Assert.Equal(1, await repo.GetCountByProjectAsync("ProjB"));
+            Assert.Equal(2, await repo.GetCountByWorkTypeAsync("TypeX"));
+            Assert.Equal(0, await repo.GetCountByProjectAsync("Nonexistent"));
+        }
+        finally
+        {
+            TestDb.Cleanup(db);
+        }
+    }
 }

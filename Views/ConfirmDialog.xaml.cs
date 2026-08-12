@@ -46,6 +46,11 @@ public partial class ConfirmDialog : Window
                 IconPath.Fill = (Brush)FindResource("PrimaryBrush");
                 break;
         }
+
+        // 非危险操作支持回车确认；危险操作（删除确认）需用户主动点击，避免误删。
+        // 取消按钮始终支持 Esc 关闭（见 xaml 的 IsCancel）。
+        if (type != ConfirmDialogType.Danger)
+            ConfirmButton.IsDefault = true;
     }
 
     /// <summary>
