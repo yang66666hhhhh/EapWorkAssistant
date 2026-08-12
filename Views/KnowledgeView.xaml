@@ -273,6 +273,23 @@
                                            HorizontalAlignment="Center" Margin="0,6,0,0"/>
                             </StackPanel>
                         </Border>
+
+                        <!-- 搜索无结果：与通用空态区分 -->
+                        <Border Visibility="{Binding IsSearchEmpty, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                Padding="40" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Background="{DynamicResource CardBrush}" CornerRadius="16" IsHitTestVisible="False">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="40" Height="40" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
+                                <TextBlock FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium">
+                                    <Run Text="未找到与 "/><Run Text="{Binding SearchKeyword}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/><Run Text=" 相关的结果"/>
+                                </TextBlock>
+                                <TextBlock Text="换个关键词，或清空搜索重新浏览" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </DockPanel>
             </Border>

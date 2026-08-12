@@ -42,10 +42,12 @@
                         Style="{StaticResource BtnSecondary}"
                         Padding="18,9" Margin="0,0,10,0"
                         IsCancel="True"
+                        FocusVisualStyle="{StaticResource DialogFocusVisual}"
                         Click="CancelButton_Click"/>
                 <Button x:Name="ConfirmButton" Content="确认"
                         Style="{StaticResource BtnDanger}"
                         Padding="18,9"
+                        FocusVisualStyle="{StaticResource DialogFocusVisual}"
                         Click="ConfirmButton_Click"/>
             </StackPanel>
         </Grid>

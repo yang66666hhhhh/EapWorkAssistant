@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EapWorkAssistant.Views;
 
@@ -34,6 +35,38 @@ public partial class SettingsView
             if (ToggleMinimizeToTray != null) ToggleMinimizeToTray.IsChecked = VM.MinimizeToTray;
             if (ToggleEnableShortcuts != null) ToggleEnableShortcuts.IsChecked = VM.EnableShortcuts;
             if (ToggleEnableReminder != null) ToggleEnableReminder.IsChecked = VM.EnableReminder;
+
+            // 初始化 API 密钥密码框（默认遮罩显示，不暴露明文）
+            if (AiApiKeyBox != null)
+                AiApiKeyBox.Password = VM?.AiApiKey ?? string.Empty;
+        }
+    }
+
+    // ===== API 密钥：密码框遮罩 + 明文切换 =====
+    private void AiApiKeyBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (VM != null)
+            VM.AiApiKey = AiApiKeyBox.Password;
+    }
+
+    private void AiApiKeyToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (VM == null) return;
+        bool revealing = AiApiKeyReveal.Visibility == Visibility.Visible;
+        if (revealing)
+        {
+            // 切回遮罩：把当前明文同步回密码框（保持圆点长度正确）
+            AiApiKeyBox.Password = VM.AiApiKey;
+            AiApiKeyReveal.Visibility = Visibility.Collapsed;
+            AiApiKeyBox.Visibility = Visibility.Visible;
+            AiApiKeyEye.Data = (Geometry)FindResource("IconEye");
+        }
+        else
+        {
+            // 切换明文：用双向绑定的文本框展示，编辑即写回 VM
+            AiApiKeyBox.Visibility = Visibility.Collapsed;
+            AiApiKeyReveal.Visibility = Visibility.Visible;
+            AiApiKeyEye.Data = (Geometry)FindResource("IconEyeOff");
         }
     }
 

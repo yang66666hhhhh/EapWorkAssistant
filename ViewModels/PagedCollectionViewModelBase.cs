@@ -38,6 +38,9 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private bool _isFormDirty;
 
+    /// <summary>搜索了关键词但无匹配结果（用于展示"未找到与 XXX 相关"的区分空态）。</summary>
+    [ObservableProperty] private bool _isSearchEmpty;
+
     protected PagedCollectionViewModelBase()
     {
         _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -121,6 +124,9 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
         TotalPages = total > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
         if (CurrentPage > TotalPages) CurrentPage = TotalPages;
         if (CurrentPage < 1) CurrentPage = 1;
+
+        // 搜索态且无结果 → 区分空态；无关键词时归为通用"暂无数据"空态。
+        IsSearchEmpty = !string.IsNullOrWhiteSpace(kw) && total == 0;
     }
 
     partial void OnCurrentPageChanged(int value) => ReloadPageAsync().SafeFire(LoadFailureMessage);

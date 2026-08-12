@@ -108,6 +108,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private ObservableCollection<WorkRecord> _allRecords = new();
 
+    private bool _isSearchEmpty;
+    public bool IsSearchEmpty { get => _isSearchEmpty; set => SetProperty(ref _isSearchEmpty, value); }
+
     [ObservableProperty]
     private DateTime? _filterStartDate;
 
@@ -969,6 +972,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         AllHighlightCount = highlightCount;
         FilteredTotalCount = totalCount;
         UpdatePagination();
+        // 搜索态且无结果 → 展示"未找到与 XXX 相关"的区分空态
+        IsSearchEmpty = !string.IsNullOrWhiteSpace(SearchKeyword) && AllRecords.Count == 0;
     }
 
     private void UpdatePagination()

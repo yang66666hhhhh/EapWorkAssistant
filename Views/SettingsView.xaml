@@ -417,9 +417,27 @@
                                 <TextBlock Text="你的 API Key 或 Token" FontSize="12"
                                            Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
-                            <TextBox Text="{Binding AiApiKey, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource Input}" Width="320"
-                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <Grid HorizontalAlignment="Right" VerticalAlignment="Center" Width="320">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <PasswordBox x:Name="AiApiKeyBox" Grid.Column="0"
+                                             PasswordChanged="AiApiKeyBox_PasswordChanged"
+                                             Style="{StaticResource InputPassword}"
+                                             VerticalContentAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox x:Name="AiApiKeyReveal" Grid.Column="0"
+                                         Text="{Binding AiApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource Input}" VerticalContentAlignment="Center"
+                                         Visibility="Collapsed" Margin="0,0,6,0"/>
+                                <Button x:Name="AiApiKeyToggle" Grid.Column="1" Click="AiApiKeyToggle_Click"
+                                        Style="{StaticResource BtnGhost}" Padding="10,0" Height="38" Width="38"
+                                        ToolTip="显示/隐藏密钥">
+                                    <Path x:Name="AiApiKeyEye" Data="{StaticResource IconEye}"
+                                          Fill="{DynamicResource TextSecondaryBrush}"
+                                          Width="18" Height="18" Stretch="Uniform"/>
+                                </Button>
+                            </Grid>
                         </Grid>
                     </Border>
 

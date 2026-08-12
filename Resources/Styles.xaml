@@ -179,6 +179,10 @@
     <Geometry x:Key="IconSortAsc">M4,13 L8,7 L12,13 Z</Geometry>
     <Geometry x:Key="IconSortDesc">M4,7 L8,13 L12,7 Z</Geometry>
 
+    <!-- 眼睛 / 闭眼（密钥显隐切换） -->
+    <Geometry x:Key="IconEye">M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z</Geometry>
+    <Geometry x:Key="IconEyeOff">M2,4.27L3.28,3L22,21.72L20.73,23L18.27,20.54C17.09,21.17 15.83,21.65 14.5,21.94L17,14.5L13,10.5L9.5,7L2,4.27M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.24 16.64,13.78L14.22,11.36C14.08,11.12 14,10.84 14,10.5A2,2 0 0,0 12,8.5C11.66,8.5 11.38,8.58 11.14,8.72L8.5,6.08C9.35,6.29 10.13,6.5 10.84,6.5C11.2,6.5 11.55,6.44 11.88,6.36L12,7M3.18,3.18C2.4,4.14 1.78,5.22 1.32,6.4L7,12.08C6.4,12.5 6,13.16 6,13.88C6,15.5 7.5,17 9.12,17C9.84,17 10.5,16.6 10.92,16L14.08,19.16C13.24,19.5 12.36,19.66 11.46,19.66C8.5,19.66 5.73,18.16 3.78,15.66L2.4,14.28C3.6,17 6.6,19 10,19C11.2,19 12.36,18.72 13.4,18.24L16.66,21.5C15.2,22.16 13.64,22.5 12,22.5C6.5,22.5 1.73,19.39 0,14C1.27,10.11 4.5,7 8.5,6.5L3.18,3.18Z</Geometry>
+
     <!-- ==================== 全局默认 TextBlock 样式 ==================== -->
     <!-- 仅设置字体链（含 emoji 回退）；Foreground 由 Window 级 TextElement.Foreground 继承驱动 -->
     <!-- 这样按钮的 TextElement.Foreground（local value, 优先级3）可以覆盖继承值（优先级5）， -->
@@ -441,6 +445,64 @@
                             <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
                         </DataTrigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 密码框（与 Input 同款聚焦环，遮罩字符） -->
+    <Style x:Key="InputPassword" TargetType="PasswordBox">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Grid>
+                        <Border x:Name="glow" CornerRadius="10"
+                                Background="{DynamicResource PrimaryBrush}"
+                                Opacity="0" IsHitTestVisible="False"
+                                Effect="{DynamicResource ShadowFocus}"
+                                Margin="-2"/>
+                        <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false"/>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter TargetName="glow" Property="Opacity" Value="0.18"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 对话框按钮键盘焦点环（替代被置空的默认 FocusVisualStyle） -->
+    <Style x:Key="DialogFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border CornerRadius="12" BorderBrush="{DynamicResource PrimaryBrush}"
+                            BorderThickness="2" Margin="-3" Background="Transparent"
+                            SnapsToDevicePixels="True"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

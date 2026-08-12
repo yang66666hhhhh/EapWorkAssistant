@@ -51,6 +51,14 @@ public partial class ConfirmDialog : Window
         // 取消按钮始终支持 Esc 关闭（见 xaml 的 IsCancel）。
         if (type != ConfirmDialogType.Danger)
             ConfirmButton.IsDefault = true;
+
+        // 打开时按风险自动聚焦：危险操作聚焦"取消"（安全默认），其余聚焦"确认"，
+        // 使键盘焦点可见（配合 DialogFocusVisual 焦点环），Esc/Enter 行为一目了然。
+        Loaded += (_, _) =>
+        {
+            var focusTarget = type == ConfirmDialogType.Danger ? CancelButton : ConfirmButton;
+            focusTarget.Focus();
+        };
     }
 
     /// <summary>
