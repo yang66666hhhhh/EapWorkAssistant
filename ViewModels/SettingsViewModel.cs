@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -442,7 +443,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void EditProject(string? project)
+    private async Task EditProject(string? project)
     {
         if (string.IsNullOrWhiteSpace(project)) return;
         var value = DialogService.Instance.ShowInputDialog("编辑任务", project);
@@ -455,8 +456,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateProject(project, value);
-            RefreshAsync();
-            StatusMessage = "任务已更新";
+            var count = await new WorkRecordRepository().UpdateProjectNameAsync(project, value);
+            await RefreshAsync();
+            StatusMessage = count > 0 ? $"任务已更新，已同步 {count} 条记录" : "任务已更新";
         }
     }
 
@@ -489,7 +491,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void EditWorkType(string? workType)
+    private async Task EditWorkType(string? workType)
     {
         if (string.IsNullOrWhiteSpace(workType)) return;
         var value = DialogService.Instance.ShowInputDialog("编辑工作类型", workType);
@@ -502,8 +504,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateWorkType(workType, value);
-            RefreshAsync();
-            StatusMessage = "类型已更新";
+            var count = await new WorkRecordRepository().UpdateWorkTypeAsync(workType, value);
+            await RefreshAsync();
+            StatusMessage = count > 0 ? $"类型已更新，已同步 {count} 条记录" : "类型已更新";
         }
     }
 
@@ -537,7 +540,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     }
 
     [RelayCommand]
-    private void EditKnowledgeCategory(string? category)
+    private async Task EditKnowledgeCategory(string? category)
     {
         if (string.IsNullOrWhiteSpace(category)) return;
         var value = DialogService.Instance.ShowInputDialog("编辑知识分类", category);
@@ -550,8 +553,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateKnowledgeCategory(category, value);
-            RefreshAsync();
-            StatusMessage = "分类已更新";
+            var count = await new KnowledgeRepository().UpdateCategoryAsync(category, value);
+            await RefreshAsync();
+            StatusMessage = count > 0 ? $"分类已更新，已同步 {count} 条知识" : "分类已更新";
         }
     }
 

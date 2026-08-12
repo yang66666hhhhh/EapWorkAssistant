@@ -85,4 +85,33 @@ public class WorkRecordRepositoryTests
             TestDb.Cleanup(db);
         }
     }
+
+    [Fact]
+    public async Task CascadeUpdate_ProjectName_And_WorkType()
+    {
+        var db = TestDb.NewTempDb();
+        try
+        {
+            var repo = new WorkRecordRepository();
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-12", ProjectName = "OldProject", WorkType = "OldType", Content = "c" });
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-13", ProjectName = "OldProject", WorkType = "OldType", Content = "c" });
+            await repo.InsertAsync(new WorkRecord { WorkDate = "2026-08-14", ProjectName = "OtherProject", WorkType = "OtherType", Content = "c" });
+
+            var pCount = await repo.UpdateProjectNameAsync("OldProject", "NewProject");
+            Assert.Equal(2, pCount);
+
+            var tCount = await repo.UpdateWorkTypeAsync("OldType", "NewType");
+            Assert.Equal(2, tCount);
+
+            var (page, total, _, _) = await repo.GetFilteredPagedAsync(null, "NewProject", "NewType", null, null, 0, 10);
+            Assert.Equal(2, total);
+
+            var (other, otherTotal, _, _) = await repo.GetFilteredPagedAsync(null, "OldProject", "OldType", null, null, 0, 10);
+            Assert.Equal(0, otherTotal);
+        }
+        finally
+        {
+            TestDb.Cleanup(db);
+        }
+    }
 }

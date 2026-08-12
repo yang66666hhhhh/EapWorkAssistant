@@ -36,6 +36,14 @@ public class KnowledgeRepositoryTests
 
             await repo.RestoreAsync(id);
             Assert.Equal(15, (await repo.GetAllAsync()).Count());
+
+            // 级联更新分类
+            var updated = await repo.UpdateCategoryAsync("A", "Alpha");
+            Assert.Equal(5, updated);
+            var (alphaPage, alphaTotal) = await repo.GetFilteredPagedAsync(null, false, "Alpha", 0, 10);
+            Assert.Equal(5, alphaTotal);
+            var (aPage, aTotal) = await repo.GetFilteredPagedAsync(null, false, "A", 0, 10);
+            Assert.Equal(0, aTotal);
         }
         finally
         {

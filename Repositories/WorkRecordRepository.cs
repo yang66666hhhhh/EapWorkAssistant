@@ -108,6 +108,32 @@ public class WorkRecordRepository
         });
     }
 
+    /// <summary>级联更新项目名称：修改配置项时同步所有工作记录</summary>
+    public async Task<int> UpdateProjectNameAsync(string oldProject, string newProject)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "UPDATE WorkRecord SET ProjectName = @NewProject WHERE ProjectName = @OldProject",
+                new { NewProject = newProject, OldProject = oldProject });
+        });
+    }
+
+    /// <summary>级联更新工作类型：修改配置项时同步所有工作记录</summary>
+    public async Task<int> UpdateWorkTypeAsync(string oldWorkType, string newWorkType)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "UPDATE WorkRecord SET WorkType = @NewWorkType WHERE WorkType = @OldWorkType",
+                new { NewWorkType = newWorkType, OldWorkType = oldWorkType });
+        });
+    }
+
     public async Task<int> DeleteAsync(int id)
     {
         return await Task.Run(async () =>

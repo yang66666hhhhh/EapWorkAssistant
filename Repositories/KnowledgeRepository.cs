@@ -66,6 +66,19 @@ public class KnowledgeRepository
         });
     }
 
+    /// <summary>级联更新分类：修改配置项时同步所有知识条目</summary>
+    public async Task<int> UpdateCategoryAsync(string oldCategory, string newCategory)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteAsync(
+                "UPDATE Knowledge SET Category = @NewCategory WHERE Category = @OldCategory",
+                new { NewCategory = newCategory, OldCategory = oldCategory });
+        });
+    }
+
     public async Task<int> DeleteAsync(int id)
     {
         return await Task.Run(async () =>
