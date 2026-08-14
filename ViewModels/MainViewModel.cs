@@ -194,15 +194,18 @@ public partial class MainViewModel : ObservableObject
         };
     }
 
-    /// <summary>工作记录：合法编辑由自动保存落库，直接放行；校验不过才询问，避免静默丢失。</summary>
+    /// <summary>
+    /// 工作记录离开确认。
+    /// - 未编辑：直接放行。
+    /// - 有有效编辑且满足自动保存条件：后台 flush 后放行。
+    /// - 只改了半成品（无法自动保存）：没有有效可保存内容，直接丢弃放行，避免「无脑提示」。
+    /// </summary>
     private bool CanLeaveWorkRecord(WorkRecordViewModel wr)
     {
         if (!wr.IsFormDirty) return true;
-        var (valid, error) = wr.ValidateStrict();
-        if (valid) return true;
-        return DialogService.Instance.ShowConfirm(
-            $"当前工作记录有未保存内容，但无法通过校验：{error}。离开将丢失，确定离开吗？",
-            "未保存的修改", ConfirmType.Warning);
+        if (!wr.CanQuickSave()) return true; // 半成品/空记录，没有保存价值，直接丢弃
+        wr.FlushPendingChangesAsync().SafeFire("离开保存失败");
+        return true;
     }
 
     /// <summary>用户取消离开时，把导航栏选中项还原到当前实际视图，避免高亮错位。</summary>

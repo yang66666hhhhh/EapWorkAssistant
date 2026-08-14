@@ -650,6 +650,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             Records.Add(CurrentRecord);
             UpdateStats();
         }
+
+        // 已落库的编辑不再是「未保存」
+        IsFormDirty = false;
     }
 
     /// <summary>
