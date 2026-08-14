@@ -305,7 +305,7 @@ public partial class WorkRecordView : UserControl
     {
         if (!_isDrawerOpen) return;
 
-        if (DataContext is WorkRecordViewModel vm && vm.IsFormDirty)
+        if (DataContext is WorkRecordViewModel vm && vm.HasUnsavedInput())
         {
             if (vm.CanQuickSave())
             {

@@ -669,6 +669,24 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     }
 
     /// <summary>
+    /// 判断当前是否有「值得保留」的实际输入。
+    /// 仅日期/默认空值时不算；有任一字段被修改过才认为有未保存输入。
+    /// </summary>
+    public bool HasUnsavedInput()
+    {
+        if (!IsFormDirty) return false;
+        if (CurrentRecord.Id > 0) return true;
+        return !string.IsNullOrWhiteSpace(CurrentRecord.ProjectName)
+            || !string.IsNullOrWhiteSpace(CurrentRecord.WorkType)
+            || !string.IsNullOrWhiteSpace(CurrentRecord.Content)
+            || !string.IsNullOrWhiteSpace(CurrentRecord.Achievement)
+            || !string.IsNullOrWhiteSpace(CurrentRecord.Problem)
+            || !string.IsNullOrWhiteSpace(CurrentRecord.Solution)
+            || CurrentRecord.Hours > 0
+            || CurrentRecord.IsHighlight > 0;
+    }
+
+    /// <summary>
     /// 刷出未保存的编辑数据。用于导航离开或关闭面板前调用。
     /// 仅做硬性校验 + 持久化，不弹出确认对话框，不重置表单。
     /// </summary>
@@ -732,6 +750,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private void EditRecord(WorkRecord? record)
     {
         if (record == null) return;
+        _suppressDirty = true;
         CurrentRecord = new WorkRecord
         {
             Id = record.Id,
@@ -749,9 +768,11 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         };
         HasProblem = !string.IsNullOrWhiteSpace(record.Problem);
         IsEditing = true;
+        IsFormDirty = false;
         FormTitle = "编辑记录";
         SaveButtonText = "更新记录";
         SelectedDailyRecord = record;
+        _suppressDirty = false;
     }
 
     [RelayCommand]
