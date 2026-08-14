@@ -7,19 +7,25 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
              Loaded="SettingsView_Loaded">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  Style="{StaticResource ModernScrollViewer}">
-        <StackPanel Margin="28,20,28,28">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <!-- 标题 -->
-            <TextBlock Text="系统设置" Style="{StaticResource Heading2}" Margin="0,0,0,20"/>
-
-            <!-- 状态消息 -->
+        <!-- 顶部固定：标题 + 状态消息，不随内容滚动消失 -->
+        <StackPanel Grid.Row="0" Margin="28,20,28,0">
+            <TextBlock Text="系统设置" Style="{StaticResource Heading2}" Margin="0,0,0,12"/>
             <Border Visibility="{Binding StatusMessage, Converter={x:Static local:StringToVisibilityConverter.Instance}}"
                     Background="{DynamicResource SuccessLightBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
                 <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource SuccessBrush}"
                            FontSize="13" FontWeight="Medium"/>
             </Border>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Style="{StaticResource ModernScrollViewer}">
+            <StackPanel Margin="28,0,28,28">
 
             <!-- ===== 外观与主题 ===== -->
             <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
@@ -1196,6 +1202,7 @@
                 </Grid>
             </Expander>
 
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

@@ -413,6 +413,8 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         StatusMessage = days.Count > 0
             ? $"休息日已设为：{string.Join("、", selected)}"
             : "未设置休息日，所有日期均为工作日";
+        if (days.Count > 0)
+            ToastService.Info($"休息日已设为：{string.Join("、", selected)}");
     }
 
     partial void OnIsRestDay0Changed(bool value) => UpdateRestDays();
@@ -439,6 +441,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             ConfigService.Instance.AddProject(value);
             RefreshAsync();
             StatusMessage = "任务已添加";
+            ToastService.Success($"任务「{value}」已添加");
         }
     }
 
@@ -459,6 +462,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             var count = await new WorkRecordRepository().UpdateProjectNameAsync(project, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"任务已更新，已同步 {count} 条记录" : "任务已更新";
+            ToastService.Success(count > 0 ? $"任务已更新，已同步 {count} 条记录" : "任务已更新");
         }
     }
 
@@ -474,6 +478,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveProject(project);
         await RefreshAsync();
         StatusMessage = "任务已删除";
+        ToastService.Success($"任务「{project}」已删除");
     }
 
     [RelayCommand]
@@ -491,6 +496,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             ConfigService.Instance.AddWorkType(value);
             RefreshAsync();
             StatusMessage = "类型已添加";
+            ToastService.Success($"类型「{value}」已添加");
         }
     }
 
@@ -511,6 +517,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             var count = await new WorkRecordRepository().UpdateWorkTypeAsync(workType, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"类型已更新，已同步 {count} 条记录" : "类型已更新";
+            ToastService.Success(count > 0 ? $"类型已更新，已同步 {count} 条记录" : "类型已更新");
         }
     }
 
@@ -526,6 +533,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveWorkType(workType);
         await RefreshAsync();
         StatusMessage = "类型已删除";
+        ToastService.Success($"类型「{workType}」已删除");
     }
 
     // ===== 知识分类管理 commands =====
@@ -544,6 +552,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             ConfigService.Instance.AddKnowledgeCategory(value);
             RefreshAsync();
             StatusMessage = "分类已添加";
+            ToastService.Success($"分类「{value}」已添加");
         }
     }
 
@@ -564,6 +573,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
             var count = await new KnowledgeRepository().UpdateCategoryAsync(category, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"分类已更新，已同步 {count} 条知识" : "分类已更新";
+            ToastService.Success(count > 0 ? $"分类已更新，已同步 {count} 条知识" : "分类已更新");
         }
     }
 
@@ -579,6 +589,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveKnowledgeCategory(category);
         await RefreshAsync();
         StatusMessage = "分类已删除";
+        ToastService.Success($"分类「{category}」已删除");
     }
 
     [RelayCommand]
@@ -598,6 +609,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 });
                 RefreshAsync();
                 StatusMessage = "模板已添加";
+                ToastService.Success($"模板「{value}」已添加");
             }
         }
     }
@@ -620,6 +632,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 });
                 RefreshAsync();
                 StatusMessage = "模板已更新";
+                ToastService.Success($"模板「{value}」已更新");
             }
         }
     }
@@ -632,6 +645,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ConfigService.Instance.RemoveContentTemplate(template.Name);
         RefreshAsync();
         StatusMessage = "模板已删除";
+        ToastService.Success($"模板「{template.Name}」已删除");
     }
 
     // ===== AI 服务配置 =====
@@ -708,6 +722,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ShowDashHighlights = true;
         ShowDashRecent = true;
         StatusMessage = "Dashboard 布局已重置为默认";
+        ToastService.Success("Dashboard 布局已重置为默认");
     }
 }
 
