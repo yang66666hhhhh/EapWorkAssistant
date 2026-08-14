@@ -291,6 +291,18 @@ public class WorkRecordRepository
         });
     }
 
+    public async Task<IEnumerable<string>> GetRecordedDatesAsync(string startDate, string endDate)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.QueryAsync<string>(
+                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
+                new { Start = startDate, End = endDate });
+        });
+    }
+
     public async Task<IEnumerable<WorkRecord>> SearchAsync(string keyword)
     {
         return await Task.Run(async () =>

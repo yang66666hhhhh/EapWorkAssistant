@@ -227,10 +227,11 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             ProbationRemainingDays = remaining;
             ProbationInfo = $"{start:yyyy-MM-dd} ~ {end:yyyy-MM-dd}（剩余 {remaining} 天）";
 
-            // 记录覆盖率：有记录的工作日占比
+            // 记录覆盖率：有记录的工作日占比（休息日记录不计入分子，避免顶满 100%）
             var startDateStr = start.ToString("yyyy-MM-dd");
             var endDateStr = DateTime.Now.ToString("yyyy-MM-dd");
-            var recordedDays = await _recordRepo.GetRecordedDaysCountAsync(startDateStr, endDateStr);
+            var recordedDates = await _recordRepo.GetRecordedDatesAsync(startDateStr, endDateStr);
+            var recordedDays = CoverageCalculator.CountRecordedWorkingDays(recordedDates, ConfigService.Instance.RestDays);
             RecordedDaysCount = recordedDays;
 
             // 计算工作日数（排除配置的休息日）

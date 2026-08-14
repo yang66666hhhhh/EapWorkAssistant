@@ -1,5 +1,6 @@
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
+using EapWorkAssistant.Services;
 using Xunit;
 
 namespace EapWorkAssistant.Tests;
@@ -151,5 +152,32 @@ public class DashboardAggregationTests
             Assert.Equal(1, Convert.ToInt32(stats["P1"].RecordCount));
         }
         finally { TestDb.Cleanup(db); }
+    }
+
+    [Fact]
+    public async Task GetRecordedDatesAsync_返回区间内不重复日期()
+    {
+        var db = TestDb.NewTempDb();
+        try
+        {
+            var repo = new WorkRecordRepository();
+            await repo.InsertAsync(Make("2026-08-01", "P1", "开发", 8));
+            await repo.InsertAsync(Make("2026-08-01", "P2", "运维", 2)); // 同日
+            await repo.InsertAsync(Make("2026-08-03", "P1", "开发", 5));
+            await repo.InsertAsync(Make("2026-08-09", "P1", "开发", 3)); // 周日休息日
+
+            var dates = (await repo.GetRecordedDatesAsync("2026-08-01", "2026-08-31")).ToList();
+            Assert.Equal(new[] { "2026-08-01", "2026-08-03", "2026-08-09" }, dates);
+        }
+        finally { TestDb.Cleanup(db); }
+    }
+
+    [Fact]
+    public void CoverageCalculator_休息日不计入有记录工作日()
+    {
+        var recordedDates = new[] { "2026-08-10", "2026-08-11", "2026-08-13", "2026-08-16" };
+        // 默认周六(6)、周日(0)为休息日；2026-08-16 为周日，应被排除
+        var workingDays = CoverageCalculator.CountRecordedWorkingDays(recordedDates, new List<int> { 0, 6 });
+        Assert.Equal(3, workingDays); // 周一/周二/周四
     }
 }
