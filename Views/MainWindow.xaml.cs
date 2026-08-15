@@ -2,18 +2,30 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace EapWorkAssistant.Views;
 
 public partial class MainWindow : Window
 {
+    // 侧边栏宽度：展开 240（建议范围 220–280）、折叠 72（图标轨道）
+    private const double ExpandedSidebarWidth = 240;
+    private const double CollapsedSidebarWidth = 72;
+    // 响应式阈值：窄于 900 自动折叠，宽于 1200 自动展开
+    private const double AutoCollapseBelow = 900;
+    private const double AutoExpandAbove = 1200;
+
     private readonly List<KeyBinding> _dynamicBindings = new();
+    private bool _autoResponsive = true;
 
     public MainWindow()
     {
         InitializeComponent();
         Loaded += MainWindow_Loaded;
+        SizeChanged += MainWindow_SizeChanged;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -27,6 +39,93 @@ public partial class MainWindow : Window
 
         // 应用当前字体大小缩放（Initialize 时窗口尚未就绪，需在此处补设）
         ApplyUIScale();
+
+        // 窄屏启动（如平板/小窗）默认折叠侧边栏，避免内容被挤压
+        if (DataContext is MainViewModel mvm && ActualWidth < AutoCollapseBelow)
+        {
+            SidebarColumn.Width = new GridLength(CollapsedSidebarWidth, GridUnitType.Pixel);
+            mvm.IsSidebarCollapsed = true;
+            // 折叠态：装饰环缩至消失，文字不可见，头像保持不变
+            if (ProfileRingScale != null)
+            {
+                ProfileRingScale.ScaleX = 0;
+                ProfileRingScale.ScaleY = 0;
+            }
+            if (ProfileCardRing != null) ProfileCardRing.Opacity = 0;
+            if (ProfileInfo != null) ProfileInfo.Opacity = 0;
+            if (ProfileMeta != null) ProfileMeta.Opacity = 0;
+        }
+    }
+
+    /// <summary>折叠/展开侧边栏（带平滑宽度动画），用户手动操作后交由用户控制，停止响应式自动切换。</summary>
+    private void SidebarToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm) return;
+        var collapse = !vm.IsSidebarCollapsed;
+        AnimateSidebar(collapse);
+        vm.IsSidebarCollapsed = collapse;
+        _autoResponsive = false;
+    }
+
+    /// <summary>平滑动画侧边栏列宽（展开 240 / 折叠 72），同时裁剪底部卡片至仅露头像。</summary>
+    private void AnimateSidebar(bool collapse)
+    {
+        var target = collapse ? CollapsedSidebarWidth : ExpandedSidebarWidth;
+        var anim = new GridLengthAnimation
+        {
+            From = SidebarColumn.Width,
+            To = new GridLength(target, GridUnitType.Pixel),
+            Duration = TimeSpan.FromMilliseconds(220)
+        };
+        SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, anim);
+
+        // 底部卡片缩放收缩：以头像位置为原点缩小，卡片"缩进"头像里
+        AnimateProfileScale(collapse);
+    }
+
+    /// <summary>装饰环收缩动画：以头像中心为原点，灰色卡片 Scale(1→0) + Opacity(1→0) 缩至消失，头像完全不动。</summary>
+    private void AnimateProfileScale(bool collapse)
+    {
+        if (ProfileRingScale == null || ProfileCardRing == null) return;
+
+        // 动画参数：0.4s, cubic-bezier(0.4, 0, 0.2, 1) → EaseInOut
+        var duration = TimeSpan.FromMilliseconds(400);  // 0.4s
+        var ease = new CubicEase { EasingMode = EasingMode.EaseInOut };
+
+        // 装饰环缩放：展开=1.0，折叠=0（完全缩至原点/头像中心）
+        var targetScale = collapse ? 0.0 : 1.0;
+        var scaleXAnim = new DoubleAnimation(targetScale, new Duration(duration)) { EasingFunction = ease };
+        var scaleYAnim = new DoubleAnimation(targetScale, new Duration(duration)) { EasingFunction = ease };
+
+        ProfileRingScale.BeginAnimation(ScaleTransform.ScaleXProperty, scaleXAnim);
+        ProfileRingScale.BeginAnimation(ScaleTransform.ScaleYProperty, scaleYAnim);
+
+        // 装饰环淡出/淡入（配合缩放，确保折叠态完全不可见）
+        var opacityTarget = collapse ? 0.0 : 1.0;
+        var opacityAnim = new DoubleAnimation(opacityTarget, new Duration(duration)) { EasingFunction = ease };
+        ProfileCardRing.BeginAnimation(UIElement.OpacityProperty, opacityAnim);
+
+        // 文字信息淡出/淡入（头像保持不变，无需处理）
+        var textTarget = collapse ? 0.0 : 1.0;
+        var textAnim = new DoubleAnimation(textTarget, new Duration(duration)) { EasingFunction = ease };
+        if (ProfileInfo != null) ProfileInfo.BeginAnimation(UIElement.OpacityProperty, textAnim);
+        if (ProfileMeta != null) ProfileMeta.BeginAnimation(UIElement.OpacityProperty, textAnim);
+    }
+
+    /// <summary>响应式：窗口变窄自动折叠、变宽自动展开；用户手动操作后不再自动干预。</summary>
+    private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (!_autoResponsive || DataContext is not MainViewModel vm) return;
+        if (ActualWidth < AutoCollapseBelow && !vm.IsSidebarCollapsed)
+        {
+            AnimateSidebar(true);
+            vm.IsSidebarCollapsed = true;
+        }
+        else if (ActualWidth > AutoExpandAbove && vm.IsSidebarCollapsed)
+        {
+            AnimateSidebar(false);
+            vm.IsSidebarCollapsed = false;
+        }
     }
 
     private void ApplyUIScale()

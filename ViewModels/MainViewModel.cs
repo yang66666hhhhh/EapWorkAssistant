@@ -28,6 +28,9 @@ public partial class MainViewModel : ObservableObject
     private bool _isSearchOpen;
 
     [ObservableProperty]
+    private bool _isSidebarCollapsed;
+
+    [ObservableProperty]
     private bool _isSearching;
 
     [ObservableProperty]
@@ -184,10 +187,10 @@ public partial class MainViewModel : ObservableObject
         return CurrentView switch
         {
             WorkRecordViewModel wr => CanLeaveWorkRecord(wr),
-            KnowledgeViewModel kw => !kw.IsFormDirty || DialogService.Instance.ShowConfirm(
+            KnowledgeViewModel kw => !kw.IsFormDirty || !kw.HasUnsavedInput() || DialogService.Instance.ShowConfirm(
                 "当前知识库页面有未保存的修改，离开后将丢失。确定离开吗？",
                 "未保存的修改", ConfirmType.Warning),
-            IssueViewModel iss => !iss.IsFormDirty || DialogService.Instance.ShowConfirm(
+            IssueViewModel iss => !iss.IsFormDirty || !iss.HasUnsavedInput() || DialogService.Instance.ShowConfirm(
                 "当前问题跟踪页面有未保存的修改，离开后将丢失。确定离开吗？",
                 "未保存的修改", ConfirmType.Warning),
             _ => true
