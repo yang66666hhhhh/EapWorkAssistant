@@ -166,6 +166,7 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
     private void Edit(Issue? item)
     {
         if (item == null) return;
+        _suppressDirty = true;
         CurrentItem = new Issue
         {
             Id = item.Id,
@@ -179,6 +180,7 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
             Priority = item.Priority
         };
         IsFormDirty = false;
+        _suppressDirty = false;
     }
 
     [RelayCommand]
@@ -211,4 +213,23 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
 
     protected override string EmptyImportMessage => "文件为空，没有可导入的问题";
     protected override string ImportSuccessMessage => "已导入 {0} 条问题";
+
+    /// <summary>
+    /// 二次验证：是否真的有未保存的用户输入。
+    /// 仅脏标记为 true 不足以判定——WPF 绑定初始化也可能触发 MarkDirty()。
+    /// 新增模式（Id=0）时检查各字段是否有实际内容；编辑模式（Id&gt;0）直接信任脏标记。
+    /// </summary>
+    public bool HasUnsavedInput()
+    {
+        if (!IsFormDirty) return false;
+        // 编辑已有条目：脏标记可信
+        if (CurrentItem.Id > 0) return true;
+        // 新增模式：必须有实际内容才算"有输入"
+        return !string.IsNullOrWhiteSpace(CurrentItem.Title)
+            || !string.IsNullOrWhiteSpace(CurrentItem.ProjectName)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Description)
+            || !string.IsNullOrWhiteSpace(CurrentItem.RootCause)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Solution)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Keywords);
+    }
 }

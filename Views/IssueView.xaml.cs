@@ -36,11 +36,13 @@ public partial class IssueView : UserControl
     private void OpenForm_Click(object sender, RoutedEventArgs e)
     {
         if (_isDrawerOpen) return;
-        // 新增模式：重置表单
+        // 新增模式：安全重置表单（屏蔽绑定事件触发的脏标记）
         if (DataContext is IssueViewModel vm)
         {
+            vm._suppressDirty = true;
             vm.CurrentItem = new EapWorkAssistant.Models.Issue();
             vm.IsFormDirty = false;
+            vm._suppressDirty = false;
         }
         OpenDrawer();
     }
@@ -83,10 +85,13 @@ public partial class IssueView : UserControl
         }
 
         _isDrawerOpen = false;
+        // 立即重置脏标记（不等动画回调），避免用户在动画期间切换导航时误触发确认框
+        if (DataContext is IssueViewModel vm2)
+            vm2.IsFormDirty = false;
         DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
         {
-            if (DataContext is IssueViewModel vm)
-                vm.NewCommand.Execute(null);
+            if (DataContext is IssueViewModel vm3)
+                vm3.NewCommand.Execute(null);
         }, 500);
     }
 

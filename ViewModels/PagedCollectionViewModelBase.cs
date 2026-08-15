@@ -17,7 +17,7 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
 {
     protected readonly UiTimer _statusTimer;
     protected readonly UiTimer _searchTimer;
-    protected bool _suppressDirty;
+    internal bool _suppressDirty;  // internal: View code-behind 需要访问以安全重置表单（屏蔽绑定事件触发的脏标记）
 
     public event Action? PanelCloseRequested;
 

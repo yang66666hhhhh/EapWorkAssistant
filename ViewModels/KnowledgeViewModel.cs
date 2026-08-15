@@ -41,6 +41,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
     {
         if (value != null)
         {
+            _suppressDirty = true;
             CurrentItem = new Knowledge
             {
                 Id = value.Id,
@@ -50,6 +51,8 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
                 Category = value.Category,
                 IsFavorite = value.IsFavorite
             };
+            IsFormDirty = false;
+            _suppressDirty = false;
         }
     }
 
@@ -201,6 +204,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
     private void Edit(Knowledge? item)
     {
         if (item == null) return;
+        _suppressDirty = true;
         CurrentItem = new Knowledge
         {
             Id = item.Id,
@@ -211,6 +215,7 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
             IsFavorite = item.IsFavorite
         };
         IsFormDirty = false;
+        _suppressDirty = false;
     }
 
     [RelayCommand]
@@ -244,4 +249,18 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
 
     protected override string EmptyImportMessage => "文件为空，没有可导入的知识";
     protected override string ImportSuccessMessage => "已导入 {0} 条知识";
+
+    /// <summary>
+    /// 二次验证：是否真的有未保存的用户输入。
+    /// 新增模式（Id=0）时检查各字段是否有实际内容；编辑模式（Id&gt;0）直接信任脏标记。
+    /// </summary>
+    public bool HasUnsavedInput()
+    {
+        if (!IsFormDirty) return false;
+        if (CurrentItem.Id > 0) return true;
+        return !string.IsNullOrWhiteSpace(CurrentItem.Title)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Content)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Tags)
+            || !string.IsNullOrWhiteSpace(CurrentItem.Category);
+    }
 }
