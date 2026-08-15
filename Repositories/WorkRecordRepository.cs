@@ -160,6 +160,7 @@ public class WorkRecordRepository
         });
     }
 
+    /// <summary>软删除（移入回收站）</summary>
     public async Task<int> DeleteAsync(int id)
     {
         return await Task.Run(async () =>
@@ -167,7 +168,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET IsDeleted = 1 WHERE Id = @Id", new { Id = id });
+                "UPDATE WorkRecord SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id", new { Id = id });
         });
     }
 
@@ -414,7 +415,7 @@ public class WorkRecordRepository
         });
     }
 
-    /// <summary>取回收站中的已删除记录（IsDeleted = 1）</summary>
+    /// <summary>取回收站中的已删除记录（IsDeleted = 1），按删除时间倒序</summary>
     public async Task<IEnumerable<WorkRecord>> GetDeletedAsync()
     {
         return await Task.Run(async () =>
@@ -422,7 +423,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 1 ORDER BY Id DESC");
+                "SELECT * FROM WorkRecord WHERE IsDeleted = 1 ORDER BY COALESCE(DeletedAt, '') DESC, Id DESC");
         });
     }
 
@@ -434,7 +435,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET IsDeleted = 0 WHERE Id = @Id", new { Id = id });
+                "UPDATE WorkRecord SET IsDeleted = 0, DeletedAt = NULL WHERE Id = @Id", new { Id = id });
         });
     }
 

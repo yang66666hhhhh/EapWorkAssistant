@@ -9,5 +9,6 @@ public class Knowledge
     public string Category { get; set; } = string.Empty;
     public int IsFavorite { get; set; }
     public int IsDeleted { get; set; }
+    public string? DeletedAt { get; set; }
     public string CreateTime { get; set; } = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 }

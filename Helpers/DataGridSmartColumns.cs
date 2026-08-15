@@ -123,7 +123,7 @@ public static class SmartColumns
         // 宽表默认优先可读性，不再为了塞进视口而压缩长文本列。
         if (Matches(header, path, "日期", "WorkDate")) return Fixed(136, 120, 156);
         if (Matches(header, path, "任务", "ProjectName")) return Fixed(160, 140, 180);
-        if (Matches(header, path, "标题", "Title")) return Fixed(168, 150, 190);
+        if (Matches(header, path, "标题", "Title")) return Star(2, 180);       // 主标识符：弹性宽度，最小180
         if (Matches(header, path, "类型", "WorkType")) return Fixed(100, 92, 112);
         if (Matches(header, path, "内容", "Content")) return Fixed(300, 240);
         if (Matches(header, path, "工作成果", "Achievement")) return Fixed(240, 220);
@@ -136,12 +136,17 @@ public static class SmartColumns
         if (Matches(header, path, "优先级", "Priority")) return Fixed(84, 76, 96);
         if (Matches(header, path, "工时", "Hours")) return Fixed(80, 76, 92);
         if (Matches(header, path, "进度", "Progress")) return Fixed(144, 132, 156);
+
+        // 回收站专用列
+        if (Matches(header, path, "摘要", "Detail")) return Fixed(200, 160);   // 次要信息，固定合理宽度
+        if (Matches(header, path, "删除时间", "DeletedAt")) return Fixed(148, 130, 165); // datetime 精确适配
+
         if (IsActionColumn(header, path)) return Fixed(136, 128, 152);
 
-        // 未识别但原本是 Star 的列，给一个保守的舒展默认值，避免首屏过挤。
+        // 未识别但原本是 Star 的列，保留弹性布局（给一个合理的 star 权重）
         if (column.Width.IsStar)
         {
-            return Fixed(220, 180);
+            return Star(1, 160);
         }
 
         return null;
@@ -149,6 +154,9 @@ public static class SmartColumns
 
     private static ColumnWidthProfile Fixed(double width, double minWidth, double? maxWidth = null) =>
         new(new DataGridLength(width, DataGridLengthUnitType.Pixel), minWidth, maxWidth);
+
+    private static ColumnWidthProfile Star(double starWeight = 1, double minWidth = 100) =>
+        new(new DataGridLength(starWeight, DataGridLengthUnitType.Star), minWidth);
 
     private static bool Matches(string? header, string? path, string expectedHeader, string expectedPath) =>
         string.Equals(header, expectedHeader, StringComparison.OrdinalIgnoreCase) ||

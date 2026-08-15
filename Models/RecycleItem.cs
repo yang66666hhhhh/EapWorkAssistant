@@ -14,4 +14,7 @@ public class RecycleItem
     public string Title { get; set; } = "";
 
     public string Detail { get; set; } = "";
+
+    /// <summary>删除时间（用于排序和展示）</summary>
+    public string? DeletedAt { get; set; }
 }
