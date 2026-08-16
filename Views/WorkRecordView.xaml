@@ -148,7 +148,7 @@
                                             Foreground="{DynamicResource PrimaryBrush}"/>
                                     <Button Content="导入CSV" Command="{Binding ImportCsvCommand}"
                                             Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
-                                            Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            Foreground="{DynamicResource PrimaryBrush}"/>
                                 </StackPanel>
                             </StackPanel>
 
