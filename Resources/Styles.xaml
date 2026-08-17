@@ -70,7 +70,8 @@
     <SolidColorBrush x:Key="ScrollThumbBrush" Color="{DynamicResource ScrollThumb}"/>
     <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{DynamicResource ScrollThumbHover}"/>
     <SolidColorBrush x:Key="ScrollThumbActiveBrush" Color="{DynamicResource ScrollThumbActive}"/>
-    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#380B1120"/>
+    <!-- 弹窗背景遮罩（双主题，由 ThemeService 按主题设置：浅色 #4D000000≈0.30 / 暗色 #99000000≈0.60） -->
+    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#4D000000"/>
     <SolidColorBrush x:Key="AvatarOverlayBrush" Color="#50000000"/>
     <SolidColorBrush x:Key="AvatarHeavyOverlayBrush" Color="#60000000"/>
     <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="#CCFFFFFF"/>
@@ -131,6 +132,21 @@
     <DropShadowEffect x:Key="ShadowMd" BlurRadius="28" ShadowDepth="4" Opacity="0.075" Color="#FF000000"/>
     <DropShadowEffect x:Key="ShadowLg" BlurRadius="44" ShadowDepth="8" Opacity="0.11" Color="#FF000000"/>
     <DropShadowEffect x:Key="ShadowFocus" BlurRadius="14" ShadowDepth="0" Opacity="0.16" Color="#FF6366F1"/>
+
+    <!-- ==================== 模态框阴影（双主题，环境光 + 主光双层） ==================== -->
+    <!-- 主色固定 #2466FF；Opacity 由 ThemeService 按主题设置（浅色 0.18 / 暗色 0.06） -->
+    <Color x:Key="ModalShadowColor">#FF2466FF</Color>
+    <!-- 主光：聚焦投影，BlurRadius 40 / ShadowDepth 20 -->
+    <DropShadowEffect x:Key="ModalShadow" BlurRadius="40" ShadowDepth="20"
+                      Color="{DynamicResource ModalShadowColor}" Opacity="0.18"/>
+    <!-- 环境光：柔和扩散光晕，BlurRadius 60 / ShadowDepth 0（Opacity 由 ThemeService 设置：浅色 0.10 / 暗色 0.04） -->
+    <DropShadowEffect x:Key="ModalShadowAmbient" BlurRadius="60" ShadowDepth="0"
+                      Color="{DynamicResource ModalShadowColor}" Opacity="0.10"/>
+    <!-- 模态窗口重阴影（独立 Window 如 ProfileDialog，浮在深色遮罩之上）
+         需要极强的立体感——高对比度黑色投影 + 较大深度，让卡片像从暗背景中"破土而出"
+         Opacity 由 ThemeService 按主题设置（浅色 0.40 / 暗色 0.25） -->
+    <DropShadowEffect x:Key="ModalHeavyShadow" BlurRadius="50" ShadowDepth="24"
+                      Color="#FF000000" Opacity="0.40"/>
 
     <!-- ==================== 动画 ==================== -->
     <Storyboard x:Key="FadeIn">
@@ -1675,11 +1691,37 @@
     <DropShadowEffect x:Key="ShadowPanel" BlurRadius="46" ShadowDepth="-10" Opacity="0.17"
                       Color="#FF000000" Direction="180"/>
 
-    <!-- 表单遮罩层（深色半透明） -->
+    <!-- 表单遮罩层（深色半透明，双主题由 OverlayMaskBrush 控制） -->
     <Style x:Key="OverlayBackdrop" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource OverlayMaskBrush}"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- 居中模态框容器（环境光 + 主光双层阴影） -->
+    <!-- 用法：<ContentControl Style="{StaticResource ModalDialogPanel}" Background="{DynamicResource CardBrush}" Padding="24">…内容…</ContentControl> -->
+    <!-- 外层 Border 承担环境光晕（Padding=8 让内层卡片四周露出柔光），内层 Border 承担主光投影 + 卡片本体 -->
+    <Style x:Key="ModalDialogPanel" TargetType="ContentControl">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <!-- 外层：环境光晕（略大于卡片，主色 #2466FF 柔和扩散） -->
+                    <Border Background="{DynamicResource CardBrush}" Padding="8"
+                            CornerRadius="22" Effect="{DynamicResource ModalShadowAmbient}">
+                        <!-- 内层：主光投影 + 卡片本体（背景/Padding 由使用处 TemplateBinding 传入，圆角固定 16） -->
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="16"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                Padding="{TemplateBinding Padding}"
+                                Effect="{DynamicResource ModalShadow}">
+                            <ContentPresenter/>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- 日历遮罩层（浅色半透明） -->

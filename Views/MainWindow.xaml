@@ -312,11 +312,9 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <Border CornerRadius="14" Background="{DynamicResource CardBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="30" ShadowDepth="10" Opacity="0.2" Color="#FF000000"/>
-                    </Border.Effect>
+                <!-- 居中模态容器：环境光 + 主光双层阴影（ModalDialogPanel） -->
+                <ContentControl Style="{StaticResource ModalDialogPanel}"
+                        Background="{DynamicResource CardBrush}" Padding="0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -488,7 +486,7 @@
                             </Grid>
                         </Border>
                     </Grid>
-                </Border>
+                </ContentControl>
             </Border>
 
             <!-- ===== Toast 通知浮层 ===== -->

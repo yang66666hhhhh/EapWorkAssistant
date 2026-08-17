@@ -235,6 +235,39 @@ public class ThemeService : INotifyPropertyChanged
         UpdateBrush(res, "WarningLightBrush", colors.WarningLight);
         UpdateBrush(res, "DangerBrush", colors.Danger);
         UpdateBrush(res, "DangerLightBrush", colors.DangerLight);
+
+        // 弹窗背景遮罩（双主题）：浅色 #000000×0.30，暗色 #000000×0.60
+        UpdateBrush(res, "OverlayMaskBrush", IsDarkMode ? "#99000000" : "#4D000000");
+
+        // 模态框阴影（双主题，主色 #2466FF）：
+        //   主光 BlurRadius 40 / ShadowDepth 20 —— 浅色 Opacity 0.18 / 暗色 0.06（暗色配合深色背景需更淡）
+        //   环境光 BlurRadius 60 / ShadowDepth 0 —— 浅色 Opacity 0.10 / 暗色 0.04
+        // 注：DropShadowEffect 可能被 Freeze，故直接替换整个实例（与 ShadowFocus 同机制）
+        var modalColor = ParseColor("#2466FF");
+        res["ModalShadow"] = new System.Windows.Media.Effects.DropShadowEffect
+        {
+            BlurRadius = 40,
+            ShadowDepth = 20,
+            Color = modalColor,
+            Opacity = IsDarkMode ? 0.06 : 0.18
+        };
+        res["ModalShadowAmbient"] = new System.Windows.Media.Effects.DropShadowEffect
+        {
+            BlurRadius = 60,
+            ShadowDepth = 0,
+            Color = modalColor,
+            Opacity = IsDarkMode ? 0.04 : 0.10
+        };
+
+        // 模态窗口重阴影（独立 Window 如 ProfileDialog，浮在深色遮罩之上）
+        // 黑色高对比投影：浅色 Opacity 0.40（强立体感）/ 暗色 0.25（深色背景上稍收敛但仍醒目）
+        res["ModalHeavyShadow"] = new System.Windows.Media.Effects.DropShadowEffect
+        {
+            BlurRadius = 50,
+            ShadowDepth = 24,
+            Color = Colors.Black,
+            Opacity = IsDarkMode ? 0.25 : 0.40
+        };
     }
 
     private void ApplyAccentColor()
@@ -396,7 +429,13 @@ public class ThemeService : INotifyPropertyChanged
 
     private static Color ParseColor(string hex)
     {
-        return (Color)ColorConverter.ConvertFromString(hex.StartsWith("#FF") ? hex : "#FF" + hex.TrimStart('#'));
+        // 去掉 # 前缀
+        var clean = hex.TrimStart('#');
+        // 已含 Alpha 通道（#AARRGGBB 8 位 或 #FFRRGGBB）→ 直接解析
+        if (clean.Length == 8 || hex.StartsWith("#FF"))
+            return (Color)ColorConverter.ConvertFromString(hex);
+        // 纯 RGB 6 位 → 补全不透明 Alpha
+        return (Color)ColorConverter.ConvertFromString("#FF" + clean);
     }
 
     /// <summary>
