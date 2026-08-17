@@ -62,6 +62,20 @@ public partial class ConfirmDialog : Window
     }
 
     /// <summary>
+    /// 窗口加载时：将自身尺寸设为 Owner（主窗口）大小，实现全屏遮罩覆盖
+    /// </summary>
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (Owner is Window owner)
+        {
+            Width = owner.ActualWidth;
+            Height = owner.ActualHeight;
+            Left = owner.Left;
+            Top = owner.Top;
+        }
+    }
+
+    /// <summary>
     /// 快捷方法：显示确认对话框并返回用户选择
     /// </summary>
     public static bool Show(string message, string title = "确认", ConfirmDialogType type = ConfirmDialogType.Warning,

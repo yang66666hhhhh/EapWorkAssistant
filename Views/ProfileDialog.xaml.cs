@@ -37,12 +37,26 @@ public partial class ProfileDialog : Window
     }
 
     /// <summary>
-    /// 快捷方法：显示个人信息编辑对话框
+    /// 快捷方法：显示个人信息编辑对话框（全屏遮罩 + 居中卡片）
     /// </summary>
     public static new bool Show()
     {
         var dialog = new ProfileDialog { Owner = Application.Current.MainWindow };
         return dialog.ShowDialog() == true;
+    }
+
+    /// <summary>
+    /// 窗口加载时：将自身尺寸设为 Owner（主窗口）大小，实现全屏遮罩覆盖
+    /// </summary>
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (Owner is Window owner)
+        {
+            Width = owner.ActualWidth;
+            Height = owner.ActualHeight;
+            Left = owner.Left;
+            Top = owner.Top;
+        }
     }
 
     private void Avatar_Click(object sender, MouseButtonEventArgs e)

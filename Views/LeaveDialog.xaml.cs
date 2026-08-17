@@ -52,6 +52,20 @@ public partial class LeaveDialog : Window
         };
     }
 
+    /// <summary>
+    /// 窗口加载时：将自身尺寸设为 Owner（主窗口）大小，实现全屏遮罩覆盖
+    /// </summary>
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (Owner is Window owner)
+        {
+            Width = owner.ActualWidth;
+            Height = owner.ActualHeight;
+            Left = owner.Left;
+            Top = owner.Top;
+        }
+    }
+
     private void UpdateMonthLabel()
     {
         MonthLabel.Text = $"{_year}年{_month}月";

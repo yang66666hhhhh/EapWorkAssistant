@@ -15,6 +15,20 @@ public partial class ConfigItemDialog : Window
         InitializeComponent();
     }
 
+    /// <summary>
+    /// 窗口加载时：将自身尺寸设为 Owner（主窗口）大小，实现全屏遮罩覆盖
+    /// </summary>
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (Owner is Window owner)
+        {
+            Width = owner.ActualWidth;
+            Height = owner.ActualHeight;
+            Left = owner.Left;
+            Top = owner.Top;
+        }
+    }
+
     private void InputTextBox_GotFocus(object sender, RoutedEventArgs e)
     {
         InputTextBox.SelectAll();

@@ -3,14 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
         xmlns:views="clr-namespace:EapWorkAssistant.Views"
-        Title="请假管理" Height="560" Width="500"
+        Title="请假管理"
         WindowStartupLocation="CenterOwner" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent"
-        ShowInTaskbar="False" ResizeMode="NoResize">
+        ShowInTaskbar="False" ResizeMode="NoResize"
+        Loaded="Window_Loaded">
     <Grid>
-        <!-- 对话框主卡片 -->
-        <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Margin="20"
-                Effect="{StaticResource ShadowLg}">
+        <!-- 模态遮罩（双主题，铺满全屏） -->
+        <Border Background="{DynamicResource OverlayMaskBrush}"/>
+        <!-- 对话框主卡片（重模态阴影，居中） -->
+        <Border Background="{DynamicResource CardBrush}" CornerRadius="14"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                MaxWidth="500" Margin="32"
+                Effect="{DynamicResource ModalHeavyShadow}">
             <Grid Margin="24,20,24,20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
