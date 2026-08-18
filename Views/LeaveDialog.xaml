@@ -12,7 +12,7 @@
         <!-- 模态遮罩（双主题，铺满全屏） -->
         <Border Background="{DynamicResource OverlayMaskBrush}"/>
         <!-- 对话框主卡片（重模态阴影，居中） -->
-        <Border Background="{DynamicResource CardBrush}" CornerRadius="14"
+        <Border Style="{StaticResource Card}" Padding="0"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 MaxWidth="500" Margin="32"
                 Effect="{DynamicResource ModalHeavyShadow}">

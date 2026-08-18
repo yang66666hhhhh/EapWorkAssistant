@@ -127,6 +127,16 @@
     <Thickness x:Key="DensityRowMargin">0,0,0,6</Thickness>
     <Thickness x:Key="DensityItemMargin">0,0,0,12</Thickness>
 
+    <!-- ==================== 圆角 token ==================== -->
+    <!-- 统一圆角档位，供样式与 View 引用，消除散落的魔法数字（AGENTS.md 要求） -->
+    <CornerRadius x:Key="RadiusXs">6</CornerRadius>
+    <CornerRadius x:Key="RadiusSm">8</CornerRadius>
+    <CornerRadius x:Key="RadiusMd">10</CornerRadius>
+    <CornerRadius x:Key="RadiusLg">12</CornerRadius>
+    <CornerRadius x:Key="RadiusCard">16</CornerRadius>
+    <CornerRadius x:Key="RadiusXl">22</CornerRadius>
+    <CornerRadius x:Key="RadiusPill">9999</CornerRadius>
+
     <!-- ==================== 阴影效果（更精致） ==================== -->
     <DropShadowEffect x:Key="ShadowSm" BlurRadius="16" ShadowDepth="1" Opacity="0.045" Color="#FF000000"/>
     <DropShadowEffect x:Key="ShadowMd" BlurRadius="28" ShadowDepth="4" Opacity="0.075" Color="#FF000000"/>
@@ -725,7 +735,7 @@
     <!-- 卡片 -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}"/>
         <Setter Property="Padding" Value="{DynamicResource DensityCardPad}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -734,7 +744,7 @@
 
     <Style x:Key="CardElevated" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}"/>
         <Setter Property="Padding" Value="{DynamicResource DensityCardPad}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -751,7 +761,7 @@
     <!-- 可交互卡片（悬停边框+阴影） -->
     <Style x:Key="CardHover" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
@@ -766,7 +776,7 @@
 
     <!-- 状态标签 -->
     <Style x:Key="Tag" TargetType="Border">
-        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXs}"/>
         <Setter Property="Padding" Value="8,4"/>
     </Style>
 

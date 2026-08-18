@@ -11,7 +11,7 @@
         <StackPanel Margin="28,24,28,28">
 
             <!-- ===== 顶部标题栏 ===== -->
-            <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+            <Border Style="{StaticResource Card}" Padding="24"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Margin="0,0,0,14">
                 <Grid>
@@ -147,7 +147,7 @@
             <Border CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
                     Visibility="{Binding ShowDashReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                     Background="{DynamicResource AccentBannerGradient}">
-                <Border Background="{DynamicResource CardBrush}" CornerRadius="13" Padding="18,14">
+                <Border Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="10"
@@ -199,7 +199,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,14"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Cursor="Hand" MouseLeftButtonDown="StatCard_Issues_Click">
                     <Grid>
@@ -220,7 +220,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="18,14"
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,14"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Cursor="Hand" MouseLeftButtonDown="StatCard_Knowledge_Click">
                     <Grid>
@@ -248,7 +248,7 @@
             <Border CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
                     Visibility="{Binding ShowDashProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                     Background="{DynamicResource AccentBannerGradient}">
-                <Border Background="{DynamicResource CardBrush}" CornerRadius="13" Padding="24">
+                <Border Style="{StaticResource Card}" Padding="24">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
                             <Grid>
@@ -364,7 +364,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- 工时趋势图表 -->
-                <Border Grid.Column="0" Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="22"
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="22"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Visibility="{Binding ShowDashCharts, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
@@ -415,7 +415,7 @@
                 </Border>
 
                 <!-- 项目分布饼图 -->
-                <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="22"
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="22"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Visibility="{Binding ShowDashCharts, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
@@ -448,7 +448,7 @@
                 </Border>
 
                 <!-- 亮点列表（可滚动） -->
-                <Border Grid.Column="4" Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="22"
+                <Border Grid.Column="4" Style="{StaticResource Card}" Padding="22"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Visibility="{Binding ShowDashHighlights, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                         MaxHeight="480">
@@ -516,7 +516,7 @@
             </Grid>
 
             <!-- ===== 转正述职材料（仅试用期员工显示） ===== -->
-            <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+            <Border Style="{StaticResource Card}" Padding="24"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Margin="0,0,0,14"
                     Visibility="{Binding IsProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
@@ -555,7 +555,7 @@
             </Border>
 
             <!-- ===== AI 工作总结 ===== -->
-            <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+            <Border Style="{StaticResource Card}" Padding="24"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Margin="0,0,0,14">
                 <DockPanel>
@@ -657,7 +657,7 @@
             </Border>
 
             <!-- ===== 最近工作记录 ===== -->
-            <Border Background="{DynamicResource CardBrush}" CornerRadius="14" Padding="24"
+            <Border Style="{StaticResource Card}" Padding="24"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     ClipToBounds="True"
                     Visibility="{Binding ShowDashRecent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">

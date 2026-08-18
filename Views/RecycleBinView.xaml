@@ -43,7 +43,7 @@
         <DockPanel>
 
             <!-- ==================== 顶部信息栏 ==================== -->
-            <Border DockPanel.Dock="Top" Background="{DynamicResource CardBrush}" CornerRadius="16" Padding="24,20"
+            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="24,20"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,16">
 
                 <!-- 标题行：标题 + 统计 + 操作 -->
@@ -288,7 +288,7 @@
             </Border>
 
             <!-- ==================== 主列表区域 ==================== -->
-            <Border Background="{DynamicResource CardBrush}" CornerRadius="16" Padding="8"
+            <Border Style="{StaticResource Card}" Padding="8"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                 <Grid>
                     <!-- DataGrid 列表 -->

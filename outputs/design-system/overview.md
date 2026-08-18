@@ -54,6 +54,10 @@
    - `ThemeService.GetChartColors()` 返回当前主题的轴文字 / 网格 / 强调色 `SKColor`；
    - `DashboardViewModel` 构造函数订阅 `ThemeService.PropertyChanged`，新增 `ApplyChartTheme()` 设置坐标轴 `LabelsPaint`/`NamePaint`/`SeparatorsPaint` 与柱图主色，在数据加载与主题（明暗 / 强调色）切换时重绘。
    - 修复深色模式下图表轴文字 / 网格线不可见的问题。
+4. **组件样式治理** `Resources/Styles.xaml` + 10 个 View/Dialog（按"依据规范重新优化、查脱离组件特例"要求）：
+   - 新增圆角 token `RadiusXs=6/Sm=8/Md=10/Lg=12/Card=16/Xl=22/Pill=9999`；`Card`/`CardElevated`/`CardHover`/`Tag` 改用 token，落实 AGENTS.md「圆角必须引用资源键」。
+   - 48 处裸卡片容器（WorkRecordView/DashboardView 各 15、KnowledgeView/IssueView 各 4、ImportCsvDialog 4、RecycleBinView 2、ConfirmDialog/ProfileDialog/ConfigItemDialog/LeaveDialog 各 1）归位到 `Style="{StaticResource Card}"`：统一圆角 16、补回 1px 边框、支持三档密度；对话框补 `Padding="0"` 防内边距翻倍。
+   - 隔离编译验证 0 错误。
 
 ## 交付文件
 
