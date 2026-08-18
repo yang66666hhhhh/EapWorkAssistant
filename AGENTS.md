@@ -132,7 +132,7 @@ EapWorkAssistant/
 - 密度资源键必须为 `Thickness` 类型，**不得**使用 `sys:Double`（WPF 无法将 Double 自动转换为 Thickness）
 - 密度相关资源键：`DensityCardPad`, `DensityRowPad`, `DensityRowPadSm`, `DensityListPad`, `DensitySectionMargin`, `DensityRowMargin`, `DensityItemMargin`
 - 字号缩放应用于 `MainContentArea` Grid（MainWindow 中 x:Name="MainContentArea"）
-- 圆角资源键（**必须在 XAML 中引用，禁止魔法数字**）：`RadiusXs=6` / `RadiusSm=8` / `RadiusMd=10` / `RadiusLg=12` / `RadiusCard=16` / `RadiusXl=22` / `RadiusPill=9999`。`Card`/`CardElevated`/`CardHover` 引用 `RadiusCard`，`Tag` 引用 `RadiusXs`，其余控件按语义就近引用对应档位（如按钮 `RadiusMd`、输入框 `RadiusSm`、Toast `RadiusSm`、模态 `RadiusCard`/`RadiusXl`）
+- 圆角资源键（**必须在 XAML 中引用，禁止魔法数字**）：主刻度 `RadiusXs=6` / `RadiusSm=8` / `RadiusMd=10` / `RadiusLg=12` / `RadiusCard=16` / `RadiusXl=22` / `RadiusPill=9999`；补充 `RadiusHair=1`（发丝角）、`RadiusXxs=4`（小圆角）、`RadiusLeftSm=8,0,0,8` / `RadiusLeftMd=11,0,0,11` / `RadiusLeftLg=13,0,0,13`（左侧单边圆角，用于分段控件）。`Card`/`CardElevated`/`CardHover` 引用 `RadiusCard`，`Tag` 引用 `RadiusXs`，其余控件按语义就近引用对应档位（如按钮 `RadiusMd`、输入框 `RadiusSm`、Toast `RadiusSm`、模态 `RadiusCard`/`RadiusXl`）。**迁移策略**：历史代码里偏离主刻度的次要半径（如 3/5/7/9/11/13/14/17/20/24 及 0.5 发丝角）统一**就近归入**上述令牌（偏差 ≤2px，视觉无感）；左侧圆角改用 `RadiusLeftXxx`。
 
 ### 组件复用规范（核心原则：先查后建）
 

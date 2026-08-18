@@ -16,7 +16,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="Transparent" CornerRadius="9">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="{DynamicResource RadiusMd}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -42,7 +42,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="bg" Background="{DynamicResource PrimaryLightBrush}"
-                                CornerRadius="6" Padding="10,4">
+                                CornerRadius="{DynamicResource RadiusXs}" Padding="10,4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -92,7 +92,7 @@
         </Grid>
 
         <!-- 渐变装饰线 -->
-        <Border Height="2" CornerRadius="1" Margin="8,0,8,6" Opacity="0.6"
+        <Border Height="2" CornerRadius="{DynamicResource RadiusHair}" Margin="8,0,8,6" Opacity="0.6"
                 Background="{DynamicResource PrimaryGradient}" IsHitTestVisible="False"/>
 
         <!-- 星期标题 -->
@@ -124,7 +124,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:CalendarDayItem}">
-                    <Border x:Name="dayBg" Background="Transparent" CornerRadius="8"
+                    <Border x:Name="dayBg" Background="Transparent" CornerRadius="{DynamicResource RadiusSm}"
                             Margin="1,1" Padding="0" Cursor="Hand"
                             MouseLeftButtonDown="Day_Click"
                             MouseEnter="Day_MouseEnter" MouseLeave="Day_MouseLeave"

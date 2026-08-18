@@ -22,7 +22,7 @@
                                    FontSize="13" Margin="0,4,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Border Cursor="Hand" Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                        <Border Cursor="Hand" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                 Padding="10,9" BorderBrush="{DynamicResource BorderBrush}"
                                 BorderThickness="1" Margin="0,0,8,0"
                                 MouseLeftButtonDown="Refresh_Click">
@@ -31,7 +31,7 @@
                             </Border.ToolTip>
                             <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
                         </Border>
-                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                 Padding="14,9" BorderBrush="{DynamicResource BorderBrush}"
                                 BorderThickness="1">
                             <StackPanel Orientation="Horizontal">
@@ -72,7 +72,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,6"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -93,7 +93,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,6"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource SuccessBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -114,7 +114,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,6"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconChart}" Fill="{DynamicResource WarningBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -135,7 +135,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,6"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource AccentVioletBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -144,13 +144,13 @@
             </Grid>
 
             <!-- ===== 今日提醒 ===== -->
-            <Border CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
+            <Border CornerRadius="{DynamicResource RadiusLg}" Margin="0,0,0,14" Padding="1.5"
                     Visibility="{Binding ShowDashReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                     Background="{DynamicResource AccentBannerGradient}">
                 <Border Style="{StaticResource Card}" Padding="18,14">
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="10"
+                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                     Width="42" Height="42" VerticalAlignment="Center" Margin="0,0,12,0">
                                 <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource PrimaryBrush}" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -162,7 +162,7 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Visibility="{Binding IsProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="8" Padding="14,8"
+                            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}" Padding="14,8"
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="{StaticResource IconTarget}" Fill="{DynamicResource TextPrimaryBrush}" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -181,7 +181,7 @@
 
             <!-- ===== 覆盖率提醒 ===== -->
             <Border Visibility="{Binding ShowCoverageWarning, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    Background="{DynamicResource WarningLightBrush}" CornerRadius="10" Padding="16,12"
+                    Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusMd}" Padding="16,12"
                     BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" Margin="0,0,0,14">
                 <StackPanel Orientation="Horizontal">
                     <Path Data="{StaticResource IconWarning}" Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -213,7 +213,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,5"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource DangerLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource DangerLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconWrench}" Fill="{DynamicResource DangerBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -234,7 +234,7 @@
                                            VerticalAlignment="Bottom" Margin="3,0,0,5"/>
                             </StackPanel>
                         </StackPanel>
-                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                 Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource PrimaryBrush}"
                                   Width="18" Height="18" Stretch="Uniform"
@@ -245,7 +245,7 @@
             </Grid>
 
             <!-- ===== 试用期进度（仅试用期员工显示） ===== -->
-            <Border CornerRadius="14" Margin="0,0,0,14" Padding="1.5"
+            <Border CornerRadius="{DynamicResource RadiusLg}" Margin="0,0,0,14" Padding="1.5"
                     Visibility="{Binding ShowDashProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                     Background="{DynamicResource AccentBannerGradient}">
                 <Border Style="{StaticResource Card}" Padding="24">
@@ -264,7 +264,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <TextBlock Text="开始日期：" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
                                                VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <Border x:Name="ProbDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                    <Border x:Name="ProbDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                             Padding="10,0" Height="34" VerticalAlignment="Center"
                                             Cursor="Hand" MouseLeftButtonDown="ProbDateBtn_Click">
@@ -289,7 +289,7 @@
 
                             <!-- 时间进度 -->
                             <Border Grid.Column="0" x:Name="ProbProgressParent"
-                                    Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                    Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                     Padding="18" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="时间进度" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -301,8 +301,8 @@
                                                    VerticalAlignment="Bottom" Margin="2,0,0,6"/>
                                     </StackPanel>
                                     <Grid Height="8" Margin="0,10,0,0">
-                                        <Border Background="{DynamicResource BorderBrush}" CornerRadius="4"/>
-                                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4"
+                                        <Border Background="{DynamicResource BorderBrush}" CornerRadius="{DynamicResource RadiusXxs}"/>
+                                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="{DynamicResource RadiusXxs}"
                                                 HorizontalAlignment="Left">
                                             <Border.Width>
                                                 <MultiBinding Converter="{x:Static local:PercentToWidthConverter.Instance}">
@@ -320,7 +320,7 @@
 
                             <!-- 记录覆盖率 -->
                             <Border Grid.Column="2" x:Name="CoverageProgressParent"
-                                    Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                    Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                     Padding="18" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="记录覆盖率" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -332,8 +332,8 @@
                                                    VerticalAlignment="Bottom" Margin="2,0,0,6"/>
                                     </StackPanel>
                                     <Grid Height="8" Margin="0,10,0,0">
-                                        <Border Background="{DynamicResource BorderBrush}" CornerRadius="4"/>
-                                        <Border Background="{DynamicResource SuccessBrush}" CornerRadius="4"
+                                        <Border Background="{DynamicResource BorderBrush}" CornerRadius="{DynamicResource RadiusXxs}"/>
+                                        <Border Background="{DynamicResource SuccessBrush}" CornerRadius="{DynamicResource RadiusXxs}"
                                                 HorizontalAlignment="Left">
                                             <Border.Width>
                                                 <MultiBinding Converter="{x:Static local:PercentToWidthConverter.Instance}">
@@ -400,7 +400,7 @@
                                                 DataPointerDownCommand="{Binding ChartPointClickCommand}"
                                                 MinHeight="190" MaxHeight="210"/>
                             <Border Visibility="{Binding HasChartData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
-                                    Background="{DynamicResource CardBrush}" CornerRadius="8">
+                                    Background="{DynamicResource CardBrush}" CornerRadius="{DynamicResource RadiusSm}">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="{StaticResource IconTrend}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                     <TextBlock Text="暂无工时数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -433,7 +433,7 @@
                                           DataPointerDownCommand="{Binding PieChartClickCommand}"
                                           MinHeight="190" MaxHeight="210"/>
                             <Border Visibility="{Binding HasPieData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
-                                    Background="{DynamicResource CardBrush}" CornerRadius="8">
+                                    Background="{DynamicResource CardBrush}" CornerRadius="{DynamicResource RadiusSm}">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="{StaticResource IconChart}" Fill="{DynamicResource TextPrimaryBrush}" Width="36" Height="36" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                     <TextBlock Text="暂无项目数据" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
@@ -460,7 +460,7 @@
                                     <Path Data="{StaticResource IconStar}" Fill="{DynamicResource TextPrimaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                     <TextBlock Text="工作亮点" FontSize="16" FontWeight="Bold"
                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                    <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="8"
+                                    <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                             Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Highlights.Count}" FontSize="11" FontWeight="Bold"
                                                    Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
@@ -474,7 +474,7 @@
                                 <ItemsControl ItemsSource="{Binding Highlights}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                                            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                                     Padding="14,10" Margin="0,0,0,6"
                                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                                 <StackPanel>
@@ -546,7 +546,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                             Padding="18">
                         <views:MarkdownViewer MarkdownText="{Binding ProbationReport}"/>
@@ -597,7 +597,7 @@
                                         Visibility="{Binding AiReportTimeRange, Converter={x:Static local:StringEqualsToVisibilityConverter.Instance}, ConverterParameter=自定义}">
                                 <TextBlock Text="开始:" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
                                            VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <Border x:Name="AiStartDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                <Border x:Name="AiStartDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                         Padding="10,0" Height="32" VerticalAlignment="Center"
                                         Cursor="Hand" MouseLeftButtonDown="AiStartDateBtn_Click">
@@ -611,7 +611,7 @@
 
                                 <TextBlock Text="结束:" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
                                            VerticalAlignment="Center" Margin="12,0,4,0"/>
-                                <Border x:Name="AiEndDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                                <Border x:Name="AiEndDateBtn" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
                                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                         Padding="10,0" Height="32" VerticalAlignment="Center"
                                         Cursor="Hand" MouseLeftButtonDown="AiEndDateBtn_Click">

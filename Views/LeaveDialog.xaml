@@ -39,7 +39,7 @@
                 </Grid>
 
                 <!-- 月份导航 -->
-                <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
                         Padding="12,8" Margin="0,0,0,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -64,7 +64,7 @@
                 </Border>
 
                 <!-- 请假记录列表 -->
-                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" CornerRadius="8"
+                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
                         Padding="4" Margin="0,0,0,10" MinHeight="100">
                     <Grid>
                         <!-- 空状态提示 -->
@@ -95,7 +95,7 @@
                                                        VerticalAlignment="Center" Margin="0,0,10,0"/>
                                             <!-- 假期类型标签（彩色描边，按类型着色） -->
                                             <Border x:Name="TypeTag" Grid.Column="1"
-                                                    CornerRadius="6" Padding="8,2"
+                                                    CornerRadius="{DynamicResource RadiusXs}" Padding="8,2"
                                                     BorderThickness="1" VerticalAlignment="Center"
                                                     Margin="0,0,8,0">
                                                 <TextBlock x:Name="TypeText" Text="{Binding LeaveType}" FontSize="11"
@@ -237,7 +237,7 @@
 
         <!-- 日历浮窗覆盖层 -->
         <Border x:Name="CalendarBackdrop" Style="{StaticResource CalendarOverlay}"
-                Panel.ZIndex="50" Margin="20" CornerRadius="14"
+                Panel.ZIndex="50" Margin="20" CornerRadius="{DynamicResource RadiusLg}"
                 MouseLeftButtonDown="CalendarBackdrop_Click"/>
         <Border x:Name="CalendarContainer" Style="{StaticResource FloatingPanel}"
                 Width="310" Panel.ZIndex="51"

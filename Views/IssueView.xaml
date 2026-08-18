@@ -24,9 +24,9 @@
                     <StackPanel VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="问题跟踪" Style="{StaticResource Heading2}"/>
-                            <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="10,3"
+                            <Border  CornerRadius="{DynamicResource RadiusMd}" Padding="10,3"
                                     Margin="10,0,0,0" VerticalAlignment="Center"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Style="{StaticResource SectionPanel}">
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontWeight="Medium" VerticalAlignment="Center">
                                     <Run Text="{Binding Items.Count, Mode=OneWay}"/>
@@ -80,7 +80,7 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="10"
+                        <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="4,2">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -165,7 +165,7 @@
                                 <DataGridTemplateColumn Header="状态" Width="92" ClipboardContentBinding="{Binding Status}">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Border CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
+                                            <Border CornerRadius="{DynamicResource RadiusXs}" Padding="8,3" HorizontalAlignment="Left">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
@@ -340,7 +340,7 @@
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="{DynamicResource PrimaryLightBrush}"
-                                    CornerRadius="8" Width="32" Height="32" Margin="0,0,12,0">
+                                    CornerRadius="{DynamicResource RadiusSm}" Width="32" Height="32" Margin="0,0,12,0">
                                 <Path Data="{StaticResource IconWrench}" Fill="{DynamicResource PrimaryBrush}"
                                       Width="15" Height="15" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -404,7 +404,7 @@
                     </Grid>
 
                     <!-- 状态消息 -->
-                    <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0"
+                    <Border CornerRadius="{DynamicResource RadiusSm}" Padding="12,8" Margin="0,10,0,0"
                             Background="{DynamicResource SuccessLightBrush}">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -432,8 +432,8 @@
                     <StackPanel Margin="0,16,0,16">
 
                         <!-- ═══ 基本信息 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16" Margin="0,0,0,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Margin="0,0,0,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <TextBlock Text="基本信息" FontSize="12.5" FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -492,8 +492,8 @@
                         </Border>
 
                         <!-- ═══ 问题详情 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16" Margin="0,0,0,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Margin="0,0,0,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <TextBlock Text="问题详情" FontSize="12.5" FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -517,8 +517,8 @@
                         </Border>
 
                         <!-- ═══ 检索关键词 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <TextBlock Text="检索关键词" FontSize="12.5" FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextSecondaryBrush}"

@@ -24,9 +24,9 @@
                     <StackPanel VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="知识库" Style="{StaticResource Heading2}"/>
-                            <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="10" Padding="10,3"
+                            <Border  CornerRadius="{DynamicResource RadiusMd}" Padding="10,3"
                                     Margin="10,0,0,0" VerticalAlignment="Center"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Style="{StaticResource SectionPanel}">
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontWeight="Medium" VerticalAlignment="Center">
                                     <Run Text="{Binding Items.Count, Mode=OneWay}"/>
@@ -92,8 +92,8 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="6,3">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="6,3" Style="{StaticResource SectionPanel}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -229,7 +229,7 @@
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
-                                                    <Border CornerRadius="6" Padding="8,2" Margin="0,0,6,0"
+                                                    <Border CornerRadius="{DynamicResource RadiusXs}" Padding="8,2" Margin="0,0,6,0"
                                                             Background="{DynamicResource SurfaceBrush}"
                                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                                         <TextBlock Text="{Binding Category}" FontSize="10.5"
@@ -311,7 +311,7 @@
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="{DynamicResource PrimaryLightBrush}"
-                                    CornerRadius="8" Width="32" Height="32" Margin="0,0,12,0">
+                                    CornerRadius="{DynamicResource RadiusSm}" Width="32" Height="32" Margin="0,0,12,0">
                                 <Path Data="{StaticResource IconBook}" Fill="{DynamicResource PrimaryBrush}"
                                       Width="15" Height="15" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -367,7 +367,7 @@
                     </Grid>
 
                     <!-- 状态消息 -->
-                    <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0"
+                    <Border CornerRadius="{DynamicResource RadiusSm}" Padding="12,8" Margin="0,10,0,0"
                             Background="{DynamicResource SuccessLightBrush}">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -395,8 +395,8 @@
                     <StackPanel Margin="0,16,0,16">
 
                         <!-- ═══ 基本信息 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16" Margin="0,0,0,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Margin="0,0,0,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <TextBlock Text="基本信息" FontSize="12.5" FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -441,8 +441,8 @@
                         </Border>
 
                         <!-- ═══ 标签管理 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16" Margin="0,0,0,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Margin="0,0,0,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <TextBlock Text="标签管理" FontSize="12.5" FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -485,8 +485,8 @@
                         </Border>
 
                         <!-- ═══ 知识内容 ═══ -->
-                        <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="12"
-                                Padding="18,16">
+                        <Border  CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="18,16" Style="{StaticResource SectionPanel}">
                             <StackPanel>
                                 <Grid Margin="0,0,0,8">
                                     <TextBlock Text="知识内容" FontSize="12.5" FontWeight="SemiBold"

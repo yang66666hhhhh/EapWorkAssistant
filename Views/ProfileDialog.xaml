@@ -28,7 +28,7 @@
                 <Grid>
                     <StackPanel Orientation="Horizontal">
                         <!-- 可点击头像 -->
-                        <Border x:Name="AvatarBorder" Width="48" Height="48" CornerRadius="24"
+                        <Border x:Name="AvatarBorder" Width="48" Height="48" CornerRadius="{DynamicResource RadiusXl}"
                                 VerticalAlignment="Center" Margin="0,0,12,0" Cursor="Hand"
                                 MouseLeftButtonDown="Avatar_Click"
                                 Background="{DynamicResource PrimaryGradient}">
@@ -38,13 +38,13 @@
                                            Foreground="White" HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                                 <!-- 头像图片（上传后覆盖） -->
-                                <Border x:Name="AvatarImageClip" CornerRadius="24" Visibility="Collapsed">
+                                <Border x:Name="AvatarImageClip" CornerRadius="{DynamicResource RadiusXl}" Visibility="Collapsed">
                                     <Border.Background>
                                         <ImageBrush x:Name="AvatarImageBrush" Stretch="UniformToFill"/>
                                     </Border.Background>
                                 </Border>
                                 <!-- 悬浮编辑遮罩 -->
-                                <Border x:Name="AvatarOverlay" CornerRadius="24"
+                                <Border x:Name="AvatarOverlay" CornerRadius="{DynamicResource RadiusXl}"
                                         Background="{DynamicResource AvatarHeavyOverlayBrush}" Visibility="Collapsed">
                                     <Path Data="{StaticResource IconCamera}" Fill="White"
                                           Width="14" Height="14" Stretch="Uniform"

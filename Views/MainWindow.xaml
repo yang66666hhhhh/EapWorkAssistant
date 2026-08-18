@@ -40,7 +40,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Width="44" Height="44" CornerRadius="12"
+                    <Border Width="44" Height="44" CornerRadius="{DynamicResource RadiusLg}"
                             Background="{DynamicResource PrimaryGradient}">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.25"/>
@@ -65,7 +65,7 @@
                 <StackPanel x:Name="HeaderCollapsed" DockPanel.Dock="Top"
                             Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                             Margin="0,28,0,16">
-                    <Border Width="44" Height="44" CornerRadius="12"
+                    <Border Width="44" Height="44" CornerRadius="{DynamicResource RadiusLg}"
                             Background="{DynamicResource PrimaryGradient}" HorizontalAlignment="Center">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.25"/>
@@ -82,7 +82,7 @@
                 <Grid x:Name="ProfileArea" DockPanel.Dock="Bottom" Margin="16,0,16,20" MinHeight="0">
 
                     <!-- 装饰环/灰色卡片背景（收缩目标：以头像中心为原点缩至 0 并淡出） -->
-                    <Border x:Name="ProfileCardRing" CornerRadius="12" Padding="16"
+                    <Border x:Name="ProfileCardRing" CornerRadius="{DynamicResource RadiusLg}" Padding="16"
                             Cursor="Hand" MouseLeftButtonDown="ProfileCard_Click"
                             Background="{DynamicResource SidebarCardBgBrush}"
                             RenderTransformOrigin="0.15,0.28">
@@ -92,7 +92,7 @@
                         <StackPanel x:Name="ProfileCardContent">
                             <Grid Margin="0,0,0,10">
                                 <!-- 头像占位（保持文字布局空间不变） -->
-                                <Border Width="34" Height="34" CornerRadius="17"
+                                <Border Width="34" Height="34" CornerRadius="{DynamicResource RadiusCard}"
                                         HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden"/>
                                 <StackPanel x:Name="ProfileInfo" Margin="44,0,0,0" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Name}"
@@ -102,7 +102,7 @@
                                                FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
                                 </StackPanel>
                             </Grid>
-                            <Border x:Name="ProfileMeta" Background="{DynamicResource SidebarCardBgBrush}" CornerRadius="8" Padding="12,8">
+                            <Border x:Name="ProfileMeta" Background="{DynamicResource SidebarCardBgBrush}" CornerRadius="{DynamicResource RadiusSm}" Padding="12,8">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Source={x:Static svc:ProfileService.Instance}, Path=Industry}"
                                                FontSize="11" Foreground="{DynamicResource SidebarTextBrush}"/>
@@ -116,7 +116,7 @@
                     <!-- 头像（独立层，z-index 更高，不参与收缩动画，始终完整显示）
                          展开态：左对齐（与卡片内 padding 对齐）；折叠态：居中（与导航图标中心轴对齐）
                          头像本身承载点击/悬浮交互，独立于装饰环，折叠后仍可点击打开个人信息 -->
-                    <Border x:Name="AvatarBorder" Width="34" Height="34" CornerRadius="17"
+                    <Border x:Name="AvatarBorder" Width="34" Height="34" CornerRadius="{DynamicResource RadiusCard}"
                             Background="{DynamicResource PrimaryGradient}"
                             Cursor="Hand" MouseLeftButtonDown="ProfileCard_Click">
                         <Border.Style>
@@ -145,7 +145,7 @@
                                        FontSize="15" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <!-- 头像图片层 -->
-                            <Border CornerRadius="17"
+                            <Border CornerRadius="{DynamicResource RadiusCard}"
                                     Visibility="{Binding Source={x:Static svc:ProfileService.Instance}, Path=HasAvatar, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                                 <Border.Background>
                                     <ImageBrush Stretch="UniformToFill"
@@ -153,7 +153,7 @@
                                 </Border.Background>
                             </Border>
                             <!-- 悬浮编辑提示 -->
-                            <Border x:Name="SidebarAvatarOverlay" CornerRadius="17"
+                            <Border x:Name="SidebarAvatarOverlay" CornerRadius="{DynamicResource RadiusCard}"
                                     Background="{DynamicResource AvatarOverlayBrush}" Visibility="Collapsed"
                                     IsHitTestVisible="False">
                                 <Path Data="{StaticResource IconPencil}" Fill="White"
@@ -408,7 +408,7 @@
                                               Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border CornerRadius="8" Padding="14,10" Margin="8,3"
+                                            <Border CornerRadius="{DynamicResource RadiusSm}" Padding="14,10" Margin="8,3"
                                                     Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
@@ -424,7 +424,7 @@
                                                         <ColumnDefinition Width="38"/>
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <Border Grid.Column="0" CornerRadius="8" Width="38" Height="38">
+                                                    <Border Grid.Column="0" CornerRadius="{DynamicResource RadiusSm}" Width="38" Height="38">
                                                         <Border.Background>
                                                             <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
                                                         </Border.Background>
@@ -438,7 +438,7 @@
                                                                        TextTrimming="CharacterEllipsis" MaxWidth="320"
                                                                        local:Highlight.Text="{Binding Title}"
                                                                        local:Highlight.Keyword="{Binding Keyword}"/>
-                                                            <Border CornerRadius="4" Padding="6,2" Margin="6,0,0,0">
+                                                            <Border CornerRadius="{DynamicResource RadiusXxs}" Padding="6,2" Margin="6,0,0,0">
                                                                 <Border.Background>
                                                                     <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
                                                                 </Border.Background>
@@ -502,7 +502,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border x:Name="ToastCard" CornerRadius="10" Padding="16,12"
+                            <Border x:Name="ToastCard" CornerRadius="{DynamicResource RadiusMd}" Padding="16,12"
                                     Margin="0,0,0,8" MinWidth="280" MaxWidth="380"
                                     IsHitTestVisible="True"
                                     Background="{DynamicResource CardBrush}"
@@ -519,7 +519,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8"
+                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="{DynamicResource RadiusSm}"
                                             VerticalAlignment="Top" Margin="0,0,12,0">
                                         <Border.Style>
                                             <Style TargetType="Border">
