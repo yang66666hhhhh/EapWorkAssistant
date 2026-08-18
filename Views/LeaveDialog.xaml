@@ -68,11 +68,12 @@
                         Padding="4" Margin="0,0,0,10" MinHeight="100">
                     <Grid>
                         <!-- 空状态提示 -->
+                        <!-- 绑定 ListBox.HasItems 的反向可见性：有记录时隐藏，无记录时显示 -->
                         <TextBlock Text="本月暂无请假记录"
                                    FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    IsHitTestVisible="False"
-                                   Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=ListBox}, Converter={x:Static local:CountToVisibilityConverter.Instance}}"/>
+                                   Visibility="{Binding ElementName=LeaveList, Path=HasItems, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"/>
 
                         <ListBox x:Name="LeaveList" Background="Transparent" BorderThickness="0"
                                  ItemContainerStyle="{StaticResource ModernListBoxItem}"
