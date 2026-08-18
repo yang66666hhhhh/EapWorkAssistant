@@ -49,3 +49,12 @@ $RECYCLE.BIN/
 .DS_Store
 .AppleDouble
 .LSOverride
+
+## Agent working data (memory / screenshots / artifacts — never source)
+.workbuddy/
+
+## Temp download cache
+_tmp_whl/
+
+## Generated design-system exports (regenerable from Ardot canvas; docs *.md stay tracked)
+outputs/design-system/*.png

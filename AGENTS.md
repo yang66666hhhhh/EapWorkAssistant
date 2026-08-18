@@ -5,7 +5,7 @@
 ## 项目概述
 
 - **项目名称**: EAP Work Assistant v2.1
-- **技术栈**: .NET 9.0 + WPF + CommunityToolkit.Mvvm 8.4.2 + SQLite/Dapper + LiveCharts2
+- **技术栈**: .NET 10 (net10.0-windows) + WPF + CommunityToolkit.Mvvm 8.4.2 + SQLite/Dapper + LiveCharts2
 - **架构模式**: MVVM（Model-View-ViewModel）
 - **语言**: C# 12+，UI 使用中文标签
 
@@ -132,6 +132,7 @@ EapWorkAssistant/
 - 密度资源键必须为 `Thickness` 类型，**不得**使用 `sys:Double`（WPF 无法将 Double 自动转换为 Thickness）
 - 密度相关资源键：`DensityCardPad`, `DensityRowPad`, `DensityRowPadSm`, `DensityListPad`, `DensitySectionMargin`, `DensityRowMargin`, `DensityItemMargin`
 - 字号缩放应用于 `MainContentArea` Grid（MainWindow 中 x:Name="MainContentArea"）
+- 圆角资源键（**必须在 XAML 中引用，禁止魔法数字**）：`RadiusXs=6` / `RadiusSm=8` / `RadiusMd=10` / `RadiusLg=12` / `RadiusCard=16` / `RadiusXl=22` / `RadiusPill=9999`。`Card`/`CardElevated`/`CardHover` 引用 `RadiusCard`，`Tag` 引用 `RadiusXs`，其余控件按语义就近引用对应档位（如按钮 `RadiusMd`、输入框 `RadiusSm`、Toast `RadiusSm`、模态 `RadiusCard`/`RadiusXl`）
 
 ### 组件复用规范（核心原则：先查后建）
 
@@ -443,10 +444,10 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 4. **禁止更改项目目标框架**：当前为 `net10.0-windows`
 5. **禁止破坏单例模式**：不得将 `ThemeService.Instance` 等改为依赖注入或其他模式
 6. **禁止在 ViewModel 中引入 WPF 命名空间**：保持 MVVM 纯净性
-7. **禁止硬编码颜色值**：新代码中颜色必须引用 Styles.xaml 中的资源键
+7. **禁止硬编码颜色值/圆角值**：新代码中颜色必须引用 `Styles.xaml` 中的 `SolidColorBrush` 资源键，圆角必须引用 `RadiusXxx` 资源键（见「主题系统」章节的圆角资源键清单），禁止散落魔法数字
 8. **禁止在 Storyboard 中使用 DynamicResource**：会导致运行时异常
 9. **修改 XAML 前必须确认结构完整性**：不要意外删除 Grid、ColumnDefinitions 等结构性标签
-10. **修改后必须验证编译通过**：执行 `dotnet build` 确认 0 error
+10. **修改后必须验证编译通过**：执行 `dotnet build -c Debug` 确认 0 error。仅当该 `bin/Debug` 目录的编译产物正被其他进程占用（如 WPF 应用运行中、IDE 调试/Hot-Reload 进程持锁）时，Windows 的文件独占锁才会导致编译失败/卡顿；此时改用隔离输出 `dotnet build -c Debug -p:OutDir=bin/_verify_xxx/`（每次不同后缀）。CI、远程/沙箱环境（如 Codex）不共享本机运行实例，通常可直接 build
 11. **新增数据库字段必须同步迁移代码**：在 `DatabaseInitializer.cs` 中同时更新建表语句和 ALTER TABLE 迁移
 12. **禁止使用 fire-and-forget 裸调用**：所有 `_ = SomeAsync()` 必须替换为 `SomeAsync().SafeFire("描述")`
 13. **禁止在 XAML 元素标签上设置需要 DataTrigger 动态覆盖的属性**：默认值必须写在 Style Setter 中
@@ -467,7 +468,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 命名是否符合规范（PascalCase/camelCase）？
 - [ ] ViewModel 是否引入了 WPF 类型？
 - [ ] 新增的颜色/间距是否使用了资源键而非硬编码？
-- [ ] 编译是否通过（dotnet build 0 error）？
+- [ ] 编译是否通过（dotnet build -c Debug 0 error；若 bin/Debug 产物被占用则改用 `-c Debug -p:OutDir=bin/_verify_xxx/`）？
 - [ ] 是否有遗留的 TODO 或临时调试代码？
 
 **组件复用：**
