@@ -75,8 +75,8 @@ public static class ExportService
             var sb = new StringBuilder();
             // 添加BOM头，确保中文在Excel中正确显示
             sb.Append('\uFEFF');
-            // CSV头（UniqueId 为首列，作为导入匹配键）
-            sb.AppendLine("UniqueId,日期,项目,类型,内容,工作成果,工时,进度,是否亮点,问题,解决方案");
+            // CSV头（UniqueId 为首列，作为导入匹配键；列名与界面 DataGrid 表头保持一致）
+            sb.AppendLine("UniqueId,日期,任务,类型,内容,工作成果,工时,进度,是否亮点,问题描述,解决方案");
             // 数据行
             foreach (var r in records)
             {
@@ -118,7 +118,8 @@ public static class ExportService
             // 同时兼容完全无表头的手工 CSV（退化为位置解析）。
             Dictionary<string, int>? colMap = null;
             var hasHeader = rows[0].Count > 0 &&
-                (rows[0][0] == "UniqueId" || rows[0].Contains("日期") || rows[0].Contains("项目"));
+                (rows[0][0] == "UniqueId" || rows[0].Contains("日期") || rows[0].Contains("任务")
+                 || rows[0].Contains("项目") || rows[0].Contains("问题描述"));
             int startIdx = 0;
             if (hasHeader)
             {
@@ -130,10 +131,16 @@ public static class ExportService
             // 有表头时业务列整体右移一列（首列为 UniqueId）
             int off = hasHeader ? 1 : 0;
 
-            string GetField(List<string> f, string name, int pos)
+            // 兼容新旧表头别名：导出用「任务/问题描述」，旧文件用「项目/问题」
+            string GetField(List<string> f, int pos, params string[] names)
             {
                 if (colMap != null)
-                    return colMap.TryGetValue(name, out var idx) && idx < f.Count ? f[idx] : "";
+                {
+                    foreach (var name in names)
+                        if (colMap.TryGetValue(name, out var idx) && idx < f.Count)
+                            return f[idx];
+                    return "";
+                }
                 return pos < f.Count ? f[pos] : "";
             }
 
@@ -146,21 +153,21 @@ public static class ExportService
 
                 var record = new WorkRecord
                 {
-                    UniqueId = GetField(fields, "UniqueId", 0).Trim(),
-                    WorkDate = GetField(fields, "日期", off + 0).Trim(),
-                    ProjectName = GetField(fields, "项目", off + 1).Trim(),
-                    WorkType = GetField(fields, "类型", off + 2).Trim(),
-                    Content = GetField(fields, "内容", off + 3).Trim(),
+                    UniqueId = GetField(fields, 0, "UniqueId").Trim(),
+                    WorkDate = GetField(fields, off + 0, "日期").Trim(),
+                    ProjectName = GetField(fields, off + 1, "项目", "任务").Trim(),
+                    WorkType = GetField(fields, off + 2, "类型").Trim(),
+                    Content = GetField(fields, off + 3, "内容").Trim(),
                 };
 
                 if (hasHeader)
                 {
-                    record.Achievement = GetField(fields, "工作成果", off + 4);
-                    record.Hours = double.TryParse(GetField(fields, "工时", off + 5), out var h) ? h : 0;
-                    record.Progress = int.TryParse(GetField(fields, "进度", off + 6), out var p) ? p : 0;
-                    record.IsHighlight = GetField(fields, "是否亮点", off + 7) == "是" ? 1 : 0;
-                    record.Problem = GetField(fields, "问题", off + 8);
-                    record.Solution = GetField(fields, "解决方案", off + 9);
+                    record.Achievement = GetField(fields, off + 4, "工作成果");
+                    record.Hours = double.TryParse(GetField(fields, off + 5, "工时"), out var h) ? h : 0;
+                    record.Progress = int.TryParse(GetField(fields, off + 6, "进度"), out var p) ? p : 0;
+                    record.IsHighlight = GetField(fields, off + 7, "是否亮点") == "是" ? 1 : 0;
+                    record.Problem = GetField(fields, off + 8, "问题", "问题描述");
+                    record.Solution = GetField(fields, off + 9, "解决方案");
                 }
                 else
                 {
