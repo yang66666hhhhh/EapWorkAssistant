@@ -371,6 +371,8 @@ public sealed class ImportCsvDialogModel
     public int TotalParsed { get; init; }
     public int ValidCount { get; init; }
     public List<string> SkippedReasons { get; init; } = new();
+    /// <summary>配置一致性提示：CSV 中项目/类型不在配置项内时列出，将自动补齐到配置（不阻断导入）。</summary>
+    public List<string> ConfigWarnings { get; init; } = new();
     public (int Insert, int Update, int Skip) SkipPreview { get; init; }
     public (int Insert, int Update, int Skip) OverwritePreview { get; init; }
     public (int Insert, int Update, int Skip) AppendPreview { get; init; }

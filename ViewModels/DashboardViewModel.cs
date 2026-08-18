@@ -605,7 +605,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         {
             sb.AppendLine("\n=== 项目投入分布 ===");
             foreach (var ps in projectStats)
-                sb.AppendLine($"  {ps.ProjectName}: {ps.TotalHours}h ({ps.cnt}条记录)");
+                sb.AppendLine($"  {ps.ProjectName}: {ps.TotalHours}h ({ps.RecordCount}条记录)");
         }
 
         // 类型分布
@@ -614,7 +614,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         {
             sb.AppendLine("\n=== 工作类型分布 ===");
             foreach (var ts in typeStats)
-                sb.AppendLine($"  {ts.WorkType}: {ts.TotalHours}h ({ts.cnt}条记录)");
+                sb.AppendLine($"  {ts.WorkType}: {ts.TotalHours}h ({ts.RecordCount}条记录)");
         }
 
         return sb.ToString();
@@ -695,8 +695,9 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         var point = points?.FirstOrDefault();
         if (point == null) return;
         var index = point.Index;
-        var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now);
-        var targetDate = weekStart.AddDays(index);
+        // 按当前图表区间（周/月/季）的起始日期推算点击对应的日期，而非写死"本周"
+        var (rangeStart, _) = GetChartRangeDates();
+        var targetDate = rangeStart.AddDays(index);
         // 通过事件通知 MainViewModel 导航
         NavigateToWorkRecord?.Invoke(targetDate);
     }

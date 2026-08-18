@@ -177,7 +177,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id", new { Id = id });
+                "UPDATE WorkRecord SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id", new { Id = id });
         });
     }
 
@@ -341,7 +341,7 @@ public class WorkRecordRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.QueryAsync(
-                "SELECT WorkType, SUM(Hours) as TotalHours FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
+                "SELECT WorkType, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
                 new { Start = startDate, End = endDate });
         });
     }

@@ -100,7 +100,7 @@ public class KnowledgeRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "UPDATE Knowledge SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id", new { Id = id });
+                "UPDATE Knowledge SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id", new { Id = id });
         });
     }
 

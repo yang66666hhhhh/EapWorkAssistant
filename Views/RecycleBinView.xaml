@@ -202,6 +202,34 @@
                                 </Border>
                             </StackPanel>
                         </Button>
+
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录"
+                                Margin="4,0,0,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding FilterType}" Value="请假记录">
+                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="7" Height="7" CornerRadius="3.5"
+                                        Background="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="请假记录"/>
+                                <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="6,1"
+                                        Margin="6,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontWeight="SemiBold">
+                                        <Run Text="{Binding LeaveRecordCount, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
 
                     <!-- 右侧：操作按钮组 -->

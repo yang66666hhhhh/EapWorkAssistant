@@ -162,6 +162,21 @@ public static class DatabaseInitializer
         }
         catch { /* 列已存在 */ }
 
+        // 迁移：为 LeaveRecord 表添加软删除标记与删除时间戳（回收站功能）
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE LeaveRecord ADD COLUMN IsDeleted INTEGER DEFAULT 0";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE LeaveRecord ADD COLUMN DeletedAt TEXT";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
         // 创建索引以优化查询性能
         try
         {
@@ -177,6 +192,7 @@ public static class DatabaseInitializer
                 CREATE INDEX IF NOT EXISTS idx_knowledge_favorite ON Knowledge(IsFavorite);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_deleted ON Knowledge(IsDeleted);
                 CREATE INDEX IF NOT EXISTS idx_leaverecord_date ON LeaveRecord(Date);
+                CREATE INDEX IF NOT EXISTS idx_leaverecord_deleted ON LeaveRecord(IsDeleted);
             ";
             migrateCmd.ExecuteNonQuery();
         }

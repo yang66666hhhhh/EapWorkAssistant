@@ -20,6 +20,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private bool _isAutoSaving;
     private bool _applyingPreset;
     private string _lastCalendarMonth = "";
+    /// <summary>记录上次计算调休余额的年份，跨年时重新计算</summary>
+    private int _lastBalanceYear = 0;
 
     /// <summary>已提示过"节假日数据缺失"的年份，避免重复打扰</summary>
     private static readonly HashSet<int> _holidayUnavailableWarned = new();
@@ -445,13 +447,30 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         {
             await _leaveRepo.DeleteAsync(record.Id);
             DailyLeaveRecords.Remove(record);
-            ToastService.Success("请假记录已删除");
             await LoadCalendarStatusAsync();
             await LoadCompLeaveBalanceAsync();
+            ToastService.WithAction("请假记录已删除", "已删除", ToastType.Success, "撤销",
+                () => _ = RestoreLeaveRecordAsync(record));
         }
         catch (Exception ex)
         {
             ToastService.Error($"删除请假记录失败：{ex.Message}");
+        }
+    }
+
+    private async Task RestoreLeaveRecordAsync(LeaveRecord deleted)
+    {
+        try
+        {
+            await _leaveRepo.RestoreAsync(deleted.Id);
+            await LoadDailyLeaveRecordsAsync();
+            await LoadCalendarStatusAsync();
+            await LoadCompLeaveBalanceAsync();
+            ToastService.Success("请假记录已恢复");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"恢复失败：{ex.Message}");
         }
     }
 
@@ -950,6 +969,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
+        // ── 配置项一致性校验：项目/类型不在配置中时自动补齐，避免筛选下拉与实际数据不一致 ──
+        var cfg = ConfigService.Instance;
+        var missingProjects = new HashSet<string>(StringComparer.Ordinal);
+        var missingTypes = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var r in valid)
+        {
+            if (!string.IsNullOrWhiteSpace(r.ProjectName) && !cfg.Projects.Contains(r.ProjectName))
+                missingProjects.Add(r.ProjectName);
+            if (!string.IsNullOrWhiteSpace(r.WorkType) && !cfg.WorkTypes.Contains(r.WorkType))
+                missingTypes.Add(r.WorkType);
+        }
+        var configWarnings = new List<string>();
+        if (missingProjects.Count > 0)
+        {
+            var preview = string.Join("、", missingProjects.Take(5));
+            configWarnings.Add($"{missingProjects.Count} 个新项目将自动加入配置：{preview}{(missingProjects.Count > 5 ? "…" : "")}");
+        }
+        if (missingTypes.Count > 0)
+        {
+            var preview = string.Join("、", missingTypes.Take(5));
+            configWarnings.Add($"{missingTypes.Count} 个新类型将自动加入配置：{preview}{(missingTypes.Count > 5 ? "…" : "")}");
+        }
+
         // 加载库中 UniqueId 映射，计算三种模式的导入预览
         var map = await _repo.GetUniqueIdMapAsync();
         var model = new ImportCsvDialogModel
@@ -957,6 +999,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             TotalParsed = records.Count,
             ValidCount = valid.Count,
             SkippedReasons = skipped,
+            ConfigWarnings = configWarnings,
             SkipPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.SkipDuplicate),
             OverwritePreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Overwrite),
             AppendPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Append)
@@ -967,6 +1010,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         try
         {
+            // 补齐缺失的配置项，保证筛选下拉与实际数据一致（仅在确认导入后执行）
+            foreach (var p in missingProjects) ConfigService.Instance.AddProject(p);
+            foreach (var t in missingTypes) ConfigService.Instance.AddWorkType(t);
+
             var (inserted, updated, skippedDup) = await _repo.ImportAsync(valid, mode.Value);
             await LoadRecordsAsync();
             var parts = new List<string> { $"新增 {inserted} 条" };
@@ -1255,6 +1302,13 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             _lastCalendarMonth = ym;
             CalendarDisplayMonth = value;
             LoadCalendarStatusAsync().SafeFire("加载日历状态失败");
+        }
+
+        // 跨年时调休余额（按年统计）需要重新计算，否则会停留在旧年份
+        if (value.Year != _lastBalanceYear)
+        {
+            _lastBalanceYear = value.Year;
+            LoadCompLeaveBalanceAsync().SafeFire("加载调休余额失败");
         }
     }
 }

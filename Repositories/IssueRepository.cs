@@ -87,7 +87,7 @@ public class IssueRepository
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
             return await connection.ExecuteAsync(
-                "UPDATE Issue SET IsDeleted = 1, DeletedAt = datetime('now') WHERE Id = @Id", new { Id = id });
+                "UPDATE Issue SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id", new { Id = id });
         });
     }
 

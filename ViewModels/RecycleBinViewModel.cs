@@ -14,6 +14,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
     private readonly WorkRecordRepository _recordRepo = new();
     private readonly KnowledgeRepository _knowledgeRepo = new();
     private readonly IssueRepository _issueRepo = new();
+    private readonly LeaveRecordRepository _leaveRepo = new();
 
     [ObservableProperty]
     private ObservableCollection<RecycleItem> _items = new();
@@ -27,7 +28,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private bool _hasItems;
 
-    /// <summary>类型筛选：全部 / 工作记录 / 知识库 / 问题跟踪</summary>
+    /// <summary>类型筛选：全部 / 工作记录 / 知识库 / 问题跟踪 / 请假记录</summary>
     [ObservableProperty]
     private string _filterType = "全部";
 
@@ -43,6 +44,9 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
 
     [ObservableProperty]
     private int _issueCount;
+
+    [ObservableProperty]
+    private int _leaveRecordCount;
 
     /// <summary>是否处于多选模式</summary>
     [ObservableProperty]
@@ -123,11 +127,27 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
                 });
             }
 
+            var leaveList = await _leaveRepo.GetDeletedAsync();
+            foreach (var l in leaveList)
+            {
+                var c = l.Note ?? "";
+                allItems.Add(new RecycleItem
+                {
+                    EntityType = "LeaveRecord",
+                    Id = l.Id,
+                    TypeLabel = "请假记录",
+                    Title = $"{l.Date} - {l.LeaveType}",
+                    Detail = $"{l.Hours}h" + (c.Length > 0 ? (c.Length > 70 ? "，" + c[..70] + "..." : "，" + c) : ""),
+                    DeletedAt = l.DeletedAt
+                });
+            }
+
             // 更新统计
             TotalCount = allItems.Count;
             WorkRecordCount = recordList.Count();
             KnowledgeCount = knowledgeList.Count();
             IssueCount = issueList.Count();
+            LeaveRecordCount = leaveList.Count();
 
             // 应用筛选
             ApplyFilter(allItems);
@@ -146,6 +166,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
             "工作记录" => allItems.Where(x => x.EntityType == "WorkRecord"),
             "知识库" => allItems.Where(x => x.EntityType == "Knowledge"),
             "问题跟踪" => allItems.Where(x => x.EntityType == "Issue"),
+            "请假记录" => allItems.Where(x => x.EntityType == "LeaveRecord"),
             _ => allItems
         };
 
@@ -280,6 +301,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
             WorkRecordCount = 0;
             KnowledgeCount = 0;
             IssueCount = 0;
+            LeaveRecordCount = 0;
             Items.Clear();
             IsEmpty = true;
             HasItems = false;
@@ -310,6 +332,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
             case "WorkRecord": WorkRecordCount += delta; break;
             case "Knowledge": KnowledgeCount += delta; break;
             case "Issue": IssueCount += delta; break;
+            case "LeaveRecord": LeaveRecordCount += delta; break;
         }
         IsEmpty = TotalCount == 0;
         HasItems = TotalCount > 0;
@@ -322,6 +345,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
             case "WorkRecord": await _recordRepo.RestoreAsync(id); break;
             case "Knowledge": await _knowledgeRepo.RestoreAsync(id); break;
             case "Issue": await _issueRepo.RestoreAsync(id); break;
+            case "LeaveRecord": await _leaveRepo.RestoreAsync(id); break;
         }
     }
 
@@ -332,6 +356,7 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
             case "WorkRecord": await _recordRepo.HardDeleteAsync(id); break;
             case "Knowledge": await _knowledgeRepo.HardDeleteAsync(id); break;
             case "Issue": await _issueRepo.HardDeleteAsync(id); break;
+            case "LeaveRecord": await _leaveRepo.HardDeleteAsync(id); break;
         }
     }
 }

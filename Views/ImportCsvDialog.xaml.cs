@@ -26,6 +26,10 @@ public partial class ImportCsvDialog : Window
             : string.Join("\n", reasons.Take(5))
               + (reasons.Count > 5 ? $"\n...及其他 {reasons.Count - 5} 条" : "");
 
+        ConfigWarningText.Text = model.ConfigWarnings.Count == 0
+            ? ""
+            : string.Join("\n", model.ConfigWarnings);
+
         Loaded += (_, _) => ConfirmButton.Focus();
     }
 
