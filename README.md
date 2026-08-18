@@ -257,6 +257,22 @@ dotnet publish -c Release --self-contained true -r win-x64 -o publish
 **测试与工程**
 - 单元测试覆盖搜索全量返回、删除引用计数、覆盖率休息日过滤等场景，累计 44 项全部通过
 
+### v2.1.5（2026-08）缺陷修复与一致性补齐
+
+**功能性缺陷修复**
+- 修复 AI 工作总结报告生成必报错：DashboardViewModel 误用 `ps.cnt`/`ts.cnt` 访问 `dynamic` 不存在的属性（必然抛 RuntimeBinderException）；改为 `RecordCount`，并在 `WorkRecordRepository.GetTypeStatsAsync` 补 `COUNT(*)`，报告可正常生成
+- 修复仪表盘柱状图点击跳转日期错误：原写死"本周"起始日推算，月/季视图下日期错乱；改为按当前图表区间（周/月/季）起始日推算，三种视图跳转均准确
+
+**功能一致性补齐**
+- 请假记录（LeaveRecord）接入软删除 + 回收站 + 撤销：新增 `IsDeleted`/`DeletedAt` 列与索引；删除走软删除并支持 Toast 撤销，误删不再静默改变调休余额；回收站新增「请假记录」筛选类型与计数
+- 修复跨年切换不刷新调休余额：通过日历切到不同年份时按 `SelectedDate.Year` 重算余额（此前余额停留在旧年份直到手动刷新）
+
+**数据一致性与健壮性**
+- 回收站删除时间统一为本地时间：4 个仓库软删除 SQL 由 `datetime('now')`（UTC）改为 `datetime('now','localtime')`，与界面本地时间显示一致，不再差 8 小时
+- CSV 导入配置校验：导入记录的项目/类型若不在 `ConfigService` 配置项内，确认导入后自动补齐到配置并持久化，避免筛选下拉与实际数据不一致（缺失值按原值入库，不丢数据、不阻断导入）
+- CSV 导出表头对齐界面列头：`项目`→`任务`、`问题`→`问题描述`，与 WorkRecordView 实际 DataGrid 列头一致；导入解析仅识别新表头，不再兼容旧别名
+- 工程验证：隔离输出目录编译 0 错误（仅 SkiaSharp NU1701 无害警告），本轮修复已提交
+
 ## 许可证
 
 MIT License
