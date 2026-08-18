@@ -887,22 +887,28 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (!Records.Any())
         {
-            StatusMessage = "没有可导出的记录";
-            _statusTimer.Start();
+            ToastService.Info("没有可导出的记录");
             return;
         }
         if (ExportService.ExportToCsv(Records, $"工作记录_{SelectedDate:yyyyMMdd}"))
-            ToastService.Success("CSV 文件已导出");
+            ToastService.Success($"已导出 {Records.Count} 条记录到 CSV");
     }
 
     [RelayCommand]
     private async Task ImportCsvAsync()
     {
-        var records = ExportService.ImportFromCsv();
-        if (records == null || records.Count == 0)
+        var result = ExportService.ImportFromCsv();
+        if (result.Canceled)
+            return; // 用户取消选择文件，无需提示
+        if (result.Error != null)
         {
-            StatusMessage = "导入失败：文件为空或格式不正确";
-            _statusTimer.Start();
+            ToastService.Error($"导入失败：{result.Error}");
+            return;
+        }
+        var records = result.Items!;
+        if (records.Count == 0)
+        {
+            ToastService.Error("导入失败：未解析到任何有效记录");
             return;
         }
 
@@ -944,20 +950,30 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
-        var msg = $"共解析 {records.Count} 条，{valid.Count} 条有效";
-        if (skipped.Count > 0)
-            msg += $"\n\n已跳过 {skipped.Count} 条异常记录：\n{string.Join("\n", skipped.Take(5))}"
-                 + (skipped.Count > 5 ? $"\n...及其他 {skipped.Count - 5} 条" : "");
+        // 加载库中 UniqueId 映射，计算三种模式的导入预览
+        var map = await _repo.GetUniqueIdMapAsync();
+        var model = new ImportCsvDialogModel
+        {
+            TotalParsed = records.Count,
+            ValidCount = valid.Count,
+            SkippedReasons = skipped,
+            SkipPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.SkipDuplicate),
+            OverwritePreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Overwrite),
+            AppendPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Append)
+        };
 
-        if (!DialogService.Instance.ShowConfirm($"{msg}\n\n确定要导入吗？", "确认导入", ConfirmType.Warning))
-            return;
+        var mode = DialogService.Instance.ShowImportCsvDialog(model);
+        if (mode == null) return; // 用户取消
 
         try
         {
-            var count = await _repo.BatchInsertAsync(valid);
+            var (inserted, updated, skippedDup) = await _repo.ImportAsync(valid, mode.Value);
             await LoadRecordsAsync();
-            ToastService.Success($"已导入 {count} 条工作记录" +
-                (skipped.Count > 0 ? $"，跳过 {skipped.Count} 条" : ""));
+            var parts = new List<string> { $"新增 {inserted} 条" };
+            if (updated > 0) parts.Add($"覆盖 {updated} 条");
+            if (skippedDup > 0) parts.Add($"跳过重复 {skippedDup} 条");
+            if (skipped.Count > 0) parts.Add($"校验跳过 {skipped.Count} 条");
+            ToastService.Success($"导入完成：{string.Join("，", parts)}");
         }
         catch
         {
@@ -1162,23 +1178,19 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     {
         if (FilteredTotalCount == 0)
         {
-            StatusMessage = "没有可导出的记录";
-            _statusTimer.Start();
+            ToastService.Info("没有可导出的记录");
             return;
         }
         // 导出全部匹配记录（不受分页限制）
         var start = FilterStartDate?.ToString("yyyy-MM-dd");
         var end = FilterEndDate?.ToString("yyyy-MM-dd");
-        var (records, _, _, _) = await _repo.GetFilteredPagedAsync(
+        var (records, exportedCount, _, _) = await _repo.GetFilteredPagedAsync(
             SearchKeyword, FilterProject, FilterWorkType, start, end, 0, int.MaxValue,
             SortColumn, SortAscending);
         var startStr = FilterStartDate?.ToString("yyyyMMdd") ?? "all";
         var endStr = FilterEndDate?.ToString("yyyyMMdd") ?? "now";
         if (ExportService.ExportToCsv(new ObservableCollection<WorkRecord>(records), $"工作记录_{startStr}_{endStr}"))
-        {
-            StatusMessage = "已导出CSV文件";
-            _statusTimer.Start();
-        }
+            ToastService.Success($"已导出 {exportedCount} 条记录到 CSV");
     }
 
     partial void OnSelectedTabIndexChanged(int value)

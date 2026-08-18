@@ -19,4 +19,6 @@ public partial class WorkRecord : ObservableObject
     [ObservableProperty] private int _isDeleted;
     [ObservableProperty] private string? _deletedAt;
     [ObservableProperty] private string _createTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    /// <summary>导入匹配键：基于 日期|项目|内容 的稳定哈希，用于「跳过重复/覆盖更新」精准识别同一条记录。</summary>
+    [ObservableProperty] private string _uniqueId = string.Empty;
 }

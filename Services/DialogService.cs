@@ -1,3 +1,4 @@
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Views;
 using System.Windows;
 
@@ -23,6 +24,9 @@ public interface IDialogService
     /// <summary>弹出确认对话框，返回用户是否确认。confirmText/cancelText 为空时使用默认按钮文字。</summary>
     bool ShowConfirm(string message, string title, ConfirmType type = ConfirmType.Info,
         string? confirmText = null, string? cancelText = null);
+
+    /// <summary>弹出 CSV 导入确认弹窗（含模式选择 + 预览），返回所选模式；取消时返回 null。</summary>
+    ImportMode? ShowImportCsvDialog(ImportCsvDialogModel model);
 }
 
 /// <summary>
@@ -54,5 +58,14 @@ public sealed class DialogService : IDialogService
         if (confirmText == null && cancelText == null)
             return ConfirmDialog.Show(message, title, mapped);
         return ConfirmDialog.Show(message, title, mapped, confirmText ?? "确认", cancelText ?? "取消");
+    }
+
+    public ImportMode? ShowImportCsvDialog(ImportCsvDialogModel model)
+    {
+        var dialog = new ImportCsvDialog(model)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        return dialog.ShowDialog() == true ? dialog.SelectedMode : null;
     }
 }

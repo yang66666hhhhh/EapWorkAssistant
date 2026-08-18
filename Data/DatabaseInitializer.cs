@@ -1,5 +1,7 @@
 using System.Data.SQLite;
 using System.IO;
+using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 
 namespace EapWorkAssistant.Data;
 
@@ -179,5 +181,65 @@ public static class DatabaseInitializer
             migrateCmd.ExecuteNonQuery();
         }
         catch { /* 索引创建失败不影响启动 */ }
+
+        // 迁移：为 WorkRecord 添加 UniqueId（导入去重/覆盖的匹配键）
+        try
+        {
+            migrateCmd.CommandText = "ALTER TABLE WorkRecord ADD COLUMN UniqueId TEXT DEFAULT ''";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 列已存在 */ }
+
+        try
+        {
+            migrateCmd.CommandText = "CREATE INDEX IF NOT EXISTS idx_workrecord_uniqueid ON WorkRecord(UniqueId)";
+            migrateCmd.ExecuteNonQuery();
+        }
+        catch { /* 索引创建失败不影响启动 */ }
+
+        // 回填：为历史记录（空 UniqueId）生成稳定唯一标识，保证「导出后再导入」幂等、不产生重复
+        try
+        {
+            using var backfillCmd = connection.CreateCommand();
+            backfillCmd.CommandText = @"
+                SELECT Id, WorkDate, ProjectName, Content, Achievement, Problem, Solution,
+                       Hours, Progress, IsHighlight, HighlightNote, CreateTime
+                FROM WorkRecord WHERE UniqueId IS NULL OR UniqueId = ''";
+            using var reader = backfillCmd.ExecuteReader();
+            var updates = new List<(int Id, string Uid)>();
+            while (reader.Read())
+            {
+                var rec = new WorkRecord
+                {
+                    Id = reader.GetInt32(0),
+                    WorkDate = reader.GetString(1),
+                    ProjectName = reader.GetString(2),
+                    Content = reader.GetString(3),
+                    Achievement = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Problem = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    Solution = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    Hours = reader.GetDouble(7),
+                    Progress = reader.GetInt32(8),
+                    IsHighlight = reader.GetInt32(9),
+                    HighlightNote = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    CreateTime = reader.IsDBNull(11) ? "" : reader.GetString(11)
+                };
+                updates.Add((rec.Id, WorkRecordIdentityHelper.GenerateUniqueId(rec)));
+            }
+            reader.Close();
+            if (updates.Count > 0)
+            {
+                using var upd = connection.CreateCommand();
+                upd.CommandText = "UPDATE WorkRecord SET UniqueId = @Uid WHERE Id = @Id";
+                foreach (var u in updates)
+                {
+                    upd.Parameters.Clear();
+                    upd.Parameters.AddWithValue("@Uid", u.Uid);
+                    upd.Parameters.AddWithValue("@Id", u.Id);
+                    upd.ExecuteNonQuery();
+                }
+            }
+        }
+        catch { /* 回填失败不阻断启动 */ }
     }
 }

@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using Dapper;
 using EapWorkAssistant.Data;
+using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 
 namespace EapWorkAssistant.Repositories;
@@ -84,9 +87,11 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
+            if (string.IsNullOrWhiteSpace(record.UniqueId))
+                record.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(record);
             var id = await connection.QuerySingleAsync<int>(@"
-                INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
-                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime);
+                INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime, UniqueId)
+                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime, @UniqueId);
                 SELECT last_insert_rowid();",
                 record);
             record.Id = id;
@@ -100,10 +105,14 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
+            // 业务字段变更后按最新内容重算 UniqueId，使导入去重键始终与内容一致
+            // （不被陈旧的 UniqueId 误导，避免导出再导入时产生重复）。CreateTime 保持不变。
+            record.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(record);
             return await connection.ExecuteAsync(@"
                 UPDATE WorkRecord SET WorkDate=@WorkDate, ProjectName=@ProjectName, WorkType=@WorkType,
                 Content=@Content, Achievement=@Achievement, Problem=@Problem, Solution=@Solution,
-                Hours=@Hours, Progress=@Progress, IsHighlight=@IsHighlight, HighlightNote=@HighlightNote WHERE Id=@Id",
+                Hours=@Hours, Progress=@Progress, IsHighlight=@IsHighlight, HighlightNote=@HighlightNote,
+                UniqueId=@UniqueId WHERE Id=@Id",
                 record);
         });
     }
@@ -178,12 +187,16 @@ public class WorkRecordRepository
         {
             using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
             await connection.OpenAsync();
+            // 确保每条都有 UniqueId（导入的新行 / 历史兜底）
+            foreach (var r in records)
+                if (string.IsNullOrWhiteSpace(r.UniqueId))
+                    r.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(r);
             using var transaction = connection.BeginTransaction();
             try
             {
                 var count = await connection.ExecuteAsync(@"
-                    INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime)
-                    VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime)",
+                    INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime, UniqueId)
+                    VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime, @UniqueId)",
                     records, transaction);
                 transaction.Commit();
                 return count;
@@ -194,6 +207,107 @@ public class WorkRecordRepository
                 throw;
             }
         });
+    }
+
+    /// <summary>批量更新（覆盖导入用），不修改 CreateTime。</summary>
+    public async Task<int> BatchUpdateAsync(IEnumerable<WorkRecord> records)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                var count = await connection.ExecuteAsync(@"
+                    UPDATE WorkRecord SET WorkDate=@WorkDate, ProjectName=@ProjectName, WorkType=@WorkType,
+                    Content=@Content, Achievement=@Achievement, Problem=@Problem, Solution=@Solution,
+                    Hours=@Hours, Progress=@Progress, IsHighlight=@IsHighlight, HighlightNote=@HighlightNote,
+                    UniqueId=@UniqueId
+                    WHERE Id=@Id",
+                    records, transaction);
+                transaction.Commit();
+                return count;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        });
+    }
+
+    /// <summary>加载库中 (UniqueId -> Id) 映射（仅未删除记录），供导入匹配去重。</summary>
+    public async Task<Dictionary<string, int>> GetUniqueIdMapAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            var rows = await connection.QueryAsync(
+                "SELECT UniqueId, Id FROM WorkRecord WHERE IsDeleted = 0 AND UniqueId IS NOT NULL AND UniqueId <> ''");
+            var map = new Dictionary<string, int>();
+            foreach (var r in rows)
+                map[(string)r.UniqueId] = (int)r.Id;
+            return map;
+        });
+    }
+
+    /// <summary>
+    /// 按指定模式执行导入：跳过重复 / 覆盖更新 / 全部新增。
+    /// records 为已校验通过的记录（UniqueId 可能为空，方法内会补全）。
+    /// 返回 (新增数, 覆盖数, 跳过重复数)。
+    /// </summary>
+    public async Task<(int Inserted, int Updated, int Skipped)> ImportAsync(
+        List<WorkRecord> records, ImportMode mode)
+    {
+        var map = await GetUniqueIdMapAsync();
+        var toInsert = new List<WorkRecord>();
+        var toUpdate = new List<WorkRecord>();
+        var skipped = 0;
+
+        foreach (var r in records)
+        {
+            var natural = string.IsNullOrWhiteSpace(r.UniqueId)
+                ? WorkRecordIdentityHelper.GenerateUniqueId(r)
+                : r.UniqueId.Trim();
+
+            if (map.TryGetValue(natural, out var existingId))
+            {
+                switch (mode)
+                {
+                    case ImportMode.SkipDuplicate:
+                        skipped++;
+                        break;
+                    case ImportMode.Overwrite:
+                        r.Id = existingId;
+                        // 关键：按最新业务字段重算 UniqueId，使库内存储与内容一致。
+                        // 否则用户改了 CSV 内容后覆盖，旧 UniqueId 仍留在库里，
+                        // 下一轮导出会生成新 UniqueId，导入时匹配不到 → 重复插入。
+                        r.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(r);
+                        toUpdate.Add(r);
+                        break;
+                    case ImportMode.Append:
+                        // 强制新增：存在同名则追加随机后缀，保证与库中记录区分
+                        r.UniqueId = map.ContainsKey(natural)
+                            ? natural + "-" + Guid.NewGuid().ToString("N").Substring(0, 8)
+                            : natural;
+                        r.Id = 0;
+                        toInsert.Add(r);
+                        break;
+                }
+            }
+            else
+            {
+                r.UniqueId = natural;
+                r.Id = 0;
+                toInsert.Add(r);
+            }
+        }
+
+        var inserted = toInsert.Count > 0 ? await BatchInsertAsync(toInsert) : 0;
+        var updated = toUpdate.Count > 0 ? await BatchUpdateAsync(toUpdate) : 0;
+        return (inserted, updated, skipped);
     }
 
     public async Task<double> GetTotalHoursAsync(string startDate, string endDate)
