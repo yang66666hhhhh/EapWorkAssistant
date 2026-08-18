@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
+using SkiaSharp;
 
 namespace EapWorkAssistant.Services;
 
@@ -472,6 +473,22 @@ public class ThemeService : INotifyPropertyChanged
     {
         return AccentPalettes.TryGetValue(name, out var p) ? p.Primary : "#4F46E5";
     }
+
+    /// <summary>
+    /// 获取图表（LiveCharts2 / SkiaSharp）在当前主题下的配色：轴文字色、网格线色、强调（柱图）主色。
+    /// 图表使用 SkiaSharp 直接绘制，无法响应 DynamicResource，需由 ViewModel 经此取色后手动重绘。
+    /// </summary>
+    public (SKColor Text, SKColor Grid, SKColor Accent) GetChartColors()
+    {
+        var res = Application.Current.Resources;
+        return (
+            ToSk((Color)res["TextSecondary"]),
+            ToSk((Color)res["Border"]),
+            ToSk((Color)res["Primary"])
+        );
+    }
+
+    private static SKColor ToSk(Color c) => new(c.R, c.G, c.B, c.A);
 }
 
 // ===== 辅助类型 =====

@@ -9,7 +9,9 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 
 namespace EapWorkAssistant.ViewModels;
@@ -19,6 +21,23 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     private readonly WorkRecordRepository _recordRepo = new();
     private readonly KnowledgeRepository _knowledgeRepo = new();
     private readonly IssueRepository _issueRepo = new();
+
+    public DashboardViewModel()
+    {
+        // 图表用 SkiaSharp 直接绘制，无法响应 DynamicResource。
+        // 订阅主题服务，明暗/强调色切换时手动重绘图表配色。
+        ThemeService.Instance.PropertyChanged += OnThemeServicePropertyChanged;
+    }
+
+    private void OnThemeServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ThemeService.ThemeMode)
+            or nameof(ThemeService.AccentColor)
+            or nameof(ThemeService.IsDarkMode))
+        {
+            ApplyChartTheme();
+        }
+    }
 
     // 基础统计
     [ObservableProperty] private double _todayHours;
@@ -277,6 +296,46 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         }
     }
 
+    /// <summary>
+    /// 让图表坐标轴文字/网格与柱图主色跟随当前主题与强调色。
+    /// 在初次加载与主题切换时调用，并重赋值数组以触发 LiveCharts 重绘。
+    /// </summary>
+    private void ApplyChartTheme()
+    {
+        if (ChartXAxes.Length == 0 && ChartYAxes.Length == 0 && ChartSeries.Length == 0) return;
+
+        var (text, grid, accent) = ThemeService.Instance.GetChartColors();
+        var textPaint = new SolidColorPaint(text);
+        var gridPaint = new SolidColorPaint(grid) { StrokeThickness = 1 };
+
+        ChartXAxes = ChartXAxes.Select(a =>
+        {
+            a.LabelsPaint = textPaint;
+            a.NamePaint = textPaint;
+            a.SeparatorsPaint = gridPaint;
+            return a;
+        }).ToArray();
+
+        ChartYAxes = ChartYAxes.Select(a =>
+        {
+            a.LabelsPaint = textPaint;
+            a.NamePaint = textPaint;
+            a.SeparatorsPaint = gridPaint;
+            return a;
+        }).ToArray();
+
+        var series = ChartSeries.ToList();
+        if (series.FirstOrDefault() is ColumnSeries<double> column)
+            column.Fill = new SolidColorPaint(accent);
+        ChartSeries = series.ToArray();
+
+        OnPropertyChanged(nameof(ChartXAxes));
+        OnPropertyChanged(nameof(ChartYAxes));
+        OnPropertyChanged(nameof(ChartSeries));
+        OnPropertyChanged(nameof(HasChartData));
+        OnPropertyChanged(nameof(HasPieData));
+    }
+
     private async Task LoadChartAsync()
     {
         var (start, end) = GetChartRangeDates();
@@ -338,6 +397,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             _ => "本周工时趋势"
         };
 
+        ApplyChartTheme();
         OnPropertyChanged(nameof(HasChartData));
     }
 
@@ -390,6 +450,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         }
 
         ProjectPieSeries = series.ToArray();
+        ApplyChartTheme();
         OnPropertyChanged(nameof(HasPieData));
     }
 

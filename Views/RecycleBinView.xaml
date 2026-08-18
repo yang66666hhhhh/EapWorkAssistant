@@ -271,8 +271,8 @@
                             ToolTip="批量恢复到原模块">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconRestore}" Width="13" Height="13" Stretch="Uniform"
-                                  Fill="#FFFFFF" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <TextBlock Text="恢复选中" FontSize="12" Foreground="#FFFFFF"/>
+                                  Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="恢复选中" FontSize="12" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
                     </Button>
 
@@ -280,8 +280,8 @@
                             IsEnabled="{Binding HasSelection}" Padding="12,5" ToolTip="彻底删除选中项">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconDeleteForever}" Width="13" Height="13" Stretch="Uniform"
-                                  Fill="#FFFFFF" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <TextBlock Text="彻底删除" FontSize="12" Foreground="#FFFFFF"/>
+                                  Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="彻底删除" FontSize="12" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
