@@ -143,12 +143,16 @@
                                     <Button Content="月报" Command="{Binding GenerateMonthlyReportCommand}"
                                             Style="{StaticResource BtnWarning}" Margin="5,0,0,0" Padding="10,7" FontSize="12"/>
                                     <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="8,5" Opacity="0.5"/>
-                                    <Button Content="导出CSV" Command="{Binding ExportCsvCommand}"
-                                            Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
-                                            Foreground="{DynamicResource PrimaryBrush}"/>
+                                    <!-- CSV 导入导出按钮组：导入按钮使用主色软背景，确保在工具栏中一眼可见 -->
                                     <Button Content="导入CSV" Command="{Binding ImportCsvCommand}"
                                             Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
-                                            Foreground="{DynamicResource PrimaryBrush}"/>
+                                            Foreground="{DynamicResource PrimaryBrush}"
+                                            Background="{DynamicResource PrimarySoftBrush}"
+                                            ToolTip="从 CSV 文件批量导入工作记录"/>
+                                    <Button Content="导出CSV" Command="{Binding ExportCsvCommand}"
+                                            Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
+                                            Foreground="{DynamicResource PrimaryBrush}"
+                                            Margin="5,0,0,0"/>
                                 </StackPanel>
                             </StackPanel>
 
