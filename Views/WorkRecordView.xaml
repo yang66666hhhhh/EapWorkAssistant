@@ -601,10 +601,18 @@
                                         <TextBlock Text="查看和筛选所有工作记录"
                                                    Foreground="{DynamicResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
                                     </StackPanel>
-                                    <Button Content="导出CSV" Command="{Binding ExportAllCsvCommand}"
-                                            Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
-                                            Foreground="{DynamicResource PrimaryBrush}"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <!-- CSV 导入导出按钮组：全部记录页同步支持导入 -->
+                                        <Button Content="导入CSV" Command="{Binding ImportCsvCommand}"
+                                                Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
+                                                Foreground="{DynamicResource PrimaryBrush}"
+                                                Background="{DynamicResource PrimarySoftBrush}"
+                                                ToolTip="从 CSV 文件批量导入工作记录"/>
+                                        <Button Content="导出CSV" Command="{Binding ExportAllCsvCommand}"
+                                                Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
+                                                Foreground="{DynamicResource PrimaryBrush}"
+                                                Margin="5,0,0,0"/>
+                                    </StackPanel>
                                 </Grid>
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,10" Opacity="0.7"/>
                                 <!-- 筛选条件 -->
