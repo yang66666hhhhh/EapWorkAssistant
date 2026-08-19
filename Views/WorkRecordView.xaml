@@ -160,7 +160,7 @@
                     </StackPanel>
             </Border>
 
-            <!-- ===== 数据统计条（带左侧色带） ===== -->
+            <!-- ===== 数据统计条 ===== -->
             <Grid Grid.Row="1" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -175,131 +175,103 @@
                 <!-- 今日工时 -->
                 <Border Grid.Column="0" Style="{StaticResource Card}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
+                        ClipToBounds="True" Padding="14,10">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="今日工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding TodayHours, StringFormat={}{0:F1}}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="今日工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
+                                       FontWeight="Medium"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding TodayHours, StringFormat={}{0:F1}}" FontSize="22"
+                                           FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                             </StackPanel>
-                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                        </StackPanel>
+                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
+                                Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}"
+                                  Width="14" Height="14" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Grid>
                 </Border>
 
                 <!-- 记录数 -->
                 <Border Grid.Column="2" Style="{StaticResource Card}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
+                        ClipToBounds="True" Padding="14,10">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding RecordCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                                    <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
+                                       FontWeight="Medium"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding RecordCount}" FontSize="22"
+                                           FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                                <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                             </StackPanel>
-                            <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconList}" Fill="{DynamicResource SuccessBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                        </StackPanel>
+                        <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
+                                Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconList}" Fill="{DynamicResource SuccessBrush}"
+                                  Width="14" Height="14" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Grid>
                 </Border>
 
                 <!-- 亮点标记 -->
                 <Border Grid.Column="4" Style="{StaticResource Card}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
+                        ClipToBounds="True" Padding="14,10">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource WarningBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding HighlightCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                    <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
+                                       FontWeight="Medium"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding HighlightCount}" FontSize="22"
+                                           FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                                <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                             </StackPanel>
-                            <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                        </StackPanel>
+                        <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
+                                Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
+                                  Width="14" Height="14" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Grid>
                 </Border>
 
                 <!-- 调休余额 -->
                 <Border Grid.Column="6" Style="{StaticResource Card}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
+                        ClipToBounds="True" Padding="14,10">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource InfoBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="调休余额" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
-                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
-                                <TextBlock Margin="0,1,0,0" FontSize="9.5" Foreground="{DynamicResource TextTertiaryBrush}">
-                                    <Run Text="加班"/>
-                                    <Run Text="{Binding OvertimeHours, StringFormat={}{0:F1}, Mode=OneWay}"/>
-                                    <Run Text="h · 已休"/>
-                                    <Run Text="{Binding CompLeaveUsed, StringFormat={}{0:F1}, Mode=OneWay}"/>
-                                    <Run Text="h"/>
-                                </TextBlock>
+                        <StackPanel>
+                            <TextBlock Text="调休余额" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
+                                       FontWeight="Medium"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" FontSize="22"
+                                           FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                             </StackPanel>
-                            <Border Background="{DynamicResource InfoLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource InfoBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                            <TextBlock Margin="0,1,0,0" FontSize="9.5" Foreground="{DynamicResource TextTertiaryBrush}">
+                                <Run Text="加班"/>
+                                <Run Text="{Binding OvertimeHours, StringFormat={}{0:F1}, Mode=OneWay}"/>
+                                <Run Text="h · 已休"/>
+                                <Run Text="{Binding CompLeaveUsed, StringFormat={}{0:F1}, Mode=OneWay}"/>
+                                <Run Text="h"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <Border Background="{DynamicResource InfoLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
+                                Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource InfoBrush}"
+                                  Width="14" Height="14" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Grid>
                 </Border>
             </Grid>
@@ -836,66 +808,45 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True" Padding="14,10">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="筛选工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllTotalHours, StringFormat={}{0:F1}}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                            <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="筛选工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding AllTotalHours, StringFormat={}{0:F1}}" FontSize="22"
+                                                   FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                        <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </Grid>
                         </Border>
                         <Border Grid.Column="2" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True" Padding="14,10">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllTotalCount}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                                            <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding AllTotalCount}" FontSize="22"
+                                                   FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                                        <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </Grid>
                         </Border>
                         <Border Grid.Column="4" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True" Padding="14,10">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource WarningBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllHighlightCount}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                            <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding AllHighlightCount}" FontSize="22"
+                                                   FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                                        <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Bottom" Margin="2,0,0,4"/>
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </Grid>
