@@ -20,9 +20,9 @@
             <!-- ===== Tab 切换栏 ===== -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                 <Button Content="当日记录" Click="TabDaily_Click"
-                        Style="{StaticResource TabButton}" Tag="0"/>
+                        Style="{StaticResource TabDailyButton}"/>
                 <Button Content="全部记录" Click="TabAll_Click" Margin="6,0,0,0"
-                        Style="{StaticResource TabButton}" Tag="1"/>
+                        Style="{StaticResource TabAllButton}"/>
             </StackPanel>
 
             <!-- ===== Tab 0: 当日记录 ===== -->
@@ -598,11 +598,11 @@
                                     <!-- 日期快捷 -->
                                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                                         <Button Content="本周" Command="{Binding SetDatePresetCommand}" CommandParameter="thisWeek"
-                                                Tag="thisWeek" Style="{StaticResource DatePresetButton}" Margin="0,0,5,0"/>
+                                                Style="{StaticResource DatePresetThisWeek}" Margin="0,0,5,0"/>
                                         <Button Content="本月" Command="{Binding SetDatePresetCommand}" CommandParameter="thisMonth"
-                                                Tag="thisMonth" Style="{StaticResource DatePresetButton}" Margin="0,0,5,0"/>
+                                                Style="{StaticResource DatePresetThisMonth}" Margin="0,0,5,0"/>
                                         <Button Content="近3月" Command="{Binding SetDatePresetCommand}" CommandParameter="last3Months"
-                                                Tag="last3Months" Style="{StaticResource DatePresetButton}" Margin="0,0,5,0"/>
+                                                Style="{StaticResource DatePresetLast3Months}" Margin="0,0,5,0"/>
                                         <Button Content="全部" Command="{Binding SetDatePresetCommand}" CommandParameter="all"
                                                 Style="{StaticResource DatePresetAllButton}"/>
                                     </StackPanel>

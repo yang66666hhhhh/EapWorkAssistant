@@ -1918,10 +1918,27 @@
         </Setter>
     </Style>
 
-    <!-- ==================== 选项卡/筛选按钮（共享参数化样式） ==================== -->
+    <!-- ==================== 选项卡/筛选按钮（共享样式） ==================== -->
 
-    <!-- 选项卡按钮：Tag 存索引(0=当日记录,1=全部记录)，与 SelectedTabIndex 匹配时高亮 -->
-    <Style x:Key="TabButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+    <!-- 当日记录Tab：默认高亮，SelectedTabIndex==1时变普通 -->
+    <Style x:Key="TabDailyButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
+                <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                <Setter Property="Background" Value="Transparent"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 全部记录Tab：默认普通，SelectedTabIndex==1时变高亮 -->
+    <Style x:Key="TabAllButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
         <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -1930,21 +1947,45 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Style.Triggers>
-            <!-- Tag 与当前选中 Tab 索引匹配时 → 高亮态 -->
-            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
                 <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
                 <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <!-- 日期快捷按钮：Tag 存预设值(thisWeek/thisMonth/last3Months/all)，与 ActiveDatePreset 匹配时高亮 -->
-    <Style x:Key="DatePresetButton" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+    <!-- 日期快捷按钮：默认普通边框态，匹配 ActiveDatePreset 时→高亮文字无边框 -->
+    <Style x:Key="DatePresetThisWeek" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
         <Setter Property="Padding" Value="10,6"/>
         <Setter Property="FontSize" Value="12"/>
         <Style.Triggers>
-            <!-- Tag 与当前激活的预设匹配时 → 选中态（文字高亮、无边框） -->
-            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisWeek">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DatePresetThisMonth" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisMonth">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DatePresetLast3Months" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="last3Months">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="BorderBrush" Value="Transparent"/>
