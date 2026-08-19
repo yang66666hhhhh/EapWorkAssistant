@@ -28,7 +28,6 @@
     <Color x:Key="SidebarText">#FF94A3B8</Color>
     <Color x:Key="SidebarHover">#FF162033</Color>
     <Color x:Key="SidebarCardBg">#FF1E293B</Color>
-    <Color x:Key="SidebarActive">#FF4338CA</Color>
     <Color x:Key="ScrollThumb">#FFCBD5E1</Color>
     <Color x:Key="ScrollThumbHover">#FF94A3B8</Color>
     <Color x:Key="ScrollThumbActive">#FF64748B</Color>
@@ -95,14 +94,8 @@
     <!-- 强调色 -->
     <Color x:Key="AccentIndigo">#FF4338CA</Color>
     <Color x:Key="AccentViolet">#FF7C3AED</Color>
-    <Color x:Key="AccentCyan">#FF0891B2</Color>
-    <Color x:Key="AccentRose">#FFE11D48</Color>
-    <Color x:Key="AccentAmber">#FFF59E0B</Color>
     <SolidColorBrush x:Key="AccentIndigoBrush" Color="{DynamicResource AccentIndigo}"/>
     <SolidColorBrush x:Key="AccentVioletBrush" Color="{DynamicResource AccentViolet}"/>
-    <SolidColorBrush x:Key="AccentCyanBrush" Color="{DynamicResource AccentCyan}"/>
-    <SolidColorBrush x:Key="AccentRoseBrush" Color="{DynamicResource AccentRose}"/>
-    <SolidColorBrush x:Key="AccentAmberBrush" Color="{DynamicResource AccentAmber}"/>
 
     <!-- ==================== 字体 ==================== -->
     <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI, Segoe UI Emoji</FontFamily>
@@ -193,7 +186,6 @@
     <Geometry x:Key="IconCamera">M12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15M20,4H16.8L15,2H9L7.2,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4Z</Geometry>
     <Geometry x:Key="IconMoon">M17.8,15.8C15.5,17.4 12.3,17.1 10.3,15.1C8.3,13.1 8,9.9 9.6,7.6C7.2,8.8 5.5,11.3 5.5,14.1A8.5,8.5 0 0,0 14,22.6C16.8,22.6 19.3,20.9 20.5,18.5C19.6,18.2 18.6,17.2 17.8,15.8Z</Geometry>
     <Geometry x:Key="IconSun">M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.4,4.4L12,3L9.6,4.4L12,2M4.2,4.2L5.6,5.6L3.8,5.6L4.2,4.2M2,12L4.4,9.6L3,12L4.4,14.4L2,12M4.2,19.8L5.6,18.4L3.8,18.4L4.2,19.8M12,22L9.6,19.6L12,21L14.4,19.6L12,22M19.8,19.8L18.4,18.4L20.2,18.4L19.8,19.8M22,12L19.6,14.4L21,12L19.6,9.6L22,12M19.8,4.2L18.4,5.6L20.2,5.6L19.8,4.2Z</Geometry>
-    <Geometry x:Key="IconSend">M2,21L23,12L2,3V10L17,12L2,14V21Z</Geometry>
     <Geometry x:Key="IconClose">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</Geometry>
     <Geometry x:Key="IconCheck">M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z</Geometry>
     <Geometry x:Key="IconCancel">M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z</Geometry>
@@ -1000,6 +992,9 @@
                                                Text="{Binding Path=(local:NavButtonProperties.Badge), RelativeSource={RelativeSource TemplatedParent}}"/>
                                 </Border>
                             </StackPanel>
+                            <Rectangle x:Name="accent" HorizontalAlignment="Left" Width="4"
+                                       Fill="{StaticResource AccentGradientH}" Visibility="Collapsed"
+                                       RadiusX="2" RadiusY="2"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1015,7 +1010,15 @@
                             <Setter TargetName="ico" Property="Fill" Value="White"/>
                             <Setter TargetName="txt" Property="Foreground" Value="White"/>
                             <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
+                            <Setter TargetName="accent" Property="Visibility" Value="Visible"/>
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsChecked" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimarySoft}"/>
+                        </MultiTrigger>
                         <!-- 折叠态：隐藏文字与徽标，图标居中；tooltip 仅在折叠态显示 -->
                         <DataTrigger Binding="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
                             <Setter TargetName="label" Property="Visibility" Value="Collapsed"/>

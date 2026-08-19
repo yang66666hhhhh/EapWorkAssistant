@@ -81,6 +81,7 @@
                     <!-- 中间：类型筛选 Tabs -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
                                 HorizontalAlignment="Center" Margin="20,0">
+                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextSecondaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
 
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="全部">
                             <Button.Style>
@@ -397,7 +398,13 @@
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource BtnGhost}" Padding="6,4" FontSize="12"
                                                     Foreground="{DynamicResource DangerBrush}"
-                                                    Content="删除" Margin="2,0,0,0"/>
+                                                    Margin="2,0,0,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Path Data="{StaticResource IconTrashCan}" Width="13" Height="13" Stretch="Uniform"
+                                                          Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="删除"/>
+                                                </StackPanel>
+                                            </Button>
 
                                         </StackPanel>
                                     </DataTemplate>

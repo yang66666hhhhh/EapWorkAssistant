@@ -23,6 +23,8 @@ public partial class DashboardView : UserControl
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => SyncDates();
         CustomCal.SelectedDateChanged += OnCalendarDateChanged;
+        MainScroller.ScrollChanged += (_, _) =>
+            BackToTopBtn.Visibility = MainScroller.VerticalOffset > 40 ? Visibility.Visible : Visibility.Collapsed;
 
         // 监听个人资料变更，身份切换时立即刷新仪表盘
         _profileHandler = (_, e) =>
@@ -207,5 +209,10 @@ public partial class DashboardView : UserControl
             vm.LoadDashboardAsync().SafeFire("刷新仪表盘失败");
             ToastService.Success("数据已刷新");
         }
+    }
+
+    private void BackToTop_Click(object sender, MouseButtonEventArgs e)
+    {
+        MainScroller.ScrollToTop();
     }
 }

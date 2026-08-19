@@ -161,76 +161,62 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <!-- 状态 - 彩色标签 -->
+                                <!-- 状态 - 彩色标签（Tag* 命名样式） -->
                                 <DataGridTemplateColumn Header="状态" Width="92" ClipboardContentBinding="{Binding Status}">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Border CornerRadius="{DynamicResource RadiusXs}" Padding="8,3" HorizontalAlignment="Left">
+                                            <Border Padding="8,3" HorizontalAlignment="Left">
                                                 <Border.Style>
-                                                    <Style TargetType="Border">
+                                                    <Style TargetType="Border" BasedOn="{StaticResource Tag}">
                                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Status}" Value="Open">
-                                                                <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
+                                                                <Setter Property="Style" Value="{StaticResource TagWarning}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="InProgress">
-                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                                <Setter Property="Style" Value="{StaticResource TagPrimary}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="Resolved">
-                                                                <Setter Property="Background" Value="{DynamicResource SuccessLightBrush}"/>
+                                                                <Setter Property="Style" Value="{StaticResource TagSuccess}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="Closed">
-                                                                <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                                                                <Setter Property="Style" Value="{StaticResource Tag}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
                                                 <TextBlock Text="{Binding Status, Converter={x:Static local:IssueStatusConverter.Instance}}"
-                                                           FontSize="11" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Open">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Status}" Value="InProgress">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Resolved">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
                                             </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <!-- 优先级 -->
+                                <!-- 优先级 - 彩色标签（Tag* 命名样式） -->
                                 <DataGridTemplateColumn Header="优先级" Width="84" ClipboardContentBinding="{Binding Priority}">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
-                                                       FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                            <Border Padding="8,3" HorizontalAlignment="Left">
+                                                <Border.Style>
+                                                    <Style TargetType="Border" BasedOn="{StaticResource Tag}">
+                                                        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Priority}" Value="High">
-                                                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
-                                                            </DataTrigger>
                                                             <DataTrigger Binding="{Binding Priority}" Value="Critical">
-                                                                <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                                <Setter Property="Style" Value="{StaticResource TagDanger}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Priority}" Value="Low">
-                                                                <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="High">
+                                                                <Setter Property="Style" Value="{StaticResource TagWarning}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Priority}" Value="Medium">
+                                                                <Setter Property="Style" Value="{StaticResource TagPrimary}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding Priority, Converter={x:Static local:IssuePriorityConverter.Instance}}"
+                                                           FontSize="11.5" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
