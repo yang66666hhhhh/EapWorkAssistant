@@ -1017,7 +1017,7 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                                 <Condition Property="IsChecked" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimarySoft}"/>
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
                         </MultiTrigger>
                         <!-- 折叠态：隐藏文字与徽标，图标居中；tooltip 仅在折叠态显示 -->
                         <DataTrigger Binding="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
