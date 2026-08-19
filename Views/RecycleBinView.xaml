@@ -22,13 +22,21 @@
             <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
         </Style>
 
-        <!-- 筛选 Tab 按钮样式 -->
+        <!-- 筛选 Tab 按钮样式：统一激活态（通过 Tag 匹配 FilterType） -->
         <Style x:Key="FilterTab" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
-            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Padding" Value="10,6"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding FilterType}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <!-- 操作按钮（带图标） -->
@@ -43,8 +51,8 @@
         <DockPanel>
 
             <!-- ==================== 顶部信息栏 ==================== -->
-            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="24,20"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="18,16"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,14">
 
                 <!-- 标题行：标题 + 统计 + 操作 -->
                 <Grid>
@@ -73,45 +81,22 @@
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="回收站" Style="{StaticResource Heading2}"/>
                                 <TextBlock Text="误删的内容会先进入这里，可随时恢复或彻底删除"
-                                           Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13" Margin="0,3,0,0"/>
+                                           Foreground="{DynamicResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- 中间：类型筛选 Tabs -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
-                                HorizontalAlignment="Center" Margin="20,0">
-                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextSecondaryBrush}" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                HorizontalAlignment="Center" Margin="12,0">
+                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="全部">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
-                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="全部">
-                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="工作记录">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                            <Setter Property="Background" Value="Transparent"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="知识库">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                            <Setter Property="Background" Value="Transparent"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="问题跟踪">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                            <Setter Property="Background" Value="Transparent"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="全部" Tag="全部"
+                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="全部"/>
-                                <Border  CornerRadius="{DynamicResource RadiusSm}" Padding="6,1"
-                                        Margin="6,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
+                                <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
+                                        Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding TotalCount, Mode=OneWay}"/>
@@ -120,26 +105,14 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="工作记录"
-                                Margin="4,0,0,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="工作记录">
-                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="工作记录" Tag="工作记录"
+                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="7" Height="7" CornerRadius="{DynamicResource RadiusXxs}"
-                                        Background="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                        Background="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="工作记录"/>
-                                <Border  CornerRadius="{DynamicResource RadiusSm}" Padding="6,1"
-                                        Margin="6,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
+                                <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
+                                        Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding WorkRecordCount, Mode=OneWay}"/>
@@ -148,26 +121,14 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="知识库"
-                                Margin="4,0,0,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="知识库">
-                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="知识库" Tag="知识库"
+                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="7" Height="7" CornerRadius="{DynamicResource RadiusXxs}"
-                                        Background="{DynamicResource SuccessBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                        Background="{DynamicResource SuccessBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="知识库"/>
-                                <Border  CornerRadius="{DynamicResource RadiusSm}" Padding="6,1"
-                                        Margin="6,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
+                                <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
+                                        Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding KnowledgeCount, Mode=OneWay}"/>
@@ -176,26 +137,14 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="问题跟踪"
-                                Margin="4,0,0,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="问题跟踪">
-                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="问题跟踪" Tag="问题跟踪"
+                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="7" Height="7" CornerRadius="{DynamicResource RadiusXxs}"
-                                        Background="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                        Background="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="问题跟踪"/>
-                                <Border  CornerRadius="{DynamicResource RadiusSm}" Padding="6,1"
-                                        Margin="6,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
+                                <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
+                                        Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding IssueCount, Mode=OneWay}"/>
@@ -204,26 +153,14 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录"
-                                Margin="4,0,0,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding FilterType}" Value="请假记录">
-                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录" Tag="请假记录"
+                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="7" Height="7" CornerRadius="{DynamicResource RadiusXxs}"
-                                        Background="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                        Background="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="请假记录"/>
-                                <Border  CornerRadius="{DynamicResource RadiusSm}" Padding="6,1"
-                                        Margin="6,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
+                                <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
+                                        Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding LeaveRecordCount, Mode=OneWay}"/>
