@@ -1918,6 +1918,75 @@
         </Setter>
     </Style>
 
+    <!-- ==================== 选项卡/筛选按钮（共享参数化样式） ==================== -->
+
+    <!-- 选项卡按钮：Tag 存索引(0=当日记录,1=全部记录)，与 SelectedTabIndex 匹配时高亮 -->
+    <Style x:Key="TabButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <!-- Tag 与当前选中 Tab 索引匹配时 → 高亮态 -->
+            <DataTrigger Binding="{Binding SelectedTabIndex}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 日期快捷按钮：Tag 存预设值(thisWeek/thisMonth/last3Months/all)，与 ActiveDatePreset 匹配时高亮 -->
+    <Style x:Key="DatePresetButton" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Style.Triggers>
+            <!-- Tag 与当前激活的预设匹配时 → 选中态（文字高亮、无边框） -->
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- "全部"日期按钮的默认态（当任一预设激活时显示为普通） -->
+    <Style x:Key="DatePresetAllButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+        <Style.Triggers>
+            <!-- 有任何预设激活时 → 普通态 -->
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisWeek">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisMonth">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding ActiveDatePreset}" Value="last3Months">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- ==================== 分页控件样式 ==================== -->
 
     <!-- 页码按钮（普通/当前页高亮） -->
@@ -2018,6 +2087,47 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- 分页数字按钮（DataTemplate 内使用）：省略号禁用 + 当前页高亮 + 自定义模板 -->
+    <Style x:Key="PageNumberItemButton" TargetType="Button" BasedOn="{StaticResource PageNumberButton}">
+        <Style.Triggers>
+            <!-- 省略号（值为0）禁用点击 -->
+            <DataTrigger Binding="{Binding}" Value="0">
+                <Setter Property="IsEnabled" Value="False"/>
+                <Setter Property="Content" Value="..."/>
+                <Setter Property="Cursor" Value="Arrow"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+            </DataTrigger>
+            <!-- 当前页高亮（MultiBinding 匹配当前页码） -->
+            <DataTrigger Value="True">
+                <DataTrigger.Binding>
+                    <MultiBinding>
+                        <MultiBinding.Converter>
+                            <local:PageActiveConverter/>
+                        </MultiBinding.Converter>
+                        <Binding/>
+                        <Binding Path="DataContext.CurrentPage"
+                                 RelativeSource="{RelativeSource AncestorType=ItemsControl}"/>
+                    </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="{DynamicResource RadiusSm}"
+                                    Background="{DynamicResource PrimaryBrush}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>
