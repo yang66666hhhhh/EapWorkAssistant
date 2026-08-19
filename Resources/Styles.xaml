@@ -992,9 +992,9 @@
                                                Text="{Binding Path=(local:NavButtonProperties.Badge), RelativeSource={RelativeSource TemplatedParent}}"/>
                                 </Border>
                             </StackPanel>
-                            <Rectangle x:Name="accent" HorizontalAlignment="Left" Width="4"
-                                       Fill="{StaticResource AccentGradientH}" Visibility="Collapsed"
-                                       RadiusX="2" RadiusY="2"/>
+                            <Rectangle x:Name="accent" HorizontalAlignment="Left" Width="3"
+                                       Fill="{DynamicResource PrimaryBrush}" Visibility="Collapsed"
+                                       RadiusX="1.5" RadiusY="1.5"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1006,9 +1006,9 @@
                             <Setter TargetName="item" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
                         </MultiTrigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
-                            <Setter TargetName="ico" Property="Fill" Value="White"/>
-                            <Setter TargetName="txt" Property="Foreground" Value="White"/>
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
+                            <Setter TargetName="ico" Property="Fill" Value="{DynamicResource PrimaryBrush}"/>
+                            <Setter TargetName="txt" Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
                             <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
                             <Setter TargetName="accent" Property="Visibility" Value="Visible"/>
                         </Trigger>
@@ -1017,7 +1017,7 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                                 <Condition Property="IsChecked" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
+                            <Setter TargetName="item" Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                         </MultiTrigger>
                         <!-- 折叠态：隐藏文字与徽标，图标居中；tooltip 仅在折叠态显示 -->
                         <DataTrigger Binding="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
