@@ -273,6 +273,25 @@ dotnet publish -c Release --self-contained true -r win-x64 -o publish
 - CSV 导出表头对齐界面列头：`项目`→`任务`、`问题`→`问题描述`，与 WorkRecordView 实际 DataGrid 列头一致；导入解析仅识别新表头，不再兼容旧别名
 - 工程验证：隔离输出目录编译 0 错误（仅 SkiaSharp NU1701 无害警告），本轮修复已提交
 
+### v2.1.6（2026-08）XAML 样式异常集中修复
+
+本轮彻底清除应用启动/导航时的 `XamlParseException` 与运行时 `FrameworkElement.Style` 异常，覆盖全部视图。
+
+**编译期崩溃（DataTrigger.Value 非法 Binding）**
+- `XamlParseException: 不能在"DataTrigger"类型的"Value"属性上设置"Binding"`——WPF 的 `DataTrigger.Value` 必须是字面量，不支持 Binding 表达式
+- WorkRecordView：原 `TabButton`/`DatePresetButton` 共享样式用 `Value="{Binding Tag,...}"`；拆分为 `TabDailyButton`/`TabAllButton`（Value="1" 匹配 SelectedTabIndex）、`DatePresetThisWeek`/`ThisMonth`/`Last3Months`（字面量匹配 ActiveDatePreset）
+- RecycleBinView：原 `FilterTab` 本地样式同样用 `Value="{Binding Tag,...}"`；拆分为 `FilterTabBase` + `FilterTabAll`/`WorkRecord`/`Knowledge`/`Issue`/`Leave`（字面量 Value="全部"/"工作记录"/"知识库"/"问题跟踪"/"请假记录"）
+- 全局验证：`grep -rPzo 'DataTrigger[^>]*Value="\{Binding'` → 零结果，所有 DataTrigger.Value 均为字面量
+
+**运行时异常（Trigger 中重置 Style 属性）**
+- IssueView 状态/优先级彩色标签，原在 DataTrigger 内 `<Setter Property="Style" Value="{StaticResource TagXxx}"/>` 整体替换 Style——WPF 不允许在 Trigger 中重置 Style，运行时抛 `FrameworkElement.Style` 异常（行184列63）
+- 修复：`Tag` 系列变体唯一差异是 Background 色，改为直接设置 Background（如 Open→WarningLightBrush、Critical→DangerLightBrush），不再替换整 Style
+- 全局验证：`grep 'Property="Style"'` → 零结果
+
+**共享样式治理**
+- 全仓库内联 `<Button.Style>`+`<DataTrigger>` 复杂块已全部提取为 Styles.xaml 共享样式（WorkRecordView 7 处、RecycleBinView 5 处），消除 WPF 对内联复杂样式块解析不稳定的隐患
+- 构建验证：隔离 obj/OutDir 编译 0 错误（仅 SkiaSharp NU1701 无害警告）
+
 ## 许可证
 
 MIT License
