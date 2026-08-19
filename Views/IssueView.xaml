@@ -171,17 +171,15 @@
                                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Status}" Value="Open">
-                                                                <Setter Property="Style" Value="{StaticResource TagWarning}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="InProgress">
-                                                                <Setter Property="Style" Value="{StaticResource TagPrimary}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status}" Value="Resolved">
-                                                                <Setter Property="Style" Value="{StaticResource TagSuccess}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource SuccessLightBrush}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Closed">
-                                                                <Setter Property="Style" Value="{StaticResource Tag}"/>
-                                                            </DataTrigger>
+                                                            <!-- Closed → 默认 SurfaceBrush，无需额外 Setter -->
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
@@ -202,14 +200,15 @@
                                                         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Priority}" Value="Critical">
-                                                                <Setter Property="Style" Value="{StaticResource TagDanger}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource DangerLightBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Priority}" Value="High">
-                                                                <Setter Property="Style" Value="{StaticResource TagWarning}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Priority}" Value="Medium">
-                                                                <Setter Property="Style" Value="{StaticResource TagPrimary}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                                                             </DataTrigger>
+                                                            <!-- Low → 默认 SurfaceBrush -->
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
