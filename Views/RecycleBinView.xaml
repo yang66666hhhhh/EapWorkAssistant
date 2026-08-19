@@ -22,8 +22,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
         </Style>
 
-        <!-- 筛选 Tab 按钮样式：统一激活态（通过 Tag 匹配 FilterType） -->
-        <Style x:Key="FilterTab" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
+        <!-- 筛选 Tab 按钮基础样式（普通态） -->
+        <Style x:Key="FilterTabBase" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
             <Setter Property="Padding" Value="10,6"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
@@ -31,8 +31,48 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <!-- 各筛选 Tab 的激活态（FilterType 匹配时高亮） -->
+        <Style x:Key="FilterTabAll" TargetType="Button" BasedOn="{StaticResource FilterTabBase}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding FilterType}" Value="{Binding Tag, RelativeSource={RelativeSource Self}}">
+                <DataTrigger Binding="{Binding FilterType}" Value="全部">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FilterTabWorkRecord" TargetType="Button" BasedOn="{StaticResource FilterTabBase}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding FilterType}" Value="工作记录">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FilterTabKnowledge" TargetType="Button" BasedOn="{StaticResource FilterTabBase}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding FilterType}" Value="知识库">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FilterTabIssue" TargetType="Button" BasedOn="{StaticResource FilterTabBase}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding FilterType}" Value="问题跟踪">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FilterTabLeave" TargetType="Button" BasedOn="{StaticResource FilterTabBase}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding FilterType}" Value="请假记录">
                     <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
                     <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                 </DataTrigger>
@@ -91,8 +131,8 @@
                                 HorizontalAlignment="Center" Margin="12,0">
                         <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="全部" Tag="全部"
-                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="全部"
+                                Style="{StaticResource FilterTabAll}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="全部"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
@@ -105,8 +145,8 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="工作记录" Tag="工作记录"
-                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="工作记录"
+                                Style="{StaticResource FilterTabWorkRecord}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
@@ -121,8 +161,8 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="知识库" Tag="知识库"
-                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="知识库"
+                                Style="{StaticResource FilterTabKnowledge}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource SuccessBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
@@ -137,8 +177,8 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="问题跟踪" Tag="问题跟踪"
-                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="问题跟踪"
+                                Style="{StaticResource FilterTabIssue}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
@@ -153,8 +193,8 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录" Tag="请假记录"
-                                Style="{StaticResource FilterTab}" Margin="3,0,0,0">
+                        <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录"
+                                Style="{StaticResource FilterTabLeave}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
