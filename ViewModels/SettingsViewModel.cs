@@ -413,8 +413,6 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         StatusMessage = days.Count > 0
             ? $"休息日已设为：{string.Join("、", selected)}"
             : "未设置休息日，所有日期均为工作日";
-        if (days.Count > 0)
-            ToastService.Info($"休息日已设为：{string.Join("、", selected)}");
     }
 
     partial void OnIsRestDay0Changed(bool value) => UpdateRestDays();

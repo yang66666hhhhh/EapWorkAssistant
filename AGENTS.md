@@ -444,7 +444,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 4. **禁止更改项目目标框架**：当前为 `net10.0-windows`
 5. **禁止破坏单例模式**：不得将 `ThemeService.Instance` 等改为依赖注入或其他模式
 6. **禁止在 ViewModel 中引入 WPF 命名空间**：保持 MVVM 纯净性
-7. **禁止硬编码颜色值/圆角值**：新代码中颜色必须引用 `Styles.xaml` 中的 `SolidColorBrush` 资源键，圆角必须引用 `RadiusXxx` 资源键（见「主题系统」章节的圆角资源键清单），禁止散落魔法数字
+7. **禁止硬编码颜色值/圆角值/字号/间距**：新代码中颜色必须引用 `DesignTokens.xaml`（由 `App.xaml` 在 `Styles.xaml` 之前合并引入，见下文「DesignTokens 令牌体系」）中的 `SolidColorBrush` 资源键，圆角引用 `RadiusXxx` 资源键，字号引用 `FontSizeXxx`、间距引用 `SpaceXxx`/`CellPad` 等令牌，禁止散落魔法数字或字面量 `FontSize="14"`、`Width="140"` 等
 8. **禁止在 Storyboard 中使用 DynamicResource**：会导致运行时异常
 9. **修改 XAML 前必须确认结构完整性**：不要意外删除 Grid、ColumnDefinitions 等结构性标签
 10. **修改后必须验证编译通过**：执行 `dotnet build -c Debug` 确认 0 error。仅当该 `bin/Debug` 目录的编译产物正被其他进程占用（如 WPF 应用运行中、IDE 调试/Hot-Reload 进程持锁）时，Windows 的文件独占锁才会导致编译失败/卡顿；此时改用隔离输出 `dotnet build -c Debug -p:OutDir=bin/_verify_xxx/`（每次不同后缀）。CI、远程/沙箱环境（如 Codex）不共享本机运行实例，通常可直接 build
@@ -518,3 +518,104 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - [ ] 自动保存计时器在离开工作记录页面时是否暂停？
 - [ ] 单例服务的事件订阅是否有对应的取消订阅路径？
 - [ ] 知识库/问题跟踪「新增」按钮是否在打开抽屉前重置了表单？
+
+## AI Agent 行为约束规则（EAP 适配版，2026-08-26 修订）
+
+> 本段与上方「AI 操作红线」「组件复用规范」「DesignTokens 令牌体系」共同构成约束全集；冲突时以本段 + 红线为准。
+> 本版基于 2026-08-26 实际代码库（v2.1.x，.NET 10 / WPF / CommunityToolkit.Mvvm）核对修订，修正了原"七条红线"中令牌名/服务名写错、把未实现功能当现状等条款。原「AI Agent 强制行为约束（七条红线）」章节已被本版取代。
+
+### 一、禁止臆测
+- 遇到不确定的字段名、API 签名、表结构时，**必须先读源码**，不允许凭记忆补全。
+- 涉及多文件调用链（View → ViewModel → Service）必须一次性读完完整链路再动手。
+- 禁止生成 `// TODO: 这里需要...` 或 `// 请手动补充...` 的占位代码——要么完整实现，要么不做。
+
+### 二、UI/样式一致性（令牌以 DesignTokens.xaml 为准）
+- 禁止硬编码颜色值、圆角、字号、间距、动效时长。
+- 除图标、头像、状态圆点等**确需固定尺寸**的控件外，禁止在 XAML 写 `CornerRadius="8"`、`FontSize="14"`、`Margin="12"`、`Width="140"`、`Duration="200"` 等字面量。
+- 所有值必须引用 `Resources/DesignTokens.xaml` 中的 `StaticResource`；`App.xaml` 已确保它在 `Styles.xaml` 之前加载。
+- 若 `DesignTokens.xaml` 缺少所需令牌，应**先在该文件补齐定义再使用**，禁止在页面硬编码。
+- 当前可用令牌（定义于 `DesignTokens.xaml`，命名以实际为准，**不要臆造键名**）：
+  - **颜色画刷**：`PrimaryBrush` `PrimaryHoverBrush` `PrimaryLightBrush` `SecondaryBrush` `SuccessBrush` `SuccessLightBrush` `WarningBrush` `WarningLightBrush` `DangerBrush` `DangerLightBrush` `InfoBrush` `SurfaceBrush` `SurfaceHoverBrush` `SurfaceAltBrush` `CardBrush` `TextPrimaryBrush` `TextSecondaryBrush` `TextTertiaryBrush` `BorderBrush` `BorderHoverBrush` `TextOnPrimaryBrush` `TextHintBrush` `AccentIndigoBrush` `AccentVioletBrush` `SidebarBgBrush` `SidebarTextBrush` `SidebarHoverBrush` `SidebarCardBgBrush` `ScrollThumbBrush` `ScrollThumbHoverBrush` `ScrollThumbActiveBrush` `OverlayMaskBrush` `CalendarOverlayBrush` `OnPrimaryTextBrush`
+    - ⚠️ 不存在：`BackgroundBrush` / `CardBackgroundBrush` / `HoverBrush` / `SelectedBrush`（别用）
+  - **圆角**：`RadiusXs`(6) `RadiusSm`(8) `RadiusMd`(10) `RadiusLg`(12) `RadiusCard`(16) `RadiusXl`(22) `RadiusPill`(9999) `RadiusXxs`(4) `RadiusHair`(1) `RadiusLeftCard`(16,0,0,16) `RadiusSidePanel`(18,0,0,18) `RadiusPopup`(14)
+  - **间距（Thickness）**：`SpaceXxs`(2) `SpaceXs`(4) `SpaceSm`(8) `SpaceMd`(12) `SpaceLg`(16) `SpaceXl`(24) `CellPad`(10,6) `GapTopXxs`(0,3,0,0)
+    - ⚠️ 前缀是 **`Space`** 不是 `Spacing`；不存在 `SpacingPage` / `SpacingSection` / `SpacingItem`
+  - **密度（Thickness）**：`DensityCardPad`(24) `DensityRowPad`(20,14) `DensityRowPadSm`(18,11) `DensityListPad`(14,12) `DensitySectionMargin` `DensityRowMargin` `DensityItemMargin`
+    - ⚠️ 不存在 `DensityPagePad`
+  - **字号（sys:Double）**：`FontSizeMicro`(10) `FontSizeXxs`(10) `FontSizeXs`(11) `FontSizeCaption`(11) `FontSizeSm`(12) `FontSizeMd`(13) `FontSizeBody`(13) `FontSizeBodySm`(12.5) `FontSizeLg`(15) `FontSizeLead`(14) `FontSizeSection`(16) `FontSizeXl`(18) `FontSizeSubtitle`(17) `FontSizeTitle`(20) `FontSizeDisplay`(26)
+    - ⚠️ 不存在 `FontSizeHero`；大标题用 `FontSizeDisplay` 或 `FontSizeTitle`
+  - **动效时长（sys:String，可直接用于 `Duration=`）**：`DurationFast`(0:0:0.15) `DurationNormal`(0:0:0.25) `DurationSlow`(0:0:0.40)
+  - **尺寸令牌**：`IconButtonSize`(34) `ControlMinHeight`(40) `ControlMinHeightSm`(36) `InputHeight`(42) `SwitchTrackWidth`(44) `SwitchTrackHeight`(24) `SwitchThumbSize`(20) `PagerSize`(32) `ToolTipMaxWidth`(400) `IllustrationSize`(72) `StatusDotSize`(6)
+
+### 三、组件复用
+- 禁止在多个页面重复写相同的 UI 结构（空状态占位、卡片、列表项模板、页面标题栏）。
+- 任一 UI 模式出现两次以上，必须抽取为 `UserControl`（建议放 `Controls/` 目录，目前该目录尚不存在，新建即可）。
+- **现状（已存在可复用资产）**：
+  - `Views/StatCard.xaml` —— 统计卡片（图标 + 数值 + 标签）
+  - `Views/PaginationControl.xaml` —— 统一分页（支持 Simple / Numbered）
+  - 表格统一使用 `Resources/Styles.xaml` 的 `ModernGrid` + `ModernGridColumnHeader` + `ModernGridCell` + `ModernGridRow`
+- **待补（原规则称"已存在"，实际不存在，新写时优先抽取）**：
+  - 空状态占位 `EmptyStateControl`（当前各页为内联 XAML）
+  - 页面标题栏 `PageHeader`（当前各页为内联 XAML）
+  - 仪表盘卡片 `DataCard`（当前用 `StatCard` 替代）
+  - 👉 不要写"引用 `Controls/EmptyStateControl`"这类代码，它尚未存在。
+
+### 四、异步与状态
+- 按钮/用户操作使用 CommunityToolkit **`[RelayCommand]`**（异步方法标注 `[RelayCommand]`），并对可能重复触发的操作加防重：
+  - `IsBusy` / `IsRunning` 守卫，或
+  - `Helpers/UiTimer.cs` 防抖（项目已有，列表搜索即用）
+  - ⚠️ 原规则写 `AsyncRelayCommand`，代码库实际用的是 `[RelayCommand]`，语义一致，以代码库现有约定为准。
+- 列表/数据容器应实现 `Loading → Content → Empty → Error` 四态：
+  - 当前基线：`IsBusy`(Loading) + Empty 占位 + `ToastService` 报错为主；**Error 态未统一内嵌**，新增列表请补齐 Error 分支。
+- 全局异常必须走 `Services/ToastService`（实际类名，**非 `ToastNotificationService`**），不允许 `MessageBox.Show` 直接暴露（调试除外）。当前代码库已无 `MessageBox.Show`。
+
+### 五、数据安全
+- 删除操作必须经"回收站"中转，禁止直接 `DELETE`（业务删除统一走软删除 / 入回收站）。✅ 现状符合。
+- 清空回收站前必须弹二次确认弹窗（现有 `Views/ConfirmDialog.xaml` + `ConfirmDialog.xaml.cs` 可用）。✅ 现状符合。
+- 关键表单（工作记录 / 问题跟踪编辑）提交前必须做前端校验，不合规数据阻止入库；校验错误高亮指示（红色边框/提示文字）并在 Toast 汇总。✅ 现状部分符合（WorkRecord 已含校验，其余表单按需补齐）。
+- ⚠️ **回收站"30 天自动物理删除"当前未实现**。代码库仅有 `DatabaseBackupService.MaxBackupDays = 30`（这是备份清理，与回收站无关），回收站无自动过期定时任务。
+  - 此条作为**目标规范**保留，但需另立任务实现（建议在 `RecycleBinViewModel` 增加过期清理命令，并在应用启动 / 进入回收站时触发）。
+
+### 六、测试与验证
+- 修改核心逻辑（Repository 层、Import/Export 服务）后必须确保现有单元测试全部通过。
+- 新增功能涉及复杂逻辑时，必须同步补充对应单元测试。
+- 删除/修改公共 API 或公共控件前，必须先检查所有引用处，确保不破坏现有功能。
+
+### 七、代码组织
+- 所有新增类/接口必须放在对应命名空间（`Models` / `Services` / `ViewModels` / `Controls` / `Helpers` / `Data` / `Views`）。
+- 禁止在一个 `.cs` 文件中塞入多个不相关的类（DTO / 枚举 / 小型辅助类除外）。
+- 文件命名必须与包含的类名一致（如 `WorkRecordRepository.cs` 包含 `WorkRecordRepository` 类）。
+
+### 八、清理临时目录
+- 允许清理（无需询问）：`bin/` `obj/` `TestResults/` `_verify_*` `_temp_*` `*.tmp` `*.log` `*.cache`
+- 禁止清理：`*.cs` `*.xaml` `*.csproj` `*.sln` `Resources/` `Assets/` `Database/*.db` `*.sqlite` `.git/` `DesignTokens.xaml` `Styles.xaml`
+
+### 九、表格/列表规范
+- 所有 `DataGrid` / `ListView` 必须使用 **`ModernGrid` 样式**（非 `DataGridBase` 基类——该类不存在）+ `ModernGridColumnHeader` / `ModernGridCell` / `ModernGridRow`，并启用 `DataGridCopyHelper`（ModernGrid 已内置）与 `DataGridSmartColumns`（按列头/字段提供智能默认列宽，见 `Helpers/DataGridSmartColumns.cs`）。
+- 列宽拖拽：`ModernGrid` 已支持 `CanUserResizeColumns`。
+- ⚠️ **列宽持久化 + 排序记忆 + `TableKey` 维度配置目前未实现**，列为待办（建议在 `DataGridSmartColumns` 增加基于 `TableKey` 的持久化，每个表格传入唯一 `TableKey` 区分列宽配置）。
+- 空状态由 `ModernGrid` 样式配合各页 Empty 占位切换（见第三、四条）。
+
+### 十、通用工具与帮助类
+- 通用工具方法放在 `Helpers/` 目录，按功能分类；禁止在 ViewModel 或 Service 中重复实现相同逻辑。
+- **现状**：
+  - `Helpers/WorkRecordIdentityHelper.cs` ✅（UniqueId 生成与匹配）
+  - `Helpers/DateTimeHelper.cs` ✅（日期格式化、相对时间）
+  - 字符串归一化/哈希：目前以 Converter 形式散落（`StringEqualsConverter` 等），**尚无 `StringHelper.cs`**；新增字符串工具请直接建 `Helpers/StringHelper.cs`，勿照搬原规则已存在的假设。
+  - 用户配置读写走 `Services/ConfigService.cs`（**非 `Helpers/ConfigHelper.cs`**）；新增配置读写请复用 `ConfigService`，勿新建重复实现。
+
+### 自查清单（每次生成代码后必须自检）
+
+| 检查项 | 状态 |
+|--------|------|
+| 是否引用了**真实存在**的 DesignTokens.xaml 令牌（未臆造键名）？ | ✅ / ❌ |
+| 是否有硬编码颜色/圆角/字号/间距/动效时长/固定尺寸（图标等豁免除外）？ | ✅ / ❌ |
+| 是否复用了已有通用控件（StatCard / PaginationControl / ModernGrid）而非重复造轮子？ | ✅ / ❌ |
+| 异步操作是否使用了 `[RelayCommand]` + 防重复机制（IsBusy / UiTimer）？ | ✅ / ❌ |
+| 列表是否实现了四态切换（含 Error 分支）？ | ✅ / ❌ |
+| 删除操作是否走回收站？清空是否二次确认？ | ✅ / ❌ |
+| 全局异常是否走 `ToastService`（非 `ToastNotificationService`）？ | ✅ / ❌ |
+| 清理临时目录是否在白名单内？ | ✅ / ❌ |
+| 新增代码是否放在正确命名空间、文件名与类名一致？ | ✅ / ❌ |
+| 是否误用了不存在的资产名（EmptyStateControl / DataGridBase / FontSizeHero / BackgroundBrush 等）？ | ✅ / ❌ |
+| 修改核心逻辑 / 公共 API 后是否跑过测试？ | ✅ / ❌ |

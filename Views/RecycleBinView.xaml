@@ -102,10 +102,10 @@
 
                     <!-- 第一层：标题 + 数量统计 -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="回收站" FontSize="20" FontWeight="Bold"
+                        <TextBlock Text="回收站" FontSize="{StaticResource FontSizeTitle}" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                         <TextBlock VerticalAlignment="Center" Margin="8,0,0,0"
-                                   FontSize="13" FontWeight="Normal"
+                                   FontSize="{StaticResource FontSizeMd}" FontWeight="Normal"
                                    Foreground="{DynamicResource TextTertiaryBrush}">
                             <Run Text="（共 "/>
                             <Run Text="{Binding TotalCount}"/>
@@ -122,7 +122,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Data="{StaticResource IconSelectAll}" Width="14" Height="14" Stretch="Uniform"
                                       Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="多选" FontSize="12" Margin="5,0,0,0"
+                                <TextBlock Text="多选" FontSize="{StaticResource FontSizeSm}" Margin="5,0,0,0"
                                            Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </ToggleButton>
@@ -133,7 +133,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Data="{StaticResource IconTrash}" Width="14" Height="14" Stretch="Uniform"
                                       Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="清空回收站" FontSize="12" Margin="5,0,0,0"
+                                <TextBlock Text="清空回收站" FontSize="{StaticResource FontSizeSm}" Margin="5,0,0,0"
                                            Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -142,7 +142,7 @@
                     <!-- 第二层：辅助提示文字 -->
                     <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="误删的内容会先进入这里，可随时恢复或彻底删除"
-                               FontSize="12" Foreground="#999999"
+                               FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextHintBrush}"
                                VerticalAlignment="Center" Margin="0,10,0,0"/>
 
                     <!-- 第三层：类型筛选（合并回卡片内） -->
@@ -157,7 +157,7 @@
                                 <TextBlock Text="全部"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
                                         Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding TotalCount, Mode=OneWay}"/>
                                     </TextBlock>
@@ -168,12 +168,12 @@
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="工作记录"
                                 Style="{StaticResource FilterTabWorkRecord}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                <Border Width="{StaticResource StatusDotSize}" Height="{StaticResource StatusDotSize}" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="工作记录"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
                                         Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding WorkRecordCount, Mode=OneWay}"/>
                                     </TextBlock>
@@ -184,12 +184,12 @@
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="知识库"
                                 Style="{StaticResource FilterTabKnowledge}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                <Border Width="{StaticResource StatusDotSize}" Height="{StaticResource StatusDotSize}" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource SuccessBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="知识库"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
                                         Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding KnowledgeCount, Mode=OneWay}"/>
                                     </TextBlock>
@@ -200,12 +200,12 @@
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="问题跟踪"
                                 Style="{StaticResource FilterTabIssue}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                <Border Width="{StaticResource StatusDotSize}" Height="{StaticResource StatusDotSize}" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="问题跟踪"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
                                         Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding IssueCount, Mode=OneWay}"/>
                                     </TextBlock>
@@ -216,12 +216,12 @@
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="请假记录"
                                 Style="{StaticResource FilterTabLeave}" Margin="3,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="6" Height="6" CornerRadius="{DynamicResource RadiusXxs}"
+                                <Border Width="{StaticResource StatusDotSize}" Height="{StaticResource StatusDotSize}" CornerRadius="{DynamicResource RadiusXxs}"
                                         Background="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="请假记录"/>
                                 <Border CornerRadius="{DynamicResource RadiusSm}" Padding="5,1"
                                         Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource SectionPanel}">
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                                    <TextBlock FontSize="{StaticResource FontSizeXs}" Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontWeight="SemiBold">
                                         <Run Text="{Binding LeaveRecordCount, Mode=OneWay}"/>
                                     </TextBlock>
@@ -237,7 +237,7 @@
                     Background="{DynamicResource PrimarySoftBrush}" CornerRadius="{DynamicResource RadiusMd}" Padding="14,10"
                     BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1" Margin="0,0,0,10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock FontSize="13" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"
+                    <TextBlock FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"
                                VerticalAlignment="Center">
                         <Run Text="已选 "/>
                         <Run Text="{Binding SelectedItems.Count, Mode=OneWay}"/>
@@ -251,7 +251,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconRestore}" Width="13" Height="13" Stretch="Uniform"
                                   Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <TextBlock Text="恢复选中" FontSize="12" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
+                            <TextBlock Text="恢复选中" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
                     </Button>
 
@@ -260,7 +260,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Path Data="{StaticResource IconDeleteForever}" Width="13" Height="13" Stretch="Uniform"
                                   Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <TextBlock Text="彻底删除" FontSize="12" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
+                            <TextBlock Text="彻底删除" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -275,6 +275,7 @@
                               AutoGenerateColumns="False" IsReadOnly="True"
                               HeadersVisibility="Column" GridLinesVisibility="None"
                               RowHeaderWidth="0" Margin="8"
+                              CanUserResizeColumns="True"
                               SelectionMode="{Binding IsMultiSelectMode, Converter={StaticResource SelModeConv}, FallbackValue=Single}"
                               local:DataGridHelper.SelectedItemsList="{Binding SelectedItems, Mode=OneWay}">
                             <DataGrid.ColumnHeaderStyle>
@@ -288,8 +289,8 @@
                             </DataGrid.RowStyle>
 
                         <DataGrid.Columns>
-                            <!-- 类型列：紧凑彩色标签（固定窄宽，仅展示分类标识） -->
-                            <DataGridTemplateColumn Header="类型" Width="80"
+                            <!-- 类型列：紧凑彩色标签（Auto 适配内容，避免截断） -->
+                            <DataGridTemplateColumn Header="类型" Width="Auto"
                                                     ClipboardContentBinding="{Binding TypeLabel}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -310,7 +311,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding TypeLabel}" FontSize="12" FontWeight="Medium"
+                                            <TextBlock Text="{Binding TypeLabel}" FontSize="{StaticResource FontSizeSm}" FontWeight="Medium"
                                                        VerticalAlignment="Center">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -333,33 +334,38 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- 标题列（主标识符，弹性宽度 * 确保不被截断） -->
-                            <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="*" MinWidth="180">
+                            <!-- 标题 + 摘要列（上下堆叠形成主次关系，弹性宽度） -->
+                            <DataGridTemplateColumn Header="标题 / 摘要" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="{StaticResource CellPad}" VerticalAlignment="Center">
+                                            <!-- 主：标题（加粗） -->
+                                            <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontSizeMd}" FontWeight="Bold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}"/>
+                                            <!-- 次：摘要（变灰） -->
+                                            <TextBlock Text="{Binding Detail}" FontSize="{StaticResource FontSizeSm}"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       Margin="{StaticResource GapTopXxs}" TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Detail}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- 删除时间列（固定格式，精准适配，不截断） -->
+                            <DataGridTextColumn Header="删除时间" Binding="{Binding DeletedAtText}" Width="Auto">
                                 <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                        <Setter Property="ToolTip" Value="{Binding Title}"/>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="None"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="ToolTip" Value="{Binding DeletedAtText}"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
 
-                            <!-- 摘要列（次要信息，固定合理宽度） -->
-                            <DataGridTextColumn Header="摘要" Binding="{Binding Detail}" Width="220" MinWidth="160">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}">
-                                        <Setter Property="ToolTip" Value="{Binding Detail}"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- 删除时间列（固定格式，精确适配） -->
-                            <DataGridTextColumn Header="删除时间" Binding="{Binding DeletedAt}" Width="145">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- 操作列（两个按钮紧凑排列） -->
-                            <DataGridTemplateColumn Header="操作" Width="135">
+                            <!-- 操作列（两个按钮，间隔 8px） -->
+                            <DataGridTemplateColumn Header="操作" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="4,0">
@@ -367,16 +373,16 @@
                                             <!-- 恢复按钮 -->
                                             <Button Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
-                                                    Style="{StaticResource BtnGhost}" Padding="6,4" FontSize="12"
+                                                    Style="{StaticResource BtnGhost}" Padding="6,4" FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource SuccessBrush}"
                                                     Content="恢复"/>
 
                                             <!-- 彻底删除按钮 -->
                                             <Button Command="{Binding DataContext.PermanentDeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"
-                                                    Style="{StaticResource BtnGhost}" Padding="6,4" FontSize="12"
+                                                    Style="{StaticResource BtnGhost}" Padding="6,4" FontSize="{StaticResource FontSizeSm}"
                                                     Foreground="{DynamicResource DangerBrush}"
-                                                    Margin="2,0,0,0">
+                                                    Margin="8,0,0,0">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="{StaticResource IconTrashCan}" Width="13" Height="13" Stretch="Uniform"
                                                           Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
@@ -396,7 +402,7 @@
                             Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <StackPanel HorizontalAlignment="Center" MaxWidth="320">
                             <!-- 空状态插图 -->
-                            <Border Width="72" Height="72" CornerRadius="{DynamicResource RadiusXl}"
+                            <Border Width="{StaticResource IllustrationSize}" Height="{StaticResource IllustrationSize}" CornerRadius="{DynamicResource RadiusXl}"
                                     
                                     HorizontalAlignment="Center" Margin="0,0,0,16"
                                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Style="{StaticResource SectionPanel}">
@@ -411,11 +417,11 @@
                                 </Path>
                             </Border>
 
-                            <TextBlock Text="回收站是空的" FontSize="17" FontWeight="SemiBold"
+                            <TextBlock Text="回收站是空的" FontSize="{StaticResource FontSizeSubtitle}" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center" Margin="0,0,0,6"/>
                             <TextBlock Text="删除的内容会出现在这里，可随时恢复或彻底清除"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" FontSize="13"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" FontSize="{StaticResource FontSizeMd}"
                                        HorizontalAlignment="Center" TextWrapping="Wrap"
                                        TextAlignment="Center" LineHeight="20"/>
                         </StackPanel>

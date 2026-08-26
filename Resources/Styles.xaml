@@ -3,167 +3,6 @@
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
                     xmlns:local="clr-namespace:EapWorkAssistant.Helpers">
 
-    <!-- ==================== 颜色体系（Refined Precision） ==================== -->
-    <Color x:Key="Primary">#FF4338CA</Color>
-    <Color x:Key="PrimaryHover">#FF3630AE</Color>
-    <Color x:Key="PrimaryLight">#FFE9EEFF</Color>
-    <Color x:Key="PrimarySoft">#FFF3F5FF</Color>
-    <Color x:Key="Secondary">#FF6B7280</Color>
-    <Color x:Key="Success">#FF059669</Color>
-    <Color x:Key="SuccessLight">#FFECFDF5</Color>
-    <Color x:Key="Warning">#FFD97706</Color>
-    <Color x:Key="WarningLight">#FFFEF3C7</Color>
-    <Color x:Key="Danger">#FFDC2626</Color>
-    <Color x:Key="DangerLight">#FFFEF2F2</Color>
-    <Color x:Key="Surface">#FFF4F6FB</Color>
-    <Color x:Key="SurfaceHover">#FFECF0F8</Color>
-    <Color x:Key="SurfaceAlt">#FFF8FAFD</Color>
-    <Color x:Key="CardColor">#FFFFFFFF</Color>
-    <Color x:Key="TextPrimary">#FF0F172A</Color>
-    <Color x:Key="TextSecondary">#FF475569</Color>
-    <Color x:Key="TextTertiary">#FF94A3B8</Color>
-    <Color x:Key="Border">#FFE2E8F0</Color>
-    <Color x:Key="BorderHover">#FFC7D2E4</Color>
-    <Color x:Key="SidebarBg">#FF0B1120</Color>
-    <Color x:Key="SidebarText">#FF94A3B8</Color>
-    <Color x:Key="SidebarHover">#FF162033</Color>
-    <Color x:Key="SidebarCardBg">#FF1E293B</Color>
-    <Color x:Key="ScrollThumb">#FFCBD5E1</Color>
-    <Color x:Key="ScrollThumbHover">#FF94A3B8</Color>
-    <Color x:Key="ScrollThumbActive">#FF64748B</Color>
-
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{DynamicResource Primary}"/>
-    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{DynamicResource PrimaryHover}"/>
-    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{DynamicResource PrimaryLight}"/>
-    <SolidColorBrush x:Key="PrimarySoftBrush" Color="{DynamicResource PrimarySoft}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{DynamicResource Secondary}"/>
-    <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource Success}"/>
-    <SolidColorBrush x:Key="SuccessLightBrush" Color="{DynamicResource SuccessLight}"/>
-    <SolidColorBrush x:Key="WarningBrush" Color="{DynamicResource Warning}"/>
-    <SolidColorBrush x:Key="WarningLightBrush" Color="{DynamicResource WarningLight}"/>
-    <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource Danger}"/>
-    <SolidColorBrush x:Key="DangerLightBrush" Color="{DynamicResource DangerLight}"/>
-    <!-- 信息蓝（日历周末加班蓝点） -->
-    <SolidColorBrush x:Key="InfoBrush" Color="#FF3B82F6"/>
-    <SolidColorBrush x:Key="InfoLightBrush" Color="#FFDBEAFE"/>
-    <!-- 假期类型圆点颜色 -->
-    <SolidColorBrush x:Key="LeaveAnnualBrush" Color="#FF06B6D4"/>   <!-- 年假：青色 -->
-    <SolidColorBrush x:Key="LeavePersonalBrush" Color="#FFF59E0B"/> <!-- 事假：琥珀 -->
-    <SolidColorBrush x:Key="LeaveSickBrush" Color="#FF10B981"/>     <!-- 病假：翠绿 -->
-    <SolidColorBrush x:Key="LeaveCompBrush" Color="#FFA78BFA"/>     <!-- 调休：紫罗兰 -->
-    <SolidColorBrush x:Key="LeaveTravelBrush" Color="#FF3B82F6"/>   <!-- 出差：蓝色 -->
-    <SolidColorBrush x:Key="LeaveMarriageBrush" Color="#FFEC4899"/> <!-- 婚假：粉色 -->
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{DynamicResource Surface}"/>
-    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{DynamicResource SurfaceHover}"/>
-    <SolidColorBrush x:Key="SurfaceAltBrush" Color="{DynamicResource SurfaceAlt}"/>
-    <SolidColorBrush x:Key="CardBrush" Color="{DynamicResource CardColor}"/>
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource TextPrimary}"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource TextSecondary}"/>
-    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{DynamicResource TextTertiary}"/>
-    <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource Border}"/>
-    <SolidColorBrush x:Key="BorderHoverBrush" Color="{DynamicResource BorderHover}"/>
-    <SolidColorBrush x:Key="SidebarBgBrush" Color="{DynamicResource SidebarBg}"/>
-    <SolidColorBrush x:Key="SidebarTextBrush" Color="{DynamicResource SidebarText}"/>
-    <SolidColorBrush x:Key="SidebarHoverBrush" Color="{DynamicResource SidebarHover}"/>
-    <SolidColorBrush x:Key="SidebarCardBgBrush" Color="{DynamicResource SidebarCardBg}"/>
-    <SolidColorBrush x:Key="ScrollThumbBrush" Color="{DynamicResource ScrollThumb}"/>
-    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{DynamicResource ScrollThumbHover}"/>
-    <SolidColorBrush x:Key="ScrollThumbActiveBrush" Color="{DynamicResource ScrollThumbActive}"/>
-    <!-- 弹窗背景遮罩（双主题，由 ThemeService 按主题设置：浅色 #4D000000≈0.30 / 暗色 #99000000≈0.60） -->
-    <SolidColorBrush x:Key="OverlayMaskBrush" Color="#4D000000"/>
-    <SolidColorBrush x:Key="AvatarOverlayBrush" Color="#50000000"/>
-    <SolidColorBrush x:Key="AvatarHeavyOverlayBrush" Color="#60000000"/>
-    <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="#CCFFFFFF"/>
-
-    <!-- 渐变画笔 -->
-    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#FF4338CA" Offset="0"/>
-        <GradientStop Color="#FF7C3AED" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="AccentGradientH" StartPoint="0,0.5" EndPoint="1,0.5">
-        <GradientStop Color="#FF4338CA" Offset="0"/>
-        <GradientStop Color="#FF7C3AED" Offset="0.5"/>
-        <GradientStop Color="#FF4338CA" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="AccentBannerGradient" StartPoint="0,0.5" EndPoint="1,0.5">
-        <GradientStop Color="#FF6366F1" Offset="0"/>
-        <GradientStop Color="#FF4F46E5" Offset="0.5"/>
-        <GradientStop Color="#FFA5B4FC" Offset="1"/>
-    </LinearGradientBrush>
-
-    <!-- 强调色 -->
-    <Color x:Key="AccentIndigo">#FF4338CA</Color>
-    <Color x:Key="AccentViolet">#FF7C3AED</Color>
-    <SolidColorBrush x:Key="AccentIndigoBrush" Color="{DynamicResource AccentIndigo}"/>
-    <SolidColorBrush x:Key="AccentVioletBrush" Color="{DynamicResource AccentViolet}"/>
-
-    <!-- ==================== 字体 ==================== -->
-    <FontFamily x:Key="DefaultFont">Microsoft YaHei UI, Segoe UI, Segoe UI Emoji</FontFamily>
-    <FontFamily x:Key="MonoFont">Cascadia Code, Consolas</FontFamily>
-
-    <!-- 字体大小（可被 ThemeService 动态修改） -->
-    <sys:Double x:Key="BaseFontSize">13</sys:Double>
-    <sys:Double x:Key="SmallFontSize">12</sys:Double>
-    <sys:Double x:Key="Heading3FontSize">16</sys:Double>
-    <sys:Double x:Key="BodyFontSize">13</sys:Double>
-    <sys:Double x:Key="CaptionFontSize">11</sys:Double>
-
-    <!-- 全局 UI 缩放因子（字体大小联动） -->
-    <sys:Double x:Key="UIScale">1.0</sys:Double>
-
-    <!-- 界面密度间距（ThemeService 动态修改，Thickness 类型） -->
-    <Thickness x:Key="DensityCardPad">24</Thickness>
-    <Thickness x:Key="DensityRowPad">20,14</Thickness>
-    <Thickness x:Key="DensityRowPadSm">18,11</Thickness>
-    <Thickness x:Key="DensityListPad">14,12</Thickness>
-    <Thickness x:Key="DensitySectionMargin">0,0,0,18</Thickness>
-    <Thickness x:Key="DensityRowMargin">0,0,0,6</Thickness>
-    <Thickness x:Key="DensityItemMargin">0,0,0,12</Thickness>
-
-    <!-- ==================== 圆角 token ==================== -->
-    <!-- 统一圆角档位，供样式与 View 引用，消除散落的魔法数字（AGENTS.md 要求） -->
-    <CornerRadius x:Key="RadiusXs">6</CornerRadius>
-    <CornerRadius x:Key="RadiusSm">8</CornerRadius>
-    <CornerRadius x:Key="RadiusMd">10</CornerRadius>
-    <CornerRadius x:Key="RadiusLg">12</CornerRadius>
-    <CornerRadius x:Key="RadiusCard">16</CornerRadius>
-    <CornerRadius x:Key="RadiusXl">22</CornerRadius>
-    <CornerRadius x:Key="RadiusPill">9999</CornerRadius>
-    <!-- 圆角补充令牌：主刻度之外的次要半径，统一就近归入主令牌，避免业务页硬编码 -->
-    <CornerRadius x:Key="RadiusHair">1</CornerRadius>
-    <CornerRadius x:Key="RadiusXxs">4</CornerRadius>
-    <CornerRadius x:Key="RadiusLeftSm">8,0,0,8</CornerRadius>
-    <CornerRadius x:Key="RadiusLeftMd">11,0,0,11</CornerRadius>
-    <CornerRadius x:Key="RadiusLeftLg">13,0,0,13</CornerRadius>
-    <!-- 卡片左侧色带专用，与 RadiusCard 完全对齐，避免视觉上“未贴合” -->
-    <CornerRadius x:Key="RadiusLeftCard">16,0,0,16</CornerRadius>
-
-    <!-- ==================== 阴影效果（更精致） ==================== -->
-    <DropShadowEffect x:Key="ShadowSm" BlurRadius="16" ShadowDepth="1" Opacity="0.045" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowMd" BlurRadius="28" ShadowDepth="4" Opacity="0.075" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowLg" BlurRadius="44" ShadowDepth="8" Opacity="0.11" Color="#FF000000"/>
-    <DropShadowEffect x:Key="ShadowFocus" BlurRadius="14" ShadowDepth="0" Opacity="0.16" Color="#FF6366F1"/>
-
-    <!-- ==================== 模态框阴影（双主题，环境光 + 主光双层） ==================== -->
-    <!-- 主色固定 #2466FF；Opacity 由 ThemeService 按主题设置（浅色 0.18 / 暗色 0.06） -->
-    <Color x:Key="ModalShadowColor">#FF2466FF</Color>
-    <!-- 主光：聚焦投影，BlurRadius 40 / ShadowDepth 20 -->
-    <DropShadowEffect x:Key="ModalShadow" BlurRadius="40" ShadowDepth="20"
-                      Color="{DynamicResource ModalShadowColor}" Opacity="0.18"/>
-    <!-- 环境光：柔和扩散光晕，BlurRadius 60 / ShadowDepth 0（Opacity 由 ThemeService 设置：浅色 0.10 / 暗色 0.04） -->
-    <DropShadowEffect x:Key="ModalShadowAmbient" BlurRadius="60" ShadowDepth="0"
-                      Color="{DynamicResource ModalShadowColor}" Opacity="0.10"/>
-    <!-- 模态窗口重阴影（独立 Window 如 ProfileDialog，浮在深色遮罩之上）
-         需要极强的立体感——高对比度黑色投影 + 较大深度，让卡片像从暗背景中"破土而出"
-         Opacity 由 ThemeService 按主题设置（浅色 0.40 / 暗色 0.25） -->
-    <DropShadowEffect x:Key="ModalHeavyShadow" BlurRadius="50" ShadowDepth="24"
-                      Color="#FF000000" Opacity="0.40"/>
-
-    <!-- ==================== 动画 ==================== -->
-    <Storyboard x:Key="FadeIn">
-        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
-    </Storyboard>
-
     <!-- ==================== 矢量图标资源 ==================== -->
     <!-- 所有图标使用 Path 矢量绘制，不受字体限制，颜色自动跟随主题 -->
     <Geometry x:Key="IconClock">M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 1,1 4,12A8,8 0 0,1 12,4M12.5,7H11V13L16.2,16.2L17,14.9L12.5,12.2V7Z</Geometry>
@@ -231,13 +70,13 @@
     <!-- 主按钮（精致悬浮 + 微缩放） -->
     <Style x:Key="BtnPrimary" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Foreground" Value="{DynamicResource OnPrimaryTextBrush}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryGradient}"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="{StaticResource ControlMinHeight}"/>
         <Setter Property="Padding" Value="20,10"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -354,13 +193,13 @@
     <!-- 次要按钮（精致边框 + 微交互） -->
     <Style x:Key="BtnSecondary" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="{StaticResource ControlMinHeight}"/>
         <Setter Property="Padding" Value="18,10"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -395,13 +234,13 @@
     <!-- 幽灵按钮 -->
     <Style x:Key="BtnGhost" TargetType="ButtonBase">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="MinHeight" Value="{StaticResource ControlMinHeightSm}"/>
         <Setter Property="Padding" Value="12,7"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -437,8 +276,8 @@
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Width" Value="34"/>
-        <Setter Property="Height" Value="34"/>
+        <Setter Property="Width" Value="{StaticResource IconButtonSize}"/>
+        <Setter Property="Height" Value="{StaticResource IconButtonSize}"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -480,12 +319,12 @@
     <!-- 输入框（精致聚焦环） -->
     <Style x:Key="Input" TargetType="TextBox">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="MinHeight" Value="{StaticResource InputHeight}"/>
         <Setter Property="Padding" Value="14,10"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource PrimaryBrush}"/>
@@ -535,12 +374,12 @@
     <!-- 密码框（与 Input 同款聚焦环，遮罩字符） -->
     <Style x:Key="InputPassword" TargetType="PasswordBox">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="42"/>
+        <Setter Property="MinHeight" Value="{StaticResource InputHeight}"/>
         <Setter Property="Padding" Value="14,10"/>
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -600,13 +439,13 @@
     <!-- 下拉框 -->
     <Style x:Key="Select" TargetType="ComboBox">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="14,10"/>
-        <Setter Property="Height" Value="42"/>
+        <Setter Property="Height" Value="{StaticResource InputHeight}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ComboBoxItem">
@@ -706,13 +545,13 @@
                                     Margin="0,4,0,14"
                                     Background="Transparent">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="#FF000000"
+                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="{DynamicResource ShadowBaseColor}"
                                                       Direction="270" RenderingBias="Quality"/>
                                 </Border.Effect>
                                 <Border Background="{DynamicResource CardBrush}" CornerRadius="{DynamicResource RadiusLg}"
                                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#FF000000"
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="{DynamicResource ShadowBaseColor}"
                                                           Direction="270" RenderingBias="Quality"/>
                                     </Border.Effect>
                                     <ScrollViewer MaxHeight="240">
@@ -751,7 +590,7 @@
     <!-- 标签 -->
     <Style x:Key="Label" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="Margin" Value="0,0,0,7"/>
@@ -760,21 +599,21 @@
     <!-- 标题层级 -->
     <Style x:Key="Heading1" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="26"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeDisplay}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
     </Style>
 
     <Style x:Key="Heading2" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
     </Style>
 
     <Style x:Key="Heading3" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLg}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
     </Style>
@@ -1011,7 +850,7 @@
     <!-- 无边框搜索输入框（嵌入在带搜索图标的容器内使用） -->
     <Style x:Key="SearchInput" TargetType="TextBox">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -1036,13 +875,13 @@
                             <StackPanel x:Name="label" Orientation="Horizontal" VerticalAlignment="Center"
                                         Margin="46,0,12,0">
                                 <TextBlock x:Name="txt" Text="{TemplateBinding Content}"
-                                           FontSize="13" FontWeight="Medium"
+                                           FontSize="{StaticResource FontSizeBody}" FontWeight="Medium"
                                            Foreground="{DynamicResource SidebarTextBrush}"
                                            VerticalAlignment="Center"/>
                                 <Border x:Name="badge" VerticalAlignment="Center"
                                         Visibility="{Binding Path=(local:NavButtonProperties.Badge), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:HasItemsToVisibilityConverter.Instance}}"
                                         Background="{DynamicResource DangerBrush}" CornerRadius="{DynamicResource RadiusSm}" Padding="6,1" Margin="8,0,0,0">
-                                    <TextBlock FontSize="10" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"
+                                    <TextBlock FontSize="{StaticResource FontSizeMicro}" Foreground="{DynamicResource OnPrimaryTextBrush}" FontWeight="SemiBold" VerticalAlignment="Center"
                                                Text="{Binding Path=(local:NavButtonProperties.Badge), RelativeSource={RelativeSource TemplatedParent}}"/>
                                 </Border>
                             </StackPanel>
@@ -1090,7 +929,7 @@
 
     <!-- 侧栏分区标题（折叠时隐藏，避免图标轨道中出现文字） -->
     <Style x:Key="SidebarSectionHeader" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeMicro}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}"/>
         <Setter Property="Margin" Value="24,18,0,8"/>
@@ -1135,7 +974,7 @@
     <!-- 切换芯片按钮（如员工类型选择） -->
     <Style x:Key="ToggleChip" TargetType="RadioButton">
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Template">
@@ -1149,7 +988,7 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="chip" Property="Background" Value="{DynamicResource PrimaryGradient}"/>
                             <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
-                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="Foreground" Value="{DynamicResource OnPrimaryTextBrush}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -1168,7 +1007,7 @@
         </Style.Resources>
         <Setter Property="local:SmartColumns.Enable" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -1197,7 +1036,7 @@
 
     <Style x:Key="ModernGridColumnHeader" TargetType="DataGridColumnHeader">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
@@ -1210,7 +1049,7 @@
 
     <Style x:Key="ModernGridCell" TargetType="DataGridCell">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Padding" Value="18,12"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
@@ -1249,7 +1088,7 @@
     <Style x:Key="ModernListBox" TargetType="ListBox">
         <Setter Property="local:ListBoxCopyHelper.EnableCopy" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="0"/>
@@ -1339,7 +1178,7 @@
                             <Setter TargetName="gripPill" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.06"
-                                                      Color="#FF000000"/>
+                                                      Color="{DynamicResource ShadowBaseColor}"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
@@ -1357,7 +1196,7 @@
 
     <!-- 圆形图标背景 -->
     <Style x:Key="IconCircle" TargetType="Border">
-        <Setter Property="CornerRadius" Value="99"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusPill}"/>
         <Setter Property="Width" Value="40"/>
         <Setter Property="Height" Value="40"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -1366,7 +1205,7 @@
     <!-- ==================== ContextMenu 样式（右键菜单，美化圆角阴影） ==================== -->
     <Style TargetType="ContextMenu">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="TextElement.Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="HasDropShadow" Value="False"/>
@@ -1403,7 +1242,7 @@
                                         <TextBlock x:Name="GestureText" Grid.Column="2"
                                                    Text="{TemplateBinding InputGestureText}"
                                                    VerticalAlignment="Center"
-                                                   FontSize="11"
+                                                   FontSize="{StaticResource FontSizeCaption}"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"
                                                    Margin="12,0,0,0"/>
                                     </Grid>
@@ -1459,7 +1298,7 @@
     <!-- ==================== Calendar 样式（仅用于 DatePicker 弹窗） ==================== -->
     <Style x:Key="ModernCalendar" TargetType="Calendar">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="CalendarItemStyle">
@@ -1471,7 +1310,7 @@
                                 <ControlTemplate.Resources>
                                     <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type Calendar}, ResourceId=DayTitleTemplate}">
                                         <TextBlock Text="{Binding Converter={x:Static local:WeekdayShortConverter.Instance}}"
-                                                   FontSize="11" FontWeight="Medium"
+                                                   FontSize="{StaticResource FontSizeCaption}" FontWeight="Medium"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    Margin="0,4,0,6"/>
@@ -1508,7 +1347,7 @@
                                             </Button>
                                             <Button x:Name="PART_HeaderButton" Grid.Column="1"
                                                     Background="Transparent" BorderThickness="0" Cursor="Hand"
-                                                    FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"
+                                                    FontSize="{StaticResource FontSizeLead}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"
                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             <Button x:Name="PART_NextButton" Grid.Column="2"
                                                     Width="28" Height="28" Background="Transparent" BorderThickness="0" Cursor="Hand">
@@ -1553,13 +1392,13 @@
     <!-- DatePicker 现代化样式 -->
     <Style x:Key="ModernDatePicker" TargetType="DatePicker">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="Height" Value="42"/>
+        <Setter Property="Height" Value="{StaticResource InputHeight}"/>
         <Setter Property="SelectedDateFormat" Value="Short"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -1587,7 +1426,7 @@
                                                    Padding="14,8,8,8"
                                                    VerticalContentAlignment="Center"
                                                    FontFamily="{StaticResource DefaultFont}"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 <Button x:Name="PART_Button" Grid.Column="1"
                                         Width="34" Height="34"
@@ -1621,14 +1460,14 @@
                                     Width="340" Margin="0,2,0,14"
                                     Background="Transparent">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="#FF000000"
+                                    <DropShadowEffect BlurRadius="24" ShadowDepth="6" Opacity="0.12" Color="{DynamicResource ShadowBaseColor}"
                                                       Direction="270" RenderingBias="Quality"/>
                                 </Border.Effect>
                                 <Border Background="{DynamicResource CardBrush}" CornerRadius="{DynamicResource RadiusLg}"
                                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                         SnapsToDevicePixels="True">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#FF000000"
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="{DynamicResource ShadowBaseColor}"
                                                           Direction="270" RenderingBias="Quality"/>
                                     </Border.Effect>
                                     <Calendar x:Name="PART_Calendar"
@@ -1665,7 +1504,7 @@
     <!-- ==================== 现代化折叠面板 ==================== -->
     <Style x:Key="SectionExpander" TargetType="Expander">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -1768,7 +1607,7 @@
 
     <!-- 侧滑面板阴影 -->
     <DropShadowEffect x:Key="ShadowPanel" BlurRadius="46" ShadowDepth="-10" Opacity="0.17"
-                      Color="#FF000000" Direction="180"/>
+                      Color="{DynamicResource ShadowBaseColor}" Direction="180"/>
 
     <!-- 表单遮罩层（深色半透明，双主题由 OverlayMaskBrush 控制） -->
     <Style x:Key="OverlayBackdrop" TargetType="Border">
@@ -1805,7 +1644,7 @@
 
     <!-- 日历遮罩层（浅色半透明） -->
     <Style x:Key="CalendarOverlay" TargetType="Border">
-        <Setter Property="Background" Value="#180B1120"/>
+        <Setter Property="Background" Value="{DynamicResource CalendarOverlayBrush}"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
@@ -1814,7 +1653,7 @@
     <Style x:Key="SidePanel" TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="18,0,0,18"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSidePanel}"/>
         <Setter Property="Padding" Value="24"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1,0,0,0"/>
@@ -1828,7 +1667,7 @@
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Top"/>
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusPopup}"/>
         <Setter Property="Padding" Value="18,14"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -1842,7 +1681,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="10,6"/>
-        <Setter Property="MaxWidth" Value="400"/>
+        <Setter Property="MaxWidth" Value="{StaticResource ToolTipMaxWidth}"/>
         <Setter Property="ToolTipService.InitialShowDelay" Value="150"/>
         <Setter Property="ToolTipService.BetweenShowDelay" Value="50"/>
         <Setter Property="ToolTipService.ShowDuration" Value="15000"/>
@@ -1861,7 +1700,7 @@
                                 <DataTemplate DataType="{x:Type sys:String}">
                                     <TextBlock Text="{Binding}" TextWrapping="Wrap"
                                                FontFamily="{StaticResource DefaultFont}"
-                                               FontSize="12"
+                                               FontSize="{StaticResource FontSizeSm}"
                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
                                 </DataTemplate>
                             </ContentPresenter.Resources>
@@ -1879,8 +1718,8 @@
         <Border CornerRadius="{DynamicResource RadiusXxs}" Padding="8,3"
                 HorizontalAlignment="Left"
                 Background="{Binding WorkType, Converter={x:Static local:WorkTypeToBrushConverter.Instance}}">
-            <TextBlock Text="{Binding WorkType}" FontSize="11" FontWeight="Medium"
-                       Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding WorkType}" FontSize="{StaticResource FontSizeCaption}" FontWeight="Medium"
+                       Foreground="{DynamicResource OnPrimaryTextBrush}" HorizontalAlignment="Center"/>
         </Border>
     </DataTemplate>
 
@@ -1894,26 +1733,26 @@
                         Width="{Binding Progress, Converter={x:Static local:ProgressToWidthConverter.Instance}}"/>
             </Border>
             <TextBlock Text="{Binding Progress, StringFormat={}{0}%}"
-                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="{StaticResource FontSizeCaption}" Foreground="{DynamicResource TextSecondaryBrush}"
                        VerticalAlignment="Center" Margin="6,0,0,0"/>
         </StackPanel>
     </DataTemplate>
 
     <!-- 开关样式 -->
     <Style x:Key="ToggleSwitch" TargetType="ToggleButton">
-        <Setter Property="Width" Value="44"/>
-        <Setter Property="Height" Value="24"/>
+        <Setter Property="Width" Value="{StaticResource SwitchTrackWidth}"/>
+        <Setter Property="Height" Value="{StaticResource SwitchTrackHeight}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
-                        <Border x:Name="Track" CornerRadius="{DynamicResource RadiusLg}" Height="24" Width="44"
+                        <Border x:Name="Track" CornerRadius="{DynamicResource RadiusLg}" Height="{StaticResource SwitchTrackHeight}" Width="{StaticResource SwitchTrackWidth}"
                                 Background="{DynamicResource BorderBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="2" ShadowDepth="0" Opacity="0.1"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="Thumb" CornerRadius="{DynamicResource RadiusMd}" Width="20" Height="20"
+                        <Border x:Name="Thumb" CornerRadius="{DynamicResource RadiusMd}" Width="{StaticResource SwitchThumbSize}" Height="{StaticResource SwitchThumbSize}"
                                 Background="{DynamicResource CardBrush}" Margin="2,0,0,0" HorizontalAlignment="Left">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
@@ -1939,7 +1778,7 @@
     <!-- ==================== 休息日选择按钮 ==================== -->
     <Style x:Key="DayCheckBox" TargetType="CheckBox">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -1980,7 +1819,7 @@
         <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="16,8"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Style.Triggers>
@@ -1997,7 +1836,7 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="16,8"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Style.Triggers>
@@ -2011,7 +1850,7 @@
     <!-- 日期快捷按钮：默认普通边框态，匹配 ActiveDatePreset 时→高亮文字无边框 -->
     <Style x:Key="DatePresetThisWeek" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
         <Setter Property="Padding" Value="10,6"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisWeek">
                 <Setter Property="Background" Value="Transparent"/>
@@ -2024,7 +1863,7 @@
 
     <Style x:Key="DatePresetThisMonth" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
         <Setter Property="Padding" Value="10,6"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding ActiveDatePreset}" Value="thisMonth">
                 <Setter Property="Background" Value="Transparent"/>
@@ -2037,7 +1876,7 @@
 
     <Style x:Key="DatePresetLast3Months" TargetType="Button" BasedOn="{StaticResource BtnSecondary}">
         <Setter Property="Padding" Value="10,6"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding ActiveDatePreset}" Value="last3Months">
                 <Setter Property="Background" Value="Transparent"/>
@@ -2051,7 +1890,7 @@
     <!-- "全部"日期按钮的默认态（当任一预设激活时显示为普通） -->
     <Style x:Key="DatePresetAllButton" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
         <Setter Property="Padding" Value="10,6"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
         <Style.Triggers>
             <!-- 有任何预设激活时 → 普通态 -->
@@ -2087,11 +1926,11 @@
     <!-- 页码按钮（普通/当前页高亮） -->
     <Style x:Key="PageNumberButton" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="MinWidth" Value="32"/>
-        <Setter Property="Height" Value="32"/>
+        <Setter Property="MinWidth" Value="{StaticResource PagerSize}"/>
+        <Setter Property="Height" Value="{StaticResource PagerSize}"/>
         <Setter Property="Padding" Value="6,0"/>
         <Setter Property="Margin" Value="2,0"/>
-        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBodySm}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -2122,7 +1961,7 @@
 
     <!-- 页码按钮-当前页高亮样式 -->
     <Style x:Key="PageNumberActive" TargetType="Button" BasedOn="{StaticResource PageNumberButton}">
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Foreground" Value="{DynamicResource OnPrimaryTextBrush}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -2150,10 +1989,10 @@
     <!-- 翻页导航按钮（上一页/下一页/首页/末页） -->
     <Style x:Key="PageNavButton" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
-        <Setter Property="Height" Value="32"/>
+        <Setter Property="Height" Value="{StaticResource PagerSize}"/>
         <Setter Property="Padding" Value="10,0"/>
         <Setter Property="Margin" Value="2,0"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSm}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -2206,7 +2045,7 @@
                                  RelativeSource="{RelativeSource AncestorType=ItemsControl}"/>
                     </MultiBinding>
                 </DataTrigger.Binding>
-                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Foreground" Value="{DynamicResource OnPrimaryTextBrush}"/>
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                 <Setter Property="Template">

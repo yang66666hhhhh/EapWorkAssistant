@@ -17,4 +17,18 @@ public class RecycleItem
 
     /// <summary>删除时间（用于排序和展示）</summary>
     public string? DeletedAt { get; set; }
+
+    /// <summary>删除时间（展示用，格式：2026-08-19 00:30，去掉秒）</summary>
+    public string DeletedAtText
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(DeletedAt))
+                return "";
+            // SQLite datetime('now','localtime') 输出形如 "2026-08-19 00:30:45"
+            if (DateTime.TryParse(DeletedAt, out var dt))
+                return dt.ToString("yyyy-MM-dd HH:mm");
+            return DeletedAt;
+        }
+    }
 }
