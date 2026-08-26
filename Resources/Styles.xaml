@@ -135,6 +135,8 @@
     <CornerRadius x:Key="RadiusLeftSm">8,0,0,8</CornerRadius>
     <CornerRadius x:Key="RadiusLeftMd">11,0,0,11</CornerRadius>
     <CornerRadius x:Key="RadiusLeftLg">13,0,0,13</CornerRadius>
+    <!-- 卡片左侧色带专用，与 RadiusCard 完全对齐，避免视觉上“未贴合” -->
+    <CornerRadius x:Key="RadiusLeftCard">16,0,0,16</CornerRadius>
 
     <!-- ==================== 阴影效果（更精致） ==================== -->
     <DropShadowEffect x:Key="ShadowSm" BlurRadius="16" ShadowDepth="1" Opacity="0.045" Color="#FF000000"/>
@@ -426,6 +428,53 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- 纯图标按钮（无文字背景，仅图标；悬停显示 ToolTip，点击区为圆角方块） -->
+    <Style x:Key="IconButton" TargetType="ButtonBase">
+        <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ButtonBase">
+                    <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource RadiusMd}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.35"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 纯图标开关按钮（多选模式等；选中时高亮为强调色） -->
+    <Style x:Key="IconToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource IconButton}">
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- 输入框（精致聚焦环） -->
@@ -744,6 +793,9 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <!-- 统一按卡片自身圆角裁剪子元素，避免内部色带/高亮层露出直角 -->
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="local:CornerClip.Enable" Value="True"/>
     </Style>
 
     <Style x:Key="CardElevated" TargetType="Border">
@@ -753,6 +805,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
+        <!-- 按卡片自身圆角裁剪子元素（如左侧窄色带），避免窄色带套大圆角被压缩成直角 -->
+        <Setter Property="local:CornerClip.Enable" Value="True"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>

@@ -146,136 +146,48 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 今日工时 -->
-                <Border Grid.Column="0" Style="{StaticResource Card}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="今日工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding TodayHours, StringFormat={}{0:F1}}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="0" Title="今日工时"
+                                Value="{Binding TodayHours, StringFormat={}{0:F1}}" Unit="h"
+                                BarBrush="{DynamicResource PrimaryBrush}"
+                                IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                                IconForegroundBrush="{DynamicResource PrimaryBrush}"
+                                IconPathData="{StaticResource IconClock}"
+                                CardStyle="{StaticResource Card}"
+                                IsCompact="True"/>
 
-                <!-- 记录数 -->
-                <Border Grid.Column="2" Style="{StaticResource Card}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding RecordCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                                    <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconList}" Fill="{DynamicResource SuccessBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="2" Title="记录数"
+                                Value="{Binding RecordCount}" Unit="条"
+                                BarBrush="{DynamicResource SuccessBrush}"
+                                IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
+                                IconForegroundBrush="{DynamicResource SuccessBrush}"
+                                IconPathData="{StaticResource IconList}"
+                                CardStyle="{StaticResource Card}"
+                                IsCompact="True"/>
 
-                <!-- 亮点标记 -->
-                <Border Grid.Column="4" Style="{StaticResource Card}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource WarningBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding HighlightCount}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                    <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
-                            </StackPanel>
-                            <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconStar}" Fill="{DynamicResource WarningBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="4" Title="亮点标记"
+                                Value="{Binding HighlightCount}" Unit="项"
+                                BarBrush="{DynamicResource WarningBrush}"
+                                IconBackgroundBrush="{DynamicResource WarningLightBrush}"
+                                IconForegroundBrush="{DynamicResource WarningBrush}"
+                                IconPathData="{StaticResource IconStar}"
+                                CardStyle="{StaticResource Card}"
+                                IsCompact="True"/>
 
-                <!-- 调休余额 -->
-                <Border Grid.Column="6" Style="{StaticResource Card}"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        ClipToBounds="True" Padding="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource InfoBrush}"/>
-                        <Grid Grid.Column="1" Margin="14,10">
-                            <StackPanel>
-                                <TextBlock Text="调休余额" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           FontWeight="Medium"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" FontSize="22"
-                                               FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
-                                    <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                </StackPanel>
-                                <TextBlock Margin="0,1,0,0" FontSize="9.5" Foreground="{DynamicResource TextTertiaryBrush}">
-                                    <Run Text="加班"/>
-                                    <Run Text="{Binding OvertimeHours, StringFormat={}{0:F1}, Mode=OneWay}"/>
-                                    <Run Text="h · 已休"/>
-                                    <Run Text="{Binding CompLeaveUsed, StringFormat={}{0:F1}, Mode=OneWay}"/>
-                                    <Run Text="h"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <Border Background="{DynamicResource InfoLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                    Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconRefresh}" Fill="{DynamicResource InfoBrush}"
-                                      Width="14" Height="14" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="6" Title="调休余额"
+                                Value="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" Unit="h"
+                                BarBrush="{DynamicResource InfoBrush}"
+                                IconBackgroundBrush="{DynamicResource InfoLightBrush}"
+                                IconForegroundBrush="{DynamicResource InfoBrush}"
+                                IconPathData="{StaticResource IconRefresh}"
+                                CardStyle="{StaticResource Card}"
+                                IsCompact="True">
+                    <views:StatCard.SubText>
+                        <MultiBinding StringFormat="加班 {0:F1}h · 已休 {1:F1}h">
+                            <Binding Path="OvertimeHours"/>
+                            <Binding Path="CompLeaveUsed"/>
+                        </MultiBinding>
+                    </views:StatCard.SubText>
+                </views:StatCard>
             </Grid>
 
             <!-- ===== 请假记录列表 ===== -->
@@ -548,14 +460,13 @@
 
                     <!-- 筛选栏 -->
                     <Border Grid.Row="0" Style="{StaticResource Card}"
-                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                            Margin="0,0,0,10" ClipToBounds="True" Padding="0">
+                            Margin="0,0,0,10" Padding="0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="4"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="{DynamicResource PrimaryGradient}" CornerRadius="{DynamicResource RadiusLeftLg}"/>
+                            <Border Grid.Column="0" Background="{DynamicResource PrimaryGradient}" CornerRadius="{DynamicResource RadiusLeftCard}"/>
                             <StackPanel Grid.Column="1" Margin="18,12,18,12">
                                 <!-- 标题行 -->
                                 <Grid Margin="0,0,0,10">
@@ -738,69 +649,21 @@
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="筛选工时" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllTotalHours, StringFormat={}{0:F1}}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                            <TextBlock Text="h" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Grid>
-                        </Border>
-                        <Border Grid.Column="2" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="记录数" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllTotalCount}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                                            <TextBlock Text="条" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Grid>
-                        </Border>
-                        <Border Grid.Column="4" Style="{StaticResource Card}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="{DynamicResource WarningBrush}"/>
-                                <Grid Grid.Column="1" Margin="14,10">
-                                    <StackPanel>
-                                        <TextBlock Text="亮点标记" FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Medium"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                            <TextBlock Text="{Binding AllHighlightCount}" FontSize="22"
-                                                       FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                            <TextBlock Text="项" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                       VerticalAlignment="Bottom" Margin="2,0,0,4"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Grid>
-                        </Border>
+                        <views:StatCard Grid.Column="0" Title="筛选工时"
+                                        Value="{Binding AllTotalHours, StringFormat={}{0:F1}}" Unit="h"
+                                        BarBrush="{DynamicResource PrimaryBrush}"
+                                        CardStyle="{StaticResource Card}"
+                                        IsCompact="True"/>
+                        <views:StatCard Grid.Column="2" Title="记录数"
+                                        Value="{Binding AllTotalCount}" Unit="条"
+                                        BarBrush="{DynamicResource SuccessBrush}"
+                                        CardStyle="{StaticResource Card}"
+                                        IsCompact="True"/>
+                        <views:StatCard Grid.Column="4" Title="亮点标记"
+                                        Value="{Binding AllHighlightCount}" Unit="项"
+                                        BarBrush="{DynamicResource WarningBrush}"
+                                        CardStyle="{StaticResource Card}"
+                                        IsCompact="True"/>
                     </Grid>
 
                     <!-- 记录列表 + 分页 -->
@@ -808,114 +671,19 @@
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0" ClipToBounds="True">
                         <DockPanel>
                             <!-- 分页控件 -->
-                            <Border DockPanel.Dock="Bottom" Padding="16,10"
-                                    Background="{DynamicResource SurfaceBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding FilteredTotalCount}" Value="0">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- 左侧：每页条数选择 -->
-                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="每页" FontSize="12"
-                                                   Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <ComboBox ItemsSource="{Binding PageSizeOptions}"
-                                                  SelectedItem="{Binding PageSize, Mode=TwoWay}"
-                                                  Style="{StaticResource Select}" Width="68" FontSize="12"/>
-                                        <TextBlock Text="条" FontSize="12"
-                                                   Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                    </StackPanel>
-
-                                    <!-- 中间：翻页按钮 -->
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                                                VerticalAlignment="Center">
-                                        <!-- 首页 -->
-                                        <Button Command="{Binding FirstPageCommand}"
-                                                Style="{StaticResource PageNavButton}">
-                                            <Button.ToolTip>
-                                                <ToolTip Content="首页"/>
-                                            </Button.ToolTip>
-                                            <Path Data="{StaticResource IconSkipFirst}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="14" Height="14" Stretch="Uniform"/>
-                                        </Button>
-                                        <!-- 上一页 -->
-                                        <Button Command="{Binding PrevPageCommand}"
-                                                Style="{StaticResource PageNavButton}">
-                                            <Button.ToolTip>
-                                                <ToolTip Content="上一页"/>
-                                            </Button.ToolTip>
-                                            <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="16" Height="16" Stretch="Uniform"/>
-                                        </Button>
-
-                                        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="6,6" Opacity="0.5"/>
-
-                                        <!-- 页码按钮 -->
-                                        <ItemsControl ItemsSource="{Binding VisiblePageNumbers}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Content="{Binding}"
-                                                            Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}"
-                                                            Margin="1,0"
-                                                            Style="{StaticResource PageNumberItemButton}"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-
-                                        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="6,6" Opacity="0.5"/>
-
-                                        <!-- 下一页 -->
-                                        <Button Command="{Binding NextPageCommand}"
-                                                Style="{StaticResource PageNavButton}">
-                                            <Button.ToolTip>
-                                                <ToolTip Content="下一页"/>
-                                            </Button.ToolTip>
-                                            <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="16" Height="16" Stretch="Uniform"/>
-                                        </Button>
-                                        <!-- 末页 -->
-                                        <Button Command="{Binding LastPageCommand}"
-                                                Style="{StaticResource PageNavButton}">
-                                            <Button.ToolTip>
-                                                <ToolTip Content="末页"/>
-                                            </Button.ToolTip>
-                                            <Path Data="{StaticResource IconSkipLast}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="14" Height="14" Stretch="Uniform"/>
-                                        </Button>
-                                    </StackPanel>
-
-                                    <!-- 右侧：总记录数 -->
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Center">
-                                            <Run Text="共 "/><Run Text="{Binding FilteredTotalCount, Mode=OneWay}"
-                                                                  FontWeight="SemiBold"
-                                                                  Foreground="{DynamicResource TextSecondaryBrush}"/><Run Text=" 条"/>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <views:PaginationControl DockPanel.Dock="Bottom"
+                                                     DisplayMode="Numbered"
+                                                     CurrentPage="{Binding CurrentPage}"
+                                                     TotalPages="{Binding TotalPages}"
+                                                     TotalCount="{Binding FilteredTotalCount}"
+                                                     PageSize="{Binding PageSize, Mode=TwoWay}"
+                                                     PageSizeOptions="{Binding PageSizeOptions}"
+                                                     VisiblePageNumbers="{Binding VisiblePageNumbers}"
+                                                     FirstPageCommand="{Binding FirstPageCommand}"
+                                                     PrevPageCommand="{Binding PrevPageCommand}"
+                                                     NextPageCommand="{Binding NextPageCommand}"
+                                                     LastPageCommand="{Binding LastPageCommand}"
+                                                     GoToPageCommand="{Binding GoToPageCommand}"/>
                             <Grid>
                             <DataGrid ItemsSource="{Binding AllRecords}" Style="{StaticResource ModernGrid}"
                                       SelectedItem="{Binding SelectedAllRecord, Mode=TwoWay}"

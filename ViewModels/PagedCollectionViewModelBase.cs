@@ -32,6 +32,7 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     [ObservableProperty] private int _pageSize = 20;
     [ObservableProperty] private int _totalPages = 1;
     [ObservableProperty] private int _totalCount;
+    [ObservableProperty] private ObservableCollection<int> _visiblePageNumbers = new();
     public int[] PageSizeOptions => [10, 20, 50, 100];
 
     [ObservableProperty] private string _searchKeyword = string.Empty;
@@ -124,9 +125,35 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
         TotalPages = total > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
         if (CurrentPage > TotalPages) CurrentPage = TotalPages;
         if (CurrentPage < 1) CurrentPage = 1;
+        UpdateVisiblePageNumbers();
 
         // 搜索态且无结果 → 区分空态；无关键词时归为通用"暂无数据"空态。
         IsSearchEmpty = !string.IsNullOrWhiteSpace(kw) && total == 0;
+    }
+
+    private void UpdateVisiblePageNumbers()
+    {
+        var pages = new ObservableCollection<int>();
+        var total = TotalPages;
+        var current = CurrentPage;
+
+        if (total <= 7)
+        {
+            for (int i = 1; i <= total; i++) pages.Add(i);
+        }
+        else
+        {
+            pages.Add(1);
+            int start = Math.Max(2, current - 2);
+            int end = Math.Min(total - 1, current + 2);
+
+            if (start > 2) pages.Add(0); // 0 = 省略号
+            for (int i = start; i <= end; i++) pages.Add(i);
+            if (end < total - 1) pages.Add(0);
+            pages.Add(total);
+        }
+
+        VisiblePageNumbers = pages;
     }
 
     partial void OnCurrentPageChanged(int value) => ReloadPageAsync().SafeFire(LoadFailureMessage);
@@ -147,6 +174,13 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
 
     [RelayCommand]
     private void LastPage() { if (CurrentPage != TotalPages) CurrentPage = TotalPages; }
+
+    [RelayCommand]
+    private void GoToPage(object? param)
+    {
+        if (param is int page && page > 0 && page <= TotalPages && page != CurrentPage)
+            CurrentPage = page;
+    }
 
     // ===== JSON 导出 / 导入 =====
     [RelayCommand]

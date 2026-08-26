@@ -79,57 +79,77 @@
             </Style.Triggers>
         </Style>
 
-        <!-- 操作按钮（带图标） -->
-        <Style x:Key="IconBtn" TargetType="Button" BasedOn="{StaticResource BtnGhost}">
-            <Setter Property="Padding" Value="8,5"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
     </UserControl.Resources>
 
     <Grid Margin="28,24">
         <DockPanel>
 
-            <!-- ==================== 顶部信息栏 ==================== -->
-            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="18,16"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,14">
+            <!-- ==================== 顶部信息栏（极简清爽版） ==================== -->
+            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Padding="24,16"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,12">
 
-                <!-- 标题行：标题 + 统计 + 操作 -->
                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- 左侧：图标 + 标题 + 描述 -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <!-- 垃圾桶图标 -->
-                            <Border Width="36" Height="36" CornerRadius="{DynamicResource RadiusMd}"
-                                    Background="{DynamicResource DangerLightBrush}"
-                                    VerticalAlignment="Center" Margin="0,0,12,0">
-                                <Path Data="{StaticResource IconTrash}" Width="18" Height="18"
-                                      Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Fill" Value="{DynamicResource DangerBrush}"/>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="回收站" Style="{StaticResource Heading2}"/>
-                                <TextBlock Text="误删的内容会先进入这里，可随时恢复或彻底删除"
-                                           Foreground="{DynamicResource TextTertiaryBrush}" FontSize="12" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </StackPanel>
+                    <!-- 第一层：标题 + 数量统计 -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="回收站" FontSize="20" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock VerticalAlignment="Center" Margin="8,0,0,0"
+                                   FontSize="13" FontWeight="Normal"
+                                   Foreground="{DynamicResource TextTertiaryBrush}">
+                            <Run Text="（共 "/>
+                            <Run Text="{Binding TotalCount}"/>
+                            <Run Text=" 项）"/>
+                        </TextBlock>
                     </StackPanel>
 
-                    <!-- 中间：类型筛选 Tabs -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
-                                HorizontalAlignment="Center" Margin="12,0">
-                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <!-- 第一层：轻量文字操作按钮（无背景框） -->
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- 多选模式切换 -->
+                        <ToggleButton IsChecked="{Binding IsMultiSelectMode}"
+                                      Style="{StaticResource BtnGhost}" Padding="8,5"
+                                      ToolTip="多选模式" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconSelectAll}" Width="14" Height="14" Stretch="Uniform"
+                                      Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="多选" FontSize="12" Margin="5,0,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ToggleButton>
+                        <!-- 清空回收站 -->
+                        <Button Command="{Binding EmptyCommand}" IsEnabled="{Binding HasItems}"
+                                Style="{StaticResource BtnGhost}" Padding="8,5"
+                                ToolTip="清空回收站" Cursor="Hand" Margin="8,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconTrash}" Width="14" Height="14" Stretch="Uniform"
+                                      Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="清空回收站" FontSize="12" Margin="5,0,0,0"
+                                           Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- 第二层：辅助提示文字 -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="误删的内容会先进入这里，可随时恢复或彻底删除"
+                               FontSize="12" Foreground="#999999"
+                               VerticalAlignment="Center" Margin="0,10,0,0"/>
+
+                    <!-- 第三层：类型筛选（合并回卡片内） -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                Orientation="Horizontal" VerticalAlignment="Center"
+                                Margin="0,12,0,0">
+                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
 
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="全部"
                                 Style="{StaticResource FilterTabAll}" Margin="3,0,0,0">
@@ -208,25 +228,6 @@
                                 </Border>
                             </StackPanel>
                         </Button>
-                    </StackPanel>
-
-                    <!-- 右侧：操作按钮组 -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-
-                        <!-- 多选模式切换 -->
-                        <ToggleButton IsChecked="{Binding IsMultiSelectMode}" Cursor="Hand"
-                                      Style="{StaticResource BtnGhost}" Padding="10,6" ToolTip="多选模式">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconSelectAll}" Width="14" Height="14" Stretch="Uniform"
-                                      Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="多选" FontSize="12"/>
-                            </StackPanel>
-                        </ToggleButton>
-
-                        <!-- 清空回收站 -->
-                        <Button Command="{Binding EmptyCommand}" Style="{StaticResource BtnDanger}"
-                                Content="清空回收站" IsEnabled="{Binding HasItems}"
-                                Margin="8,0,0,0" Padding="14,7"/>
                     </StackPanel>
                 </Grid>
             </Border>

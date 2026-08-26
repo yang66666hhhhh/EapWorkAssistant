@@ -68,125 +68,37 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 今日工时 -->
-                <Border Grid.Column="0" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Today_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="今日工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding TodayHours, Mode=OneWay, StringFormat={}{0:F1}}" FontSize="28"
-                                                   FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                        <TextBlock Text="h" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,6"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconClock}" Fill="{DynamicResource PrimaryBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="0" Title="今日工时"
+                                Value="{Binding TodayHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
+                                BarBrush="{DynamicResource PrimaryBrush}"
+                                IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                                IconForegroundBrush="{DynamicResource PrimaryBrush}"
+                                IconPathData="{StaticResource IconClock}"
+                                Cursor="Hand" Click="StatCard_Today_Click"/>
 
-                <!-- 本周工时 -->
-                <Border Grid.Column="2" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Week_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource SuccessBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="本周工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding WeekHours, Mode=OneWay, StringFormat={}{0:F1}}" FontSize="28"
-                                                   FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                                        <TextBlock Text="h" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,6"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource SuccessLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource SuccessBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="2" Title="本周工时"
+                                Value="{Binding WeekHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
+                                BarBrush="{DynamicResource SuccessBrush}"
+                                IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
+                                IconForegroundBrush="{DynamicResource SuccessBrush}"
+                                IconPathData="{StaticResource IconCalendar}"
+                                Cursor="Hand" Click="StatCard_Week_Click"/>
 
-                <!-- 本月工时 -->
-                <Border Grid.Column="4" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Month_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource WarningBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="本月工时" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding MonthHours, Mode=OneWay, StringFormat={}{0:F1}}" FontSize="28"
-                                                   FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                        <TextBlock Text="h" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,6"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource WarningLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconChart}" Fill="{DynamicResource WarningBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="4" Title="本月工时"
+                                Value="{Binding MonthHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
+                                BarBrush="{DynamicResource WarningBrush}"
+                                IconBackgroundBrush="{DynamicResource WarningLightBrush}"
+                                IconForegroundBrush="{DynamicResource WarningBrush}"
+                                IconPathData="{StaticResource IconChart}"
+                                Cursor="Hand" Click="StatCard_Month_Click"/>
 
-                <!-- 记录数 -->
-                <Border Grid.Column="6" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Records_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource AccentVioletBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="记录数" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding TotalRecords, Mode=OneWay}" FontSize="28"
-                                                   FontWeight="Bold" Foreground="{DynamicResource AccentVioletBrush}"/>
-                                        <TextBlock Text="条" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,6"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource AccentVioletBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="6" Title="记录数"
+                                Value="{Binding TotalRecords, Mode=OneWay}" Unit="条"
+                                BarBrush="{DynamicResource AccentVioletBrush}"
+                                IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                                IconForegroundBrush="{DynamicResource AccentVioletBrush}"
+                                IconPathData="{StaticResource IconPencil}"
+                                Cursor="Hand" Click="StatCard_Records_Click"/>
             </Grid>
 
             <!-- ===== 今日提醒 ===== -->
@@ -245,67 +157,21 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Issues_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource DangerBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="待解决问题" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="{Binding TotalIssues, Mode=OneWay}" FontSize="24"
-                                                   FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
-                                        <TextBlock Text="个" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,5"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource DangerLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconWrench}" Fill="{DynamicResource DangerBrush}" Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="0" Title="待解决问题"
+                                Value="{Binding TotalIssues, Mode=OneWay}" Unit="个"
+                                BarBrush="{DynamicResource DangerBrush}"
+                                IconBackgroundBrush="{DynamicResource DangerLightBrush}"
+                                IconForegroundBrush="{DynamicResource DangerBrush}"
+                                IconPathData="{StaticResource IconWrench}"
+                                Cursor="Hand" Click="StatCard_Issues_Click"/>
 
-                <Border Grid.Column="2" Style="{StaticResource CardElevated}" ClipToBounds="True" Padding="0"
-                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                        Cursor="Hand" MouseLeftButtonDown="StatCard_Knowledge_Click">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"/>
-                        <Grid Grid.Column="1" Margin="18,14">
-                            <Grid>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="知识条目" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontWeight="Medium"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="{Binding TotalKnowledge, Mode=OneWay}" FontSize="24"
-                                                   FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                        <TextBlock Text="条" FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}"
-                                                   VerticalAlignment="Bottom" Margin="3,0,0,5"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                                        Width="38" Height="38" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource IconClipboard}" Fill="{DynamicResource PrimaryBrush}"
-                                          Width="18" Height="18" Stretch="Uniform"
-                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <views:StatCard Grid.Column="2" Title="知识条目"
+                                Value="{Binding TotalKnowledge, Mode=OneWay}" Unit="条"
+                                BarBrush="{DynamicResource PrimaryBrush}"
+                                IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                                IconForegroundBrush="{DynamicResource PrimaryBrush}"
+                                IconPathData="{StaticResource IconClipboard}"
+                                Cursor="Hand" Click="StatCard_Knowledge_Click"/>
             </Grid>
 
             <!-- ===== 试用期进度（仅试用期员工显示） ===== -->

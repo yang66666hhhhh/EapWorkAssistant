@@ -166,37 +166,37 @@ public partial class DashboardView : UserControl
     }
 
     // ===== 统计卡片点击导航 =====
-    private void StatCard_Today_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Today_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToWorkRecord(DateTime.Now);
     }
 
-    private void StatCard_Week_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Week_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
-    private void StatCard_Month_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Month_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
-    private void StatCard_Records_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Records_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToPage(ViewNames.WorkRecord);
     }
 
-    private void StatCard_Issues_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Issues_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToPage(ViewNames.Issue);
     }
 
-    private void StatCard_Knowledge_Click(object sender, MouseButtonEventArgs e)
+    private void StatCard_Knowledge_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is DashboardViewModel vm)
             vm.RaiseNavigateToPage(ViewNames.Knowledge);
