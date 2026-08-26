@@ -62,29 +62,12 @@ public partial class ConfirmDialog : Window
     }
 
     /// <summary>
-    /// 窗口加载时：将自身尺寸设为 Owner（主窗口）大小，实现全屏遮罩覆盖
-    /// </summary>
-    private void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (Owner is Window owner)
-        {
-            Width = owner.ActualWidth;
-            Height = owner.ActualHeight;
-            Left = owner.Left;
-            Top = owner.Top;
-        }
-    }
-
-    /// <summary>
     /// 快捷方法：显示确认对话框并返回用户选择
     /// </summary>
     public static bool Show(string message, string title = "确认", ConfirmDialogType type = ConfirmDialogType.Warning,
         string confirmText = "确认", string cancelText = "取消")
     {
-        var dialog = new ConfirmDialog(title, message, type, confirmText, cancelText)
-        {
-            Owner = Application.Current.MainWindow
-        };
+        var dialog = CreateAndPositionDialog(title, message, type, confirmText, cancelText);
         return dialog.ShowDialog() == true;
     }
 
@@ -93,13 +76,29 @@ public partial class ConfirmDialog : Window
     /// </summary>
     public static void Alert(string message, string title = "提示")
     {
-        var dialog = new ConfirmDialog(title, message, ConfirmDialogType.Info)
-        {
-            Owner = Application.Current.MainWindow
-        };
+        var dialog = CreateAndPositionDialog(title, message, ConfirmDialogType.Info, "确定", "取消");
         dialog.CancelButton.Visibility = Visibility.Collapsed;
         dialog.ConfirmButton.Content = "确定";
         dialog.ShowDialog();
+    }
+
+    /// <summary>
+    /// 创建弹窗并按 Owner 全屏定位与缩放，使遮罩覆盖整个主窗口；
+    /// 必须在 ShowDialog() 之前完成，避免「先小框居中再放大跳屏」的闪烁。
+    /// </summary>
+    private static ConfirmDialog CreateAndPositionDialog(string title, string message, ConfirmDialogType type,
+        string confirmText, string cancelText)
+    {
+        var owner = Application.Current.MainWindow;
+        var dialog = new ConfirmDialog(title, message, type, confirmText, cancelText)
+        {
+            Owner = owner,
+            Left = owner.Left,
+            Top = owner.Top,
+            Width = owner.ActualWidth,
+            Height = owner.ActualHeight
+        };
+        return dialog;
     }
 
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
