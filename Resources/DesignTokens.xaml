@@ -230,9 +230,4 @@
     <sys:Double x:Key="PagerSize">32</sys:Double>
     <sys:Double x:Key="ToolTipMaxWidth">400</sys:Double>
 
-    <!-- 动效时长（Storyboard / Trigger 动画统一引用，禁止散落字面量 Duration） -->
-    <sys:String x:Key="DurationFast">0:0:0.15</sys:String>
-    <sys:String x:Key="DurationNormal">0:0:0.25</sys:String>
-    <sys:String x:Key="DurationSlow">0:0:0.40</sys:String>
-
 </ResourceDictionary>

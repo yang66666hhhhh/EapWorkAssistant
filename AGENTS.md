@@ -316,6 +316,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - 颜色使用 `SolidColorBrush` 类型的资源键，不要直接写十六进制色值。
 - **Storyboard 中不能使用 DynamicResource**（WPF 冻结限制），动画目标值必须硬编码。
 - **资源字典内禁止后向引用**：同一 `ResourceDictionary` 中，`{StaticResource ...}` 只能引用**已定义在前方**的资源。若资源 A 需要引用资源 B，则 B 必须排在 A 之前。跨 `MergedDictionaries` 时，先合并的字典中的资源可被后合并的字典引用；反之不行。
+- **资源字典禁止重复 key**：`ResourceDictionary` 不允许同名 `x:Key`，重复 key 会在启动时 `DeferrableContent` 延迟加载阶段抛出 `XamlParseException`（表现常定位到 `App.xaml` 的 `MergedDictionaries` 行，而非真实出错文件）。对资源做「挪位类」重构（把条目从 X 处移到 Y 处）时，**必须 grep 确认旧位置已清空**，否则会留下两份同名定义。改动后建议 `grep -oE 'x:Key="[^"]+"' <文件> | sort | uniq -c | awk '$1>1'` 复查。
 - **依赖属性优先级陷阱**：XAML 中本地值（precedence 3）优先于 Style Trigger（precedence 5）。需要 DataTrigger 动态切换的属性，默认值必须写在 Style Setter 中，不能写在元素标签上：
 
 ```xml
@@ -651,6 +652,7 @@ if (DataContext is KnowledgeViewModel vm)
 | 18 | 创建重复样式（未先查 Styles.xaml） | 5.4 |
 | 19 | 在 DataGridCopyHelper 管理的长文本列上设额外 ToolTip | 5.6 / 5.10 |
 | 20 | 在需要穿越 DataTemplate 时使用 LogicalTreeHelper | 5.10 |
+| 21 | 资源字典挪位重构后旧位置同名 key 未删除（重复 key 致启动崩溃） | 5.2 |
 
 ### 9.1 禁止臆测
 - 遇到不确定的字段名、API 签名、表结构时，**必须先读源码**，不允许凭记忆补全。
