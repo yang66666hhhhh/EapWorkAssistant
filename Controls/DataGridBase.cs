@@ -20,6 +20,8 @@ public class DataGridBase : DataGrid
     {
         // 默认套用全局 ModernGrid 样式（App.xaml 已合并，资源在加载时解析）
         SetResourceReference(StyleProperty, "ModernGrid");
+        // 强制开启列宽拖拽（即使样式 Setter 被意外覆盖，也能保证可调整）
+        CanUserResizeColumns = true;
         // 启用智能列宽校准 + 列宽记忆
         SmartColumns.SetEnable(this, true);
     }

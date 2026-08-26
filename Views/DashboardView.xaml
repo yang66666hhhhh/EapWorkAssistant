@@ -618,6 +618,7 @@
                                   SelectedItem="{Binding SelectedRecentRecord, Mode=TwoWay}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
+                                  CanUserResizeColumns="True"
                                   ClipboardCopyMode="IncludeHeader">
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>

@@ -133,9 +133,9 @@
                                Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5"/>
                     <Grid>
                         <controls:DataGridBase x:Name="ItemsGrid" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}" TableKey="Issue"
-                                  Style="{StaticResource ModernGrid}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
+                                  CanUserResizeColumns="True"
                                   ClipboardCopyMode="IncludeHeader"
                                   MouseDoubleClick="ItemsGrid_MouseDoubleClick">
                             <DataGrid.ColumnHeaderStyle>

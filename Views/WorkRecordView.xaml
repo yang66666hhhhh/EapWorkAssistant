@@ -305,6 +305,7 @@
                               SelectedItem="{Binding SelectedDailyRecord, Mode=TwoWay}"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Auto"
+                              CanUserResizeColumns="True"
                               ClipboardCopyMode="IncludeHeader"
                               MouseDoubleClick="RecordsGrid_MouseDoubleClick">
                             <DataGrid.ColumnHeaderStyle>
@@ -689,6 +690,7 @@
                             <controls:DataGridBase ItemsSource="{Binding AllRecords}" TableKey="WorkRecordAll"
                                       SelectedItem="{Binding SelectedAllRecord, Mode=TwoWay}"
                                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                      CanUserResizeColumns="True"
                                       ClipboardCopyMode="IncludeHeader"
                                       Sorting="AllRecordsGrid_Sorting">
                                 <DataGrid.ColumnHeaderStyle>
