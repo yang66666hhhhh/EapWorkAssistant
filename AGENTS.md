@@ -547,6 +547,14 @@ refactor: 提取 ThemeService 统一管理主题逻辑
   - **动效时长（sys:String，可直接用于 `Duration=`）**：`DurationFast`(0:0:0.15) `DurationNormal`(0:0:0.25) `DurationSlow`(0:0:0.40)
   - **尺寸令牌**：`IconButtonSize`(34) `ControlMinHeight`(40) `ControlMinHeightSm`(36) `InputHeight`(42) `SwitchTrackWidth`(44) `SwitchTrackHeight`(24) `SwitchThumbSize`(20) `PagerSize`(32) `ToolTipMaxWidth`(400) `IllustrationSize`(72) `StatusDotSize`(6)
 
+#### 卡片边框规范（2026-08-26 新增）
+- **普通卡片**：无边框，仅用 `CardBrush` 背景 + `RadiusMd` 圆角 + `SpaceMd` 内边距（靠 `Style="{StaticResource Card}"` 实现，自带 1px `BorderBrush` 极淡边框，与 `StatCard`/`CardHover` 等卡片家族一致）。
+- **强调卡片**（如统计数据 `StatCard`）：无边框，可使用主色的极淡变体（`PrimaryLightBrush` / `SuccessLightBrush` 等）作为背景。
+- **分隔性卡片**（如提示区）：可用 `1px` 极淡 `BorderBrush` 作为分隔，**禁止 2px 及以上边框**。
+- **禁止彩色边框**作为强调手段（如蓝色/红色描边），除非是错误状态（`DangerBrush`）或警告状态（`WarningBrush`）。
+- ⚠️ 不要用 `AccentBannerGradient` 之类的彩色渐变做"边框/外框"包裹——dashboard 的"今日记录""试用期进度"卡片已移除该渐变外框，改用标准 `Card` 样式（统一 `RadiusMd` 圆角 + `SpaceMd` 内边距）。
+- ⚠️ 令牌前缀是 `Space`（即 `SpaceMd`），不存在 `SpacingMd` / `CardBackgroundBrush`；内边距统一引 `SpaceMd`。
+
 ### 三、组件复用
 - 禁止在多个页面重复写相同的 UI 结构（空状态占位、卡片、列表项模板、页面标题栏）。
 - 任一 UI 模式出现两次以上，必须抽取为 `UserControl`（建议放 `Controls/` 目录，目前该目录尚不存在，新建即可）。

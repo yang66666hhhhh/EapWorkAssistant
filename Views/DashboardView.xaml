@@ -103,10 +103,11 @@
             </Grid>
 
             <!-- ===== 今日提醒 ===== -->
-            <Border CornerRadius="{DynamicResource RadiusLg}" Margin="0,0,0,14" Padding="1.5"
-                    Visibility="{Binding ShowDashReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    Background="{DynamicResource AccentBannerGradient}">
-                <Border Style="{StaticResource CardElevated}" Padding="18,14">
+            <Border Style="{StaticResource Card}"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Padding="{DynamicResource SpaceMd}"
+                    Margin="0,0,0,14"
+                    Visibility="{Binding ShowDashReminder, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusMd}"
@@ -136,7 +137,6 @@
                         </StackPanel>
                     </Grid>
                 </Border>
-            </Border>
 
             <!-- ===== 覆盖率提醒 ===== -->
             <Border Visibility="{Binding ShowCoverageWarning, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
@@ -176,10 +176,11 @@
             </Grid>
 
             <!-- ===== 试用期进度（仅试用期员工显示） ===== -->
-            <Border CornerRadius="{DynamicResource RadiusLg}" Margin="0,0,0,14" Padding="1.5"
-                    Visibility="{Binding ShowDashProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
-                    Background="{DynamicResource AccentBannerGradient}">
-                <Border Style="{StaticResource Card}" Padding="24">
+            <Border Style="{StaticResource Card}"
+                    CornerRadius="{DynamicResource RadiusMd}"
+                    Padding="{DynamicResource SpaceMd}"
+                    Margin="0,0,0,14"
+                    Visibility="{Binding ShowDashProbation, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,18">
                             <Grid>
@@ -282,7 +283,6 @@
                         </Grid>
                     </DockPanel>
                 </Border>
-            </Border>
 
             <!-- ===== 工时趋势 + 项目分布 + 亮点列表 ===== -->
             <Grid Margin="0,0,0,14">
