@@ -7,20 +7,34 @@ using System.Windows.Threading;
 namespace EapWorkAssistant.Helpers;
 
 /// <summary>
-/// DataGrid 智能列宽优化（附加属性）。
-/// 默认优先保证宽表可读性，让长文本列先拥有舒适宽度，
-/// 放不下时再交给横向滚动条，而不是把每一列都压窄。
+/// DataGrid 智能列宽与列宽记忆（附加属性）。
+/// - 智能默认：长文本列给舒适宽度，放不下时交给横向滚动，而非把所有列压窄。
+/// - 列宽记忆：以 TableKey 为维度，把用户拖拽后的列宽持久化到本地 JSON，
+///   下次打开（及数据刷新）时自动恢复，实现“记忆”。
 ///
-/// 用法：在 DataGrid 上设置 local:SmartColumns.Enable="True"
+/// 用法：在 DataGrid（或继承 DataGridBase）上设置 SmartColumns.Enable="True" 与 TableKey="WorkRecord"。
+/// 注意：XAML 中显式声明的 Auto / * 列会被尊重（不会强制套用固定宽度），仅对像素列做智能校准 + 记忆。
 /// </summary>
 public static class SmartColumns
 {
     public static readonly DependencyProperty EnableProperty =
         DependencyProperty.RegisterAttached("Enable", typeof(bool), typeof(SmartColumns),
-            new PropertyMetadata(false, OnPropertyChanged));
+            new PropertyMetadata(false, OnEnableChanged));
+
+    public static readonly DependencyProperty TableKeyProperty =
+        DependencyProperty.RegisterAttached("TableKey", typeof(string), typeof(SmartColumns),
+            new PropertyMetadata(null, OnTableKeyChanged));
 
     private static readonly DependencyProperty HasAppliedDefaultsProperty =
         DependencyProperty.RegisterAttached("HasAppliedDefaults", typeof(bool), typeof(SmartColumns),
+            new PropertyMetadata(false));
+
+    private static readonly DependencyProperty IsAdjustingProperty =
+        DependencyProperty.RegisterAttached("IsAdjusting", typeof(bool), typeof(SmartColumns),
+            new PropertyMetadata(false));
+
+    private static readonly DependencyProperty HasListenersProperty =
+        DependencyProperty.RegisterAttached("HasListeners", typeof(bool), typeof(SmartColumns),
             new PropertyMetadata(false));
 
     private sealed record ColumnWidthProfile(
@@ -31,13 +45,20 @@ public static class SmartColumns
     public static void SetEnable(DependencyObject obj, bool value) => obj.SetValue(EnableProperty, value);
     public static bool GetEnable(DependencyObject obj) => (bool)obj.GetValue(EnableProperty);
 
-    private static bool GetHasAppliedDefaults(DependencyObject obj) => (bool)obj.GetValue(HasAppliedDefaultsProperty);
-    private static void SetHasAppliedDefaults(DependencyObject obj, bool value) => obj.SetValue(HasAppliedDefaultsProperty, value);
+    public static void SetTableKey(DependencyObject obj, string? value) => obj.SetValue(TableKeyProperty, value);
+    public static string? GetTableKey(DependencyObject obj) => (string?)obj.GetValue(TableKeyProperty);
+
+    private static bool GetHasAppliedDefaults(DependencyObject o) => (bool)o.GetValue(HasAppliedDefaultsProperty);
+    private static void SetHasAppliedDefaults(DependencyObject o, bool v) => o.SetValue(HasAppliedDefaultsProperty, v);
+    private static bool GetIsAdjusting(DependencyObject o) => (bool)o.GetValue(IsAdjustingProperty);
+    private static void SetIsAdjusting(DependencyObject o, bool v) => o.SetValue(IsAdjustingProperty, v);
+    private static bool GetHasListeners(DependencyObject o) => (bool)o.GetValue(HasListenersProperty);
+    private static void SetHasListeners(DependencyObject o, bool v) => o.SetValue(HasListenersProperty, v);
 
     private static readonly DependencyPropertyDescriptor ItemsSourceDescriptor =
         DependencyPropertyDescriptor.FromProperty(ItemsControl.ItemsSourceProperty, typeof(DataGrid));
 
-    private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static void OnEnableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not DataGrid grid) return;
 
@@ -55,7 +76,19 @@ public static class SmartColumns
         }
     }
 
-    private static void OnLoaded(object sender, RoutedEventArgs e) => ScheduleAdjust((DataGrid)sender);
+    private static void OnTableKeyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        // TableKey 可能在 Enable 之后设置，变化时重新校准以应用对应维度的记忆
+        if (d is DataGrid grid && GetEnable(grid))
+            ScheduleAdjust(grid);
+    }
+
+    private static void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var grid = (DataGrid)sender;
+        ScheduleAdjust(grid);
+        AttachColumnListeners(grid);
+    }
 
     private static void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>
         ScheduleAdjust((DataGrid)sender);
@@ -63,13 +96,12 @@ public static class SmartColumns
     private static void OnItemsSourceChanged(object? sender, EventArgs e)
     {
         if (sender is DataGrid grid)
-        {
             ScheduleAdjust(grid);
-        }
     }
 
     private static void ScheduleAdjust(DataGrid grid)
     {
+        if (grid.Columns.Count == 0) return;
         grid.Dispatcher.BeginInvoke(new Action(() => AdjustColumns(grid)), DispatcherPriority.Background);
     }
 
@@ -77,22 +109,43 @@ public static class SmartColumns
     {
         if (grid.Columns.Count == 0) return;
 
-        var hasAppliedDefaults = GetHasAppliedDefaults(grid);
-
-        foreach (var column in grid.Columns)
+        SetIsAdjusting(grid, true);
+        try
         {
-            var profile = ResolveProfile(column);
-            if (profile is null) continue;
+            var tableKey = GetTableKey(grid);
+            var hasAppliedDefaults = GetHasAppliedDefaults(grid);
 
-            if (ShouldPreserveUserWidth(column, profile, hasAppliedDefaults))
+            for (int i = 0; i < grid.Columns.Count; i++)
             {
-                continue;
+                var column = grid.Columns[i];
+                var key = ColumnKey(column, i);
+
+                // 1) 持久化的用户列宽记忆优先
+                if (!string.IsNullOrEmpty(tableKey)
+                    && ColumnWidthStore.TryGet(tableKey, key, out double saved)
+                    && saved > 1)
+                {
+                    column.Width = new DataGridLength(saved, DataGridLengthUnitType.Pixel);
+                    continue;
+                }
+
+                // 2) 尊重 XAML 中显式声明的 Auto / * 列（如回收站的 Auto / 2* 列）
+                if (column.Width.UnitType is DataGridLengthUnitType.Auto or DataGridLengthUnitType.Star)
+                    continue;
+
+                // 3) 已显式固定宽度的列：用智能默认档位校准（与现有 XAML 宽度一致，无视觉变化）
+                var profile = ResolveProfile(column);
+                if (profile is null) continue;
+                if (ShouldPreserveUserWidth(column, profile, hasAppliedDefaults)) continue;
+                ApplyProfile(column, profile);
             }
 
-            ApplyProfile(column, profile);
+            SetHasAppliedDefaults(grid, true);
         }
-
-        SetHasAppliedDefaults(grid, true);
+        finally
+        {
+            SetIsAdjusting(grid, false);
+        }
     }
 
     private static bool ShouldPreserveUserWidth(
@@ -165,6 +218,44 @@ public static class SmartColumns
     private static bool IsActionColumn(string? header, string? path) =>
         string.Equals(header, "操作", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(path, "Actions", StringComparison.OrdinalIgnoreCase);
+
+    private static string ColumnKey(DataGridColumn column, int index)
+    {
+        var header = column.Header?.ToString()?.Trim();
+        var path = GetBindingPath(column);
+        if (!string.IsNullOrEmpty(header) && !string.IsNullOrEmpty(path)) return $"{header}|{path}";
+        if (!string.IsNullOrEmpty(path)) return path!;
+        if (!string.IsNullOrEmpty(header)) return header!;
+        return $"col{index}";
+    }
+
+    private static void AttachColumnListeners(DataGrid grid)
+    {
+        if (GetHasListeners(grid)) return;
+        SetHasListeners(grid, true);
+
+        foreach (var column in grid.Columns)
+        {
+            var c = column;
+            var desc = DependencyPropertyDescriptor.FromProperty(DataGridColumn.WidthProperty, c.GetType());
+            desc.AddValueChanged(c, (_, _) => OnColumnWidthChanged(grid, c));
+        }
+    }
+
+    private static void OnColumnWidthChanged(DataGrid grid, DataGridColumn column)
+    {
+        // 程序化设置（加载/校准）期间忽略，避免回写噪声
+        if (GetIsAdjusting(grid)) return;
+
+        var tableKey = GetTableKey(grid);
+        if (string.IsNullOrEmpty(tableKey)) return;
+
+        // 仅持久化像素宽度（用户拖拽结果），Auto/* 不需要记忆
+        if (column.Width.UnitType != DataGridLengthUnitType.Pixel) return;
+
+        var key = ColumnKey(column, grid.Columns.IndexOf(column));
+        ColumnWidthStore.SetWidth(tableKey, key, column.Width.Value);
+    }
 
     private static string? GetBindingPath(DataGridColumn column)
     {

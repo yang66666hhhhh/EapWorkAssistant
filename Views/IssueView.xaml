@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
+             xmlns:controls="clr-namespace:EapWorkAssistant.Controls"
              xmlns:views="clr-namespace:EapWorkAssistant.Views"
              FontFamily="{StaticResource DefaultFont}">
     <UserControl.InputBindings>
@@ -131,7 +132,7 @@
                                Text="双击列表项可快速编辑 · 编辑中按 Ctrl+S 保存、Esc 关闭"
                                Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5"/>
                     <Grid>
-                        <DataGrid x:Name="ItemsGrid" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}"
+                        <controls:DataGridBase x:Name="ItemsGrid" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}" TableKey="Issue"
                                   Style="{StaticResource ModernGrid}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
@@ -271,7 +272,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
-                        </DataGrid>
+                        </controls:DataGridBase>
 
                         <!-- 空状态 -->
                         <Border Visibility="{Binding Items.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"

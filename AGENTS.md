@@ -591,9 +591,11 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - 禁止清理：`*.cs` `*.xaml` `*.csproj` `*.sln` `Resources/` `Assets/` `Database/*.db` `*.sqlite` `.git/` `DesignTokens.xaml` `Styles.xaml`
 
 ### 九、表格/列表规范
-- 所有 `DataGrid` / `ListView` 必须使用 **`ModernGrid` 样式**（非 `DataGridBase` 基类——该类不存在）+ `ModernGridColumnHeader` / `ModernGridCell` / `ModernGridRow`，并启用 `DataGridCopyHelper`（ModernGrid 已内置）与 `DataGridSmartColumns`（按列头/字段提供智能默认列宽，见 `Helpers/DataGridSmartColumns.cs`）。
-- 列宽拖拽：`ModernGrid` 已支持 `CanUserResizeColumns`。
-- ⚠️ **列宽持久化 + 排序记忆 + `TableKey` 维度配置目前未实现**，列为待办（建议在 `DataGridSmartColumns` 增加基于 `TableKey` 的持久化，每个表格传入唯一 `TableKey` 区分列宽配置）。
+- 所有 `DataGrid` / `ListView` 必须继承 **`Controls/DataGridBase`**（统一套用 `ModernGrid` 样式 + 启用智能列宽 `SmartColumns`），不得再使用原生 `<DataGrid>` 或仅套 `ModernGrid` 样式。`DataGridBase` 位于 `EapWorkAssistant.Controls`，XAML 引用需 `xmlns:controls="clr-namespace:EapWorkAssistant.Controls"`。
+- 每张表必须设置唯一 `TableKey`（如 `WorkRecord` / `RecycleBin` / `Issue` / `Dashboard` / `WorkRecordAll`），作为列宽记忆在 `ColumnWidthStore`（本地 JSON）中的存储维度。
+- 列宽记忆已落地：`DataGridSmartColumns` 在用户拖拽列宽后，将像素宽度持久化到 `%LOCALAPPDATA%/EapWorkAssistant/columnwidths.json`，下次打开 / 数据刷新时自动恢复。**XAML 中显式声明的 `Auto` / `*` 列会被尊重，不会强制套用固定宽度**（回收站即如此）。
+- 表格必须配合 `ModernGridColumnHeader` / `ModernGridCell` / `ModernGridRow`，并启用 `DataGridCopyHelper`（ModernGrid 已内置）实现长文本悬停预览。
+- 列宽拖拽：`ModernGrid` / `DataGridBase` 已支持 `CanUserResizeColumns="True"`。
 - 空状态由 `ModernGrid` 样式配合各页 Empty 占位切换（见第三、四条）。
 
 ### 十、通用工具与帮助类
@@ -617,5 +619,5 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 | 全局异常是否走 `ToastService`（非 `ToastNotificationService`）？ | ✅ / ❌ |
 | 清理临时目录是否在白名单内？ | ✅ / ❌ |
 | 新增代码是否放在正确命名空间、文件名与类名一致？ | ✅ / ❌ |
-| 是否误用了不存在的资产名（EmptyStateControl / DataGridBase / FontSizeHero / BackgroundBrush 等）？ | ✅ / ❌ |
+| 是否误用了不存在的资产名（EmptyStateControl / FontSizeHero / BackgroundBrush 等）？ | ✅ / ❌ |
 | 修改核心逻辑 / 公共 API 后是否跑过测试？ | ✅ / ❌ |
