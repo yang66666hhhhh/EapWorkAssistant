@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace EapWorkAssistant.Views;
+namespace EapWorkAssistant.Controls;
 
 /// <summary>
 /// 分页控件：统一全软件的分页交互。

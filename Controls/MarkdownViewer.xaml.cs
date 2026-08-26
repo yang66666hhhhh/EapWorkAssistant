@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using EapWorkAssistant.Helpers;
 
-namespace EapWorkAssistant.Views;
+namespace EapWorkAssistant.Controls;
 
 /// <summary>
 /// Markdown 报告预览控件：将 Markdown 文本渲染为带格式的只读 FlowDocument。

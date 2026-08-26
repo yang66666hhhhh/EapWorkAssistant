@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
              xmlns:controls="clr-namespace:EapWorkAssistant.Controls"
-             xmlns:views="clr-namespace:EapWorkAssistant.Views"
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              FontFamily="{StaticResource DefaultFont}">
     <Grid>
@@ -69,7 +68,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <views:StatCard Grid.Column="0" Title="今日工时"
+                <controls:StatCard Grid.Column="0" Title="今日工时"
                                 Value="{Binding TodayHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
                                 BarBrush="{DynamicResource PrimaryBrush}"
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
@@ -77,7 +76,7 @@
                                 IconPathData="{StaticResource IconClock}"
                                 Cursor="Hand" Click="StatCard_Today_Click"/>
 
-                <views:StatCard Grid.Column="2" Title="本周工时"
+                <controls:StatCard Grid.Column="2" Title="本周工时"
                                 Value="{Binding WeekHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
                                 BarBrush="{DynamicResource SuccessBrush}"
                                 IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
@@ -85,7 +84,7 @@
                                 IconPathData="{StaticResource IconCalendar}"
                                 Cursor="Hand" Click="StatCard_Week_Click"/>
 
-                <views:StatCard Grid.Column="4" Title="本月工时"
+                <controls:StatCard Grid.Column="4" Title="本月工时"
                                 Value="{Binding MonthHours, Mode=OneWay, StringFormat={}{0:F1}}" Unit="h"
                                 BarBrush="{DynamicResource WarningBrush}"
                                 IconBackgroundBrush="{DynamicResource WarningLightBrush}"
@@ -93,7 +92,7 @@
                                 IconPathData="{StaticResource IconChart}"
                                 Cursor="Hand" Click="StatCard_Month_Click"/>
 
-                <views:StatCard Grid.Column="6" Title="记录数"
+                <controls:StatCard Grid.Column="6" Title="记录数"
                                 Value="{Binding TotalRecords, Mode=OneWay}" Unit="条"
                                 BarBrush="{DynamicResource AccentVioletBrush}"
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
@@ -158,7 +157,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <views:StatCard Grid.Column="0" Title="待解决问题"
+                <controls:StatCard Grid.Column="0" Title="待解决问题"
                                 Value="{Binding TotalIssues, Mode=OneWay}" Unit="个"
                                 BarBrush="{DynamicResource DangerBrush}"
                                 IconBackgroundBrush="{DynamicResource DangerLightBrush}"
@@ -166,7 +165,7 @@
                                 IconPathData="{StaticResource IconWrench}"
                                 Cursor="Hand" Click="StatCard_Issues_Click"/>
 
-                <views:StatCard Grid.Column="2" Title="知识条目"
+                <controls:StatCard Grid.Column="2" Title="知识条目"
                                 Value="{Binding TotalKnowledge, Mode=OneWay}" Unit="条"
                                 BarBrush="{DynamicResource PrimaryBrush}"
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
@@ -480,7 +479,7 @@
                     <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                             Padding="18">
-                        <views:MarkdownViewer MarkdownText="{Binding ProbationReport}"/>
+                        <controls:MarkdownViewer MarkdownText="{Binding ProbationReport}"/>
                     </Border>
                 </DockPanel>
             </Border>
@@ -696,7 +695,7 @@
     <Border x:Name="CalendarContainer" Style="{StaticResource FloatingPanel}"
             Margin="20,90,0,0" Panel.ZIndex="51"
             Width="310">
-        <views:CustomCalendar x:Name="CustomCal"
+        <controls:CustomCalendar x:Name="CustomCal"
                               SelectedDate="{Binding CalendarDate, Mode=TwoWay}"/>
     </Border>
 

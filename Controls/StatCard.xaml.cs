@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace EapWorkAssistant.Views;
+namespace EapWorkAssistant.Controls;
 
 /// <summary>
 /// 统一统计卡片组件：左侧色带 + 标题/数值/单位 + 图标。

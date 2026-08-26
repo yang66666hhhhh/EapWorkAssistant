@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace EapWorkAssistant.Views
+namespace EapWorkAssistant.Controls
 {
     public partial class CustomCalendar : UserControl
     {

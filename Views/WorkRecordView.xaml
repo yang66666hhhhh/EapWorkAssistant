@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
              xmlns:controls="clr-namespace:EapWorkAssistant.Controls"
-             xmlns:views="clr-namespace:EapWorkAssistant.Views"
              FontFamily="{StaticResource DefaultFont}">
     <UserControl.InputBindings>
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveRecordCommand}"/>
@@ -147,7 +146,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <views:StatCard Grid.Column="0" Title="今日工时"
+                <controls:StatCard Grid.Column="0" Title="今日工时"
                                 Value="{Binding TodayHours, StringFormat={}{0:F1}}" Unit="h"
                                 BarBrush="{DynamicResource PrimaryBrush}"
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
@@ -156,7 +155,7 @@
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True"/>
 
-                <views:StatCard Grid.Column="2" Title="记录数"
+                <controls:StatCard Grid.Column="2" Title="记录数"
                                 Value="{Binding RecordCount}" Unit="条"
                                 BarBrush="{DynamicResource SuccessBrush}"
                                 IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
@@ -165,7 +164,7 @@
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True"/>
 
-                <views:StatCard Grid.Column="4" Title="亮点标记"
+                <controls:StatCard Grid.Column="4" Title="亮点标记"
                                 Value="{Binding HighlightCount}" Unit="项"
                                 BarBrush="{DynamicResource WarningBrush}"
                                 IconBackgroundBrush="{DynamicResource WarningLightBrush}"
@@ -174,7 +173,7 @@
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True"/>
 
-                <views:StatCard Grid.Column="6" Title="调休余额"
+                <controls:StatCard Grid.Column="6" Title="调休余额"
                                 Value="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" Unit="h"
                                 BarBrush="{DynamicResource InfoBrush}"
                                 IconBackgroundBrush="{DynamicResource InfoLightBrush}"
@@ -182,13 +181,13 @@
                                 IconPathData="{StaticResource IconRefresh}"
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True">
-                    <views:StatCard.SubText>
+                    <controls:StatCard.SubText>
                         <MultiBinding StringFormat="加班 {0:F1}h · 已休 {1:F1}h">
                             <Binding Path="OvertimeHours"/>
                             <Binding Path="CompLeaveUsed"/>
                         </MultiBinding>
-                    </views:StatCard.SubText>
-                </views:StatCard>
+                    </controls:StatCard.SubText>
+                </controls:StatCard>
             </Grid>
 
             <!-- ===== 请假记录列表 ===== -->
@@ -433,7 +432,7 @@
                         <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusMd}"
                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 Margin="10,0,10,10" Padding="12">
-                            <views:MarkdownViewer x:Name="ReportViewer" MarkdownText="{Binding ReportText}"/>
+                            <controls:MarkdownViewer x:Name="ReportViewer" MarkdownText="{Binding ReportText}"/>
                         </Border>
                     </DockPanel>
                 </Border>
@@ -651,17 +650,17 @@
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <views:StatCard Grid.Column="0" Title="筛选工时"
+                        <controls:StatCard Grid.Column="0" Title="筛选工时"
                                         Value="{Binding AllTotalHours, StringFormat={}{0:F1}}" Unit="h"
                                         BarBrush="{DynamicResource PrimaryBrush}"
                                         CardStyle="{StaticResource Card}"
                                         IsCompact="True"/>
-                        <views:StatCard Grid.Column="2" Title="记录数"
+                        <controls:StatCard Grid.Column="2" Title="记录数"
                                         Value="{Binding AllTotalCount}" Unit="条"
                                         BarBrush="{DynamicResource SuccessBrush}"
                                         CardStyle="{StaticResource Card}"
                                         IsCompact="True"/>
-                        <views:StatCard Grid.Column="4" Title="亮点标记"
+                        <controls:StatCard Grid.Column="4" Title="亮点标记"
                                         Value="{Binding AllHighlightCount}" Unit="项"
                                         BarBrush="{DynamicResource WarningBrush}"
                                         CardStyle="{StaticResource Card}"
@@ -673,7 +672,7 @@
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0" ClipToBounds="True">
                         <DockPanel>
                             <!-- 分页控件 -->
-                            <views:PaginationControl DockPanel.Dock="Bottom"
+                            <controls:PaginationControl DockPanel.Dock="Bottom"
                                                      DisplayMode="Numbered"
                                                      CurrentPage="{Binding CurrentPage}"
                                                      TotalPages="{Binding TotalPages}"
@@ -1125,7 +1124,7 @@
         <Border x:Name="CalendarContainer" Style="{StaticResource FloatingPanel}"
                 Margin="20,90,0,0" Panel.ZIndex="51"
                 Width="310">
-            <views:CustomCalendar x:Name="SharedCal"
+            <controls:CustomCalendar x:Name="SharedCal"
                                   SelectedDate="{Binding SelectedDate, Mode=TwoWay}"/>
         </Border>
 

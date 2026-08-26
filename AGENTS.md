@@ -45,7 +45,7 @@ EapWorkAssistant/
 ├── Services/                # 业务逻辑服务（单例模式）
 ├── ViewModels/              # 视图模型（CommunityToolkit.Mvvm）
 ├── Views/                   # XAML 视图 + code-behind
-├── Controls/                # 可复用自定义控件（如 DataGridBase）
+├── Controls/                # 自定义控件（代码型派生控件如 DataGridBase + XAML 型可复用 UserControl 如 CustomCalendar/StatCard/PaginationControl/MarkdownViewer）
 ├── App.xaml / App.xaml.cs   # 应用入口
 └── EapWorkAssistant.csproj  # 项目文件
 ```
@@ -378,14 +378,23 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - ❌ 创建与 `Styles.xaml` 中已有样式功能重复的新样式。
 - ❌ 硬编码颜色值、圆角值、阴影参数（必须引用令牌 / 资源键）。
 
-### 5.5 可复用组件清单（Views/ 目录）
+### 5.5 可复用组件清单
 
-- `CustomCalendar`（`Views/CustomCalendar.xaml`）：日期选择，支持月份导航、有记录日期标记、今日快捷。所有需要日期选择的场景必须使用此组件，配合浮窗覆盖层模式。
+**`Controls/` 目录（自定义控件：代码型派生控件 + XAML 型可复用 UserControl）：**
+
+- `DataGridBase`（`Controls/DataGridBase.cs`）：`: DataGrid` 派生，自动套用 `ModernGrid` 样式 + 列宽记忆（`TableKey`）。所有 DataGrid 必须用此类。
+- `CustomCalendar`（`Controls/CustomCalendar.xaml`）：日期选择，支持月份导航、有记录日期标记、今日快捷。所有需要日期选择的场景必须使用此组件，配合浮窗覆盖层模式。
+- `StatCard`（`Controls/StatCard.xaml`）：统计卡片（图标 + 数值 + 标签），默认 `CardElevated` 样式。
+- `PaginationControl`（`Controls/PaginationControl.xaml`）：统一分页（支持 Simple / Numbered）。
+- `MarkdownViewer`（`Controls/MarkdownViewer.xaml`）：Markdown 渲染查看器，绑定 `MarkdownText`。
+
+**`Views/` 目录（对话框 / 窗口型可复用组件）：**
+
 - `ConfirmDialog`（`Views/ConfirmDialog.xaml`）：确认对话框，支持 Danger/Warning/Info 类型。
 - `ConfigItemDialog`（`Views/ConfigItemDialog.xaml`）：配置项编辑对话框。
 - `ProfileDialog`（`Views/ProfileDialog.xaml`）：个人信息编辑对话框。
-- `StatCard`（`Views/StatCard.xaml`）：统计卡片（图标 + 数值 + 标签），默认 `CardElevated` 样式。
-- `PaginationControl`（`Views/PaginationControl.xaml`）：统一分页（支持 Simple / Numbered）。
+
+> 在消费方 XAML 中引用 `Controls/` 下的控件，统一使用 `xmlns:controls="clr-namespace:EapWorkAssistant.Controls"` 前缀（如 `<controls:StatCard>`）。
 
 ### 5.6 可复用样式清单（Resources/Styles.xaml）
 
@@ -670,7 +679,7 @@ if (DataContext is KnowledgeViewModel vm)
 ### 9.3 组件复用
 - 禁止在多个页面重复写相同的 UI 结构（空状态占位、卡片、列表项模板、页面标题栏）。
 - 任一 UI 模式出现两次以上，必须抽取为 `UserControl`（建议放 `Controls/` 目录）。
-- **现状（已存在可复用资产）**：`Views/StatCard.xaml`、`Views/PaginationControl.xaml`、表格 `ModernGrid` 系列（5.6）。
+- **现状（已存在可复用资产）**：`Controls/StatCard.xaml`、`Controls/PaginationControl.xaml`、表格 `ModernGrid` 系列（5.6）。
 - **待补（原规则称「已存在」，实际不存在，新写时优先抽取）**：
   - 空状态占位 `EmptyStateControl`（当前各页为内联 XAML）
   - 页面标题栏 `PageHeader`（当前各页为内联 XAML）
