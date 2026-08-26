@@ -176,7 +176,7 @@ public static class SmartColumns
         // 宽表默认优先可读性，不再为了塞进视口而压缩长文本列。
         if (Matches(header, path, "日期", "WorkDate")) return Fixed(136, 120, 156);
         if (Matches(header, path, "任务", "ProjectName")) return Fixed(160, 140, 180);
-        if (Matches(header, path, "标题", "Title")) return Star(2, 180);       // 主标识符：弹性宽度，最小180
+        if (Matches(header, path, "标题", "Title")) return Fixed(200, 160, 240);   // 主标识符：固定像素，保持可拖拽（Star 列无法拖拽）
         if (Matches(header, path, "类型", "WorkType")) return Fixed(100, 92, 112);
         if (Matches(header, path, "内容", "Content")) return Fixed(300, 240);
         if (Matches(header, path, "工作成果", "Achievement")) return Fixed(240, 220);
