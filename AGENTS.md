@@ -317,6 +317,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - **Storyboard 中不能使用 DynamicResource**（WPF 冻结限制），动画目标值必须硬编码。
 - **资源字典内禁止后向引用**：同一 `ResourceDictionary` 中，`{StaticResource ...}` 只能引用**已定义在前方**的资源。若资源 A 需要引用资源 B，则 B 必须排在 A 之前。跨 `MergedDictionaries` 时，先合并的字典中的资源可被后合并的字典引用；反之不行。
 - **资源字典禁止重复 key**：`ResourceDictionary` 不允许同名 `x:Key`，重复 key 会在启动时 `DeferrableContent` 延迟加载阶段抛出 `XamlParseException`（表现常定位到 `App.xaml` 的 `MergedDictionaries` 行，而非真实出错文件）。对资源做「挪位类」重构（把条目从 X 处移到 Y 处）时，**必须 grep 确认旧位置已清空**，否则会留下两份同名定义。改动后建议 `grep -oE 'x:Key="[^"]+"' <文件> | sort | uniq -c | awk '$1>1'` 复查。
+- **动效时长资源必须用 WPF 原生 `Duration` 类型**：动画相关 `DurationFast` / `DurationNormal` / `DurationSlow` 等令牌**禁止声明为 `sys:String`**（虽然字面量形如 `"0:0:0.25"` 可被 `DurationConverter` 解析，但通过 `{StaticResource}` 取出后类型是 `string`，塞给 `Timeline.Duration` 时类型不匹配会抛 `ArgumentException`，且编译期 `StaticResource` 不校验此类错误，运行时才暴露）。必须使用 WPF 原生 `Duration` 元素：`<Duration x:Key="DurationNormal">0:0:0.25</Duration>`，与 `Color` / `CornerRadius` / `Thickness` 同族，无需额外命名空间前缀。
 - **依赖属性优先级陷阱**：XAML 中本地值（precedence 3）优先于 Style Trigger（precedence 5）。需要 DataTrigger 动态切换的属性，默认值必须写在 Style Setter 中，不能写在元素标签上：
 
 ```xml

@@ -159,9 +159,10 @@
                       Color="#FF000000" Opacity="0.40"/>
 
     <!-- ==================== 动效时长（Storyboard / Trigger 动画统一引用，禁止散落字面量 Duration） ==================== -->
-    <sys:String x:Key="DurationFast">0:0:0.15</sys:String>
-    <sys:String x:Key="DurationNormal">0:0:0.25</sys:String>
-    <sys:String x:Key="DurationSlow">0:0:0.40</sys:String>
+    <!-- 注意：必须用 WPF 原生 Duration 类型（不能用 sys:String），否则 Timeline.Duration 属性赋值时类型不匹配报 ArgumentException -->
+    <Duration x:Key="DurationFast">0:0:0.15</Duration>
+    <Duration x:Key="DurationNormal">0:0:0.25</Duration>
+    <Duration x:Key="DurationSlow">0:0:0.40</Duration>
 
     <!-- ==================== 动画 ==================== -->
     <Storyboard x:Key="FadeIn">
