@@ -291,7 +291,7 @@
 
                         <DataGrid.Columns>
                             <!-- 类型列：紧凑彩色标签（Auto 适配内容，避免截断） -->
-                            <DataGridTemplateColumn Header="类型" Width="Auto"
+                            <DataGridTemplateColumn Header="类型" Width="110" MinWidth="90"
                                                     ClipboardContentBinding="{Binding TypeLabel}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -336,7 +336,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- 标题 + 摘要列（上下堆叠形成主次关系，弹性宽度） -->
-                            <DataGridTemplateColumn Header="标题 / 摘要" Width="2*">
+                            <DataGridTemplateColumn Header="标题 / 摘要" Width="360" MinWidth="240">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Margin="{StaticResource CellPad}" VerticalAlignment="Center">
@@ -355,7 +355,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- 删除时间列（固定格式，精准适配，不截断） -->
-                            <DataGridTextColumn Header="删除时间" Binding="{Binding DeletedAtText}" Width="Auto">
+                            <DataGridTextColumn Header="删除时间" Binding="{Binding DeletedAtText}" Width="160" MinWidth="130">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextTrimming" Value="None"/>
@@ -366,7 +366,7 @@
                             </DataGridTextColumn>
 
                             <!-- 操作列（两个按钮，间隔 8px） -->
-                            <DataGridTemplateColumn Header="操作" Width="Auto">
+                            <DataGridTemplateColumn Header="操作" Width="140" MinWidth="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="4,0">
