@@ -315,6 +315,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 - 运行时可变的值使用 `DynamicResource`，静态值使用 `StaticResource`。
 - 颜色使用 `SolidColorBrush` 类型的资源键，不要直接写十六进制色值。
 - **Storyboard 中不能使用 DynamicResource**（WPF 冻结限制），动画目标值必须硬编码。
+- **资源字典内禁止后向引用**：同一 `ResourceDictionary` 中，`{StaticResource ...}` 只能引用**已定义在前方**的资源。若资源 A 需要引用资源 B，则 B 必须排在 A 之前。跨 `MergedDictionaries` 时，先合并的字典中的资源可被后合并的字典引用；反之不行。
 - **依赖属性优先级陷阱**：XAML 中本地值（precedence 3）优先于 Style Trigger（precedence 5）。需要 DataTrigger 动态切换的属性，默认值必须写在 Style Setter 中，不能写在元素标签上：
 
 ```xml

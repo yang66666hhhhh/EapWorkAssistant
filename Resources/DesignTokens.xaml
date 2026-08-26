@@ -158,6 +158,11 @@
     <DropShadowEffect x:Key="ModalHeavyShadow" BlurRadius="50" ShadowDepth="24"
                       Color="#FF000000" Opacity="0.40"/>
 
+    <!-- ==================== 动效时长（Storyboard / Trigger 动画统一引用，禁止散落字面量 Duration） ==================== -->
+    <sys:String x:Key="DurationFast">0:0:0.15</sys:String>
+    <sys:String x:Key="DurationNormal">0:0:0.25</sys:String>
+    <sys:String x:Key="DurationSlow">0:0:0.40</sys:String>
+
     <!-- ==================== 动画 ==================== -->
     <Storyboard x:Key="FadeIn">
         <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="{StaticResource DurationNormal}"/>
