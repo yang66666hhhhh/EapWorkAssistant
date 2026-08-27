@@ -215,4 +215,38 @@ public partial class StatCard : UserControl
             new PropertyMetadata(new Thickness(18, 14, 18, 14)));
 
     #endregion
+
+    #region TrendText
+
+    /// <summary>
+    /// 趋势文案，例如 "12.4% 较上月"。为空时不显示趋势胶囊。
+    /// </summary>
+    public string? TrendText
+    {
+        get => (string?)GetValue(TrendTextProperty);
+        set => SetValue(TrendTextProperty, value);
+    }
+
+    public static readonly DependencyProperty TrendTextProperty =
+        DependencyProperty.Register(nameof(TrendText), typeof(string), typeof(StatCard),
+            new PropertyMetadata(string.Empty));
+
+    #endregion
+
+    #region TrendUp
+
+    /// <summary>
+    /// 趋势方向：true 表示增长（红，遵循中国涨红习惯），false 表示下降（绿）。
+    /// </summary>
+    public bool TrendUp
+    {
+        get => (bool)GetValue(TrendUpProperty);
+        set => SetValue(TrendUpProperty, value);
+    }
+
+    public static readonly DependencyProperty TrendUpProperty =
+        DependencyProperty.Register(nameof(TrendUp), typeof(bool), typeof(StatCard),
+            new PropertyMetadata(false));
+
+    #endregion
 }

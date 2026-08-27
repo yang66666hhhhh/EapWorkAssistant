@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EAP Work Assistant · 组件高级化升级方案</title>
+<style>
+  :root{
+    --primary:#4338CA;
+    --primary-hover:#3630AE;
+    --violet:#7C3AED;
+    --text-1:#0F172A;
+    --text-2:#475569;
+    --text-3:#94A3B8;
+    --border:#E2E, 0,0; /* fallback */
+    --border:#E2E8F0;
+    --border-hover:#C7D2E4;
+    --surface:#F4F6FB;
+    --surface-alt:#F8FAFD;
+    --card:#FFFFFF;
+    --radius-card:16px;
+    --radius-md:10px;
+    --radius-xs:6px;
+    --red:#DC2626;     /* 涨 */
+    --green:#059669;   /* 跌 */
+    --amber:#D97706;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Microsoft YaHei UI","Segoe UI",system-ui,sans-serif;
+    background:var(--surface);
+    color:var(--text-1);
+    line-height:1.6;
+    padding:32px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .sub{color:var(--text-2);font-size:14px;margin-bottom:28px;}
+  .score{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 30px;}
+  .pill{background:var(--card);border:1px solid var(--border);border-radius:9999px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--text-2);box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .pill.ok{color:var(--primary);border-color:#C7D2EA;}
+  section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:24px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  h2{font-size:18px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+  h2 .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff;}
+  .tag-high{background:var(--violet);}
+  .tag-mid{background:var(--amber);}
+  .tag-low{background:var(--text-3);}
+  p.note{color:var(--text-2);font-size:14px;margin:8px 0 0;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px;}
+  @media(max-width:680px){.grid{grid-template-columns:1fr;}}
+  .card-demo{border:1px solid var(--border);border-radius:var(--radius-md);padding:18px;background:var(--surface-alt);}
+  .card-demo .label{font-size:11px;color:var(--text-3);font-weight:600;margin-bottom:10px;letter-spacing:.04em;}
+  /* 概念 StatCard before */
+  .stat-old{border:1px solid var(--border);border-radius:var(--radius-card);padding:0;overflow:hidden;display:flex;background:#fff;border-left:3px solid #4338CA;}
+  .stat-old .body{padding:16px 18px;}
+  .stat-old .t{font-size:11px;color:var(--text-3);font-weight:600;}
+  .stat-old .v{font-size:26px;font-weight:800;color:#4338CA;margin-top:6px;}
+  .stat-old .u{font-size:12px;color:var(--text-3);}
+  .stat-old .ic{width:38px;height:38px;border-radius:var(--radius-xs);background:var(--surface-alt);display:flex;align-items:center;justify-content:center;margin:18px;}
+  /* 概念 StatCard after */
+  .stat-new{border:1px solid var(--border);border-radius:var(--radius-card);padding:18px;background:#fff;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:.2s;}
+  .stat-new:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(67,56,202,.10);}
+  .stat-new .t{font-size:12px;color:var(--text-3);font-weight:600;}
+  .stat-new .row{display:flex;align-items:baseline;gap:4px;margin-top:6px;}
+  .stat-new .v{font-size:28px;font-weight:800;color:var(--text-1);letter-spacing:-.5px;}
+  .stat-new .u{font-size:13px;color:var(--text-3);}
+  .stat-new .trend{margin-top:8px;font-size:12px;font-weight:700;color:var(--red);display:inline-flex;align-items:center;gap:3px;background:#FEF2F2;border-radius:9999px;padding:2px 8px;}
+  .stat-new .ic{width:42px;height:42px;border-radius:12px;background:rgba(67,56,202,.10);display:flex;align-items:center;justify-content:center;color:#4338CA;}
+  code{display:block;background:#0B1120;color:#E2E8F0;border-radius:10px;padding:14px;font-family:"Cascadia Code",Consolas,monospace;font-size:12.5px;white-space:pre;overflow:auto;margin-top:14px;line-height:1.55;}
+  .k{color:#7DD3FC;} .s{color:#FBBF24;} .c{color:#64748B;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);}
+  th{color:var(--text-2);font-weight:700;background:var(--surface-alt);}
+  td:first-child{font-weight:600;color:var(--text-1);}
+  td .en{color:var(--primary);font-weight:700;}
+  .foot{color:var(--text-3);font-size:12.5px;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>EAP Work Assistant · 组件高级化升级方案</h1>
+  <div class="sub">基于现有 DesignTokens / Styles（indigo 双主题）的设计审计与进阶建议 · UI Designer 视角</div>
+
+  <div class="score">
+    <span class="pill ok">令牌体系完整</span>
+    <span class="pill ok">聚焦环 / 阴影精致</span>
+    <span class="pill ok">侧栏 / 下拉 / 滚动条到位</span>
+    <span class="pill">可升级：信息密度 · 微交互 · 质感层次</span>
+  </div>
+
+  <section>
+    <h2>评估结论（先说结论）</h2>
+    <p class="note">
+      你的组件底层已经相当成熟：颜色/圆角/字号/间距全部走令牌，按钮有聚焦光晕层、下拉有双层阴影、滚动条与侧栏都做了细节打磨，且严格遵循了「禁止硬编码」的规范。
+      继续「更高级」不靠重做，而是在三个维度上抬升——<b>数据信息密度（让卡片会说话）</b>、<b>微交互（按得下去、抬得起来）</b>、<b>质感层次（玻璃/渐变/高光）</b>。
+    </p>
+  </section>
+
+  <section>
+    <h2>升级机会一览（按信号强度排序）</h2>
+    <table>
+      <tr><th>机会</th><th>现状</th><th>升级方向</th><th>收益</th></tr>
+      <tr><td>StatCard 趋势指标</td><td>只有标题 / 数值 / 单位 / 图标</td><td>新增<span class="en"> TrendChip </span>（涨跌幅 + 箭头，红涨绿跌）</td><td><span class="en">高</span> 仪表盘高级感来源</td></tr>
+      <tr><td>图标容器质感</td><td>透明方块 / 纯色方块</td><td>柔和色调底（BarBrush 12% 透明）+ 圆角药丸</td><td><span class="en">高</span> 视觉锚点</td></tr>
+      <tr><td>卡片悬浮微交互</td><td>CardElevated 换背景/边框</td><td>整卡 translateY(-2px) + 阴影抬升</td><td><span class="en">中</span> 统一「可按」手感</td></tr>
+      <tr><td>按钮按压反馈</td><td>仅 Opacity</td><td>Pressed 加 ScaleTransform(.97)</td><td><span class="en">中</span> 触感</td></tr>
+      <tr><td>统一空状态</td><td>各页零散</td><td>复用 EmptyState 组件（IllustrationSize 已备）</td><td><span class="en">中</span> 一致性</td></tr>
+      <tr><td>Modal 顶部高光带</td><td>纯白卡片</td><td>头部极淡渐变带 + 1px 内高光</td><td><span class="en">低</span> 精致收尾</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="tag tag-high">核心</span> StatCard 升级：Before → After</h2>
+    <p class="note">左侧为现状：窄色带 + 大数值 + 透明图标块。右侧为进阶版：柔和色调图标容器 + 等宽数字 + 趋势胶囊 + 悬浮抬升。</p>
+    <div class="grid">
+      <div class="card-demo">
+        <div class="label">现状 · 旧</div>
+        <div class="stat-old">
+          <div class="body">
+            <div class="t">本月工时</div>
+            <div class="row" style="display:flex;"><div class="v">128.5</div><span class="u">h</span></div>
+            <div class="t" style="margin-top:6px;">较上月</div>
+          </div>
+          <div class="ic">⌛</div>
+        </div>
+      </div>
+      <div class="card-demo">
+        <div class="label">进阶 · 建议</div>
+        <div class="stat-new" style="border-left:3px solid var(--primary);">
+          <div>
+            <div class="t">本月工时</div>
+            <div class="row"><div class="v">128.5</div><span class="u">h</span></div>
+            <div class="trend">▲ 12.4% 较上月</div>
+          </div>
+          <div class="ic">⌛</div>
+        </div>
+      </div>
+    </div>
+    <code><span class="c">// StatCard.xaml —— 新增柔和图标容器 + 趋势胶囊（沿用现有令牌，不破规范）</span>
+&lt;Border Background=<span class="s">"{Binding BarBrush, ElementName=Self}"</span> Opacity=<span class="s">"0.12"</span>
+        CornerRadius=<span class="s">"{DynamicResource RadiusMd}"</span>&gt;
+  &lt;Path Data=<span class="s">"{Binding IconPathData, ElementName=Self}"</span>
+        Fill=<span class="s">"{Binding BarBrush, ElementName=Self}"</span> .../&gt;
+&lt;/Border&gt;
+
+<span class="c">// 趋势胶囊：新增两个依赖属性 TrendText / TrendUp(bool)</span>
+&lt;Border Visibility=<span class="s">"{Binding TrendText, ...}"</span>
+        Background=<span class="s">"{Binding TrendUp, Converter={StaticResource TrendBrush}}"</span>
+        Opacity=<span class="s">"0.12"</span> CornerRadius=<span class="s">"{DynamicResource RadiusPill}"</span>&gt;
+  &lt;TextBlock Text=<span class="s">"{Binding TrendText, ElementName=Self}"</span> .../&gt;
+&lt;/Border&gt;</code>
+    <p class="foot">注：涨用红、跌用绿（中国习惯）。新增 TrendBrush 转换器映射到 Success/Danger，或趋势语义色。</p>
+  </section>
+
+  <section>
+    <h2><span class="tag tag-mid">质感</span> 卡片悬浮 & 按压微交互</h2>
+    <p class="note">把「按下去有反馈、抬起来有呼吸」作为统一行为。卡片层用 RenderTransform 抬升，按钮层加到 Pressed 的 ScaleTransform。</p>
+    <code><span class="c">// CardElevated 风格 —— 加入整卡 translateY（需包一层 RenderTransform）</span>
+&lt;Style x:Key=<span class="s">"CardElevated"</span> TargetType=<span class="s">"Border"</span>&gt;
+  &lt;Setter Property=<span class="s">"RenderTransform"</span>&gt;
+    &lt;Setter.Value&gt;&lt;TranslateTransform Y=<span class="s">"0"</span>/&gt;&lt;/Setter.Value&gt;
+  &lt;/Setter&gt;
+  &lt;Style.Triggers&gt;
+    &lt;Trigger Property=<span class="s">"IsMouseOver"</span> Value=<span class="s">"True"</span>&gt;
+      &lt;Setter Property=<span class="s">"RenderTransform"</span>&gt;
+        &lt;Setter.Value&gt;&lt;TranslateTransform Y=<span class="s">"-2"</span>/&gt;&lt;/Setter.Value&gt;
+      &lt;/Setter&gt;
+      &lt;Setter Property=<span class="s">"Effect"</span> Value=<span class    class="s">"{StaticResource ShadowMd}"</span>/&gt;
+    &lt;/Trigger&gt;
+  &lt;/Style.Triggers&gt;
+&lt;/Style&gt;
+
+<span class="c">// BtnPrimary 模板：在 ControlTemplate 内给根 Border 命名，Pressed 时加 Scale</span>
+&lt;Trigger Property=<span class="s">"IsPressed"</span> Value=<span class="s">"True"</span>&gt;
+  &lt;Setter TargetName=<span class="s">"bg"</span> Property=<span class="s">"RenderTransform"</span>&gt;
+    &lt;Setter.Value&gt;&lt;ScaleTransform ScaleX=<span class="s">"0.97"</span> ScaleY=<span class="s">"0.97"</span>/&gt;&lt;/Setter.Value&gt;
+  &lt;/Setter&gt;
+&lt;/Trigger&gt;</code>
+  </section>
+
+  <section>
+    <h2><span class="tag tag-low">收尾</span> 下一步建议</h2>
+    <p class="note">
+      我建议按「高信号优先」落地三步：<b>① StatCard 趋势胶囊 + 柔和图标容器</b>（影响最大、纯增量、不破坏现有调用）；<b>② 卡片悬浮抬升行为</b>；<b>③ 复用空状态组件</b>。
+      这些都可以复用你现有的令牌（Radius/RadiusPill/ShadowMd/BarBrush），无需新增颜色。
+    </p>
+    <p class="foot">如需我直接改源码，告诉我「全部实现」或勾选其中几项；我会保持 AGENTS.md 的令牌与命名规范，并跑一次构建确认。</p>
+  </section>
+</div>
+</body>
+</html>

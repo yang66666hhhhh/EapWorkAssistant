@@ -86,7 +86,8 @@
                     <Border x:Name="bg" CornerRadius="{DynamicResource RadiusLg}"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
                             Background="{DynamicResource PrimaryGradient}"
-                            TextElement.Foreground="{TemplateBinding Foreground}">
+                            TextElement.Foreground="{TemplateBinding Foreground}"
+                            RenderTransformOrigin="0.5,0.5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -98,6 +99,11 @@
                             <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/>
                             <Setter TargetName="bg" Property="Effect" Value="{x:Null}"/>
                             <Setter TargetName="bg" Property="Opacity" Value="1"/>
+                            <Setter TargetName="bg" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
@@ -117,7 +123,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{DynamicResource SuccessBrush}" CornerRadius="{DynamicResource RadiusLg}"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
-                            TextElement.Foreground="{TemplateBinding Foreground}">
+                            TextElement.Foreground="{TemplateBinding Foreground}"
+                            RenderTransformOrigin="0.5,0.5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -126,6 +133,11 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bg" Property="Effect" Value="{x:Null}"/>
+                            <Setter TargetName="bg" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
@@ -144,7 +156,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{DynamicResource WarningBrush}" CornerRadius="{DynamicResource RadiusLg}"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
-                            TextElement.Foreground="{TemplateBinding Foreground}">
+                            TextElement.Foreground="{TemplateBinding Foreground}"
+                            RenderTransformOrigin="0.5,0.5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -153,6 +166,11 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bg" Property="Effect" Value="{x:Null}"/>
+                            <Setter TargetName="bg" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
@@ -171,7 +189,8 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bg" Background="{DynamicResource DangerBrush}" CornerRadius="{DynamicResource RadiusLg}"
                             Padding="{TemplateBinding Padding}" Effect="{StaticResource ShadowSm}"
-                            TextElement.Foreground="{TemplateBinding Foreground}">
+                            TextElement.Foreground="{TemplateBinding Foreground}"
+                            RenderTransformOrigin="0.5,0.5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -180,6 +199,11 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bg" Property="Effect" Value="{x:Null}"/>
+                            <Setter TargetName="bg" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.40"/>
@@ -285,7 +309,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ButtonBase">
                     <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource RadiusMd}"
-                            Padding="{TemplateBinding Padding}">
+                            Padding="{TemplateBinding Padding}"
+                            RenderTransformOrigin="0.5,0.5">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -295,6 +320,11 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bg" Property="Background" Value="{DynamicResource PrimarySoftBrush}"/>
+                            <Setter TargetName="bg" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="0.94" ScaleY="0.94"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bg" Property="Opacity" Value="0.35"/>
@@ -646,11 +676,17 @@
         <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
         <!-- 按卡片自身圆角裁剪子元素（如左侧窄色带），避免窄色带套大圆角被压缩成直角 -->
         <Setter Property="local:CornerClip.Enable" Value="True"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
                 <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <TranslateTransform Y="-2"/>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -662,11 +698,17 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
                 <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <TranslateTransform Y="-2"/>
+                    </Setter.Value>
+                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
