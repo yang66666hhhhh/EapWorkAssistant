@@ -107,6 +107,10 @@ public static class ExportService
         if (dialog.ShowDialog() != true)
             return new ImportResult<WorkRecord> { Canceled = true };
 
+        // 防呆卡控：拦截 Excel / 压缩包等二进制文件，避免被当成 CSV 读成乱码污染数据库
+        var guard = GuardAgainstNonCsvFile(dialog.FileName);
+        if (guard != null) return guard;
+
         try
         {
             var content = File.ReadAllText(dialog.FileName, Encoding.UTF8);
@@ -196,6 +200,57 @@ public static class ExportService
         {
             return new ImportResult<WorkRecord> { Error = ex.Message };
         }
+    }
+
+    /// <summary>
+    /// 导入防呆卡控：在读取/解析前拦截明显非 CSV 的二进制文件（Excel、压缩包等），
+    /// 防止其被 CSV 解析器读成乱码、静默污染数据库。
+    /// 以文件头魔数嗅探为主（比扩展名可靠，可防"改后缀绕过"），扩展名仅作快速提示。
+    /// 返回非 null 表示已拦截（携带错误信息的 ImportResult），null 表示校验通过。
+    /// </summary>
+    private static ImportResult<WorkRecord>? GuardAgainstNonCsvFile(string filePath)
+    {
+        // 扩展名快速提示：直接拒绝已知的 Excel 扩展名
+        var ext = Path.GetExtension(filePath)?.ToLowerInvariant();
+        if (ext is ".xlsx" or ".xls" or ".xlsm" or ".xlsb")
+        {
+            return new ImportResult<WorkRecord>
+            {
+                Error = "不支持 Excel 文件(.xlsx/.xls)。请先在 Excel 中「文件 → 另存为 → CSV(逗号分隔)」后再导入。"
+            };
+        }
+
+        // 文件头魔数嗅探：.xlsx/.xlsm 本质是 ZIP(PK\x03\x04)，旧版 .xls 是 OLE2 复合文档(D0 CF 11 E0 …)
+        try
+        {
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var header = new byte[8];
+            int read = fs.Read(header, 0, header.Length);
+            if (read >= 4 &&
+                header[0] == 0x50 && header[1] == 0x4B && header[2] == 0x03 && header[3] == 0x04)
+            {
+                return new ImportResult<WorkRecord>
+                {
+                    Error = "检测到 Excel/压缩文件(ZIP 格式)，无法作为 CSV 导入。请先另存为 CSV 后再导入。"
+                };
+            }
+            if (read >= 8 &&
+                header[0] == 0xD0 && header[1] == 0xCF && header[2] == 0x11 && header[3] == 0xE0 &&
+                header[4] == 0xA1 && header[5] == 0xB1 && header[6] == 0x1A && header[7] == 0xE1)
+            {
+                return new ImportResult<WorkRecord>
+                {
+                    Error = "检测到旧版 Excel 文件(.xls)，无法作为 CSV 导入。请先另存为 CSV 后再导入。"
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            // 连文件都打不开，直接报错，不要继续解析
+            return new ImportResult<WorkRecord> { Error = $"无法读取文件：{ex.Message}" };
+        }
+
+        return null; // 校验通过
     }
 
     /// <summary>
