@@ -1,0 +1,101 @@
+<UserControl x:Class="EapWorkAssistant.Controls.EmptyState"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
+             x:Name="Self"
+             FontFamily="{StaticResource DefaultFont}">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel.Style>
+            <Style TargetType="StackPanel">
+                <Setter Property="Margin" Value="32"/>
+                <Setter Property="MaxWidth" Value="360"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                        <Setter Property="Margin" Value="12"/>
+                        <Setter Property="MaxWidth" Value="260"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </StackPanel.Style>
+
+        <!-- 插画容器：默认 IllustrationSize，紧凑态缩小到 32px -->
+        <Border Background="{DynamicResource PrimarySoftBrush}"
+                HorizontalAlignment="Center"
+                Visibility="{Binding IconPathData, ElementName=Self, Converter={x:Static local:StringToVisibilityConverter.Instance}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Width" Value="{DynamicResource IllustrationSize}"/>
+                    <Setter Property="Height" Value="{DynamicResource IllustrationSize}"/>
+                    <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                            <Setter Property="Width" Value="32"/>
+                            <Setter Property="Height" Value="32"/>
+                            <Setter Property="CornerRadius" Value="{DynamicResource RadiusMd}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Path Data="{Binding IconPathData, ElementName=Self}"
+                  Fill="{DynamicResource PrimaryBrush}"
+                  Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Path.Style>
+                    <Style TargetType="Path">
+                        <Setter Property="Width" Value="34"/>
+                        <Setter Property="Height" Value="34"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                                <Setter Property="Width" Value="18"/>
+                                <Setter Property="Height" Value="18"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Path.Style>
+            </Path>
+        </Border>
+
+        <TextBlock Text="{Binding Title, ElementName=Self}"
+                   HorizontalAlignment="Center" TextWrapping="Wrap">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                    <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                    <Setter Property="Margin" Value="0,18,0,0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeMd}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                            <Setter Property="Margin" Value="0,8,0,0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="{Binding Description, ElementName=Self}"
+                   HorizontalAlignment="Center" TextWrapping="Wrap"
+                   Visibility="{Binding Description, ElementName=Self, Converter={x:Static local:StringToVisibilityConverter.Instance}}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                    <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                    <Setter Property="Margin" Value="0,8,0,0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="Margin" Value="0,4,0,0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <Button Content="{Binding ActionContent, ElementName=Self}"
+                Command="{Binding ActionCommand, ElementName=Self}"
+                Style="{StaticResource BtnPrimary}"
+                Margin="0,18,0,0"
+                Visibility="{Binding ActionContent, ElementName=Self, Converter={x:Static local:StringToVisibilityConverter.Instance}}"/>
+    </StackPanel>
+</UserControl>

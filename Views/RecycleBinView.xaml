@@ -401,31 +401,9 @@
                     <!-- ==================== 空状态 ==================== -->
                     <Border Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"
                             Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <StackPanel HorizontalAlignment="Center" MaxWidth="320">
-                            <!-- 空状态插图 -->
-                            <Border Width="{StaticResource IllustrationSize}" Height="{StaticResource IllustrationSize}" CornerRadius="{DynamicResource RadiusXl}"
-                                    
-                                    HorizontalAlignment="Center" Margin="0,0,0,16"
-                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Style="{StaticResource SectionPanel}">
-                                <Path Data="{StaticResource IconRecycleEmpty}" Width="32" Height="32"
-                                      Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Fill" Value="{DynamicResource TextTertiaryBrush}"/>
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                        </Style>
-                                    </Path.Style>
-                                </Path>
-                            </Border>
-
-                            <TextBlock Text="回收站是空的" FontSize="{StaticResource FontSizeSubtitle}" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                            <TextBlock Text="删除的内容会出现在这里，可随时恢复或彻底清除"
-                                       Foreground="{DynamicResource TextTertiaryBrush}" FontSize="{StaticResource FontSizeMd}"
-                                       HorizontalAlignment="Center" TextWrapping="Wrap"
-                                       TextAlignment="Center" LineHeight="20"/>
-                        </StackPanel>
+                        <controls:EmptyState IconPathData="{StaticResource IconRecycleEmpty}"
+                                             Title="回收站是空的"
+                                             Description="删除的内容会出现在这里，可随时恢复或彻底清除"/>
                     </Border>
                 </Grid>
             </Border>

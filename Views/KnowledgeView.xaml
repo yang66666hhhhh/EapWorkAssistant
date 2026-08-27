@@ -263,15 +263,9 @@
                         <Border Visibility="{Binding Items.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="40" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 Style="{StaticResource Card}">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Path Data="{StaticResource IconBook}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="40" Height="40" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                <TextBlock Text="暂无知识条目" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium"/>
-                                <TextBlock Text="点击右上角「新增知识」按钮开始构建您的知识库" FontSize="12"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                            </StackPanel>
+                            <controls:EmptyState IconPathData="{StaticResource IconBook}"
+                                                 Title="暂无知识条目"
+                                                 Description="点击右上角「新增知识」按钮开始构建您的知识库"/>
                         </Border>
 
                         <!-- 搜索无结果：与通用空态区分 -->

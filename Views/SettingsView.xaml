@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
              xmlns:vm="clr-namespace:EapWorkAssistant.ViewModels"
+             xmlns:controls="clr-namespace:EapWorkAssistant.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
@@ -927,15 +928,10 @@
                         <!-- 空状态 -->
                         <Border Visibility="{Binding Projects.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Path Data="{StaticResource IconList}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                <TextBlock Text="暂无任务项目" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="点击上方按钮添加任务" FontSize="11"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
-                            </StackPanel>
+                            <controls:EmptyState IsCompact="True"
+                                                 IconPathData="{StaticResource IconList}"
+                                                 Title="暂无任务项目"
+                                                 Description="点击上方按钮添加任务"/>
                         </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -1010,15 +1006,10 @@
                         <!-- 空状态 -->
                         <Border Visibility="{Binding WorkTypes.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Path Data="{StaticResource IconPencil}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                <TextBlock Text="暂无工作类型" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="点击上方按钮添加类型" FontSize="11"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
-                            </StackPanel>
+                            <controls:EmptyState IsCompact="True"
+                                                 IconPathData="{StaticResource IconPencil}"
+                                                 Title="暂无工作类型"
+                                                 Description="点击上方按钮添加类型"/>
                         </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -1093,15 +1084,10 @@
                         <!-- 空状态 -->
                         <Border Visibility="{Binding KnowledgeCategories.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Path Data="{StaticResource IconBook}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                <TextBlock Text="暂无知识分类" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="点击上方按钮添加分类" FontSize="11"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
-                            </StackPanel>
+                            <controls:EmptyState IsCompact="True"
+                                                 IconPathData="{StaticResource IconBook}"
+                                                 Title="暂无知识分类"
+                                                 Description="点击上方按钮添加分类"/>
                         </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -1187,15 +1173,10 @@
                         <!-- 空状态 -->
                         <Border Visibility="{Binding ContentTemplates.Count, Converter={x:Static local:CountToVisibilityConverter.Instance}}"
                                 Padding="24,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Path Data="{StaticResource IconDoc}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
-                                <TextBlock Text="暂无内容模板" FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="点击上方按钮添加模板" FontSize="11"
-                                           Foreground="{DynamicResource TextTertiaryBrush}"
-                                           HorizontalAlignment="Center" Margin="0,4,0,0" Opacity="0.7"/>
-                            </StackPanel>
+                            <controls:EmptyState IsCompact="True"
+                                                 IconPathData="{StaticResource IconDoc}"
+                                                 Title="暂无内容模板"
+                                                 Description="点击上方按钮添加模板"/>
                         </Border>
                         </StackPanel>
                     </ScrollViewer>
