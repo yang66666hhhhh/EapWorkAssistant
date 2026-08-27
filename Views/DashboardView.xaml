@@ -74,6 +74,8 @@
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
                                 IconForegroundBrush="{DynamicResource PrimaryBrush}"
                                 IconPathData="{StaticResource IconClock}"
+                                TrendText="{Binding TodayTrendText}"
+                                TrendUp="{Binding TodayTrendUp}"
                                 Cursor="Hand" Click="StatCard_Today_Click"/>
 
                 <controls:StatCard Grid.Column="2" Title="本周工时"
@@ -82,6 +84,8 @@
                                 IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
                                 IconForegroundBrush="{DynamicResource SuccessBrush}"
                                 IconPathData="{StaticResource IconCalendar}"
+                                TrendText="{Binding WeekTrendText}"
+                                TrendUp="{Binding WeekTrendUp}"
                                 Cursor="Hand" Click="StatCard_Week_Click"/>
 
                 <controls:StatCard Grid.Column="4" Title="本月工时"
@@ -90,6 +94,8 @@
                                 IconBackgroundBrush="{DynamicResource WarningLightBrush}"
                                 IconForegroundBrush="{DynamicResource WarningBrush}"
                                 IconPathData="{StaticResource IconChart}"
+                                TrendText="{Binding MonthTrendText}"
+                                TrendUp="{Binding MonthTrendUp}"
                                 Cursor="Hand" Click="StatCard_Month_Click"/>
 
                 <controls:StatCard Grid.Column="6" Title="记录数"
@@ -98,6 +104,8 @@
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
                                 IconForegroundBrush="{DynamicResource AccentVioletBrush}"
                                 IconPathData="{StaticResource IconPencil}"
+                                TrendText="{Binding RecordsTrendText}"
+                                TrendUp="{Binding RecordsTrendUp}"
                                 Cursor="Hand" Click="StatCard_Records_Click"/>
             </Grid>
 
@@ -163,6 +171,8 @@
                                 IconBackgroundBrush="{DynamicResource DangerLightBrush}"
                                 IconForegroundBrush="{DynamicResource DangerBrush}"
                                 IconPathData="{StaticResource IconWrench}"
+                                TrendText="{Binding IssuesTrendText}"
+                                TrendUp="{Binding IssuesTrendUp}"
                                 Cursor="Hand" Click="StatCard_Issues_Click"/>
 
                 <controls:StatCard Grid.Column="2" Title="知识条目"
@@ -171,6 +181,8 @@
                                 IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
                                 IconForegroundBrush="{DynamicResource PrimaryBrush}"
                                 IconPathData="{StaticResource IconClipboard}"
+                                TrendText="{Binding KnowledgeTrendText}"
+                                TrendUp="{Binding KnowledgeTrendUp}"
                                 Cursor="Hand" Click="StatCard_Knowledge_Click"/>
             </Grid>
 

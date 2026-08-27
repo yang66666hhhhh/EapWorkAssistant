@@ -46,6 +46,21 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private int _totalRecords;
     [ObservableProperty] private int _totalIssues;
     [ObservableProperty] private int _totalKnowledge;
+
+    // 统计卡片环比趋势（涨红跌绿，遵循中国习惯；TrendText 为空表示不显示胶囊）
+    [ObservableProperty] private string _todayTrendText = string.Empty;
+    [ObservableProperty] private bool _todayTrendUp = true;
+    [ObservableProperty] private string _weekTrendText = string.Empty;
+    [ObservableProperty] private bool _weekTrendUp = true;
+    [ObservableProperty] private string _monthTrendText = string.Empty;
+    [ObservableProperty] private bool _monthTrendUp = true;
+    [ObservableProperty] private string _recordsTrendText = string.Empty;
+    [ObservableProperty] private bool _recordsTrendUp = true;
+    [ObservableProperty] private string _issuesTrendText = string.Empty;
+    [ObservableProperty] private bool _issuesTrendUp = true;
+    [ObservableProperty] private string _knowledgeTrendText = string.Empty;
+    [ObservableProperty] private bool _knowledgeTrendUp = true;
+
     [ObservableProperty] private string _probationReport = string.Empty;
     [ObservableProperty] private string _currentDate = DateTime.Now.ToString("yyyy-MM-dd dddd");
 
@@ -182,6 +197,34 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         TotalIssues = await _issueRepo.GetTotalCountAsync();
         TotalKnowledge = await _knowledgeRepo.GetTotalCountAsync();
 
+        // ===== 统计卡片环比趋势 =====
+        // 上期区间：昨日 / 上周 / 上月
+        var yesterday = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+        var lastWeekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now).AddDays(-7).ToString("yyyy-MM-dd");
+        var lastWeekEnd = Helpers.DateTimeHelper.GetWeekEnd(DateTime.Now).AddDays(-7).ToString("yyyy-MM-dd");
+        var prevMonthStart = Helpers.DateTimeHelper.GetMonthStart(DateTime.Now.AddMonths(-1)).ToString("yyyy-MM-dd");
+        var prevMonthEnd = Helpers.DateTimeHelper.GetMonthEnd(DateTime.Now.AddMonths(-1)).ToString("yyyy-MM-dd");
+
+        // 工时：本期 vs 上期
+        var prevDayHours = await _recordRepo.GetTotalHoursAsync(yesterday, yesterday);
+        var prevWeekHours = await _recordRepo.GetTotalHoursAsync(lastWeekStart, lastWeekEnd);
+        var prevMonthHours = await _recordRepo.GetTotalHoursAsync(prevMonthStart, prevMonthEnd);
+
+        // 计数：本月新增 vs 上月新增
+        var thisMonthRecords = await _recordRepo.GetCountByDateRangeAsync(monthStart, monthEnd);
+        var prevMonthRecords = await _recordRepo.GetCountByDateRangeAsync(prevMonthStart, prevMonthEnd);
+        var thisMonthIssues = await _issueRepo.GetCountByDateRangeAsync(monthStart, monthEnd);
+        var prevMonthIssues = await _issueRepo.GetCountByDateRangeAsync(prevMonthStart, prevMonthEnd);
+        var thisMonthKnowledge = await _knowledgeRepo.GetCountByDateRangeAsync(monthStart, monthEnd);
+        var prevMonthKnowledge = await _knowledgeRepo.GetCountByDateRangeAsync(prevMonthStart, prevMonthEnd);
+
+        (TodayTrendText, TodayTrendUp) = ComputeTrend(TodayHours, prevDayHours, "较昨日");
+        (WeekTrendText, WeekTrendUp) = ComputeTrend(WeekHours, prevWeekHours, "较上周");
+        (MonthTrendText, MonthTrendUp) = ComputeTrend(MonthHours, prevMonthHours, "较上月");
+        (RecordsTrendText, RecordsTrendUp) = ComputeTrend(thisMonthRecords, prevMonthRecords, "较上月");
+        (IssuesTrendText, IssuesTrendUp) = ComputeTrend(thisMonthIssues, prevMonthIssues, "较上月");
+        (KnowledgeTrendText, KnowledgeTrendUp) = ComputeTrend(thisMonthKnowledge, prevMonthKnowledge, "较上月");
+
         // 最近5条工作记录（只取所需的 5 条，而非全表载入）
         var recent = (await _recordRepo.GetRecentAsync(5)).Select(r => new RecentRecordItem
         {
@@ -224,6 +267,21 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
         // 亮点列表
         await LoadHighlightsAsync();
+    }
+
+    /// <summary>
+    /// 计算环比趋势文案与方向（涨红跌绿，中国习惯）。
+    /// 上期无数据时：本期有则记为"新"（向上箭头），两者皆无则不显示胶囊。
+    /// </summary>
+    private (string TrendText, bool TrendUp) ComputeTrend(double current, double previous, string periodLabel)
+    {
+        if (previous <= 0)
+        {
+            if (current <= 0) return (string.Empty, true);
+            return ("新", true);
+        }
+        var pct = (current - previous) / previous * 100;
+        return ($"{periodLabel} {(pct > 0 ? "+" : "")}{pct:F0}%", current >= previous);
     }
 
     private async Task LoadProbationProgressAsync()

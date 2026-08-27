@@ -143,6 +143,19 @@ public class WorkRecordRepository
         });
     }
 
+    /// <summary>统计指定日期范围内的未删除工作记录条数（Dashboard 计数卡环比用）</summary>
+    public async Task<int> GetCountByDateRangeAsync(string startDate, string endDate)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
+                new { Start = startDate, End = endDate });
+        });
+    }
+
     /// <summary>统计引用指定任务名称的未删除工作记录数（用于删除配置项前的引用提示）</summary>
     public async Task<int> GetCountByProjectAsync(string projectName)
     {

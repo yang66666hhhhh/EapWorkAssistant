@@ -29,6 +29,19 @@ public class IssueRepository
         });
     }
 
+    /// <summary>统计指定创建日期范围内的未删除问题数（Dashboard 计数卡环比用）</summary>
+    public async Task<int> GetCountByDateRangeAsync(string startDate, string endDate)
+    {
+        return await Task.Run(async () =>
+        {
+            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
+            await connection.OpenAsync();
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Issue WHERE IsDeleted = 0 AND date(CreateTime) BETWEEN @Start AND @End",
+                new { Start = startDate, End = endDate });
+        });
+    }
+
     public async Task<IEnumerable<Issue>> SearchAsync(string keyword)
     {
         return await Task.Run(async () =>
