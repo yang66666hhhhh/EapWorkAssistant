@@ -1015,6 +1015,29 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             foreach (var t in missingTypes) ConfigService.Instance.AddWorkType(t);
 
             var (inserted, updated, skippedDup) = await _repo.ImportAsync(valid, mode.Value);
+
+            // 导入后自动跳转到导入覆盖的日期范围，并刷新「当日面板」与「全部记录」网格，让结果立即可见
+            var minDate = valid.Min(r => r.WorkDate);
+            var maxDate = valid.Max(r => r.WorkDate);
+            if (DateTime.TryParseExact(minDate, "yyyy-MM-dd",
+                    System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dMin)
+                && DateTime.TryParseExact(maxDate, "yyyy-MM-dd",
+                    System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dMax))
+            {
+                _applyingPreset = true;
+                try
+                {
+                    FilterStartDate = dMin;
+                    FilterEndDate = dMax;
+                    ActiveDatePreset = "";
+                    CurrentPage = 1;
+                    SelectedTabIndex = 1;  // 切到「全部记录」网格
+                    SelectedDate = dMax;   // 刷新选中日期（当日面板定位到最后一天）
+                }
+                finally { _applyingPreset = false; }
+            }
+
+            await LoadAllRecordsAsync();
             await LoadRecordsAsync();
             var parts = new List<string> { $"新增 {inserted} 条" };
             if (updated > 0) parts.Add($"覆盖 {updated} 条");
