@@ -2,6 +2,7 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
+using EapWorkAssistant.Controls;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,7 +12,7 @@ namespace EapWorkAssistant.Views;
 
 public partial class WorkRecordView : UserControl
 {
-    private bool _isDrawerOpen;
+    private bool _closingGuard;
     private enum CalendarMode { Daily, FilterStart, FilterEnd }
     private CalendarMode _calendarMode;
 
@@ -49,7 +50,7 @@ public partial class WorkRecordView : UserControl
 
     private void OnRecordSaved()
     {
-        Dispatcher.Invoke(CloseDrawer);
+        Dispatcher.Invoke(() => FormDrawer.RequestClose());
     }
 
     private void OnReportGenerated()
@@ -194,45 +195,41 @@ public partial class WorkRecordView : UserControl
 
     private void OpenForm_Click(object sender, RoutedEventArgs e)
     {
-        if (_isDrawerOpen) return;
+        if (FormDrawer.IsOpen) return;
 
         // 新增模式：重置表单
         if (DataContext is WorkRecordViewModel vm)
         {
             vm.NewRecordCommand.Execute(null);
+            vm.IsDrawerOpen = true;
         }
 
-        OpenDrawer();
+        FormDrawer.IsOpen = true;
     }
 
     private void EditRow_Click(object sender, RoutedEventArgs e)
     {
         // EditRecordCommand 已通过 Command 绑定执行，此处只需打开抽屉
-        OpenDrawer();
+        if (FormDrawer.IsOpen) return;
+        if (DataContext is WorkRecordViewModel vm)
+            vm.IsDrawerOpen = true;
+        FormDrawer.IsOpen = true;
     }
 
     // ===== 表格交互打磨：双击编辑 =====
 
     private void RecordsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (_isDrawerOpen) return;
+        if (FormDrawer.IsOpen) return;
         if (DataContext is not WorkRecordViewModel vm) return;
         if (sender is DataGrid dg
             && dg.ContainerFromElement(e.OriginalSource as DependencyObject) is DataGridRow
             && dg.SelectedItem is WorkRecord record)
         {
             vm.EditRecordCommand.Execute(record);
-            OpenDrawer();
-        }
-    }
-
-    private void OpenDrawer()
-    {
-        if (_isDrawerOpen) return;
-        _isDrawerOpen = true;
-        if (DataContext is WorkRecordViewModel vm)
             vm.IsDrawerOpen = true;
-        DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 540);
+            FormDrawer.IsOpen = true;
+        }
     }
 
     private void FormField_Changed(object sender, RoutedEventArgs e)
@@ -241,22 +238,12 @@ public partial class WorkRecordView : UserControl
             vm.MarkDirty();
     }
 
-    private void CloseForm_Click(object sender, RoutedEventArgs e)
-    {
-        CloseDrawer();
-    }
-
     private void CopyLast_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is WorkRecordViewModel vm)
         {
             vm.CopyLastRecordCommand.Execute(null);
         }
-    }
-
-    private void Backdrop_Click(object sender, MouseButtonEventArgs e)
-    {
-        CloseDrawer();
     }
 
     private void TabDaily_Click(object sender, RoutedEventArgs e)
@@ -301,45 +288,57 @@ public partial class WorkRecordView : UserControl
         ShowCalendar(FilterEndBtn);
     }
 
-    private async void CloseDrawer()
-    {
-        if (!_isDrawerOpen) return;
+    // ===== 侧滑抽屉：直接驱动 Drawer.IsOpen，遮罩/滑入动画与关闭逻辑均内化于 Drawer 控件 =====
 
-        if (DataContext is WorkRecordViewModel vm && vm.HasUnsavedInput())
+    private async void FormDrawer_Closing(object sender, DrawerClosingEventArgs e)
+    {
+        // RequestClose 二次进入（自动保存后）时跳过脏检查，放行关闭
+        if (_closingGuard)
         {
-            if (vm.CanQuickSave())
-            {
-                // 数据满足保存条件 → 自动保存后关闭，无需用户确认
-                try
-                {
-                    await vm.FlushPendingChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    ToastService.Error($"保存失败：{ex.Message}");
-                    return; // 保存异常时不关闭，让用户继续编辑
-                }
-            }
-            else
-            {
-                // 数据不完整，无法自动保存 → 警告用户
-                bool confirmed = ConfirmDialog.Show(
-                    "当前表单数据不完整，无法自动保存。\n确定要放弃这些修改吗？",
-                    "放弃修改？",
-                    ConfirmDialogType.Warning,
-                    "放弃", "继续编辑");
-                if (!confirmed) return;
-            }
+            _closingGuard = false;
+            return;
         }
 
-        _isDrawerOpen = false;
-        if (DataContext is WorkRecordViewModel vmClose)
-            vmClose.IsDrawerOpen = false;
-        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
+        if (DataContext is not WorkRecordViewModel vm) return;
+        if (!vm.HasUnsavedInput()) return;
+
+        if (vm.CanQuickSave())
         {
-            if (DataContext is WorkRecordViewModel vm2)
-                vm2.NewRecordCommand.Execute(null);
-        }, 540);
+            // 数据满足保存条件 → 取消本次关闭并自动保存，保存后再次请求关闭
+            e.Cancel = true;
+            _closingGuard = true;
+            try
+            {
+                await vm.FlushPendingChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                ToastService.Error($"保存失败：{ex.Message}");
+                _closingGuard = false; // 保存异常时不关闭，让用户继续编辑
+                return;
+            }
+            FormDrawer.RequestClose();
+        }
+        else
+        {
+            // 数据不完整，无法自动保存 → 警告用户
+            bool confirmed = ConfirmDialog.Show(
+                "当前表单数据不完整，无法自动保存。\n确定要放弃这些修改吗？",
+                "放弃修改？",
+                ConfirmDialogType.Warning,
+                "放弃", "继续编辑");
+            if (!confirmed) e.Cancel = true;
+        }
+    }
+
+    private void FormDrawer_Closed(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is WorkRecordViewModel vm)
+        {
+            vm.IsDrawerOpen = false;
+            vm.IsFormDirty = false;
+            vm.NewRecordCommand.Execute(null);
+        }
     }
 
     /// <summary>工时输入验证：只允许数字和小数点</summary>

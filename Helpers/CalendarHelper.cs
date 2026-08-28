@@ -6,7 +6,7 @@ using System.Windows.Media.Animation;
 namespace EapWorkAssistant.Helpers;
 
 /// <summary>
-/// 日历浮窗定位工具（与 DrawerHelper 配合使用）
+/// 日历浮窗定位工具（用于工作记录页的日期选择浮窗）
 /// </summary>
 public static class CalendarHelper
 {

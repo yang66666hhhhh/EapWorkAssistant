@@ -1,3 +1,4 @@
+using EapWorkAssistant.Controls;
 using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.ViewModels;
@@ -9,8 +10,6 @@ namespace EapWorkAssistant.Views;
 
 public partial class KnowledgeView : UserControl
 {
-    private bool _isDrawerOpen;
-
     public KnowledgeView()
     {
         InitializeComponent();
@@ -23,7 +22,11 @@ public partial class KnowledgeView : UserControl
         };
     }
 
-    private void OnPanelCloseRequested() => CloseDrawer();
+    private void OnPanelCloseRequested()
+    {
+        if (FormDrawer.IsOpen)
+            FormDrawer.RequestClose();
+    }
 
     private void FormField_Changed(object sender, RoutedEventArgs e)
     {
@@ -51,11 +54,11 @@ public partial class KnowledgeView : UserControl
         }
     }
 
-    // ===== 浮窗抽屉动画 =====
+    // ===== 浮窗抽屉：直接驱动 Drawer.IsOpen，遮罩/滑入动画与关闭逻辑均内化于 Drawer 控件 =====
 
     private void OpenForm_Click(object sender, RoutedEventArgs e)
     {
-        if (_isDrawerOpen) return;
+        if (FormDrawer.IsOpen) return;
         // 新增模式：安全重置表单（屏蔽绑定事件触发的脏标记）
         if (DataContext is KnowledgeViewModel vm)
         {
@@ -64,45 +67,25 @@ public partial class KnowledgeView : UserControl
             vm.IsFormDirty = false;
             vm._suppressDirty = false;
         }
-        OpenDrawer();
-    }
-
-    private void OpenDrawer()
-    {
-        if (_isDrawerOpen) return;
-        _isDrawerOpen = true;
-        DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
+        FormDrawer.IsOpen = true;
     }
 
     private void EditItem_Click(object sender, RoutedEventArgs e)
     {
-        if (_isDrawerOpen) return;
+        if (FormDrawer.IsOpen) return;
         if (DataContext is not KnowledgeViewModel vm) return;
-
         // 从按钮的 DataContext 获取当前列表项
         if (sender is FrameworkElement fe && fe.DataContext is EapWorkAssistant.Models.Knowledge item)
         {
             // 通过 EditCommand 将条目加载到编辑表单
             vm.EditCommand.Execute(item);
-            _isDrawerOpen = true;
-            DrawerHelper.OpenDrawer(Backdrop, FormPanel, OpenFormBtn, 500);
+            FormDrawer.IsOpen = true;
         }
     }
 
-    private void CloseForm_Click(object sender, RoutedEventArgs e)
+    // 关闭前脏检查：有未保存修改则弹确认，用户取消则阻止关闭
+    private void FormDrawer_Closing(object sender, DrawerClosingEventArgs e)
     {
-        CloseDrawer();
-    }
-
-    private void Backdrop_Click(object sender, MouseButtonEventArgs e)
-    {
-        CloseDrawer();
-    }
-
-    private void CloseDrawer()
-    {
-        if (!_isDrawerOpen) return;
-
         if (DataContext is KnowledgeViewModel vm && vm.IsFormDirty)
         {
             bool confirmed = ConfirmDialog.Show(
@@ -110,50 +93,32 @@ public partial class KnowledgeView : UserControl
                 "放弃修改？",
                 ConfirmDialogType.Warning,
                 "放弃", "取消");
-            if (!confirmed) return;
+            if (!confirmed) e.Cancel = true;
         }
+    }
 
-        _isDrawerOpen = false;
-        // 立即重置脏标记（不等动画回调），避免用户在动画期间切换导航时误触发确认框
-        if (DataContext is KnowledgeViewModel vm2)
-            vm2.IsFormDirty = false;
-        DrawerHelper.CloseDrawer(Backdrop, FormPanel, OpenFormBtn, () =>
+    // 关闭完成后：重置脏标记并回到新增态（与原 CloseDrawer 回调一致）
+    private void FormDrawer_Closed(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is KnowledgeViewModel vm)
         {
-            if (DataContext is KnowledgeViewModel vm3)
-                vm3.NewCommand.Execute(null);
-        }, 500);
+            vm.IsFormDirty = false;
+            vm.NewCommand.Execute(null);
+        }
     }
 
     // ===== 列表交互打磨：双击编辑 =====
 
     private void ItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (_isDrawerOpen) return;
+        if (FormDrawer.IsOpen) return;
         if (DataContext is not KnowledgeViewModel vm) return;
         if (sender is ListBox lb
             && lb.ContainerFromElement(e.OriginalSource as DependencyObject) is ListBoxItem
             && lb.SelectedItem is Knowledge item)
         {
             vm.EditCommand.Execute(item);
-            OpenDrawer();
-        }
-    }
-
-    // ===== 抽屉内键盘快捷键：Esc 关闭 / Ctrl+S 保存 =====
-
-    private void FormPanel_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (!_isDrawerOpen) return;
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            CloseDrawer();
-        }
-        else if (e.Key == Key.S && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-        {
-            e.Handled = true;
-            if (DataContext is KnowledgeViewModel vm)
-                vm.SaveCommand.Execute(null);
+            FormDrawer.IsOpen = true;
         }
     }
 }

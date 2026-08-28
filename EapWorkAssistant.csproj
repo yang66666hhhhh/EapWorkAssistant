@@ -49,4 +49,15 @@
     <Compile Remove="obj\**\*.cs" />
   </ItemGroup>
 
+  <!-- outputs\ 是产物/临时脚本目录（报告、生成的 XAML/CS 暂存件等）。
+       默认 glob 会把其中的 .xaml 当作 Page、.cs 当作 Compile 收编，
+       一旦暂存件带有与真实视图相同的 x:Class，就会生成同名 partial class，
+       导致“已包含 XXX 的定义 / 多次显式实现 IComponentConnector.Connect”等重复定义错误。 -->
+  <ItemGroup>
+    <Compile Remove="outputs\**\*.cs" />
+    <Page Remove="outputs\**\*.xaml" />
+    <None Remove="outputs\**\*.xaml" />
+    <Resource Remove="outputs\**\*.xaml" />
+  </ItemGroup>
+
 </Project>

@@ -92,20 +92,8 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <Border  CornerRadius="{DynamicResource RadiusLg}"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="6,3" Style="{StaticResource SectionPanel}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextSecondaryBrush}"
-                                      Width="13" Height="13" Stretch="Uniform"
-                                      VerticalAlignment="Center" Margin="8,0,6,0" Opacity="0.45"/>
-                                <TextBox Grid.Column="1" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="220"
-                                         Style="{StaticResource SearchInput}"/>
-                            </Grid>
-                        </Border>
+                        <controls:SearchBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="220" Placeholder="搜索知识…"/>
                         <Button Content="搜索" Command="{Binding SearchCommand}"
                                 Style="{StaticResource BtnPrimary}" Margin="10,0,0,0" Padding="18,9"/>
                         <Button Content="导出" Command="{Binding ExportJsonCommand}"
@@ -113,15 +101,7 @@
                         <Button Content="导入" Command="{Binding ImportJsonAsyncCommand}"
                                 Style="{StaticResource BtnSecondary}" Margin="10,0,0,0" Padding="14,9" FontSize="12"/>
                         <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="16,0"/>
-                        <Button x:Name="OpenFormBtn" Click="OpenForm_Click"
-                                Style="{StaticResource BtnPrimary}" Padding="18,9">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="+" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"
-                                           Margin="0,0,6,0" Foreground="White"/>
-                                <TextBlock Text="新增知识" FontSize="13" FontWeight="SemiBold"
-                                           VerticalAlignment="Center" Foreground="White"/>
-                            </StackPanel>
-                        </Button>
+                        <controls:PrimaryActionButton x:Name="OpenFormBtn" Text="新增知识" Click="OpenForm_Click"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -221,11 +201,9 @@
                                                         </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Style="{StaticResource TagPrimary}" Margin="0,0,6,0">
-                                                                    <TextBlock Text="{Binding}" FontSize="11"
-                                                                               Foreground="{DynamicResource PrimaryBrush}"
-                                                                               FontWeight="Medium"/>
-                                                                </Border>
+                                                                <controls:Badge Text="{Binding}" Margin="0,0,6,0"
+                                                                BackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                                                                ForegroundBrush="{DynamicResource PrimaryBrush}"/>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
@@ -289,48 +267,18 @@
             </Border>
         </DockPanel>
         </Grid>
-        <!-- 关闭内层 Margin Grid -->
-
-        <!-- ===== 遮罩层（浮窗打开时显示，覆盖整个视图） ===== -->
-        <Border x:Name="Backdrop" Style="{StaticResource OverlayBackdrop}"
-                MouseLeftButtonDown="Backdrop_Click"/>
-
-        <!-- ===== 浮窗表单（从右侧滑入覆盖） ===== -->
-        <Border x:Name="FormPanel" Style="{StaticResource SidePanel}" Width="520"
-                PreviewKeyDown="FormPanel_PreviewKeyDown">
-            <DockPanel>
-
-                <!-- ── 面板头部 ── -->
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,4">
-                    <Grid>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Background="{DynamicResource PrimaryLightBrush}"
-                                    CornerRadius="{DynamicResource RadiusSm}" Width="32" Height="32" Margin="0,0,12,0">
-                                <Path Data="{StaticResource IconBook}" Fill="{DynamicResource PrimaryBrush}"
-                                      Width="15" Height="15" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="知识条目" FontSize="17" FontWeight="Bold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock Text="创建和管理您的专业知识文章" FontSize="11.5"
-                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </StackPanel>
-                        <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                                Click="CloseForm_Click" Style="{StaticResource BtnGhost}" Padding="8,6">
-                            <Button.ToolTip>
-                                <ToolTip Content="关闭面板 (Esc)"/>
-                            </Button.ToolTip>
-                            <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
-                                  Width="14" Height="14" Stretch="Uniform"/>
-                        </Button>
-                    </Grid>
-                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,14,0,0" Opacity="0.5"/>
-                </StackPanel>
-
+        <!-- ===== 侧滑抽屉（封装遮罩 + 表单，内化动画/关闭逻辑） ===== -->
+        <controls:Drawer x:Name="FormDrawer"
+                         DrawerWidth="520"
+                         HeaderIcon="{StaticResource IconBook}"
+                         HeaderTitle="知识条目"
+                         HeaderSubtitle="创建和管理您的专业知识文章"
+                         SaveCommand="{Binding SaveCommand}"
+                         Closing="FormDrawer_Closing"
+                         Closed="FormDrawer_Closed">
+            <controls:Drawer.FooterContent>
                 <!-- ── 底部操作栏 ── -->
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                <StackPanel Margin="0,12,0,0">
                     <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,14" Opacity="0.5"/>
 
                     <!-- 操作按钮 -->
@@ -381,7 +329,8 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-
+            </controls:Drawer.FooterContent>
+            <controls:Drawer.Body>
                 <!-- ── 表单字段区域（滚动） ── -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -398,7 +347,7 @@
 
                                 <!-- 标题 -->
                                 <TextBlock Text="标题" Style="{StaticResource Label}" Margin="0,0,0,6"/>
-                                <TextBox x:Name="TitleBox" Text="{Binding CurrentItem.Title}"
+                                <TextBox Text="{Binding CurrentItem.Title}"
                                          Style="{StaticResource Input}"
                                          Margin="0,0,0,16" TextChanged="FormField_Changed"/>
 
@@ -442,7 +391,7 @@
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            Margin="0,0,0,14"/>
 
-                                <TextBox x:Name="TagsBox" Text="{Binding CurrentItem.Tags}"
+                                <TextBox Text="{Binding CurrentItem.Tags}"
                                          Style="{StaticResource Input}"
                                          Margin="0,0,0,6" TextChanged="FormField_Changed"/>
                                 <TextBlock Text="多个标签用逗号分隔，如：SECS/GEM, 通信协议"
@@ -490,7 +439,7 @@
                                                FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}"
                                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </Grid>
-                                <TextBox x:Name="ContentBox" Text="{Binding CurrentItem.Content}"
+                                <TextBox Text="{Binding CurrentItem.Content}"
                                          Height="260" Style="{StaticResource TextArea}"
                                          VerticalScrollBarVisibility="Auto" TextChanged="FormField_Changed"/>
                             </StackPanel>
@@ -498,7 +447,8 @@
 
                     </StackPanel>
                 </ScrollViewer>
-            </DockPanel>
-        </Border>
+            </controls:Drawer.Body>
+        </controls:Drawer>
+
     </Grid>
 </UserControl>
