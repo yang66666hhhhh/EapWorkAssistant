@@ -1,0 +1,19 @@
+<UserControl x:Class="EapWorkAssistant.Controls.PrimaryActionButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EapWorkAssistant.Controls"
+             x:Name="Self">
+    <!-- 复用 BtnPrimary 样式：主色背景 / 阴影 / 按压缩放全部保留；
+         内部固定注入「+」图标与文字，对外仅暴露 Text / Command / Click。 -->
+    <Button x:Name="InnerButton"
+            Style="{StaticResource BtnPrimary}"
+            Padding="16,9"
+            Command="{Binding Command, ElementName=Self}"
+            CommandParameter="{Binding CommandParameter, ElementName=Self}"
+            Click="InnerButton_Click">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="+" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <TextBlock Text="{Binding Text, ElementName=Self}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </StackPanel>
+    </Button>
+</UserControl>
