@@ -101,11 +101,13 @@
 ## 技术栈
 
 - **框架**: .NET 10 + WPF
-- **架构**: MVVM (CommunityToolkit.Mvvm 8.4.2)
-- **数据库**: SQLite + Dapper（含索引优化）
+- **架构**: MVVM (CommunityToolkit.Mvvm 8.4.2) + 依赖注入
+- **依赖注入**: Microsoft.Extensions.DependencyInjection 10.0.11（组合根 `Services/ServiceContainer.cs`）
+- **数据库**: SQLite + Dapper（含索引优化，`PRAGMA user_version` 版本化迁移）
 - **图表**: LiveCharts2 (SkiaSharp)
 - **UI**: 自定义现代靛蓝风格设计系统
 - **错误处理**: Toast 通知服务，关键操作异常实时反馈
+- **测试**: xUnit（91 项，覆盖仓储查询与抽出的纯业务逻辑）
 
 ## 最近界面升级
 
@@ -122,6 +124,7 @@
 ## 数据层优化
 
 - **数据库索引**：为工作记录（日期、项目）、问题跟踪（项目、状态）、知识库（分类、标签）建立索引，加速查询
+- **版本化迁移**：schema 版本记录在 `PRAGMA user_version`，每步迁移前做幂等检查，升级过程可追溯、失败可定位
 - **多关键词搜索**：工作记录和全局搜索支持空格分隔多关键词 AND 匹配
 - **批量导入**：支持通过 CSV 文件批量插入工作记录
 
@@ -129,18 +132,54 @@
 
 ```
 EapWorkAssistant/
-├── Data/                    # 数据库初始化与迁移
+├── Controls/                # 自定义控件（Drawer、StatCard、SearchBox、Badge 等）
+├── Data/                    # 数据库初始化与版本化迁移（PRAGMA user_version）
 ├── Helpers/                 # 转换器（IssueStatusConverter 等）和辅助类
 ├── Models/                  # 数据模型
-├── Repositories/            # 数据访问层
+├── Repositories/            # 数据访问层（SqliteRepository 基类统一连接生命周期）
 ├── Resources/               # 样式资源（Styles.xaml）
-├── Services/                # 业务服务（ThemeService, ConfigService, ToastService 等）
-├── ViewModels/              # 视图模型
+├── Services/                # 业务服务与组合根
+│   ├── ServiceContainer.cs      # DI 组合根：集中注册仓储 / 服务 / 子 ViewModel
+│   ├── WorkRecordImportService  # CSV 导入校验与配置一致性检查（纯逻辑）
+│   ├── PaginationCalculator      # 分页算术（纯函数）
+│   ├── CompLeaveBalanceService   # 调休余额计算
+│   └── TrendCalculator           # 仪表盘环比趋势（纯函数）
+├── ViewModels/              # 视图模型（双构造：无参构造委托注入构造）
 ├── Views/                   # 视图界面
+├── EapWorkAssistant.Tests/  # xUnit 单元测试（91 项）
 ├── App.xaml                 # 应用入口
 ├── AGENTS.md                # AI 编程约束文件
 └── EapWorkAssistant.csproj  # 项目文件
 ```
+
+### 架构要点
+
+- **依赖注入**：`Services/ServiceContainer.cs` 是组合根，集中登记 Repository / Service / 子 ViewModel，
+  消除 ViewModel 内直接 `new Repository()` 与跨模块依赖静态单例的耦合。
+  ViewModel 采用「无参构造 + 显式注入构造」双构造模式：无参构造保住 XAML 实例化
+  （`MainWindow.xaml` 的 `<vm:MainViewModel/>`）所需入口，显式构造给单元测试留注入口。
+  `MainViewModel` 刻意**不**在容器注册——其生命周期由 XAML 拥有，重复注册会导致导航状态分裂。
+- **数据访问**：4 个仓储继承 `SqliteRepository`，连接生命周期由基类 `ExecuteAsync<T>` 统一管理，
+  子类只保留 SQL 与参数，不再重复连接样板。
+- **数据库迁移**：`Data/DatabaseInitializer.cs` 用 `PRAGMA user_version` 记录 schema 版本（当前 v8），
+  每步迁移前用 `PRAGMA table_info` 做幂等检查；迁移失败写日志并中止后续迁移，不再静默吞异常。
+- **纯逻辑抽取**：CSV 导入校验、分页算术、环比趋势等无 UI 依赖的逻辑抽为独立服务，均有单测覆盖。
+
+### 构建与测试
+
+```bash
+# 常规构建
+dotnet build EapWorkAssistant.csproj -c Debug
+
+# 单元测试（91 项）
+dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -p:OutDir=bin/_verify_test/
+```
+
+> **IDE 持锁时的隔离构建**：若报 `MarkupCompile.cache` / `GeneratedInternalTypeHelper.g.cs`
+> "Access is denied"，说明 IDE 正持有 `obj\Debug`，需**同时**隔离中间目录与输出：
+> `dotnet build -c Debug -p:BaseIntermediateOutputPath=obj/_verify_x/ -p:OutputPath=bin/_verify_x/`。
+> 注意测试工程必须用 `OutputPath`（不能用 `OutDir`）——覆盖率目标会硬写 `bin\Debug\...`。
+> 仅 SkiaSharp 的 NU1701 警告属无害（net10 与 net4x 兼容回退），不计为错误。
 
 ## 运行要求
 
@@ -291,6 +330,37 @@ dotnet publish -c Release --self-contained true -r win-x64 -o publish
 **共享样式治理**
 - 全仓库内联 `<Button.Style>`+`<DataTrigger>` 复杂块已全部提取为 Styles.xaml 共享样式（WorkRecordView 7 处、RecycleBinView 5 处），消除 WPF 对内联复杂样式块解析不稳定的隐患
 - 构建验证：隔离 obj/OutDir 编译 0 错误（仅 SkiaSharp NU1701 无害警告）
+
+### v2.1.7（2026-08）架构重构与工程治理
+
+本轮为纯内部重构，**无用户可见功能变化**，重点是消除技术债、提升可测试性与可维护性。
+
+**数据库迁移版本化**
+- 用 `PRAGMA user_version`（当前 v8）+ `PRAGMA table_info` 幂等前置检查，替换原先约 15 段
+  `try/catch` 吞异常的迁移写法；迁移失败改为写日志并中止后续迁移，真实错误不再被静默掩盖
+- 修复历史数据回填中对可空 TEXT 列直接 `GetString` 的潜在崩溃点（改用 `IsDBNull` 防护）
+- 新建库走「建完整 schema → 直接置为最新版」快路径，不再逐条跑 `ALTER TABLE`
+
+**引入依赖注入**
+- 新增 `Services/ServiceContainer.cs` 组合根，集中登记仓储 / 服务 / 子 ViewModel，
+  消除 ViewModel 内 `new Repository()` 与跨模块依赖静态单例的紧耦合
+- ViewModel 统一「无参构造委托注入构造」双构造模式；`App.OnStartup` 增加容器自检，
+  DI 注册漏项在启动阶段即暴露而非运行时才崩
+
+**巨型类拆分**
+- 从 `WorkRecordViewModel`（1337 → 1260 行）与 `DashboardViewModel` 抽出 4 个无 UI 依赖的服务：
+  `WorkRecordImportService`、`PaginationCalculator`、`CompLeaveBalanceService`、`TrendCalculator`
+
+**消除仓储样板**
+- 新增 `SqliteRepository` 基类统一连接生命周期，4 个仓储净减约 416 行
+  （WorkRecord 580→393、Knowledge 226→125、Issue 183→106、LeaveRecord 110→59），SQL 与参数逐字不变
+
+**其它修复**
+- 全局搜索分类计数改用稳定导航键（`ViewNames.*`）而非显示文案，避免改 UI 文案导致计数静默算错
+- 图表取色（`ThemeService.GetChartColors`）增加资源兜底，主题未就绪时不再抛 `InvalidCastException`
+
+**测试**
+- 单元测试 44 → **91 项全部通过**，新增 47 项覆盖抽出的纯逻辑（CSV 导入校验、分页算术、环比趋势等）
 
 ## 许可证
 
