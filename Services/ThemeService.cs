@@ -481,12 +481,19 @@ public class ThemeService : INotifyPropertyChanged
     public (SKColor Text, SKColor Grid, SKColor Accent) GetChartColors()
     {
         var res = Application.Current.Resources;
+        // 资源可能在 ApplyThemeColors 之前被调用（极早期），或键缺失/类型不符。
+        // 直接 (Color)res[...] 强转会抛 InvalidCastException（KeyNotFound / InvalidCast），
+        // 这里用 TryGetColor 兜底，保证图表取色永不抛——即使主题未就绪也能画出可读配色。
         return (
-            ToSk((Color)res["TextSecondary"]),
-            ToSk((Color)res["Border"]),
-            ToSk((Color)res["Primary"])
+            ToSk(TryGetColor(res, "TextSecondary", Color.FromRgb(0x47, 0x55, 0x69))), // slate-600
+            ToSk(TryGetColor(res, "Border", Color.FromRgb(0xCB, 0xD5, 0xE1))),         // slate-300
+            ToSk(TryGetColor(res, "Primary", Color.FromRgb(0x63, 0x66, 0xF1)))        // indigo-500
         );
     }
+
+    /// <summary>安全取资源色：键缺失或非 Color 时返回兜底色，永不抛。</summary>
+    private static Color TryGetColor(ResourceDictionary res, string key, Color fallback)
+        => res[key] is Color c ? c : fallback;
 
     private static SKColor ToSk(Color c) => new(c.R, c.G, c.B, c.A);
 }

@@ -361,9 +361,11 @@ public partial class MainViewModel : ObservableObject
         }
 
         // 分类计数汇总（用于结果区顶部提示，并标识是否被截断）
-        RecordResultCount = results.Count(r => r.Type == "工作记录");
-        KnowledgeResultCount = results.Count(r => r.Type == "知识库");
-        IssueResultCount = results.Count(r => r.Type == "问题跟踪");
+        // 计数改用稳定的导航键 NavigateTo（ViewNames.* 常量），不依赖显示文案 Type——
+        // 后者一旦在 UI 改文案，按文案计数就会静默算错。
+        RecordResultCount = results.Count(r => r.NavigateTo == ViewNames.WorkRecord);
+        KnowledgeResultCount = results.Count(r => r.NavigateTo == ViewNames.Knowledge);
+        IssueResultCount = results.Count(r => r.NavigateTo == ViewNames.Issue);
         TotalResultCount = results.Count;
         SearchTruncated = TotalResultCount > 20;
         SearchSummary = TotalResultCount > 0
