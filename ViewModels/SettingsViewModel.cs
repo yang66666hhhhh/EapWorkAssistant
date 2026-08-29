@@ -151,8 +151,20 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","U","W"
     };
 
+    private readonly WorkRecordRepository _recordRepo;
+    private readonly KnowledgeRepository _knowledgeRepo;
+
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
     public SettingsViewModel()
+        : this(ServiceContainer.Get<WorkRecordRepository>(), ServiceContainer.Get<KnowledgeRepository>())
+    { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public SettingsViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo)
     {
+        _recordRepo = recordRepo;
+        _knowledgeRepo = knowledgeRepo;
+
         _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(3) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
@@ -457,7 +469,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateProject(project, value);
-            var count = await new WorkRecordRepository().UpdateProjectNameAsync(project, value);
+            var count = await _recordRepo.UpdateProjectNameAsync(project, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"任务已更新，已同步 {count} 条记录" : "任务已更新";
             ToastService.Success(count > 0 ? $"任务已更新，已同步 {count} 条记录" : "任务已更新");
@@ -468,7 +480,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private async Task DeleteProject(string? project)
     {
         if (string.IsNullOrWhiteSpace(project)) return;
-        var count = await new WorkRecordRepository().GetCountByProjectAsync(project);
+        var count = await _recordRepo.GetCountByProjectAsync(project);
         var message = count > 0
             ? $"确定要删除任务「{project}」吗？\n该任务被 {count} 条工作记录引用。删除后这些记录仍保留原任务名「{project}」，但将不再出现在任务筛选下拉中。"
             : $"确定要删除任务「{project}」吗？";
@@ -512,7 +524,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateWorkType(workType, value);
-            var count = await new WorkRecordRepository().UpdateWorkTypeAsync(workType, value);
+            var count = await _recordRepo.UpdateWorkTypeAsync(workType, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"类型已更新，已同步 {count} 条记录" : "类型已更新";
             ToastService.Success(count > 0 ? $"类型已更新，已同步 {count} 条记录" : "类型已更新");
@@ -523,7 +535,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private async Task DeleteWorkType(string? workType)
     {
         if (string.IsNullOrWhiteSpace(workType)) return;
-        var count = await new WorkRecordRepository().GetCountByWorkTypeAsync(workType);
+        var count = await _recordRepo.GetCountByWorkTypeAsync(workType);
         var message = count > 0
             ? $"确定要删除类型「{workType}」吗？\n该类型被 {count} 条工作记录引用。删除后这些记录仍保留原类型「{workType}」，但将不再出现在类型筛选下拉中。"
             : $"确定要删除类型「{workType}」吗？";
@@ -568,7 +580,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
                 return;
             }
             ConfigService.Instance.UpdateKnowledgeCategory(category, value);
-            var count = await new KnowledgeRepository().UpdateCategoryAsync(category, value);
+            var count = await _knowledgeRepo.UpdateCategoryAsync(category, value);
             await RefreshAsync();
             StatusMessage = count > 0 ? $"分类已更新，已同步 {count} 条知识" : "分类已更新";
             ToastService.Success(count > 0 ? $"分类已更新，已同步 {count} 条知识" : "分类已更新");
@@ -579,7 +591,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     private async Task DeleteKnowledgeCategory(string? category)
     {
         if (string.IsNullOrWhiteSpace(category)) return;
-        var count = await new KnowledgeRepository().GetCountByCategoryAsync(category);
+        var count = await _knowledgeRepo.GetCountByCategoryAsync(category);
         var message = count > 0
             ? $"确定要删除分类「{category}」吗？\n该分类被 {count} 条知识条目引用。删除后这些条目仍保留原分类「{category}」，但将不再出现在分类筛选下拉中。"
             : $"确定要删除分类「{category}」吗？";

@@ -9,6 +9,14 @@
     <RootNamespace>EapWorkAssistant.Tests</RootNamespace>
   </PropertyGroup>
 
+  <!-- 隔离构建（中间目录被重定向到 obj 之外）时，默认 obj 下的生成代码不再被自动排除，
+       会与新的中间目录里的 AssemblyInfo 等生成件重复编译，报 CS0579「特性重复」。
+       与主项目 EapWorkAssistant.csproj 保持同一策略：仅隔离构建时排除默认 obj。
+       默认构建（BaseIntermediateOutputPath 仍为 obj\）时此规则不生效，不影响 IDE 正常构建。 -->
+  <ItemGroup Condition="'$(BaseIntermediateOutputPath)' != 'obj\'">
+    <Compile Remove="obj\**\*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />

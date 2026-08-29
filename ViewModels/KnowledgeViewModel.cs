@@ -12,7 +12,13 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge>
 {
-    private readonly KnowledgeRepository _repo = new();
+    private readonly KnowledgeRepository _repo;
+
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
+    public KnowledgeViewModel() : this(ServiceContainer.Get<KnowledgeRepository>()) { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public KnowledgeViewModel(KnowledgeRepository repo) => _repo = repo;
 
     [ObservableProperty]
     private Knowledge _currentItem = new();

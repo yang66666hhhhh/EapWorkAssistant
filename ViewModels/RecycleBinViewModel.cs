@@ -11,10 +11,10 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class RecycleBinViewModel : ObservableObject, IRefreshable
 {
-    private readonly WorkRecordRepository _recordRepo = new();
-    private readonly KnowledgeRepository _knowledgeRepo = new();
-    private readonly IssueRepository _issueRepo = new();
-    private readonly LeaveRecordRepository _leaveRepo = new();
+    private readonly WorkRecordRepository _recordRepo;
+    private readonly KnowledgeRepository _knowledgeRepo;
+    private readonly IssueRepository _issueRepo;
+    private readonly LeaveRecordRepository _leaveRepo;
 
     [ObservableProperty]
     private ObservableCollection<RecycleItem> _items = new();
@@ -60,8 +60,23 @@ public partial class RecycleBinViewModel : ObservableObject, IRefreshable
 
     private readonly UiTimer _statusTimer;
 
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
     public RecycleBinViewModel()
+        : this(ServiceContainer.Get<WorkRecordRepository>(),
+               ServiceContainer.Get<KnowledgeRepository>(),
+               ServiceContainer.Get<IssueRepository>(),
+               ServiceContainer.Get<LeaveRecordRepository>())
+    { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public RecycleBinViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo,
+        IssueRepository issueRepo, LeaveRecordRepository leaveRepo)
     {
+        _recordRepo = recordRepo;
+        _knowledgeRepo = knowledgeRepo;
+        _issueRepo = issueRepo;
+        _leaveRepo = leaveRepo;
+
         _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(4) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 

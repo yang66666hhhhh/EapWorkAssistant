@@ -10,8 +10,10 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 {
-    private readonly WorkRecordRepository _repo = new();
-    private readonly LeaveRecordRepository _leaveRepo = new();
+    private readonly WorkRecordRepository _repo;
+    private readonly LeaveRecordRepository _leaveRepo;
+    private readonly WorkRecordImportService _importService;
+    private readonly CompLeaveBalanceService _compLeaveService;
     private readonly UiTimer _statusTimer;
     private readonly UiTimer _searchTimer;
     private readonly UiTimer _autoSaveTimer;
@@ -224,8 +226,23 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     public string[] FilterWorkTypes => ["", .. ProjectInfo.WorkTypes];
     public List<ContentTemplate> ContentTemplates => ConfigService.Instance.ContentTemplates;
 
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
     public WorkRecordViewModel()
+        : this(ServiceContainer.Get<WorkRecordRepository>(),
+               ServiceContainer.Get<LeaveRecordRepository>(),
+               ServiceContainer.Get<WorkRecordImportService>(),
+               ServiceContainer.Get<CompLeaveBalanceService>())
+    { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 依赖。</summary>
+    public WorkRecordViewModel(WorkRecordRepository repo, LeaveRecordRepository leaveRepo,
+        WorkRecordImportService importService, CompLeaveBalanceService compLeaveService)
     {
+        _repo = repo;
+        _leaveRepo = leaveRepo;
+        _importService = importService;
+        _compLeaveService = compLeaveService;
+
         _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
         _statusTimer.Tick += (_, _) => { StatusMessage = string.Empty; _statusTimer.Stop(); };
 
@@ -359,43 +376,20 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     /// </summary>
     public async Task LoadCompLeaveBalanceAsync()
     {
-        var year = SelectedDate.Year;
-        var yearStart = $"{year:D4}-01-01";
-        var yearEnd = $"{year:D4}-12-31";
-
         try
         {
-            // 确保假日数据已加载
-            await HolidayService.Instance.LoadYearAsync(year);
-            if (!HolidayService.Instance.IsYearAvailable(year))
+            var year = SelectedDate.Year;
+
+            // 取数 + 计算均由 CompLeaveBalanceService 完成（内部会确保假日数据已加载）
+            var balance = await _compLeaveService.CalculateAsync(year);
+
+            // 假日数据缺失时提示一次（提示策略属 UI 职责，留在 ViewModel）
+            if (!_compLeaveService.IsHolidayDataAvailable(year))
                 NotifyHolidayDataUnavailable(year);
 
-            // 1. 获取全年工作记录
-            var allRecords = await _repo.GetByDateRangeAsync(yearStart, yearEnd);
-
-            // 2. 取出可解析日期的工作记录（日期 + 工时）
-            var workTuples = new List<(DateTime Date, double Hours)>();
-            foreach (var r in allRecords)
-            {
-                if (DateTime.TryParse(r.WorkDate, out var date))
-                    workTuples.Add((date, r.Hours));
-            }
-
-            // 3. 获取全年调休请假工时（LeaveType == "调休"）
-            var compHours = (await _leaveRepo.GetByYearAsync(year))
-                .Where(l => l.LeaveType == "调休")
-                .Select(l => l.Hours);
-
-            // 4. 计算余额（假日/补班判定走 HolidayService 单例）
-            var (overtimeHours, compUsed, available) = CompLeaveCalculator.Compute(
-                workTuples,
-                compHours,
-                HolidayService.Instance.IsHoliday,
-                HolidayService.Instance.IsMakeupWorkday);
-
-            OvertimeHours = overtimeHours;
-            CompLeaveUsed = compUsed;
-            CompLeaveAvailable = available;
+            OvertimeHours = balance.OvertimeHours;
+            CompLeaveUsed = balance.CompLeaveUsed;
+            CompLeaveAvailable = balance.CompLeaveAvailable;
         }
         catch (Exception ex)
         {
@@ -932,36 +926,10 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         }
 
         // ── CSV 数据清洗与校验 ──
-        var valid = new List<WorkRecord>();
-        var skipped = new List<string>();
-        foreach (var r in records)
-        {
-            // 日期格式校验
-            if (!DateTime.TryParseExact(r.WorkDate, "yyyy-MM-dd",
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None, out _))
-            {
-                skipped.Add($"日期格式错误「{r.WorkDate}」，已跳过");
-                continue;
-            }
-            // 必填字段
-            if (string.IsNullOrWhiteSpace(r.ProjectName) || string.IsNullOrWhiteSpace(r.Content))
-            {
-                skipped.Add($"{r.WorkDate} 记录缺少任务或内容，已跳过");
-                continue;
-            }
-            // 工时范围
-            if (r.Hours <= 0 || r.Hours > 24)
-            {
-                skipped.Add($"{r.WorkDate}「{r.ProjectName}」工时 {r.Hours}h 不合理，已跳过");
-                continue;
-            }
-            // 进度范围
-            if (r.Progress < 0 || r.Progress > 100)
-                r.Progress = Math.Clamp(r.Progress, 0, 100);
-
-            valid.Add(r);
-        }
+        // 纯逻辑已抽到 WorkRecordImportService（无 UI 依赖、可单测），ViewModel 只负责编排。
+        var validation = _importService.Validate(records);
+        var valid = validation.Valid;
+        var skipped = validation.SkippedReasons;
 
         if (valid.Count == 0)
         {
@@ -969,28 +937,11 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return;
         }
 
-        // ── 配置项一致性校验：项目/类型不在配置中时自动补齐，避免筛选下拉与实际数据不一致 ──
+        // ── 配置项一致性检查：项目/类型不在配置中时自动补齐，避免筛选下拉与实际数据不一致 ──
         var cfg = ConfigService.Instance;
-        var missingProjects = new HashSet<string>(StringComparer.Ordinal);
-        var missingTypes = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var r in valid)
-        {
-            if (!string.IsNullOrWhiteSpace(r.ProjectName) && !cfg.Projects.Contains(r.ProjectName))
-                missingProjects.Add(r.ProjectName);
-            if (!string.IsNullOrWhiteSpace(r.WorkType) && !cfg.WorkTypes.Contains(r.WorkType))
-                missingTypes.Add(r.WorkType);
-        }
-        var configWarnings = new List<string>();
-        if (missingProjects.Count > 0)
-        {
-            var preview = string.Join("、", missingProjects.Take(5));
-            configWarnings.Add($"{missingProjects.Count} 个新项目将自动加入配置：{preview}{(missingProjects.Count > 5 ? "…" : "")}");
-        }
-        if (missingTypes.Count > 0)
-        {
-            var preview = string.Join("、", missingTypes.Take(5));
-            configWarnings.Add($"{missingTypes.Count} 个新类型将自动加入配置：{preview}{(missingTypes.Count > 5 ? "…" : "")}");
-        }
+        var configCheck = _importService.CheckConfig(valid, cfg.Projects, cfg.WorkTypes);
+        var missingProjects = configCheck.MissingProjects;
+        var missingTypes = configCheck.MissingWorkTypes;
 
         // 加载库中 UniqueId 映射，计算三种模式的导入预览
         var map = await _repo.GetUniqueIdMapAsync();
@@ -999,7 +950,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             TotalParsed = records.Count,
             ValidCount = valid.Count,
             SkippedReasons = skipped,
-            ConfigWarnings = configWarnings,
+            ConfigWarnings = configCheck.Warnings,
             SkipPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.SkipDuplicate),
             OverwritePreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Overwrite),
             AppendPreview = WorkRecordIdentityHelper.CountPlan(valid, map, ImportMode.Append)
@@ -1088,41 +1039,13 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
     private void UpdatePagination()
     {
-        TotalPages = CalculateTotalPages();
-        if (CurrentPage > TotalPages && TotalPages > 0)
-            CurrentPage = TotalPages;
-        PageText = FilteredTotalCount > 0
-            ? $"第 {CurrentPage} / {TotalPages} 页"
-            : "无记录";
-        UpdateVisiblePageNumbers();
-    }
+        TotalPages = PaginationCalculator.CalculateTotalPages(FilteredTotalCount, PageSize);
+        CurrentPage = PaginationCalculator.ClampPage(CurrentPage, TotalPages);
+        PageText = PaginationCalculator.BuildPageText(CurrentPage, TotalPages, FilteredTotalCount);
 
-    private int CalculateTotalPages()
-        => FilteredTotalCount > 0 ? (FilteredTotalCount + PageSize - 1) / PageSize : 1;
-
-    private void UpdateVisiblePageNumbers()
-    {
-        var pages = new ObservableCollection<int>();
-        var total = TotalPages;
-        var current = CurrentPage;
-
-        if (total <= 7)
-        {
-            for (int i = 1; i <= total; i++) pages.Add(i);
-        }
-        else
-        {
-            pages.Add(1);
-            int start = Math.Max(2, current - 2);
-            int end = Math.Min(total - 1, current + 2);
-
-            if (start > 2) pages.Add(0); // 0 = 省略号
-            for (int i = start; i <= end; i++) pages.Add(i);
-            if (end < total - 1) pages.Add(0);
-            pages.Add(total);
-        }
-
-        VisiblePageNumbers = pages;
+        // 纯算术已抽到 PaginationCalculator（可单测），此处只做赋值
+        VisiblePageNumbers = new ObservableCollection<int>(
+            PaginationCalculator.BuildVisiblePageNumbers(CurrentPage, TotalPages));
     }
 
     [RelayCommand]

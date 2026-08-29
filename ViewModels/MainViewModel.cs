@@ -10,9 +10,9 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly WorkRecordRepository _recordRepo = new();
-    private readonly KnowledgeRepository _knowledgeRepo = new();
-    private readonly IssueRepository _issueRepo = new();
+    private readonly WorkRecordRepository _recordRepo;
+    private readonly KnowledgeRepository _knowledgeRepo;
+    private readonly IssueRepository _issueRepo;
     private readonly UiTimer _searchTimer;
 
     [ObservableProperty]
@@ -66,15 +66,39 @@ public partial class MainViewModel : ObservableObject
         SearchSummary = string.Empty;
     }
 
-    public DashboardViewModel Dashboard { get; } = new();
-    public WorkRecordViewModel WorkRecord { get; } = new();
-    public KnowledgeViewModel Knowledge { get; } = new();
-    public IssueViewModel Issue { get; } = new();
-    public SettingsViewModel Settings { get; } = new();
-    public RecycleBinViewModel RecycleBin { get; } = new();
+    public DashboardViewModel Dashboard { get; }
+    public WorkRecordViewModel WorkRecord { get; }
+    public KnowledgeViewModel Knowledge { get; }
+    public IssueViewModel Issue { get; }
+    public SettingsViewModel Settings { get; }
+    public RecycleBinViewModel RecycleBin { get; }
 
+    /// <summary>
+    /// 无参构造：MainWindow.xaml 中的 <c>&lt;vm:MainViewModel/&gt;</c> 由 XAML 实例化，
+    /// 必须保留。依赖与子 ViewModel 均从组合根（ServiceContainer）解析。
+    /// </summary>
     public MainViewModel()
+        : this(ServiceContainer.Get<WorkRecordRepository>(),
+               ServiceContainer.Get<KnowledgeRepository>(),
+               ServiceContainer.Get<IssueRepository>())
+    { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public MainViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo, IssueRepository issueRepo)
     {
+        _recordRepo = recordRepo;
+        _knowledgeRepo = knowledgeRepo;
+        _issueRepo = issueRepo;
+
+        // 子 ViewModel 由容器统一供给（单例），保证全应用只有一个实例，
+        // 避免导航状态出现多份副本。
+        Dashboard = ServiceContainer.Get<DashboardViewModel>();
+        WorkRecord = ServiceContainer.Get<WorkRecordViewModel>();
+        Knowledge = ServiceContainer.Get<KnowledgeViewModel>();
+        Issue = ServiceContainer.Get<IssueViewModel>();
+        Settings = ServiceContainer.Get<SettingsViewModel>();
+        RecycleBin = ServiceContainer.Get<RecycleBinViewModel>();
+
         _searchTimer = new UiTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _searchTimer.Tick += async (_, _) =>
         {

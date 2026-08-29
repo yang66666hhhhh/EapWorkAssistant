@@ -9,7 +9,13 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
 {
-    private readonly IssueRepository _repo = new();
+    private readonly IssueRepository _repo;
+
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
+    public IssueViewModel() : this(ServiceContainer.Get<IssueRepository>()) { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public IssueViewModel(IssueRepository repo) => _repo = repo;
 
     [ObservableProperty]
     private Issue _currentItem = new();

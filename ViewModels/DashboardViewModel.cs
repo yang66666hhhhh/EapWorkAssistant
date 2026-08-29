@@ -18,12 +18,24 @@ namespace EapWorkAssistant.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject, IRefreshable
 {
-    private readonly WorkRecordRepository _recordRepo = new();
-    private readonly KnowledgeRepository _knowledgeRepo = new();
-    private readonly IssueRepository _issueRepo = new();
+    private readonly WorkRecordRepository _recordRepo;
+    private readonly KnowledgeRepository _knowledgeRepo;
+    private readonly IssueRepository _issueRepo;
 
+    /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
     public DashboardViewModel()
+        : this(ServiceContainer.Get<WorkRecordRepository>(),
+               ServiceContainer.Get<KnowledgeRepository>(),
+               ServiceContainer.Get<IssueRepository>())
+    { }
+
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    public DashboardViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo, IssueRepository issueRepo)
     {
+        _recordRepo = recordRepo;
+        _knowledgeRepo = knowledgeRepo;
+        _issueRepo = issueRepo;
+
         // 图表用 SkiaSharp 直接绘制，无法响应 DynamicResource。
         // 订阅主题服务，明暗/强调色切换时手动重绘图表配色。
         ThemeService.Instance.PropertyChanged += OnThemeServicePropertyChanged;
@@ -218,12 +230,12 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         var thisMonthKnowledge = await _knowledgeRepo.GetCountByDateRangeAsync(monthStart, monthEnd);
         var prevMonthKnowledge = await _knowledgeRepo.GetCountByDateRangeAsync(prevMonthStart, prevMonthEnd);
 
-        (TodayTrendText, TodayTrendUp) = ComputeTrend(TodayHours, prevDayHours, "较昨日");
-        (WeekTrendText, WeekTrendUp) = ComputeTrend(WeekHours, prevWeekHours, "较上周");
-        (MonthTrendText, MonthTrendUp) = ComputeTrend(MonthHours, prevMonthHours, "较上月");
-        (RecordsTrendText, RecordsTrendUp) = ComputeTrend(thisMonthRecords, prevMonthRecords, "较上月");
-        (IssuesTrendText, IssuesTrendUp) = ComputeTrend(thisMonthIssues, prevMonthIssues, "较上月");
-        (KnowledgeTrendText, KnowledgeTrendUp) = ComputeTrend(thisMonthKnowledge, prevMonthKnowledge, "较上月");
+        (TodayTrendText, TodayTrendUp) = TrendCalculator.Compute(TodayHours, prevDayHours, "较昨日");
+        (WeekTrendText, WeekTrendUp) = TrendCalculator.Compute(WeekHours, prevWeekHours, "较上周");
+        (MonthTrendText, MonthTrendUp) = TrendCalculator.Compute(MonthHours, prevMonthHours, "较上月");
+        (RecordsTrendText, RecordsTrendUp) = TrendCalculator.Compute(thisMonthRecords, prevMonthRecords, "较上月");
+        (IssuesTrendText, IssuesTrendUp) = TrendCalculator.Compute(thisMonthIssues, prevMonthIssues, "较上月");
+        (KnowledgeTrendText, KnowledgeTrendUp) = TrendCalculator.Compute(thisMonthKnowledge, prevMonthKnowledge, "较上月");
 
         // 最近5条工作记录（只取所需的 5 条，而非全表载入）
         var recent = (await _recordRepo.GetRecentAsync(5)).Select(r => new RecentRecordItem
@@ -269,20 +281,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         await LoadHighlightsAsync();
     }
 
-    /// <summary>
-    /// 计算环比趋势文案与方向（涨红跌绿，中国习惯）。
-    /// 上期无数据时：本期有则记为"新"（向上箭头），两者皆无则不显示胶囊。
-    /// </summary>
-    private (string TrendText, bool TrendUp) ComputeTrend(double current, double previous, string periodLabel)
-    {
-        if (previous <= 0)
-        {
-            if (current <= 0) return (string.Empty, true);
-            return ("新", true);
-        }
-        var pct = (current - previous) / previous * 100;
-        return ($"{periodLabel} {(pct > 0 ? "+" : "")}{pct:F0}%", current >= previous);
-    }
+    // ComputeTrend 已抽到 TrendCalculator（纯函数、可单测）。
 
     private async Task LoadProbationProgressAsync()
     {
