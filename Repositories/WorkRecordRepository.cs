@@ -8,85 +8,45 @@ using EapWorkAssistant.Models;
 
 namespace EapWorkAssistant.Repositories;
 
-public class WorkRecordRepository
+/// <summary>
+/// 工作记录仓储。连接生命周期样板由 <see cref="SqliteRepository.ExecuteAsync"/> 统一管理，
+/// 本类只保留查询体（SQL + 参数 + 少量编排逻辑）。
+/// </summary>
+public class WorkRecordRepository : SqliteRepository
 {
-    public async Task<IEnumerable<WorkRecord>> GetAllAsync()
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC");
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetAllAsync()
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC"));
 
     /// <summary>仅取总条数，避免为计数全表拉取（Dashboard 统计用）</summary>
-    public async Task<int> GetTotalCountAsync()
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0");
-        });
-    }
+    public Task<int> GetTotalCountAsync()
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0"));
 
     /// <summary>取最近 N 条记录（Dashboard 最近记录列表用），避免全表载入</summary>
-    public async Task<IEnumerable<WorkRecord>> GetRecentAsync(int count)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC LIMIT @Count",
-                new { Count = count });
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetRecentAsync(int count)
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 ORDER BY WorkDate DESC, Id DESC LIMIT @Count",
+            new { Count = count }));
 
-    public async Task<IEnumerable<WorkRecord>> GetByDateAsync(string date)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate = @Date ORDER BY Id",
-                new { Date = date });
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetByDateAsync(string date)
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate = @Date ORDER BY Id",
+            new { Date = date }));
 
-    public async Task<IEnumerable<WorkRecord>> GetByDateRangeAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetByDateRangeAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<WorkRecord>> GetByMonthAsync(string yearMonth)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month ORDER BY WorkDate",
-                new { Month = $"{yearMonth}%" });
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetByMonthAsync(string yearMonth)
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month ORDER BY WorkDate",
+            new { Month = $"{yearMonth}%" }));
 
-    public async Task<int> InsertAsync(WorkRecord record)
-    {
-        return await Task.Run(async () =>
+    public Task<int> InsertAsync(WorkRecord record)
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             if (string.IsNullOrWhiteSpace(record.UniqueId))
                 record.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(record);
             var id = await connection.QuerySingleAsync<int>(@"
@@ -97,14 +57,10 @@ public class WorkRecordRepository
             record.Id = id;
             return id;
         });
-    }
 
-    public async Task<int> UpdateAsync(WorkRecord record)
-    {
-        return await Task.Run(async () =>
+    public Task<int> UpdateAsync(WorkRecord record)
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             // 业务字段变更后按最新内容重算 UniqueId，使导入去重键始终与内容一致
             // （不被陈旧的 UniqueId 误导，避免导出再导入时产生重复）。CreateTime 保持不变。
             record.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(record);
@@ -115,91 +71,46 @@ public class WorkRecordRepository
                 UniqueId=@UniqueId WHERE Id=@Id",
                 record);
         });
-    }
 
     /// <summary>级联更新项目名称：修改配置项时同步所有工作记录</summary>
-    public async Task<int> UpdateProjectNameAsync(string oldProject, string newProject)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET ProjectName = @NewProject WHERE ProjectName = @OldProject",
-                new { NewProject = newProject, OldProject = oldProject });
-        });
-    }
+    public Task<int> UpdateProjectNameAsync(string oldProject, string newProject)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "UPDATE WorkRecord SET ProjectName = @NewProject WHERE ProjectName = @OldProject",
+            new { NewProject = newProject, OldProject = oldProject }));
 
     /// <summary>级联更新工作类型：修改配置项时同步所有工作记录</summary>
-    public async Task<int> UpdateWorkTypeAsync(string oldWorkType, string newWorkType)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET WorkType = @NewWorkType WHERE WorkType = @OldWorkType",
-                new { NewWorkType = newWorkType, OldWorkType = oldWorkType });
-        });
-    }
+    public Task<int> UpdateWorkTypeAsync(string oldWorkType, string newWorkType)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "UPDATE WorkRecord SET WorkType = @NewWorkType WHERE WorkType = @OldWorkType",
+            new { NewWorkType = newWorkType, OldWorkType = oldWorkType }));
 
     /// <summary>统计指定日期范围内的未删除工作记录条数（Dashboard 计数卡环比用）</summary>
-    public async Task<int> GetCountByDateRangeAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<int> GetCountByDateRangeAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
+            new { Start = startDate, End = endDate }));
 
     /// <summary>统计引用指定任务名称的未删除工作记录数（用于删除配置项前的引用提示）</summary>
-    public async Task<int> GetCountByProjectAsync(string projectName)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND ProjectName = @ProjectName",
-                new { ProjectName = projectName });
-        });
-    }
+    public Task<int> GetCountByProjectAsync(string projectName)
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND ProjectName = @ProjectName",
+            new { ProjectName = projectName }));
 
     /// <summary>统计引用指定工作类型的未删除工作记录数（用于删除配置项前的引用提示）</summary>
-    public async Task<int> GetCountByWorkTypeAsync(string workType)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkType = @WorkType",
-                new { WorkType = workType });
-        });
-    }
+    public Task<int> GetCountByWorkTypeAsync(string workType)
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM WorkRecord WHERE IsDeleted = 0 AND WorkType = @WorkType",
+            new { WorkType = workType }));
 
     /// <summary>软删除（移入回收站）</summary>
-    public async Task<int> DeleteAsync(int id)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id", new { Id = id });
-        });
-    }
+    public Task<int> DeleteAsync(int id)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "UPDATE WorkRecord SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id",
+            new { Id = id }));
 
-    public async Task<int> BatchInsertAsync(IEnumerable<WorkRecord> records)
-    {
-        return await Task.Run(async () =>
+    public Task<int> BatchInsertAsync(IEnumerable<WorkRecord> records)
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             // 确保每条都有 UniqueId（导入的新行 / 历史兜底）
             foreach (var r in records)
                 if (string.IsNullOrWhiteSpace(r.UniqueId))
@@ -220,15 +131,11 @@ public class WorkRecordRepository
                 throw;
             }
         });
-    }
 
     /// <summary>批量更新（覆盖导入用），不修改 CreateTime。</summary>
-    public async Task<int> BatchUpdateAsync(IEnumerable<WorkRecord> records)
-    {
-        return await Task.Run(async () =>
+    public Task<int> BatchUpdateAsync(IEnumerable<WorkRecord> records)
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             using var transaction = connection.BeginTransaction();
             try
             {
@@ -248,15 +155,11 @@ public class WorkRecordRepository
                 throw;
             }
         });
-    }
 
     /// <summary>加载库中 (UniqueId -> Id) 映射（仅未删除记录），供导入匹配去重。</summary>
-    public async Task<Dictionary<string, int>> GetUniqueIdMapAsync()
-    {
-        return await Task.Run(async () =>
+    public Task<Dictionary<string, int>> GetUniqueIdMapAsync()
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             var rows = await connection.QueryAsync(
                 "SELECT UniqueId, Id FROM WorkRecord WHERE IsDeleted = 0 AND UniqueId IS NOT NULL AND UniqueId <> ''");
             var map = new Dictionary<string, int>();
@@ -264,12 +167,12 @@ public class WorkRecordRepository
                 map[(string)r.UniqueId] = (int)r.Id;
             return map;
         });
-    }
 
     /// <summary>
     /// 按指定模式执行导入：跳过重复 / 覆盖更新 / 全部新增。
     /// records 为已校验通过的记录（UniqueId 可能为空，方法内会补全）。
     /// 返回 (新增数, 覆盖数, 跳过重复数)。
+    /// 编排型方法：调用本类其它方法，本身不开连接。
     /// </summary>
     public async Task<(int Inserted, int Updated, int Skipped)> ImportAsync(
         List<WorkRecord> records, ImportMode mode)
@@ -323,120 +226,54 @@ public class WorkRecordRepository
         return (inserted, updated, skipped);
     }
 
-    public async Task<double> GetTotalHoursAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<double>(
-                "SELECT COALESCE(SUM(Hours), 0) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<double> GetTotalHoursAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.ExecuteScalarAsync<double>(
+            "SELECT COALESCE(SUM(Hours), 0) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<dynamic>> GetProjectStatsAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync(
-                "SELECT ProjectName, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY ProjectName",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<dynamic>> GetProjectStatsAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync(
+            "SELECT ProjectName, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY ProjectName",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<dynamic>> GetTypeStatsAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync(
-                "SELECT WorkType, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<dynamic>> GetTypeStatsAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync(
+            "SELECT WorkType, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkType",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<WorkRecord>> GetHighlightsAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND IsHighlight = 1 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate DESC",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetHighlightsAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND IsHighlight = 1 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate DESC",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<string>> GetDistinctDatesByMonthAsync(string yearMonth)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<string>(
-                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month",
-                new { Month = $"{yearMonth}%" });
-        });
-    }
+    public Task<IEnumerable<string>> GetDistinctDatesByMonthAsync(string yearMonth)
+        => ExecuteAsync(c => c.QueryAsync<string>(
+            "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate LIKE @Month",
+            new { Month = $"{yearMonth}%" }));
 
-    public async Task<IEnumerable<dynamic>> GetDailyStatsAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync(
-                "SELECT WorkDate, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkDate ORDER BY WorkDate",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<dynamic>> GetDailyStatsAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync(
+            "SELECT WorkDate, SUM(Hours) as TotalHours, COUNT(*) as RecordCount FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End GROUP BY WorkDate ORDER BY WorkDate",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<WorkRecord?> GetLatestBeforeOrOnAsync(string date)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryFirstOrDefaultAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate <= @Date ORDER BY WorkDate DESC, Id DESC LIMIT 1",
-                new { Date = date });
-        });
-    }
+    public Task<WorkRecord?> GetLatestBeforeOrOnAsync(string date)
+        => ExecuteAsync(c => c.QueryFirstOrDefaultAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate <= @Date ORDER BY WorkDate DESC, Id DESC LIMIT 1",
+            new { Date = date }));
 
-    public async Task<int> GetRecordedDaysCountAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(DISTINCT WorkDate) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<int> GetRecordedDaysCountAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(DISTINCT WorkDate) FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<string>> GetRecordedDatesAsync(string startDate, string endDate)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<string>(
-                "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
-                new { Start = startDate, End = endDate });
-        });
-    }
+    public Task<IEnumerable<string>> GetRecordedDatesAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync<string>(
+            "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate BETWEEN @Start AND @End ORDER BY WorkDate",
+            new { Start = startDate, End = endDate }));
 
-    public async Task<IEnumerable<WorkRecord>> SearchAsync(string keyword)
-    {
-        return await Task.Run(async () =>
+    public Task<IEnumerable<WorkRecord>> SearchAsync(string keyword)
+        => ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             // 支持多关键词空格分隔搜索
             var keywords = keyword.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (keywords.Length <= 1)
@@ -454,7 +291,6 @@ public class WorkRecordRepository
             return await connection.QueryAsync<WorkRecord>(
                 $"SELECT * FROM WorkRecord WHERE IsDeleted = 0 AND {where} ORDER BY WorkDate DESC, Id DESC", param);
         });
-    }
 
     /// <summary>
     /// 带筛选和分页的查询，返回当前页记录 + 统计信息（总条数、总工时、亮点数）
@@ -471,10 +307,8 @@ public class WorkRecordRepository
             string? startDate, string? endDate, int offset, int limit,
             string sortColumn = "WorkDate", bool sortAscending = false)
     {
-        return await Task.Run(async () =>
+        return await ExecuteAsync(async connection =>
         {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
             var where = new List<string> { "IsDeleted = 0" };
             var param = new DynamicParameters();
 
@@ -543,38 +377,17 @@ public class WorkRecordRepository
     }
 
     /// <summary>取回收站中的已删除记录（IsDeleted = 1），按删除时间倒序</summary>
-    public async Task<IEnumerable<WorkRecord>> GetDeletedAsync()
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.QueryAsync<WorkRecord>(
-                "SELECT * FROM WorkRecord WHERE IsDeleted = 1 ORDER BY COALESCE(DeletedAt, '') DESC, Id DESC");
-        });
-    }
+    public Task<IEnumerable<WorkRecord>> GetDeletedAsync()
+        => ExecuteAsync(c => c.QueryAsync<WorkRecord>(
+            "SELECT * FROM WorkRecord WHERE IsDeleted = 1 ORDER BY COALESCE(DeletedAt, '') DESC, Id DESC"));
 
     /// <summary>从回收站恢复（软删除还原）</summary>
-    public async Task<int> RestoreAsync(int id)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteAsync(
-                "UPDATE WorkRecord SET IsDeleted = 0, DeletedAt = NULL WHERE Id = @Id", new { Id = id });
-        });
-    }
+    public Task<int> RestoreAsync(int id)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "UPDATE WorkRecord SET IsDeleted = 0, DeletedAt = NULL WHERE Id = @Id", new { Id = id }));
 
     /// <summary>彻底删除（回收站清空 / 单条永久删除用）</summary>
-    public async Task<int> HardDeleteAsync(int id)
-    {
-        return await Task.Run(async () =>
-        {
-            using var connection = new SQLiteConnection(DatabaseInitializer.ConnectionString);
-            await connection.OpenAsync();
-            return await connection.ExecuteAsync(
-                "DELETE FROM WorkRecord WHERE Id = @Id", new { Id = id });
-        });
-    }
+    public Task<int> HardDeleteAsync(int id)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "DELETE FROM WorkRecord WHERE Id = @Id", new { Id = id }));
 }
