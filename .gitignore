@@ -56,5 +56,7 @@ $RECYCLE.BIN/
 ## Temp download cache
 _tmp_whl/
 
-## Generated design-system exports (regenerable from Ardot canvas; docs *.md stay tracked)
-outputs/design-system/*.png
+## 产物 / 交付件目录：含个人数据（试用期评估、工作记录 CSV 等），且多为可再生产物。
+## csproj 已排除 outputs/** 参与编译（否则其中的 .xaml/.cs 暂存件会被当源码收编），
+## 此处再从版本控制排除，避免个人数据进入公开仓库。
+outputs/
