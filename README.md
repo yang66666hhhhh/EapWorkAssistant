@@ -134,7 +134,8 @@
 EapWorkAssistant/
 ├── Controls/                # 自定义控件（Drawer、StatCard、SearchBox、Badge 等）
 ├── Data/                    # 数据库初始化与版本化迁移（PRAGMA user_version）
-├── Helpers/                 # 转换器（IssueStatusConverter 等）和辅助类
+├── Helpers/                 # 辅助类与基础设施（Logger、DateTimeHelper、UiTimer 等）
+│   └── Converters/          # 25 个 XAML 转换器（namespace 仍为 EapWorkAssistant.Helpers）
 ├── Models/                  # 数据模型
 ├── Repositories/            # 数据访问层（SqliteRepository 基类统一连接生命周期）
 ├── Resources/               # 样式资源（Styles.xaml）
@@ -149,6 +150,7 @@ EapWorkAssistant/
 ├── EapWorkAssistant.Tests/  # xUnit 单元测试（91 项）
 ├── App.xaml                 # 应用入口
 ├── AGENTS.md                # AI 编程约束文件
+├── .editorconfig            # 编辑器规范（UTF-8 防中文注释乱码 / 缩进 / 尾随空格）
 └── EapWorkAssistant.csproj  # 项目文件
 ```
 
@@ -361,6 +363,25 @@ dotnet publish -c Release --self-contained true -r win-x64 -o publish
 
 **测试**
 - 单元测试 44 → **91 项全部通过**，新增 47 项覆盖抽出的纯逻辑（CSV 导入校验、分页算术、环比趋势等）
+
+### v2.1.8（2026-09）工程规范与目录治理
+
+本轮同为纯内部治理，**无用户可见功能变化**。
+
+**编辑器规范**
+- 新增 `.editorconfig`：统一字符集为 UTF-8（避免中文注释在部分编辑器下乱码）、
+  缩进（C#/XAML 4 空格、XML/JSON 2 空格）、去除行尾空格、补全文件末尾换行
+- 刻意**不**强制 `end_of_line`，保留仓库现有换行符，避免一次性产生大规模 diff
+
+**目录归类**
+- `Helpers/` 下 25 个 `*Converter*.cs` 收进 `Helpers/Converters/` 子目录，
+  根目录由 42 个混杂文件收敛为 17 个纯辅助类，职责边界清晰
+- namespace 保持 `EapWorkAssistant.Helpers` **不变**，因此所有 XAML 中既有的
+  `clr-namespace:EapWorkAssistant.Helpers` 引用零改动、零风险
+
+**验证**
+- 隔离输出构建 0 错误（仅 SkiaSharp NU1701 无害警告），91/91 单元测试全部通过
+- 隔离构建产物（`bin/_verify_*`）已清理
 
 ## 许可证
 

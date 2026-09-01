@@ -38,7 +38,8 @@
 ```
 EapWorkAssistant/
 ├── Data/                    # 数据库初始化（仅 DatabaseInitializer.cs）
-├── Helpers/                 # IValueConverter 实现、工具类、扩展方法
+├── Helpers/                 # 工具类、扩展方法与基础设施（Logger / DateTimeHelper / UiTimer 等）
+│   └── Converters/          # IValueConverter 实现（namespace 仍为 EapWorkAssistant.Helpers）
 ├── Models/                  # 纯数据模型（POCO）
 ├── Repositories/            # 数据访问层（Dapper + SQLite）
 ├── Resources/               # XAML 资源字典（DesignTokens.xaml / Styles.xaml）
@@ -52,7 +53,9 @@ EapWorkAssistant/
 
 **规则：**
 - 新增文件必须放入对应目录，不得在根目录随意创建。
-- 转换器（IValueConverter）放入 `Helpers/`，不得放入 `ViewModels/` 或 `Views/`。
+- 转换器（IValueConverter）放入 `Helpers/Converters/`，不得放入 `ViewModels/` 或 `Views/`。
+  - 其 namespace **固定为 `EapWorkAssistant.Helpers`**（有意与文件夹不同名）：XAML 里已有大量
+    `clr-namespace:EapWorkAssistant.Helpers` 引用，改 namespace 会牵动全部视图，故保持不变。
 - 服务类放入 `Services/`，数据仓储放入 `Repositories/`，自定义控件放入 `Controls/`。
 - 不要在 `Views/*.xaml.cs` 中编写业务逻辑，仅处理 UI 交互。
 
