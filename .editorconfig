@@ -1,0 +1,38 @@
+# EapWorkAssistant 编辑器规范
+# 作用：统一字符集 / 缩进 / 尾随空格，避免中文注释乱码与风格漂移。
+# 注意：不强制 end_of_line，保留仓库现有换行符，避免一次性大规模 diff。
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{cs,csx,cake}]
+indent_size = 4
+dotnet_sort_system_directives_first = true
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_prefer_braces = true:silent
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_new_line_before_open_brace = all:suggestion
+csharp_prefer_simple_using_statement = true:suggestion
+# 不强制 XML 文档注释（项目未全面铺开，避免引入大量 CS1591 警告）
+dotnet_diagnostic.CS1591.severity = none
+
+[*.{xaml,xaml.cs}]
+indent_size = 4
+
+[*.{xml,config,props,targets,resx}]
+indent_size = 2
+
+[*.{json,js,ts,tsx,html,css}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
