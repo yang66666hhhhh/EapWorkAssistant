@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
+using EapWorkAssistant.Helpers;
 using SkiaSharp;
 
 namespace EapWorkAssistant.Services;
@@ -121,7 +122,19 @@ public class ThemeService : INotifyPropertyChanged
         _accentColor = cfg.AccentColor;
         _fontSizeLevel = cfg.FontSizeLevel;
         _uiDensity = cfg.UIDensity;
-        ApplyAll();
+
+        // 首次应用不做配色过渡：此时窗口尚未呈现，动画无意义，
+        // 还会与窗口入场淡入叠加。用 try/finally 保证异常时标志也能复位，
+        // 否则一次异常会让后续所有切换永久失去过渡。
+        ColorTransition.Suppressed = true;
+        try
+        {
+            ApplyAll();
+        }
+        finally
+        {
+            ColorTransition.Suppressed = false;
+        }
     }
 
     /// <summary>
@@ -188,24 +201,12 @@ public class ThemeService : INotifyPropertyChanged
         var colors = IsDarkMode ? DarkColors : LightColors;
         var res = Application.Current.Resources;
 
-        SetColor(res, "Surface", colors.Surface);
-        SetColor(res, "SurfaceHover", colors.SurfaceHover);
-        SetColor(res, "SurfaceAlt", colors.SurfaceAlt);
-        SetColor(res, "CardColor", colors.CardColor);
-        SetColor(res, "TextPrimary", colors.TextPrimary);
-        SetColor(res, "TextSecondary", colors.TextSecondary);
-        SetColor(res, "TextTertiary", colors.TextTertiary);
-        SetColor(res, "Border", colors.Border);
-        SetColor(res, "BorderHover", colors.BorderHover);
-        SetColor(res, "SidebarBg", colors.SidebarBg);
-        SetColor(res, "SidebarText", colors.SidebarText);
-        SetColor(res, "SidebarHover", colors.SidebarHover);
-        SetColor(res, "SidebarCardBg", colors.SidebarCardBg);
-        SetColor(res, "ScrollThumb", colors.ScrollThumb);
-        SetColor(res, "ScrollThumbHover", colors.ScrollThumbHover);
-        SetColor(res, "ScrollThumbActive", colors.ScrollThumbActive);
-
-        // 更新 SolidColorBrush
+        // 顺序要求：必须先 UpdateBrush、再 SetColor。
+        // 原因：SetColor 改的是 Color 资源，而 DesignTokens 里的画刷是
+        // <SolidColorBrush Color="{DynamicResource Xxx}"/>，SetColor 一执行这些画刷会立刻跳到新色；
+        // 过渡动画的起点正是取自旧画刷的当前有效色，起点若已被污染成新色，动画就成了"新色→新色"，过渡失效。
+        // 另：已核查这 16 个 Color 资源在 XAML 中仅被 DesignTokens 内的同名画刷定义引用，
+        // 无其他直接引用，故延后设置不会产生任何未过渡的残留。
         UpdateBrush(res, "SurfaceBrush", colors.Surface);
         UpdateBrush(res, "SurfaceHoverBrush", colors.SurfaceHover);
         UpdateBrush(res, "SurfaceAltBrush", colors.SurfaceAlt);
@@ -223,19 +224,39 @@ public class ThemeService : INotifyPropertyChanged
         UpdateBrush(res, "ScrollThumbHoverBrush", colors.ScrollThumbHover);
         UpdateBrush(res, "ScrollThumbActiveBrush", colors.ScrollThumbActive);
 
+        // 画刷已替换完毕（其 Color 为固定值，不再响应 Color 资源变化），此时再同步 Color 资源
+        SetColor(res, "Surface", colors.Surface);
+        SetColor(res, "SurfaceHover", colors.SurfaceHover);
+        SetColor(res, "SurfaceAlt", colors.SurfaceAlt);
+        SetColor(res, "CardColor", colors.CardColor);
+        SetColor(res, "TextPrimary", colors.TextPrimary);
+        SetColor(res, "TextSecondary", colors.TextSecondary);
+        SetColor(res, "TextTertiary", colors.TextTertiary);
+        SetColor(res, "Border", colors.Border);
+        SetColor(res, "BorderHover", colors.BorderHover);
+        SetColor(res, "SidebarBg", colors.SidebarBg);
+        SetColor(res, "SidebarText", colors.SidebarText);
+        SetColor(res, "SidebarHover", colors.SidebarHover);
+        SetColor(res, "SidebarCardBg", colors.SidebarCardBg);
+        SetColor(res, "ScrollThumb", colors.ScrollThumb);
+        SetColor(res, "ScrollThumbHover", colors.ScrollThumbHover);
+        SetColor(res, "ScrollThumbActive", colors.ScrollThumbActive);
+
         // 语义色（Success/Warning/Danger 在暗色下更柔和）
-        SetColor(res, "Success", colors.Success);
-        SetColor(res, "SuccessLight", colors.SuccessLight);
-        SetColor(res, "Warning", colors.Warning);
-        SetColor(res, "WarningLight", colors.WarningLight);
-        SetColor(res, "Danger", colors.Danger);
-        SetColor(res, "DangerLight", colors.DangerLight);
+        // 同样遵循「先画刷、后 Color 资源」的顺序
         UpdateBrush(res, "SuccessBrush", colors.Success);
         UpdateBrush(res, "SuccessLightBrush", colors.SuccessLight);
         UpdateBrush(res, "WarningBrush", colors.Warning);
         UpdateBrush(res, "WarningLightBrush", colors.WarningLight);
         UpdateBrush(res, "DangerBrush", colors.Danger);
         UpdateBrush(res, "DangerLightBrush", colors.DangerLight);
+
+        SetColor(res, "Success", colors.Success);
+        SetColor(res, "SuccessLight", colors.SuccessLight);
+        SetColor(res, "Warning", colors.Warning);
+        SetColor(res, "WarningLight", colors.WarningLight);
+        SetColor(res, "Danger", colors.Danger);
+        SetColor(res, "DangerLight", colors.DangerLight);
 
         // 弹窗背景遮罩（双主题）：浅色 #000000×0.30，暗色 #000000×0.60
         UpdateBrush(res, "OverlayMaskBrush", IsDarkMode ? "#99000000" : "#4D000000");
@@ -284,19 +305,20 @@ public class ThemeService : INotifyPropertyChanged
             ? BlendColors(ParseColor(DarkColors.Surface), ParseColor(palette.Primary), 0.12)
             : ParseColor(palette.PrimarySoft);
 
-        SetColor(res, "Primary", palette.Primary);
-        SetColor(res, "PrimaryHover", palette.PrimaryHover);
-        SetColor(res, "PrimaryLight", lightColor);
-        SetColor(res, "PrimarySoft", softColor);
-        SetColor(res, "AccentIndigo", palette.Primary);   // 兼容旧引用
-        SetColor(res, "AccentViolet", palette.PrimaryHover);
-
+        // 同样遵循「先画刷、后 Color 资源」（理由见 ApplyThemeColors）
         UpdateBrush(res, "PrimaryBrush", palette.Primary);
         UpdateBrush(res, "PrimaryHoverBrush", palette.PrimaryHover);
         UpdateBrush(res, "PrimaryLightBrush", lightColor);
         UpdateBrush(res, "PrimarySoftBrush", softColor);
         UpdateBrush(res, "AccentIndigoBrush", palette.Primary);
         UpdateBrush(res, "AccentVioletBrush", palette.PrimaryHover);
+
+        SetColor(res, "Primary", palette.Primary);
+        SetColor(res, "PrimaryHover", palette.PrimaryHover);
+        SetColor(res, "PrimaryLight", lightColor);
+        SetColor(res, "PrimarySoft", softColor);
+        SetColor(res, "AccentIndigo", palette.Primary);   // 兼容旧引用
+        SetColor(res, "AccentViolet", palette.PrimaryHover);
 
         // 替换渐变画笔（原实例可能被 Freeze）
         var c1 = ParseColor(palette.Primary);
@@ -413,19 +435,22 @@ public class ThemeService : INotifyPropertyChanged
             res.Add(key, color);
     }
 
+    /// <summary>
+    /// 更新画刷颜色（带过渡动画）。
+    /// </summary>
+    /// <remarks>
+    /// 创建新的 unfrozen 画刷替换资源条目 —— WPF 中 XAML 定义的 Brush 会被 Freeze，不能直接改 Color。
+    /// 过渡逻辑见 <see cref="ColorTransition"/>：新建画刷的起始色取自旧画刷的当前有效值，
+    /// 故资源条目一替换，视觉上仍是旧色，随后动画到目标色，切换过程"化"过去而非瞬跳。
+    /// </remarks>
     private static void UpdateBrush(ResourceDictionary res, string key, string hexColor)
     {
-        var color = ParseColor(hexColor);
-        // WPF 中 XAML 定义的 Brush 会被 Freeze，不能直接修改 Color
-        // 始终创建新的 unfrozen 画刷替换资源条目
-        var newBrush = new SolidColorBrush(color);
-        res[key] = newBrush;
+        ColorTransition.Apply(res, key, ParseColor(hexColor));
     }
 
     private static void UpdateBrush(ResourceDictionary res, string key, Color color)
     {
-        var newBrush = new SolidColorBrush(color);
-        res[key] = newBrush;
+        ColorTransition.Apply(res, key, color);
     }
 
     private static Color ParseColor(string hex)

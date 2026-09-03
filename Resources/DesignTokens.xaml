@@ -167,6 +167,9 @@
     <Duration x:Key="DurationEnter">0:0:0.22</Duration>
     <!-- 侧边栏折叠展开（原 MainWindow.xaml.cs 硬编码 220ms） -->
     <Duration x:Key="DurationSidebar">0:0:0.22</Duration>
+    <!-- 主题色过渡（明暗切换 / 强调色切换）：略长于普通交互，让大面积配色"化"过去而非瞬跳；
+         太长会显得拖沓（>400ms），太短则感知不到过渡（<150ms） -->
+    <Duration x:Key="DurationTheme">0:0:0.28</Duration>
 
     <!-- ==================== 缓动函数 ==================== -->
     <!-- 全项目统一缓动：快出慢收（EaseOut），无回弹、无过冲，符合"克制专业"定位
