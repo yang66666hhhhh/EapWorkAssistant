@@ -52,30 +52,39 @@ namespace EapWorkAssistant.Helpers
             var old = res.Contains(key) ? res[key] as SolidColorBrush : null;
             var from = old is null ? target : (Color)old.GetValue(SolidColorBrush.ColorProperty);
 
-            // 新建未冻结实例替换资源条目（冻结实例无法动画）
-            var brush = new SolidColorBrush(from);
-            res[key] = brush;
-
             // 无需过渡的情形：功能关闭 / 本次抑制 / 首次创建 / 颜色没变
+            // 直接放一个终值刷子了事 —— 不能"先放起始色再回头改"，
+            // 因为 ResourceDictionary 会自动冻结可冻结的写入值（实测崩溃点：
+            // res[key] = brush 之后 brush 已冻结，再 brush.Color = target 抛
+            // "无法在对象上设置属性，因为它处于只读状态"）。
             if (!Enabled || Suppressed || old is null || from == target)
             {
-                brush.Color = target;
+                res[key] = new SolidColorBrush(target);
                 return;
             }
 
+            var brush = new SolidColorBrush(from);
             var anim = new ColorAnimation(target, MotionTokens.GetDuration("DurationTheme", 280))
             {
                 EasingFunction = MotionTokens.GetEasing("EaseStandard")
             };
 
-            // 动画结束落地：先写基值，再清动画（顺序颠倒会导致颜色闪回起点）
+            // 动画结束落地：先写基值，再清动画（顺序颠倒会导致颜色闪回起点）。
+            // Completed 时 brush 已被字典收编且动画已结束，为何还能写基值？
+            // 因为字典只在「写入瞬间」冻结可冻结的值，不会事后回头冻结已存条目；
+            // 而 brush 入库时带着活动动画（CanFreeze=false），字典冻不动它。
             anim.Completed += (_, _) =>
             {
                 brush.Color = target;
                 brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
             };
 
+            // 关键顺序：必须先 BeginAnimation 再写入资源字典。
+            // 带活动动画的 Freezable 无法被冻结（CanFreeze=false），
+            // 字典收编时就会放弃冻结；若先入库（被冻结）再动画，BeginAnimation 直接抛异常。
+            // 起始色就是 from，动画第一帧与旧刷子视觉连续，插入字典才不会闪。
             brush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+            res[key] = brush;
         }
     }
 }
