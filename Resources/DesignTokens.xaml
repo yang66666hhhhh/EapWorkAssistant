@@ -163,6 +163,30 @@
     <Duration x:Key="DurationFast">0:0:0.15</Duration>
     <Duration x:Key="DurationNormal">0:0:0.25</Duration>
     <Duration x:Key="DurationSlow">0:0:0.40</Duration>
+    <!-- 入场专用：页面转场 / 窗口加载（略快于 DurationNormal，避免"慢半拍"的拖沓感） -->
+    <Duration x:Key="DurationEnter">0:0:0.22</Duration>
+    <!-- 侧边栏折叠展开（原 MainWindow.xaml.cs 硬编码 220ms） -->
+    <Duration x:Key="DurationSidebar">0:0:0.22</Duration>
+
+    <!-- ==================== 缓动函数 ==================== -->
+    <!-- 全项目统一缓动：快出慢收（EaseOut），无回弹、无过冲，符合"克制专业"定位
+         注意：Storyboard 内禁止 DynamicResource，此处用 StaticResource 引用即可 -->
+    <CubicEase x:Key="EaseStandard" EasingMode="EaseOut"/>
+
+    <!-- ==================== 动效位移量（px） ==================== -->
+    <!-- 页面入场位移：略大于卡片上浮量，形成"从下方浮入"的层次感 -->
+    <sys:Double x:Key="MotionPageEnterY">12</sys:Double>
+    <!-- 窗口首次加载位移 -->
+    <sys:Double x:Key="MotionWindowEnterY">10</sys:Double>
+    <!-- 卡片悬停上浮量（与 Styles.xaml 的 CardHover / CardElevated 保持一致） -->
+    <sys:Double x:Key="MotionHoverLiftY">2</sys:Double>
+    <!-- CornerClip 向外扩张量：UIElement.Clip 会连同 Effect（投影）一起裁掉，
+         故裁剪矩形须外扩 ≥ 投影最大扩散范围（ShadowMd: BlurRadius 28 / ShadowDepth 4 → 约 18px），
+         同时圆角半径同步增大，保证子元素视觉圆角不变 -->
+    <sys:Double x:Key="ClipShadowPad">20</sys:Double>
+
+    <!-- ==================== 页面外边距（统一各 View 根布局留白） ==================== -->
+    <Thickness x:Key="PageMargin">28,24,28,24</Thickness>
 
     <!-- ==================== 动画 ==================== -->
     <Storyboard x:Key="FadeIn">

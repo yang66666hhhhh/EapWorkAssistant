@@ -254,14 +254,14 @@
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="{StaticResource DurationEnter}"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="{StaticResource DurationFast}"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
@@ -288,22 +288,19 @@
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="{StaticResource DurationEnter}"/>
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                             From="-20" To="0" Duration="0:0:0.25">
-                                                <DoubleAnimation.EasingFunction>
-                                                    <CubicEase EasingMode="EaseOut"/>
-                                                </DoubleAnimation.EasingFunction>
-                                            </DoubleAnimation>
+                                                             From="-20" To="0" Duration="{StaticResource DurationEnter}"
+                                                             EasingFunction="{StaticResource EaseStandard}"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="{StaticResource DurationFast}"/>
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                             To="-15" Duration="0:0:0.15"/>
+                                                             To="-15" Duration="{StaticResource DurationFast}"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.ExitActions>
@@ -594,14 +591,11 @@
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="ToastCard"
                                                              Storyboard.TargetProperty="Opacity"
-                                                             From="0" To="1" Duration="0:0:0.25"/>
+                                                             From="0" To="1" Duration="{StaticResource DurationEnter}"/>
                                             <DoubleAnimation Storyboard.TargetName="ToastCard"
                                                              Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                                             From="40" To="0" Duration="0:0:0.25">
-                                                <DoubleAnimation.EasingFunction>
-                                                    <CubicEase EasingMode="EaseOut"/>
-                                                </DoubleAnimation.EasingFunction>
-                                            </DoubleAnimation>
+                                                             From="40" To="0" Duration="{StaticResource DurationEnter}"
+                                                             EasingFunction="{StaticResource EaseStandard}"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
@@ -611,10 +605,10 @@
                                             <Storyboard>
                                                 <DoubleAnimation Storyboard.TargetName="ToastCard"
                                                                  Storyboard.TargetProperty="Opacity"
-                                                                 From="1" To="0" Duration="0:0:0.25"/>
+                                                                 From="1" To="0" Duration="{StaticResource DurationFast}"/>
                                                 <DoubleAnimation Storyboard.TargetName="ToastCard"
                                                                  Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                                                 From="0" To="30" Duration="0:0:0.25">
+                                                                 From="0" To="30" Duration="{StaticResource DurationFast}">
                                                     <DoubleAnimation.EasingFunction>
                                                         <CubicEase EasingMode="EaseIn"/>
                                                     </DoubleAnimation.EasingFunction>

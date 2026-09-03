@@ -75,7 +75,7 @@ public partial class MainWindow : Window
         {
             From = SidebarColumn.Width,
             To = new GridLength(target, GridUnitType.Pixel),
-            Duration = TimeSpan.FromMilliseconds(220)
+            Duration = GetDuration("DurationSidebar", 220)
         };
         SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, anim);
 
@@ -88,8 +88,8 @@ public partial class MainWindow : Window
     {
         if (ProfileRingScale == null || ProfileCardRing == null) return;
 
-        // 动画参数：0.4s, cubic-bezier(0.4, 0, 0.2, 1) → EaseInOut
-        var duration = TimeSpan.FromMilliseconds(400);  // 0.4s
+        // 动画参数：cubic-bezier(0.4, 0, 0.2, 1) → EaseInOut；时长取自 DurationSlow 令牌（0.40s）
+        var duration = GetDuration("DurationSlow", 400);
         var ease = new CubicEase { EasingMode = EasingMode.EaseInOut };
 
         // 装饰环缩放：展开=1.0，折叠=0（完全缩至原点/头像中心）
@@ -110,6 +110,20 @@ public partial class MainWindow : Window
         var textAnim = new DoubleAnimation(textTarget, new Duration(duration)) { EasingFunction = ease };
         if (ProfileInfo != null) ProfileInfo.BeginAnimation(UIElement.OpacityProperty, textAnim);
         if (ProfileMeta != null) ProfileMeta.BeginAnimation(UIElement.OpacityProperty, textAnim);
+    }
+
+    /// <summary>
+    /// 读取 DesignTokens 中的 Duration 令牌，避免在 code-behind 硬编码动效时长。
+    /// 取不到（设计器 / 测试环境无 Application）时回退到 fallbackMilliseconds，保证不崩。
+    /// </summary>
+    private static TimeSpan GetDuration(string resourceKey, double fallbackMilliseconds)
+    {
+        // 注意：ResourceDictionary 只实现 IDictionary，没有泛型 TryGetValue，须用 Contains + 索引器
+        var resources = Application.Current?.Resources;
+        if (resources != null && resources.Contains(resourceKey) && resources[resourceKey] is Duration d && d.HasTimeSpan)
+            return d.TimeSpan;
+
+        return TimeSpan.FromMilliseconds(fallbackMilliseconds);
     }
 
     /// <summary>响应式：窗口变窄自动折叠、变宽自动展开；用户手动操作后不再自动干预。</summary>

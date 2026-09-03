@@ -82,7 +82,7 @@
 
     </UserControl.Resources>
 
-    <Grid Margin="28,24">
+    <Grid Margin="{StaticResource PageMargin}">
         <DockPanel>
 
             <!-- ==================== 顶部信息栏（极简清爽版） ==================== -->

@@ -11,7 +11,7 @@
     </UserControl.InputBindings>
     <Grid>
         <!-- 内层内容区域 -->
-        <Grid Margin="28,24">
+        <Grid Margin="{StaticResource PageMargin}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>

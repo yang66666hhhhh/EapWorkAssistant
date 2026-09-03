@@ -8,7 +8,7 @@
     <Grid>
     <ScrollViewer x:Name="MainScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   Style="{StaticResource ModernScrollViewer}">
-        <StackPanel Margin="28,24,28,28">
+        <StackPanel Margin="{StaticResource PageMargin}">
 
             <!-- ===== 顶部标题栏 ===== -->
             <Border Style="{StaticResource Card}" Padding="24"

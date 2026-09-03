@@ -11,7 +11,7 @@
     </UserControl.InputBindings>
     <Grid>
         <!-- 内层内容区域（带边距） -->
-        <Grid Margin="28,24">
+        <Grid Margin="{StaticResource PageMargin}">
 
         <!-- ===== 主区域 ===== -->
         <DockPanel>
