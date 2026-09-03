@@ -662,10 +662,10 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <!-- 极淡环境投影：让卡片从页面底色上"浮起"，建立视觉层次。
+        <!-- 柔和投影：让卡片从页面底色上"浮起"，建立视觉层次（ShadowSm 在浅灰底上几乎不可感知，故用 Md）。
              注意：必须配合 CornerClip 的投影外扩（ClipShadowPad），
              否则 UIElement.Clip 会把 DropShadowEffect 的投影整圈裁掉，此处设了也不显示 -->
-        <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
+        <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
         <!-- 统一按卡片自身圆角裁剪子元素，避免内部色带/高亮层露出直角 -->
         <Setter Property="ClipToBounds" Value="True"/>
         <Setter Property="local:CornerClip.Enable" Value="True"/>
@@ -677,20 +677,15 @@
         <Setter Property="Padding" Value="{DynamicResource DensityCardPad}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
+        <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
         <!-- 按卡片自身圆角裁剪子元素（如左侧窄色带），避免窄色带套大圆角被压缩成直角 -->
         <Setter Property="local:CornerClip.Enable" Value="True"/>
-        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <!-- 悬停过渡（上浮 + 阴影增强）由 HoverLift 附加行为接管，
+             阴影/位移不再用 Trigger 整值替换（无法过渡且会与 HoverLift 的动画副本冲突） -->
+        <Setter Property="local:HoverLift.Enable" Value="True"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
-                <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-                <Setter Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform Y="-2"/>
-                    </Setter.Value>
-                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -701,18 +696,12 @@
         <Setter Property="CornerRadius" Value="{StaticResource RadiusCard}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Effect" Value="{StaticResource ShadowSm}"/>
-        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
+        <Setter Property="local:HoverLift.Enable" Value="True"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
-                <Setter Property="Effect" Value="{StaticResource ShadowMd}"/>
-                <Setter Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform Y="-2"/>
-                    </Setter.Value>
-                </Setter>
             </Trigger>
         </Style.Triggers>
     </Style>

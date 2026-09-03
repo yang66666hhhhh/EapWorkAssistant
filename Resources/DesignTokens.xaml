@@ -181,9 +181,10 @@
     <!-- 卡片悬停上浮量（与 Styles.xaml 的 CardHover / CardElevated 保持一致） -->
     <sys:Double x:Key="MotionHoverLiftY">2</sys:Double>
     <!-- CornerClip 向外扩张量：UIElement.Clip 会连同 Effect（投影）一起裁掉，
-         故裁剪矩形须外扩 ≥ 投影最大扩散范围（ShadowMd: BlurRadius 28 / ShadowDepth 4 → 约 18px），
-         同时圆角半径同步增大，保证子元素视觉圆角不变 -->
-    <sys:Double x:Key="ClipShadowPad">20</sys:Double>
+         故裁剪矩形须外扩 ≥ 投影最大扩散范围。
+         取值依据：悬停时阴影增强至 1.5 倍（HoverLift）→ ShadowMd BlurRadius 28×1.5=42 / ShadowDepth 4
+         → 42/2 + 4 = 25px，取 26 留余量。圆角半径同步增大，保证子元素视觉圆角不变 -->
+    <sys:Double x:Key="ClipShadowPad">26</sys:Double>
 
     <!-- ==================== 页面外边距（统一各 View 根布局留白） ==================== -->
     <Thickness x:Key="PageMargin">28,24,28,24</Thickness>

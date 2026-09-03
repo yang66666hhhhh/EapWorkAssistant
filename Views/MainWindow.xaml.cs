@@ -24,6 +24,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        // 窗口入场：先置全透明，Loaded 后淡入，消除启动"硬切"的出现感
+        Opacity = 0;
         Loaded += MainWindow_Loaded;
         SizeChanged += MainWindow_SizeChanged;
     }
@@ -55,6 +57,21 @@ public partial class MainWindow : Window
             if (ProfileInfo != null) ProfileInfo.Opacity = 0;
             if (ProfileMeta != null) ProfileMeta.Opacity = 0;
         }
+
+        PlayWindowEnterAnimation();
+    }
+
+    /// <summary>
+    /// 窗口入场动画：淡入。
+    /// 只做 Opacity 不做位移——Window 的 RenderTransform 会在移动期间露出窗口背后的桌面，观感穿帮。
+    /// </summary>
+    private void PlayWindowEnterAnimation()
+    {
+        var fade = new DoubleAnimation(1, MotionTokens.GetDuration("DurationEnter", 220))
+        {
+            EasingFunction = MotionTokens.GetEasing("EaseStandard")
+        };
+        BeginAnimation(OpacityProperty, fade);
     }
 
     /// <summary>折叠/展开侧边栏（带平滑宽度动画），用户手动操作后交由用户控制，停止响应式自动切换。</summary>
@@ -75,7 +92,7 @@ public partial class MainWindow : Window
         {
             From = SidebarColumn.Width,
             To = new GridLength(target, GridUnitType.Pixel),
-            Duration = GetDuration("DurationSidebar", 220)
+            Duration = MotionTokens.GetDuration("DurationSidebar", 220)
         };
         SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, anim);
 
@@ -89,41 +106,27 @@ public partial class MainWindow : Window
         if (ProfileRingScale == null || ProfileCardRing == null) return;
 
         // 动画参数：cubic-bezier(0.4, 0, 0.2, 1) → EaseInOut；时长取自 DurationSlow 令牌（0.40s）
-        var duration = GetDuration("DurationSlow", 400);
+        var duration = MotionTokens.GetDuration("DurationSlow", 400);
         var ease = new CubicEase { EasingMode = EasingMode.EaseInOut };
 
         // 装饰环缩放：展开=1.0，折叠=0（完全缩至原点/头像中心）
         var targetScale = collapse ? 0.0 : 1.0;
-        var scaleXAnim = new DoubleAnimation(targetScale, new Duration(duration)) { EasingFunction = ease };
-        var scaleYAnim = new DoubleAnimation(targetScale, new Duration(duration)) { EasingFunction = ease };
+        var scaleXAnim = new DoubleAnimation(targetScale, duration) { EasingFunction = ease };
+        var scaleYAnim = new DoubleAnimation(targetScale, duration) { EasingFunction = ease };
 
         ProfileRingScale.BeginAnimation(ScaleTransform.ScaleXProperty, scaleXAnim);
         ProfileRingScale.BeginAnimation(ScaleTransform.ScaleYProperty, scaleYAnim);
 
         // 装饰环淡出/淡入（配合缩放，确保折叠态完全不可见）
         var opacityTarget = collapse ? 0.0 : 1.0;
-        var opacityAnim = new DoubleAnimation(opacityTarget, new Duration(duration)) { EasingFunction = ease };
+        var opacityAnim = new DoubleAnimation(opacityTarget, duration) { EasingFunction = ease };
         ProfileCardRing.BeginAnimation(UIElement.OpacityProperty, opacityAnim);
 
         // 文字信息淡出/淡入（头像保持不变，无需处理）
         var textTarget = collapse ? 0.0 : 1.0;
-        var textAnim = new DoubleAnimation(textTarget, new Duration(duration)) { EasingFunction = ease };
+        var textAnim = new DoubleAnimation(textTarget, duration) { EasingFunction = ease };
         if (ProfileInfo != null) ProfileInfo.BeginAnimation(UIElement.OpacityProperty, textAnim);
         if (ProfileMeta != null) ProfileMeta.BeginAnimation(UIElement.OpacityProperty, textAnim);
-    }
-
-    /// <summary>
-    /// 读取 DesignTokens 中的 Duration 令牌，避免在 code-behind 硬编码动效时长。
-    /// 取不到（设计器 / 测试环境无 Application）时回退到 fallbackMilliseconds，保证不崩。
-    /// </summary>
-    private static TimeSpan GetDuration(string resourceKey, double fallbackMilliseconds)
-    {
-        // 注意：ResourceDictionary 只实现 IDictionary，没有泛型 TryGetValue，须用 Contains + 索引器
-        var resources = Application.Current?.Resources;
-        if (resources != null && resources.Contains(resourceKey) && resources[resourceKey] is Duration d && d.HasTimeSpan)
-            return d.TimeSpan;
-
-        return TimeSpan.FromMilliseconds(fallbackMilliseconds);
     }
 
     /// <summary>响应式：窗口变窄自动折叠、变宽自动展开；用户手动操作后不再自动干预。</summary>

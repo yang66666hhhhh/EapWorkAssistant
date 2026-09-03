@@ -9,6 +9,7 @@
             Padding="0"
             ClipToBounds="True"
             local:CornerClip.Enable="True"
+            local:HoverLift.Enable="True"
             Cursor="{Binding Cursor, ElementName=Self}"
             MouseLeftButtonDown="CardBorder_MouseLeftButtonDown">
         <Grid>
