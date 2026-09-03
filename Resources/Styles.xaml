@@ -1101,9 +1101,7 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <!-- 选中态不再给单元格单独铺色：行级 PrimarySoftBrush 已覆盖整行宽度。
-                     若在此处铺 PrimaryLightBrush，会与行背景形成双色断层——
-                     断层恰好落在最后一列（如回收站"操作"列）右缘，观感像该列挂了重阴影 -->
+                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             </Trigger>
         </Style.Triggers>
