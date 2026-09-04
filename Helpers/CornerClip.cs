@@ -68,7 +68,7 @@ namespace EapWorkAssistant.Helpers
             // 正确裁剪区 = 「外扩矩形」减去「四个缺角」：
             //   缺角 = 卡片外接矩形 − 圆角矩形（即圆角裁掉的那四块三角状区域）
             // 这样：卡片边界内的裁剪曲线与原始行为**逐像素一致**；卡片边界外完全放开，投影得以绘制。
-            double pad = fe.Effect is null ? 0 : GetShadowPad();
+            double pad = ComputeShadowPad(fe.Effect);
 
             fe.Clip = BuildClipGeometry(
                 new Rect(-pad, -pad, fe.ActualWidth + pad * 2, fe.ActualHeight + pad * 2),
@@ -98,26 +98,23 @@ namespace EapWorkAssistant.Helpers
             return new CombinedGeometry(GeometryCombineMode.Exclude, outerGeo, notches);
         }
 
-        /// <summary>投影外扩量的缓存（令牌值为常量，只需读一次）</summary>
-        private static double? _shadowPadCache;
-
         /// <summary>
-        /// 读取 DesignTokens 中的 ClipShadowPad 令牌（投影外扩量）。
-        /// 取不到（如设计器 / 单元测试环境无 Application）时回退到 20px。
+        /// 按元素实际挂载的 DropShadowEffect 动态计算裁剪外扩量。
+        /// 投影最大扩散 ≈ BlurRadius/2 + ShadowDepth（Direction 默认指向右下），
+        /// 再加 4px 余量。固定外扩值不可行：不同令牌所需空间差异大
+        /// （如 ShadowMd 需约 18px，更重的阴影需 40px+），统一外扩必然
+        /// 「不是裁掉重阴影、就是给轻阴影放水」。
+        /// 末尾乘 1.3 是给 HoverLift 悬停增强（阴影 1.5×）留的空间——
+        /// Clip 只在尺寸变化时重建，无法跟随运行时的 Effect 替换。
+        /// Effect 为 null（如弹窗卡片：遮罩已提供层次，显式置空）时返回 0，
+        /// 裁剪区退化为纯圆角矩形，与原始行为一致。
         /// </summary>
-        private static double GetShadowPad()
+        private static double ComputeShadowPad(System.Windows.Media.Effects.Effect effect)
         {
-            if (_shadowPadCache.HasValue)
-                return _shadowPadCache.Value;
+            if (effect is not System.Windows.Media.Effects.DropShadowEffect ds)
+                return 0;
 
-            double pad = 20;
-            // 注意：ResourceDictionary 只实现 IDictionary，没有泛型 TryGetValue，须用 Contains + 索引器
-            var resources = Application.Current?.Resources;
-            if (resources != null && resources.Contains("ClipShadowPad") && resources["ClipShadowPad"] is double d)
-                pad = d;
-
-            _shadowPadCache = pad;
-            return pad;
+            return (ds.BlurRadius / 2 + Math.Max(0, ds.ShadowDepth) + 4) * 1.3;
         }
     }
 }
