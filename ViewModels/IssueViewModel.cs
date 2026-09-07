@@ -138,6 +138,9 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
         await LoadAsync();
         StatusMessage = string.Empty;
         ToastService.Success("问题已保存");
+        // 保存成功（新增/编辑均同）后退出抽屉，与工作记录的保存行为保持一致。
+        // IsFormDirty 已在上方重置为 false，故 Closing 处的脏检查不会再弹确认。
+        RequestPanelClose();
     }
 
     [RelayCommand]

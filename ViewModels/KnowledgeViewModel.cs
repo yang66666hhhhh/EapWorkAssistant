@@ -161,6 +161,8 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
         await LoadAsync();
         StatusMessage = string.Empty;
         ToastService.Success("知识已保存");
+        // 保存成功（新增/编辑均同）后退出抽屉，与工作记录、问题跟踪的保存行为保持一致。
+        RequestPanelClose();
     }
 
     [RelayCommand]

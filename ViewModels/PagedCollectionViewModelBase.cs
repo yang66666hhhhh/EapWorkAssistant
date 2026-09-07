@@ -80,7 +80,13 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     protected abstract string ImportSuccessMessage { get; }
 
     [RelayCommand]
-    private void ClosePanel() => PanelCloseRequested?.Invoke();
+    private void ClosePanel() => RequestPanelClose();
+
+    /// <summary>
+    /// 请求关闭抽屉面板（供子类在保存成功等场景触发，与 View 的 PanelCloseRequested 订阅连通）。
+    /// 事件只能在声明类内部触发，故暴露此受保护方法给子类调用。
+    /// </summary>
+    protected void RequestPanelClose() => PanelCloseRequested?.Invoke();
 
     [RelayCommand]
     private void ClearSearch() => SearchKeyword = "";
