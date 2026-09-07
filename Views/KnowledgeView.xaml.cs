@@ -70,7 +70,7 @@ public partial class KnowledgeView : UserControl
         FormDrawer.IsOpen = true;
     }
 
-    private void EditItem_Click(object sender, RoutedEventArgs e)
+    private void EditRow_Click(object sender, RoutedEventArgs e)
     {
         if (FormDrawer.IsOpen) return;
         if (DataContext is not KnowledgeViewModel vm) return;
@@ -107,15 +107,15 @@ public partial class KnowledgeView : UserControl
         }
     }
 
-    // ===== 列表交互打磨：双击编辑 =====
+    // ===== 表格交互：双击编辑 =====
 
-    private void ItemsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    private void ItemsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (FormDrawer.IsOpen) return;
         if (DataContext is not KnowledgeViewModel vm) return;
-        if (sender is ListBox lb
-            && lb.ContainerFromElement(e.OriginalSource as DependencyObject) is ListBoxItem
-            && lb.SelectedItem is Knowledge item)
+        if (sender is DataGrid dg
+            && dg.ContainerFromElement(e.OriginalSource as DependencyObject) is DataGridRow
+            && dg.SelectedItem is Knowledge item)
         {
             vm.EditCommand.Execute(item);
             FormDrawer.IsOpen = true;
