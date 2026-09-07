@@ -7,15 +7,16 @@
         ShowInTaskbar="False" ResizeMode="NoResize"
         FontFamily="{StaticResource DefaultFont}"
         Loaded="Window_Loaded">
-    <!-- 模态窗口：全屏透明容器 → 深色遮罩（覆盖整个主界面） → 居中卡片（重阴影） -->
+    <!-- 模态窗口：全屏透明容器 → 深色遮罩（覆盖整个主界面） → 居中卡片（对话框阴影） -->
     <Grid>
         <!-- 遮罩层：铺满整个窗口，双主题（浅色 0.30 / 暗色 0.60） -->
         <Border Background="{DynamicResource OverlayMaskBrush}"/>
 
-        <!-- 卡片本体：居中浮动（浮在深色遮罩之上；遮罩已提供层次，不再叠加投影） -->
+        <!-- 卡片本体：居中浮动。遮罩负责"注意力"，阴影负责"层级"——二者叠加而非二选一
+             （Fluent 2 把 Pop-up dialogs 放在最高的 Shadow 64 档，且 ContentDialog 同样带背景调光） -->
         <Border Style="{StaticResource Card}" Padding="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                MaxWidth="440" Margin="32"
-                Effect="{x:Null}">
+                MaxWidth="440" Margin="48"
+                Effect="{DynamicResource ModalDialogShadow}">
             <Grid Margin="28,22,28,22">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

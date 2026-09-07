@@ -281,14 +281,16 @@ public class ThemeService : INotifyPropertyChanged
             Opacity = IsDarkMode ? 0.04 : 0.10
         };
 
-        // 模态窗口重阴影（独立 Window 如 ProfileDialog，浮在深色遮罩之上）
-        // 黑色高对比投影：浅色 Opacity 0.40（强立体感）/ 暗色 0.25（深色背景上稍收敛但仍醒目）
-        res["ModalHeavyShadow"] = new System.Windows.Media.Effects.DropShadowEffect
+        // 对话框阴影（5 个弹窗共用：Confirm / ConfigItem / ImportCsv / Profile / Leave）
+        // 中性黑，克制浓度：浅色 0.10 / 暗色 0.16（深色背景上黑阴影更不明显，故反向上调）
+        // 注意：BlurRadius / ShadowDepth 必须与 DesignTokens.xaml 的同名令牌保持一致，
+        // 因为 CornerClip 用它们计算裁剪外扩量，二者不一致会导致投影被裁出硬边。
+        res["ModalDialogShadow"] = new System.Windows.Media.Effects.DropShadowEffect
         {
-            BlurRadius = 50,
-            ShadowDepth = 24,
+            BlurRadius = 40,
+            ShadowDepth = 8,
             Color = Colors.Black,
-            Opacity = IsDarkMode ? 0.25 : 0.40
+            Opacity = IsDarkMode ? 0.16 : 0.10
         };
     }
 

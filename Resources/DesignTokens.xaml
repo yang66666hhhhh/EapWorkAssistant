@@ -152,11 +152,17 @@
     <!-- 环境光：柔和扩散光晕，BlurRadius 60 / ShadowDepth 0（Opacity 由 ThemeService 设置：浅色 0.10 / 暗色 0.04） -->
     <DropShadowEffect x:Key="ModalShadowAmbient" BlurRadius="60" ShadowDepth="0"
                       Color="{DynamicResource ModalShadowColor}" Opacity="0.10"/>
-    <!-- 模态窗口重阴影（独立 Window 如 ProfileDialog，浮在深色遮罩之上）
-         需要极强的立体感——高对比度黑色投影 + 较大深度，让卡片像从暗背景中"破土而出"
-         Opacity 由 ThemeService 按主题设置（浅色 0.40 / 暗色 0.25） -->
-    <DropShadowEffect x:Key="ModalHeavyShadow" BlurRadius="50" ShadowDepth="24"
-                      Color="#FF000000" Opacity="0.40"/>
+    <!-- 对话框专用阴影（中性黑，浮在深色遮罩之上）
+         对齐 Fluent 2 / Material 3 的通行做法：遮罩负责"注意力"，阴影负责"层级"，两者叠加而非二选一
+         （Fluent 2 把 Pop-up dialogs 放在最高的 Shadow 64 档，且 ContentDialog 同样带背景调光）。
+         参数刻意克制：早期 Blur50 / Depth24 / Opacity 0.40 比 Fluent 同档重 2~3 倍，
+         在遮罩上会糊成一片硬边；现为 Blur40 / Depth8 / Opacity 0.10，
+         仅比卡片 ShadowMd(0.075) 重一点点，既有"浮起"感又不抢眼。
+         注意：BlurRadius / ShadowDepth 是 CornerClip 计算裁剪外扩量的依据，
+         改动需保证 (BlurRadius/2 + ShadowDepth + 4) × 1.3 ≈ 42px 仍在弹窗尺寸允许范围内。
+         Opacity 由 ThemeService 按主题设置（浅色 0.10 / 暗色 0.16） -->
+    <DropShadowEffect x:Key="ModalDialogShadow" BlurRadius="40" ShadowDepth="8"
+                      Color="#FF000000" Opacity="0.10"/>
 
     <!-- ==================== 动效时长（Storyboard / Trigger 动画统一引用，禁止散落字面量 Duration） ==================== -->
     <!-- 注意：必须用 WPF 原生 Duration 类型（不能用 sys:String），否则 Timeline.Duration 属性赋值时类型不匹配报 ArgumentException -->
@@ -185,7 +191,7 @@
     <sys:Double x:Key="MotionHoverLiftY">2</sys:Double>
     <!-- 注：CornerClip 的投影外扩量已改为按元素实际 Effect 动态计算
          （BlurRadius/2 + ShadowDepth + 4，再乘 1.3 悬停余量），见 Helpers/CornerClip.cs，
-         不再使用固定令牌——弹窗 ModalHeavyShadow 与卡片 ShadowMd 所需空间差异过大 -->
+         不再使用固定令牌——弹窗 ModalDialogShadow 与卡片 ShadowMd 所需空间差异过大 -->
 
     <!-- ==================== 页面外边距（统一各 View 根布局留白） ==================== -->
     <Thickness x:Key="PageMargin">28,24,28,24</Thickness>
