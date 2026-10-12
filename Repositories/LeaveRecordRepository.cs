@@ -42,6 +42,12 @@ public class LeaveRecordRepository : SqliteRepository
         => ExecuteAsync(c => c.ExecuteAsync(
             "UPDATE LeaveRecord SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id = @Id", new { Id = id }));
 
+    /// <summary>批量软删除（多选批量删除用，一条 SQL 完成）</summary>
+    public Task<int> DeleteManyAsync(IEnumerable<int> ids)
+        => ExecuteAsync(c => c.ExecuteAsync(
+            "UPDATE LeaveRecord SET IsDeleted = 1, DeletedAt = datetime('now','localtime') WHERE Id IN @Ids",
+            new { Ids = ids }));
+
     /// <summary>取回收站中的已删除请假记录，按删除时间倒序</summary>
     public Task<IEnumerable<LeaveRecord>> GetDeletedAsync()
         => ExecuteAsync(c => c.QueryAsync<LeaveRecord>(

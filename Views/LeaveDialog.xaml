@@ -14,15 +14,12 @@
         <!-- 对话框主卡片（居中；遮罩负责注意力、阴影负责层级，二者叠加） -->
         <Border Style="{StaticResource Card}" Padding="0"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                MaxWidth="500" Margin="48"
+                MaxWidth="720" MaxHeight="580" Margin="48"
                 Effect="{DynamicResource ModalDialogShadow}">
             <Grid Margin="24,20,24,20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- 标题栏 -->
@@ -32,205 +29,325 @@
                                VerticalAlignment="Center"/>
                     <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                             Style="{StaticResource BtnGhost}" Padding="4" Click="CloseButton_Click"
-                            ToolTip="关闭">
+                            IsCancel="True"
+                            ToolTip="关闭（Esc）">
                         <Path Data="{StaticResource IconClose}" Width="14" Height="14" Stretch="Uniform"
                               Fill="{DynamicResource TextTertiaryBrush}"/>
                     </Button>
                 </Grid>
 
-                <!-- 月份导航 -->
-                <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                        Padding="12,8" Margin="0,0,0,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Style="{StaticResource BtnGhost}" Padding="8,2"
-                                Click="PrevMonth_Click" ToolTip="上个月">
-                            <Path Data="{StaticResource IconChevronLeft}" Width="14" Height="14" Stretch="Uniform"
-                                  Fill="{DynamicResource TextSecondaryBrush}"/>
-                        </Button>
-                        <TextBlock x:Name="MonthLabel" Grid.Column="1" FontSize="14" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Button Grid.Column="2" Style="{StaticResource BtnGhost}" Padding="8,2"
-                                Click="NextMonth_Click" ToolTip="下个月">
-                            <Path Data="{StaticResource IconChevronRight}" Width="14" Height="14" Stretch="Uniform"
-                                  Fill="{DynamicResource TextSecondaryBrush}"/>
-                        </Button>
-                    </Grid>
-                </Border>
-
-                <!-- 请假记录列表 -->
-                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" CornerRadius="{DynamicResource RadiusSm}"
-                        Padding="4" Margin="0,0,0,10" MinHeight="100">
-                    <Grid>
-                        <!-- 空状态提示 -->
-                        <!-- 绑定 ListBox.HasItems 的反向可见性：有记录时隐藏，无记录时显示 -->
-                        <TextBlock Text="本月暂无请假记录"
-                                   FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   IsHitTestVisible="False"
-                                   Visibility="{Binding ElementName=LeaveList, Path=HasItems, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"/>
-
-                        <ListBox x:Name="LeaveList" Background="Transparent" BorderThickness="0"
-                                 ItemContainerStyle="{StaticResource ModernListBoxItem}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="10,8" Margin="2,1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <!-- 日期 -->
-                                            <TextBlock Grid.Column="0" Text="{Binding Date}" FontSize="12"
-                                                       FontWeight="Medium"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                            <!-- 假期类型标签（彩色描边，按类型着色） -->
-                                            <Border x:Name="TypeTag" Grid.Column="1"
-                                                    CornerRadius="{DynamicResource RadiusXs}" Padding="8,2"
-                                                    BorderThickness="1" VerticalAlignment="Center"
-                                                    Margin="0,0,8,0">
-                                                <TextBlock x:Name="TypeText" Text="{Binding LeaveType}" FontSize="11"
-                                                           FontWeight="Medium"/>
-                                            </Border>
-                                            <!-- 工时 -->
-                                            <TextBlock Grid.Column="2" FontSize="11"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                       VerticalAlignment="Center" Margin="0,0,6,0">
-                                                <Run Text="{Binding Hours, Mode=OneWay, StringFormat={}{0}h}"/>
-                                            </TextBlock>
-                                            <!-- 操作按钮 -->
-                                            <StackPanel Grid.Column="3" Orientation="Horizontal">
-                                                <Button Style="{StaticResource BtnGhost}" Padding="4"
-                                                        ToolTip="编辑" Click="EditLeave_Click"
-                                                        Tag="{Binding}">
-                                                    <Path Data="{StaticResource IconPencil}" Width="12" Height="12"
-                                                          Stretch="Uniform" Fill="{DynamicResource PrimaryBrush}"/>
-                                                </Button>
-                                                <Button Style="{StaticResource BtnGhost}" Padding="4"
-                                                        ToolTip="删除" Click="DeleteLeave_Click"
-                                                        Tag="{Binding}">
-                                                    <Path Data="{StaticResource IconClose}" Width="12" Height="12"
-                                                          Stretch="Uniform" Fill="{DynamicResource DangerBrush}"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="年假">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveAnnualBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveAnnualBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="事假">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeavePersonalBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeavePersonalBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="病假">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveSickBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveSickBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="调休">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveCompBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveCompBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="出差">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveTravelBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveTravelBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding LeaveType}" Value="婚假">
-                                            <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveMarriageBrush}"/>
-                                            <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveMarriageBrush}"/>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </Border>
-
-                <!-- 分隔线 -->
-                <Separator Grid.Row="3" Style="{StaticResource Divider}" Margin="0,0,0,10"/>
-
-                <!-- 新增/编辑表单 -->
-                <Grid Grid.Row="4">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- 主体：左列表右表单的双栏布局（方向 A：纵向 5 段改为横向 2 段） -->
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.15*" MinWidth="290"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="14"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1*" MinWidth="270"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- 日期 -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="日期" Style="{StaticResource Label}"
-                               VerticalAlignment="Center" Margin="0,0,8,6"/>
-                    <Button Grid.Row="0" Grid.Column="1" x:Name="DateBtn"
-                            Style="{StaticResource BtnSecondary}"
-                            HorizontalContentAlignment="Left" Padding="10,7"
-                            Margin="0,0,0,6" Click="DateBtn_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
-                                  Width="13" Height="13" Stretch="Uniform"
-                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock x:Name="DateBtnText" Text="选择日期" FontSize="13"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </StackPanel>
-                    </Button>
+                    <!-- 左栏：月份导航 + 月度汇总 + 多选操作条 + 记录列表 -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <!-- 假期类型 -->
-                    <TextBlock Grid.Row="0" Grid.Column="3" Text="类型" Style="{StaticResource Label}"
-                               VerticalAlignment="Center" Margin="0,0,8,6"/>
-                    <ComboBox x:Name="LeaveTypeCombo" Grid.Row="0" Grid.Column="4"
-                              Style="{StaticResource Select}" Margin="0,0,0,6"
-                              ItemsSource="{Binding LeaveTypes, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        <!-- 月份导航 -->
+                        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}"
+                                CornerRadius="{DynamicResource RadiusSm}"
+                                Padding="12,8" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="PrevMonthBtn" Grid.Column="0" Style="{StaticResource BtnGhost}" Padding="8,2"
+                                        Click="PrevMonth_Click" ToolTip="上个月">
+                                    <Path Data="{StaticResource IconChevronLeft}" Width="14" Height="14" Stretch="Uniform"
+                                          Fill="{DynamicResource TextSecondaryBrush}"/>
+                                </Button>
+                                <TextBlock x:Name="MonthLabel" Grid.Column="1" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Button x:Name="NextMonthBtn" Grid.Column="2" Style="{StaticResource BtnGhost}" Padding="8,2"
+                                        Click="NextMonth_Click" ToolTip="下个月">
+                                    <Path Data="{StaticResource IconChevronRight}" Width="14" Height="14" Stretch="Uniform"
+                                          Fill="{DynamicResource TextSecondaryBrush}"/>
+                                </Button>
+                            </Grid>
+                        </Border>
 
-                    <!-- 工时 -->
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="工时" Style="{StaticResource Label}"
-                               VerticalAlignment="Center" Margin="0,0,8,6"/>
-                    <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" x:Name="HoursInput"
-                                 Style="{StaticResource Input}" Text="8"
-                                 PreviewTextInput="HoursInput_PreviewTextInput"/>
-                        <TextBlock Grid.Column="1" Text="小时" Style="{StaticResource Label}"
-                                   VerticalAlignment="Center" Margin="6,0,0,0"
-                                   Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        <!-- 月度汇总条 -->
+                        <Border Grid.Row="1" Background="{DynamicResource PrimaryLightBrush}"
+                                CornerRadius="{DynamicResource RadiusSm}"
+                                Padding="12,8" Margin="0,0,0,8">
+                            <TextBlock x:Name="SummaryText" FontSize="12"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- 多选批量操作条（有选中时出现，避免逐条删除的重复劳动） -->
+                        <Border x:Name="SelectionBar" Grid.Row="2" Background="{DynamicResource DangerLightBrush}"
+                                CornerRadius="{DynamicResource RadiusSm}"
+                                Padding="12,8" Margin="0,0,0,8" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="SelectionSummary" Grid.Column="0" FontSize="12"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" Content="删除" Style="{StaticResource BtnDanger}"
+                                        Padding="12,5" Margin="0,0,6,0" FontSize="12"
+                                        Click="DeleteSelected_Click" ToolTip="删除选中的记录"/>
+                                <Button Grid.Column="2" Content="清除选择" Style="{StaticResource BtnGhost}"
+                                        Padding="8,5" FontSize="12"
+                                        Click="ClearSelection_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 请假记录列表（占据左栏剩余高度，超出内部滚动，窗口高度不随记录数漂移） -->
+                        <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}"
+                                CornerRadius="{DynamicResource RadiusSm}"
+                                Padding="4" MinHeight="120">
+                            <Grid>
+                                <!-- 空状态提示 -->
+                                <!-- 绑定 ListBox.HasItems 的反向可见性：有记录时隐藏，无记录时显示 -->
+                                <TextBlock Text="本月暂无请假记录"
+                                           FontSize="13" Foreground="{DynamicResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsHitTestVisible="False"
+                                           Visibility="{Binding ElementName=LeaveList, Path=HasItems, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"/>
+
+                                <ListBox x:Name="LeaveList" Background="Transparent" BorderThickness="0"
+                                         SelectionMode="Extended"
+                                         SelectionChanged="LeaveList_SelectionChanged"
+                                         ItemContainerStyle="{StaticResource ModernListBoxItem}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="10,7" Margin="2,1"
+                                                    ToolTip="{Binding Converter={x:Static local:LeaveRowTooltipConverter.Instance}}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <!-- 日期（紧凑格式：MM-dd 周X） -->
+                                                    <TextBlock Grid.Column="0" Text="{Binding Date, Converter={x:Static local:LeaveDateDisplayConverter.Instance}}" FontSize="12"
+                                                               FontWeight="Medium"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                    <!-- 假期类型标签（彩色描边，按类型着色） -->
+                                                    <Border x:Name="TypeTag" Grid.Column="1"
+                                                            CornerRadius="{DynamicResource RadiusXs}" Padding="8,2"
+                                                            BorderThickness="1" VerticalAlignment="Center"
+                                                            Margin="0,0,8,0">
+                                                        <TextBlock x:Name="TypeText" Text="{Binding LeaveType}" FontSize="11"
+                                                                   FontWeight="Medium"/>
+                                                    </Border>
+                                                    <!-- 备注（有值才淡显，截断防挤压；全文见 ToolTip） -->
+                                                    <TextBlock Grid.Column="2" Text="{Binding Note}" FontSize="11"
+                                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                                               VerticalAlignment="Center" Margin="0,0,8,0"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Visibility="{Binding Note, Converter={x:Static local:StringToVisibilityConverter.Instance}}"/>
+                                                    <!-- 工时 -->
+                                                    <TextBlock Grid.Column="3" FontSize="11"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center" Margin="0,0,6,0">
+                                                        <Run Text="{Binding Hours, Mode=OneWay, StringFormat={}{0}h}"/>
+                                                    </TextBlock>
+                                                    <!-- 操作按钮（默认淡显，行悬停时全显，保持行高稳定） -->
+                                                    <StackPanel x:Name="Actions" Grid.Column="4" Orientation="Horizontal"
+                                                                Opacity="0.35">
+                                                        <Button Style="{StaticResource BtnGhost}" Padding="6"
+                                                                ToolTip="编辑" Click="EditLeave_Click"
+                                                                Tag="{Binding}">
+                                                            <Path Data="{StaticResource IconPencil}" Width="12" Height="12"
+                                                                  Stretch="Uniform" Fill="{DynamicResource PrimaryBrush}"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource BtnGhost}" Padding="6"
+                                                                ToolTip="删除" Click="DeleteLeave_Click"
+                                                                Tag="{Binding}">
+                                                            <Path Data="{StaticResource IconClose}" Width="12" Height="12"
+                                                                  Stretch="Uniform" Fill="{DynamicResource DangerBrush}"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                    <Setter TargetName="Actions" Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="年假">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveAnnualBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveAnnualBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="事假">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeavePersonalBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeavePersonalBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="病假">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveSickBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveSickBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="调休">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveCompBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveCompBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="出差">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveTravelBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveTravelBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding LeaveType}" Value="婚假">
+                                                    <Setter TargetName="TypeTag" Property="BorderBrush" Value="{DynamicResource LeaveMarriageBrush}"/>
+                                                    <Setter TargetName="TypeText" Property="Foreground" Value="{DynamicResource LeaveMarriageBrush}"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
                     </Grid>
 
-                    <!-- 备注 -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="备注" Style="{StaticResource Label}"
-                               VerticalAlignment="Top" Margin="0,0,8,6"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" x:Name="NoteInput"
-                             Style="{StaticResource TextArea}" Height="48"
-                             Margin="0,0,0,10"/>
+                    <!-- 栏间距 -->
+                    <Grid Grid.Column="1" Width="16"/>
 
-                    <!-- 操作按钮 -->
-                    <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
-                                Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="CancelEditBtn" Content="取消编辑"
-                                Style="{StaticResource BtnSecondary}"
-                                Padding="14,8" Margin="0,0,8,0"
-                                Click="CancelEdit_Click" Visibility="Collapsed"/>
-                        <Button Content="添加记录" Style="{StaticResource BtnPrimary}"
-                                Padding="14,8" Click="SaveLeave_Click"/>
-                    </StackPanel>
+                    <!-- 右栏：新增/编辑表单（按钮贴底） -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" VerticalAlignment="Top">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 日期 -->
+                            <TextBlock Grid.Row="0" Text="日期" Style="{StaticResource Label}"
+                                       Margin="0,0,0,6"/>
+                            <Button Grid.Row="1" x:Name="DateBtn"
+                                    Style="{StaticResource BtnSecondary}"
+                                    HorizontalContentAlignment="Left" Padding="10,7"
+                                    Margin="0,0,0,12" Click="DateBtn_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
+                                          Width="13" Height="13" Stretch="Uniform"
+                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock x:Name="DateBtnText" Text="选择日期" FontSize="13"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- 假期类型 -->
+                            <TextBlock Grid.Row="2" Text="类型" Style="{StaticResource Label}"
+                                       Margin="0,0,0,6"/>
+                            <ComboBox x:Name="LeaveTypeCombo" Grid.Row="3"
+                                      Style="{StaticResource Select}" Margin="0,0,0,12"
+                                      ItemsSource="{Binding LeaveTypes, RelativeSource={RelativeSource AncestorType=Window}}"/>
+
+                            <!-- 工时 -->
+                            <TextBlock Grid.Row="4" Text="工时" Style="{StaticResource Label}"
+                                       Margin="0,0,0,6"/>
+                            <Grid Grid.Row="5" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" x:Name="HoursInput"
+                                         Style="{StaticResource Input}" Text="8"
+                                         PreviewTextInput="HoursInput_PreviewTextInput"/>
+                                <TextBlock Grid.Column="1" Text="小时" Style="{StaticResource Label}"
+                                           VerticalAlignment="Center" Margin="6,0,0,0"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            </Grid>
+
+                            <!-- 备注 -->
+                            <TextBlock Grid.Row="6" Text="备注" Style="{StaticResource Label}"
+                                       Margin="0,0,0,6"/>
+                            <TextBox Grid.Row="7" x:Name="NoteInput"
+                                     Style="{StaticResource TextArea}" Height="56"/>
+                        </Grid>
+
+                        <!-- 连续录入：按日期区间批量生成（连请多天免逐条录入；类型/工时/备注共用上方表单） -->
+                        <Expander Grid.Row="1" Style="{StaticResource SectionExpander}"
+                                  Header="连续录入（按日期区间批量生成）"
+                                  Margin="0,12,0,0" IsExpanded="False">
+                            <StackPanel Margin="0,8,0,0">
+                                <TextBlock Text="起止日期" Style="{StaticResource Label}" Margin="0,0,0,6"/>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" x:Name="RangeStartBtn"
+                                            Style="{StaticResource BtnSecondary}"
+                                            HorizontalContentAlignment="Left" Padding="10,7"
+                                            Click="RangeStartBtn_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
+                                                  Width="13" Height="13" Stretch="Uniform"
+                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <TextBlock x:Name="RangeStartText" Text="开始日期" FontSize="13"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <TextBlock Grid.Column="1" Text="至" FontSize="12"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               VerticalAlignment="Center" Margin="8,0"/>
+                                    <Button Grid.Column="2" x:Name="RangeEndBtn"
+                                            Style="{StaticResource BtnSecondary}"
+                                            HorizontalContentAlignment="Left" Padding="10,7"
+                                            Click="RangeEndBtn_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
+                                                  Width="13" Height="13" Stretch="Uniform"
+                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <TextBlock x:Name="RangeEndText" Text="结束日期" FontSize="13"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <TextBlock x:Name="RangePreviewText" FontSize="12"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                <Button x:Name="GenerateRangeBtn" Content="生成记录" Style="{StaticResource BtnSuccess}"
+                                        Padding="14,8" HorizontalAlignment="Right"
+                                        Click="GenerateRange_Click"/>
+                            </StackPanel>
+                        </Expander>
+
+                        <!-- 操作按钮（贴底右对齐） -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                                    Margin="0,12,0,0">
+                            <Button x:Name="CancelEditBtn" Content="取消编辑"
+                                    Style="{StaticResource BtnSecondary}"
+                                    Padding="14,8" Margin="0,0,8,0"
+                                    Click="CancelEdit_Click" Visibility="Collapsed"/>
+                            <Button x:Name="SaveBtn" Content="添加记录" Style="{StaticResource BtnPrimary}"
+                                    Padding="14,8" Click="SaveLeave_Click" IsDefault="True"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
         </Border>
