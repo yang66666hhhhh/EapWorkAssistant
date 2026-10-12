@@ -4,11 +4,15 @@ namespace EapWorkAssistant.Services;
 
 /// <summary>调休余额计算结果。</summary>
 public sealed record CompLeaveBalance(
-    /// <summary>年度累计加班工时（周末 + 法定假日）。</summary>
+    /// <summary>年度周末加班工时（可安排调休，计入余额）。</summary>
+    double WeekendOvertimeHours,
+    /// <summary>年度法定假日加班工时（300% 工资、不可调休，单独统计）。</summary>
+    double HolidayOvertimeHours,
+    /// <summary>年度加班合计（周末 + 法定假日），仅用于展示。</summary>
     double OvertimeHours,
     /// <summary>年度已使用调休工时。</summary>
     double CompLeaveUsed,
-    /// <summary>可用调休余额（加班工时 - 已调休）。</summary>
+    /// <summary>可用调休余额（周末加班 - 已调休，法定假日加班不计入）。</summary>
     double CompLeaveAvailable);
 
 /// <summary>
@@ -63,12 +67,12 @@ public class CompLeaveBalanceService
             .Select(l => l.Hours);
 
         // 3. 计算余额（节假日/补班判定走 HolidayService）
-        var (overtimeHours, compUsed, available) = CompLeaveCalculator.Compute(
+        var (weekendOt, holidayOt, overtimeHours, compUsed, available) = CompLeaveCalculator.Compute(
             workTuples,
             compHours,
             HolidayService.Instance.IsHoliday,
             HolidayService.Instance.IsMakeupWorkday);
 
-        return new CompLeaveBalance(overtimeHours, compUsed, available);
+        return new CompLeaveBalance(weekendOt, holidayOt, overtimeHours, compUsed, available);
     }
 }

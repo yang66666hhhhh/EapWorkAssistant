@@ -237,10 +237,19 @@ namespace EapWorkAssistant.Controls
 
             if (isCurrentMonth)
             {
+                // 补班日永远是周六/周日但属于工作日，法定假日也可能落在周末，
+                // 因此补班/假日判定必须排在"普通周末"之前，否则标记永远不显示。
+                var isMakeup = makeupDates.Contains(date.Date);
+                var isHoliday = holidayDates.Contains(date.Date);
+
                 // 优先级判定
-                if (hasRecord && !isWeekend)
+                if (hasRecord && isHoliday)
                 {
-                    dotColor = "green"; // 工作日已填
+                    dotColor = "amber";  // 法定假日加班已记录（300% 工资，不可调休）
+                }
+                else if (hasRecord && (isMakeup || !isWeekend))
+                {
+                    dotColor = "green";  // 工作日已填（含补班日）
                 }
                 else if (leaveMap.TryGetValue(date.Date, out var lt))
                 {
@@ -251,17 +260,17 @@ namespace EapWorkAssistant.Controls
                 {
                     dotColor = "blue";   // 周末加班已记录
                 }
-                else if (isWeekend)
+                else if (isMakeup)
                 {
-                    dotColor = "gray";   // 普通周末
+                    dotColor = "red";    // 补班日未填
                 }
-                else if (holidayDates.Contains(date.Date))
+                else if (isHoliday)
                 {
                     dotColor = "purple"; // 法定假日
                 }
-                else if (makeupDates.Contains(date.Date))
+                else if (isWeekend)
                 {
-                    dotColor = "red";    // 补班日未填
+                    dotColor = "gray";   // 普通周末
                 }
                 else
                 {

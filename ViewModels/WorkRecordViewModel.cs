@@ -68,7 +68,15 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private int _highlightCount;
 
     // ===== 调休余额 =====
-    /// <summary>年度累计加班工时（周末 + 法定假日）</summary>
+    /// <summary>年度周末加班工时（可安排调休，计入余额）</summary>
+    [ObservableProperty]
+    private double _weekendOvertimeHours;
+
+    /// <summary>年度法定假日加班工时（300% 工资、不可调休，单独统计）</summary>
+    [ObservableProperty]
+    private double _holidayOvertimeHours;
+
+    /// <summary>年度加班合计（周末 + 法定假日），仅用于展示</summary>
     [ObservableProperty]
     private double _overtimeHours;
 
@@ -76,7 +84,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private double _compLeaveUsed;
 
-    /// <summary>可用调休余额（加班工时 - 已调休）</summary>
+    /// <summary>可用调休余额（周末加班 - 已调休，法定假日加班不计入）</summary>
     [ObservableProperty]
     private double _compLeaveAvailable;
 
@@ -388,6 +396,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
                 NotifyHolidayDataUnavailable(year);
 
             OvertimeHours = balance.OvertimeHours;
+            WeekendOvertimeHours = balance.WeekendOvertimeHours;
+            HolidayOvertimeHours = balance.HolidayOvertimeHours;
             CompLeaveUsed = balance.CompLeaveUsed;
             CompLeaveAvailable = balance.CompLeaveAvailable;
         }

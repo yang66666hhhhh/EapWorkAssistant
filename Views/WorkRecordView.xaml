@@ -174,8 +174,9 @@
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True">
                     <controls:StatCard.SubText>
-                        <MultiBinding StringFormat="加班 {0:F1}h · 已休 {1:F1}h">
-                            <Binding Path="OvertimeHours"/>
+                        <MultiBinding StringFormat="周末 {0:F1}h · 法定假 {1:F1}h · 已休 {2:F1}h">
+                            <Binding Path="WeekendOvertimeHours"/>
+                            <Binding Path="HolidayOvertimeHours"/>
                             <Binding Path="CompLeaveUsed"/>
                         </MultiBinding>
                     </controls:StatCard.SubText>

@@ -162,8 +162,12 @@
                                                 <Setter Property="Fill" Value="{DynamicResource InfoBrush}"/>
                                                 <Setter Property="Visibility" Value="Visible"/>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding DotColor}" Value="amber">
+                                                <Setter Property="Fill" Value="{DynamicResource WarningBrush}"/>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding DotColor}" Value="purple">
-                                                <Setter Property="Fill" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                <Setter Property="Fill" Value="{DynamicResource AccentVioletBrush}"/>
                                                 <Setter Property="Visibility" Value="Visible"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding DotColor}" Value="gray">

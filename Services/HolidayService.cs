@@ -29,6 +29,12 @@ public class HolidayService
     // 数据来源：国务院办公厅每年发布的节假日安排通知。
     private static readonly Dictionary<int, List<HolidayItem>> Fallback = BuildFallback();
 
+    // 写缓存时忽略 null 字段，避免把 isOffDay / holiday 两个源字段都落盘
+    private static readonly JsonSerializerOptions CacheWriteOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     private HolidayService()
     {
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
@@ -51,7 +57,10 @@ public class HolidayService
             {
                 var json = await File.ReadAllTextAsync(cacheFile);
                 var items = JsonSerializer.Deserialize<List<HolidayItem>>(json);
-                if (items is { Count: > 0 })
+                // 有效性校验：至少包含一个法定假日。
+                // 旧版本代码映射了上游已废弃的 "holiday" 字段名（现行 schema 为 "isOffDay"），
+                // 会把含假日的年份缓存成"全日皆非假日"的毒化数据，此处识别并丢弃，重新拉取。
+                if (items is { Count: > 0 } && items.Any(i => i.IsHoliday))
                 {
                     _cache[year] = items;
                     _availableYears.Add(year);
@@ -72,7 +81,7 @@ public class HolidayService
                 _availableYears.Add(year);
 
                 Directory.CreateDirectory(CacheDir);
-                var cacheJson = JsonSerializer.Serialize(response.Days);
+                var cacheJson = JsonSerializer.Serialize(response.Days, CacheWriteOptions);
                 await File.WriteAllTextAsync(cacheFile, cacheJson);
                 return;
             }
@@ -88,7 +97,7 @@ public class HolidayService
             try
             {
                 Directory.CreateDirectory(CacheDir);
-                await File.WriteAllTextAsync(cacheFile, JsonSerializer.Serialize(fallback));
+                await File.WriteAllTextAsync(cacheFile, JsonSerializer.Serialize(fallback, CacheWriteOptions));
             }
             catch { /* 忽略写入失败 */ }
             return;
@@ -158,8 +167,28 @@ public class HolidayService
         [JsonPropertyName("date")]
         public DateTime Date { get; set; }
 
+        /// <summary>上游 holiday-cn 现行 schema 字段名（v2，2024 年起启用）</summary>
+        [JsonPropertyName("isOffDay")]
+        public bool? IsOffDay { get; set; }
+
+        /// <summary>上游旧 schema 字段名（v1），兼容历史本地缓存</summary>
         [JsonPropertyName("holiday")]
-        public bool IsHoliday { get; set; }
+        public bool? Holiday { get; set; }
+
+        /// <summary>
+        /// 是否为法定假日。反序列化时优先取 <see cref="IsOffDay"/>，缺失时回退 <see cref="Holiday"/>；
+        /// 代码内构造（内置兜底数据）经 setter 写入 <see cref="Holiday"/>，两种读法均可正确解析。
+        /// </summary>
+        [JsonIgnore]
+        public bool IsHoliday
+        {
+            get => IsOffDay ?? Holiday ?? false;
+            set
+            {
+                IsOffDay = null;
+                Holiday = value;
+            }
+        }
     }
 
     // ── 内置兜底数据构建 ──
