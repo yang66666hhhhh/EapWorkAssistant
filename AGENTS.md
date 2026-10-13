@@ -110,6 +110,15 @@ EapWorkAssistant/
 - 单例通过 `public static XxxService Instance { get; } = new();` 实现。
 - 服务初始化在 `App.xaml.cs` 的 `OnStartup` 中完成。
 - 不要在 View 或 ViewModel 中直接 `new` 服务实例；保持单例不被破坏（禁止改为依赖注入等其他模式）。
+- 依赖仓储的业务服务（如 `CompLeaveBalanceService`、`DayStatusService`）通过 `ServiceContainer` 注册为 DI 单例，由容器统一供给（测试可注入 Fake）。
+
+### 3.3.1 出勤判定规则唯一事实来源
+
+- 「是否加班 / 是否应上班」等规则**只允许**定义在 `Services/DayStatusRules.cs`（纯静态、无 IO）。
+- 消费方仅限三处：`DayStatusService`（出勤总览日状态）、`CompLeaveCalculator`（周末/假日加班拆分）、`CustomCalendar.CreateDayItem`（日历圆点颜色）。
+- **禁止**在消费方内另写一套周末/假日/补班判定（历史上曾因节假日上游 schema 变更导致两处规则同时失效）。
+- ⚠️ **判定必须覆盖「周末 / 补班日 / 法定假日」三种情况，缺一不可**。反面教材：`IsWorkdayDue` 曾只判 `!IsWeekend(date) || isMakeup`，漏掉法定假日 → 国庆里落在工作日的假日（10-01/02/05）被判「应上班」，出勤总览误报「未填」且统计卡虚高。任何改动 `DayStatusRules` 的提交都必须同步补/改单测。
+- 出勤语义（双标记）：同一天可同时有工作记录与请假，两侧独立展示、互不覆盖；应上班但无记录也无请假 = 「未填」。
 
 ### 3.4 数据访问层规范
 
@@ -168,7 +177,11 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 | Problem | string | 遇到的问题 |
 | Solution | string | 解决方案 |
 | IsHighlight | int | 是否亮点（0/1） |
-| Hours | double | 工时 |
+| Hours | double | **填报工时**：报给公司的口径，统一按每天 8h；**调休余额按它计算** |
+| ActualHours | double | **实际工时**（v10）：自己真实投入，仅展示；0 = 未填，**不回落**成填报值（界面显示「—」） |
+
+> ⚠️ **工时双口径铁律**：填报工时 = 公司口径（每天 8h，调休余额据此计算）；实际工时 = 真实投入（只给自己看，不参与任何余额/统计）。
+> 读取一律用**原始 `ActualHours`**，禁止"未填回落"式兜底（详见 `.workbuddy/memory/MEMORY.md`）。
 
 ### Issue
 | 字段 | 类型 | 说明 |
@@ -347,6 +360,12 @@ refactor: 提取 ThemeService 统一管理主题逻辑
     </Border.Style>
 </Border>
 ```
+
+- **只读计算属性绑定必须显式 `Mode=OneWay`（高频踩坑）**：`Run.Text`、`TextBox.Text`（可编辑）等目标属性的默认绑定模式是 `TwoWay`，把表达式体属性（`public string X => ...`，反射层面 `CanWrite=false`）绑到这些目标上，会在**运行时**抛出「对 … 类型的只读属性 … 进行 TwoWay 或 OneWayToSource 绑定」并弹 Toast，编译期完全不报错。
+  - 安全目标（默认 OneWay，可直接绑）：`TextBlock.Text`、`Border.Visibility`、`*.Foreground/BorderBrush` 等。
+  - 危险目标（必须写 `Mode=OneWay`）：`<Run Text="{Binding 计算属性, Mode=OneWay}"/>`；`DataGrid` 可编辑列（`IsReadOnly="False"` 时列绑定落到编辑元素 `TextBox.Text`）。
+  - 备注：`{ get; init; }` 属性反射层面仍有 setter（`CanWrite=true`），因此**不会**触发该错误 —— 这也是为什么同一模板里 `Init` 属性绑定正常、紧邻的 `=>` 计算属性却报错的原因。
+  - 更优做法：像 `WorkBadgeText` / `LeaveBadgeText` 那样，把文案在 Model 层合成好，绑到 `TextBlock.Text`，从根上避开。
 
 ### 5.3 主题系统
 
