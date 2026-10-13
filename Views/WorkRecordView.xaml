@@ -174,9 +174,9 @@
                                 CardStyle="{StaticResource Card}"
                                 IsCompact="True">
                     <controls:StatCard.SubText>
-                        <MultiBinding StringFormat="周末 {0:F1}h · 法定假 {1:F1}h · 已休 {2:F1}h">
+                        <MultiBinding StringFormat="周末加班 填报{0:F1} / 实际{1:F1}h · 已休{2:F1}h">
+                            <Binding Path="ReportedWeekendOvertimeHours"/>
                             <Binding Path="WeekendOvertimeHours"/>
-                            <Binding Path="HolidayOvertimeHours"/>
                             <Binding Path="CompLeaveUsed"/>
                         </MultiBinding>
                     </controls:StatCard.SubText>
@@ -342,7 +342,8 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80"/>
+                                <DataGridTextColumn Header="填报工时" Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80"/>
+                                <DataGridTextColumn Header="实际工时" Binding="{Binding ActualHoursText, Mode=OneWay}" Width="80"/>
                                 <!-- 进度 - 进度条 -->
                                 <DataGridTemplateColumn Header="进度" Width="144"
                                                         ClipboardContentBinding="{Binding Progress, StringFormat={}{0}%}"
@@ -847,12 +848,12 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <!-- 工时 -->
+                                    <!-- 填报工时（报给公司/领导的口径，也是调休余额的依据） -->
                                     <DataGridTextColumn Binding="{Binding Hours, StringFormat={}{0:F1}h}" Width="80">
                                         <DataGridTextColumn.SortMemberPath>Hours</DataGridTextColumn.SortMemberPath>
                                         <DataGridTextColumn.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="工时" VerticalAlignment="Center"/>
+                                                <TextBlock Text="填报工时" VerticalAlignment="Center"/>
                                                 <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
                                                     <Path.Visibility>
                                                         <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
@@ -873,6 +874,43 @@
                                                 </Path>
                                             </StackPanel>
                                         </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <!-- 实际工时（真实投入，仅自己查看；未填写时显示「—」灰字，不再回落成填报值） -->
+                                    <DataGridTextColumn Binding="{Binding ActualHoursText, Mode=OneWay}" Width="88">
+                                        <DataGridTextColumn.SortMemberPath>ActualHours</DataGridTextColumn.SortMemberPath>
+                                        <DataGridTextColumn.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="实际工时" VerticalAlignment="Center"/>
+                                                <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="ActualHours"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                                <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                                    <Path.Visibility>
+                                                        <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                                            <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                            <Binding Source="ActualHours"/>
+                                                        </MultiBinding>
+                                                    </Path.Visibility>
+                                                </Path>
+                                            </StackPanel>
+                                        </DataGridTextColumn.Header>
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasExplicitActualHours}" Value="False">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                                        <Setter Property="ToolTip" Value="未填写实际工时（仅记录了填报工时）"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
                                     <!-- 进度 -->
                                     <DataGridTemplateColumn Width="144"
@@ -1300,9 +1338,11 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- 工时与进度 -->
+                                <!-- 工时（填报/实际双口径）与进度 -->
                                 <Grid Margin="0,0,0,14">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="14"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="14"/>
                                         <ColumnDefinition Width="*"/>
@@ -1310,8 +1350,12 @@
                                     <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
                                             CornerRadius="{DynamicResource RadiusMd}" Padding="14,10"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Border.ToolTip>
+                                            <TextBlock MaxWidth="260" TextWrapping="Wrap"
+                                                       Text="报给公司的工时口径，通常就是每天 8 小时。&#10;调休余额按此口径计算（公司只认填报工时）。"/>
+                                        </Border.ToolTip>
                                         <StackPanel>
-                                            <TextBlock Text="工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+                                            <TextBlock Text="填报工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
                                             <TextBox Text="{Binding CurrentRecord.Hours}" Style="{StaticResource Input}"
                                                      BorderThickness="0" Background="Transparent" Padding="0,4"
                                                      PreviewTextInput="HoursInput_PreviewTextInput"
@@ -1319,6 +1363,21 @@
                                         </StackPanel>
                                     </Border>
                                     <Border Grid.Column="2" Background="{DynamicResource SurfaceBrush}"
+                                            CornerRadius="{DynamicResource RadiusMd}" Padding="14,10"
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Border.ToolTip>
+                                            <TextBlock MaxWidth="260" TextWrapping="Wrap"
+                                                       Text="你自己真实投入的时长，仅供自己查看。&#10;留空显示「—」，不会与填报工时混同，也不参与调休余额计算。"/>
+                                        </Border.ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="实际工时 (小时)" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+                                            <TextBox Text="{Binding CurrentRecord.ActualHours}" Style="{StaticResource Input}"
+                                                     BorderThickness="0" Background="Transparent" Padding="0,4"
+                                                     PreviewTextInput="HoursInput_PreviewTextInput"
+                                                     TextChanged="FormField_Changed"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="4" Background="{DynamicResource SurfaceBrush}"
                                             CornerRadius="{DynamicResource RadiusMd}" Padding="14,10"
                                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <StackPanel>

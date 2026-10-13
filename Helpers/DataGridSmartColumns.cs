@@ -188,6 +188,7 @@ public static class SmartColumns
         if (Matches(header, path, "状态", "Status")) return Fixed(92, 84, 104);
         if (Matches(header, path, "优先级", "Priority")) return Fixed(84, 76, 96);
         if (Matches(header, path, "工时", "Hours")) return Fixed(80, 76, 92);
+        if (Matches(header, path, "实际工时", "ActualHours")) return Fixed(88, 80, 108);
         if (Matches(header, path, "进度", "Progress")) return Fixed(144, 132, 156);
 
         // 回收站专用列

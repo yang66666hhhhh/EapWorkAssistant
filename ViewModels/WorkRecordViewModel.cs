@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EapWorkAssistant.Data;
 using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
@@ -67,24 +68,32 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private int _highlightCount;
 
-    // ===== 调休余额 =====
-    /// <summary>年度周末加班工时（可安排调休，计入余额）</summary>
+    // ===== 调休余额（双口径：填报给领导看，实际给自己算账）=====
+    /// <summary>年度周末加班工时（**实际**口径，计入可调休余额）</summary>
     [ObservableProperty]
     private double _weekendOvertimeHours;
 
-    /// <summary>年度法定假日加班工时（300% 工资、不可调休，单独统计）</summary>
+    /// <summary>年度法定假日加班工时（**实际**口径，300% 工资、不可调休，单独统计）</summary>
     [ObservableProperty]
     private double _holidayOvertimeHours;
 
-    /// <summary>年度加班合计（周末 + 法定假日），仅用于展示</summary>
+    /// <summary>年度加班合计（**实际**口径）</summary>
     [ObservableProperty]
     private double _overtimeHours;
+
+    /// <summary>年度周末加班工时（**填报**口径，对外展示用）</summary>
+    [ObservableProperty]
+    private double _reportedWeekendOvertimeHours;
+
+    /// <summary>年度法定假日加班工时（**填报**口径）</summary>
+    [ObservableProperty]
+    private double _reportedHolidayOvertimeHours;
 
     /// <summary>年度已使用调休工时</summary>
     [ObservableProperty]
     private double _compLeaveUsed;
 
-    /// <summary>可用调休余额（周末加班 - 已调休，法定假日加班不计入）</summary>
+    /// <summary>可用调休余额（周末加班【实际】- 已调休，法定假日加班不计入）</summary>
     [ObservableProperty]
     private double _compLeaveAvailable;
 
@@ -180,7 +189,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     /// <summary>每列的默认排序方向</summary>
     private static readonly Dictionary<string, bool> DefaultSortAscending = new()
     {
-        ["WorkDate"] = false, ["IsHighlight"] = false, ["Hours"] = false,
+        ["WorkDate"] = false, ["IsHighlight"] = false, ["Hours"] = false, ["ActualHours"] = false,
         ["Progress"] = false, ["CreateTime"] = false,
         ["ProjectName"] = true, ["WorkType"] = true, ["Content"] = true, ["Achievement"] = true
     };
@@ -395,9 +404,11 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             if (!_compLeaveService.IsHolidayDataAvailable(year))
                 NotifyHolidayDataUnavailable(year);
 
-            OvertimeHours = balance.OvertimeHours;
-            WeekendOvertimeHours = balance.WeekendOvertimeHours;
-            HolidayOvertimeHours = balance.HolidayOvertimeHours;
+            OvertimeHours = balance.OvertimeActualHours;
+            WeekendOvertimeHours = balance.WeekendOvertimeActualHours;
+            HolidayOvertimeHours = balance.HolidayOvertimeActualHours;
+            ReportedWeekendOvertimeHours = balance.WeekendOvertimeReportHours;
+            ReportedHolidayOvertimeHours = balance.HolidayOvertimeReportHours;
             CompLeaveUsed = balance.CompLeaveUsed;
             CompLeaveAvailable = balance.CompLeaveAvailable;
         }
@@ -499,6 +510,8 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private const double DailyHoursHardCap = 15;
     private const double DailyHoursWarnCap = 12;
     private const double DailyHoursSoftCap = 10;
+    /// <summary>实际工时上限：仅用于拦截明显填错（真实投入不可能超过一天）</summary>
+    private const double MaxActualHours = 24;
     private const int MinContentLength = 5;
 
     /// <summary>
@@ -519,6 +532,14 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             return (false, "工时必须大于 0");
         if (CurrentRecord.Hours < MinRecordHours)
             return (false, $"单条工时不应少于 {MinRecordHours} 小时，过短的请合并到其他记录");
+        // 实际工时：留空（0）表示与填报工时相同；一旦填写就必须是合理正数。
+        // 不参与"每日累计"卡控——它记录的是真实投入，本来就可能超过公司允许的填报上限。
+        if (CurrentRecord.ActualHours < 0)
+            return (false, "实际工时不能为负数");
+        if (CurrentRecord.ActualHours > 0 && CurrentRecord.ActualHours < MinRecordHours)
+            return (false, $"实际工时不填则留空，填写了就不应少于 {MinRecordHours} 小时");
+        if (CurrentRecord.ActualHours > MaxActualHours)
+            return (false, $"实际工时不应超过 {MaxActualHours} 小时，请检查是否填错");
         if (CurrentRecord.Progress < 0 || CurrentRecord.Progress > 100)
             return (false, "进度应在 0-100% 之间");
 
@@ -615,7 +636,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         // 重置表单状态
         _suppressDirty = true;
-        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
+        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd"), Hours = DatabaseInitializer.DailyReportHours };
         HasProblem = false;
         IsEditing = false;
         IsFormDirty = false;
@@ -753,7 +774,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
 
         await _repo.DeleteAsync(CurrentRecord.Id);
         _suppressDirty = true;
-        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
+        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd"), Hours = DatabaseInitializer.DailyReportHours };
         HasProblem = false;
         IsEditing = false;
         IsFormDirty = false;
@@ -802,7 +823,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     private void NewRecord()
     {
         _suppressDirty = true;
-        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd") };
+        CurrentRecord = new WorkRecord { WorkDate = SelectedDate.ToString("yyyy-MM-dd"), Hours = DatabaseInitializer.DailyReportHours };
         HasProblem = false;
         IsEditing = false;
         IsFormDirty = false;

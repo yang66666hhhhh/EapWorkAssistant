@@ -17,7 +17,10 @@ namespace EapWorkAssistant.Data;
 public static class DatabaseInitializer
 {
     /// <summary>当前代码期望的最新 schema 版本。新增迁移时必须递增此常量。</summary>
-    private const int LatestSchemaVersion = 8;
+    private const int LatestSchemaVersion = 10;
+
+    /// <summary>每天「填报工时」的合计目标值（报给公司的标准工作日工时）。见 v10 迁移。</summary>
+    internal const double DailyReportHours = 8.0;
 
     private static readonly string DbPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -67,6 +70,7 @@ public static class DatabaseInitializer
             Problem TEXT,
             Solution TEXT,
             Hours REAL,
+            ActualHours REAL DEFAULT 0,
             Progress INTEGER,
             CreateTime TEXT,
             IsHighlight INTEGER DEFAULT 0,
@@ -268,7 +272,101 @@ public static class DatabaseInitializer
                 BackfillUniqueIds(c);
             }
         },
+        new Migration
+        {
+            Version = 9,
+            Name = "WorkRecord 增加实际工时 ActualHours",
+            // 实际工时用于「给自己算账」：现场填报常被限制在 8h 以内，填报口径无法反映真实投入。
+            // 存量记录补 0，读取时回落为填报工时（不改变历史语义）。
+            Apply = c => AddColumnIfMissing(c, "WorkRecord", "ActualHours", "REAL DEFAULT 0")
+        },
+        new Migration
+        {
+            Version = 10,
+            Name = "工时双口径数据搬迁：旧工时→实际工时，填报按天归 8h",
+            // 用户口径（2026-10-13 确认）：
+            //   - 填报工时 = 报给公司的口径，统一按「每天 8 小时」；
+            //   - 实际工时 = 真实投入，直接沿用历史填写的工时值。
+            // ⚠️ 必须按天分摊而非逐条设 8：历史上有 46 天是「一天多条」（最多 5 条），
+            //    逐条设 8h 会把一天放大成 16/24/40h。改为按当天各条实际工时占比分摊，当日合计恰为 8h。
+            Apply = MigrateToDualTrackHours
+        },
     ];
+
+    /// <summary>
+    /// v10 一次性数据搬迁：
+    ///   1) 历史「工时」→「实际工时」（仅处理尚未显式填写实际工时的记录，保留用户已录入的值）；
+    ///   2) 每一天的「填报工时」合计归为 <see cref="DailyReportHours"/>，按当天各条实际工时占比分摊。
+    /// 搬迁后用户可自行微调个别记录。
+    /// </summary>
+    private static void MigrateToDualTrackHours(SQLiteConnection connection)
+    {
+        // 1) 旧工时 → 实际工时（跳过已显式填过实际工时的记录，避免覆盖用户已录入的值）
+        ExecuteNonQuery(connection, @"
+            UPDATE WorkRecord
+            SET ActualHours = Hours
+            WHERE IsDeleted = 0 AND ActualHours = 0 AND Hours > 0");
+
+        // 2) 逐天把填报工时归一到 8h
+        var days = new List<string>();
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "SELECT DISTINCT WorkDate FROM WorkRecord WHERE IsDeleted = 0";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read()) days.Add(reader.GetString(0));
+        }
+
+        foreach (var day in days)
+        {
+            var rows = new List<(long Id, double Actual)>();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT Id, ActualHours FROM WorkRecord WHERE IsDeleted = 0 AND WorkDate = @day ORDER BY Id";
+                cmd.Parameters.AddWithValue("@day", day);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    rows.Add((reader.GetInt64(0), reader.IsDBNull(1) ? 0d : reader.GetDouble(1)));
+            }
+            if (rows.Count == 0) continue;
+
+            var shares = AllocateReportHours(rows.Select(r => r.Actual).ToList());
+            for (var i = 0; i < rows.Count; i++)
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = "UPDATE WorkRecord SET Hours = @hours WHERE Id = @id";
+                cmd.Parameters.AddWithValue("@hours", shares[i]);
+                cmd.Parameters.AddWithValue("@id", rows[i].Id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 把一天填报工时总额（<paramref name="dailyTotal"/>）按各条记录实际工时占比分摊。
+    /// 最后一条吸收四舍五入误差，保证当日合计**精确等于** dailyTotal；
+    /// 当天实际工时合计为 0 时退化为平均分摊，避免除零。
+    /// </summary>
+    internal static double[] AllocateReportHours(IReadOnlyList<double> actualHours, double dailyTotal = DailyReportHours)
+    {
+        var result = new double[actualHours.Count];
+        if (actualHours.Count == 0) return result;
+
+        var total = actualHours.Sum();
+        var assigned = 0d;
+        for (var i = 0; i < actualHours.Count; i++)
+        {
+            double share;
+            if (i == actualHours.Count - 1)
+                share = Math.Round(dailyTotal - assigned, 2);      // 末条吸收舍入误差
+            else if (total > 0)
+                share = Math.Round(dailyTotal * actualHours[i] / total, 2);
+            else
+                share = Math.Round(dailyTotal / actualHours.Count, 2); // 当天无工时 → 平均分
+            result[i] = share;
+            assigned += share;
+        }
+        return result;
+    }
 
     private static void ApplyMigrations(SQLiteConnection connection)
     {

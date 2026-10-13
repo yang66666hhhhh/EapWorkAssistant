@@ -1,4 +1,5 @@
 using EapWorkAssistant.Models;
+using EapWorkAssistant.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -239,42 +240,67 @@ namespace EapWorkAssistant.Controls
             {
                 // 补班日永远是周六/周日但属于工作日，法定假日也可能落在周末，
                 // 因此补班/假日判定必须排在"普通周末"之前，否则标记永远不显示。
+                // 判定规则统一走 DayStatusRules（与出勤总览、调休余额同一份事实来源）。
                 var isMakeup = makeupDates.Contains(date.Date);
                 var isHoliday = holidayDates.Contains(date.Date);
+                var kind = DayStatusRules.Classify(date, hasRecord, isHoliday, isMakeup);
 
-                // 优先级判定
-                if (hasRecord && isHoliday)
+                // 请假标记提取（工作日有记录时记录优先，其余情况请假优先于加班/未填标记）
+                bool TryGetLeave(out string color, out string label)
                 {
-                    dotColor = "amber";  // 法定假日加班已记录（300% 工资，不可调休）
+                    if (leaveMap.TryGetValue(date.Date, out var lt))
+                    {
+                        color = lt;
+                        label = lt.Length > 2 ? lt[..2] : lt;
+                        return true;
+                    }
+                    color = "";
+                    label = "";
+                    return false;
                 }
-                else if (hasRecord && (isMakeup || !isWeekend))
+
+                switch (kind)
                 {
-                    dotColor = "green";  // 工作日已填（含补班日）
-                }
-                else if (leaveMap.TryGetValue(date.Date, out var lt))
-                {
-                    dotColor = lt;       // 假期类型（年假/事假/病假/调休/出差/婚假）
-                    leaveLabel = lt.Length > 2 ? lt[..2] : lt;
-                }
-                else if (hasRecord && isWeekend)
-                {
-                    dotColor = "blue";   // 周末加班已记录
-                }
-                else if (isMakeup)
-                {
-                    dotColor = "red";    // 补班日未填
-                }
-                else if (isHoliday)
-                {
-                    dotColor = "purple"; // 法定假日
-                }
-                else if (isWeekend)
-                {
-                    dotColor = "gray";   // 普通周末
-                }
-                else
-                {
-                    dotColor = "red";    // 普通工作日未填
+                    case WorkKind.HolidayOvertime:
+                        dotColor = "amber";  // 法定假日加班已记录（300% 工资，不可调休）
+                        break;
+                    case WorkKind.Workday:
+                        dotColor = "green";  // 工作日已填（含补班日）
+                        break;
+                    case WorkKind.WeekendOvertime:
+                        if (TryGetLeave(out var leaveColor, out var leaveLabelW))
+                        {
+                            dotColor = leaveColor;
+                            leaveLabel = leaveLabelW;
+                        }
+                        else
+                        {
+                            dotColor = "blue";   // 周末加班已记录
+                        }
+                        break;
+                    default:
+                        if (TryGetLeave(out var leaveColor2, out var leaveLabel2))
+                        {
+                            dotColor = leaveColor2;  // 假期类型（年假/事假/病假/调休/出差/婚假）
+                            leaveLabel = leaveLabel2;
+                        }
+                        else if (isMakeup)
+                        {
+                            dotColor = "red";    // 补班日未填
+                        }
+                        else if (isHoliday)
+                        {
+                            dotColor = "purple"; // 法定假日
+                        }
+                        else if (isWeekend)
+                        {
+                            dotColor = "gray";   // 普通周末
+                        }
+                        else
+                        {
+                            dotColor = "red";    // 普通工作日未填
+                        }
+                        break;
                 }
             }
 

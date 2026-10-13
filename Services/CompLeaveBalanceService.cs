@@ -2,19 +2,6 @@ using EapWorkAssistant.Repositories;
 
 namespace EapWorkAssistant.Services;
 
-/// <summary>调休余额计算结果。</summary>
-public sealed record CompLeaveBalance(
-    /// <summary>年度周末加班工时（可安排调休，计入余额）。</summary>
-    double WeekendOvertimeHours,
-    /// <summary>年度法定假日加班工时（300% 工资、不可调休，单独统计）。</summary>
-    double HolidayOvertimeHours,
-    /// <summary>年度加班合计（周末 + 法定假日），仅用于展示。</summary>
-    double OvertimeHours,
-    /// <summary>年度已使用调休工时。</summary>
-    double CompLeaveUsed,
-    /// <summary>可用调休余额（周末加班 - 已调休，法定假日加班不计入）。</summary>
-    double CompLeaveAvailable);
-
 /// <summary>
 /// 调休余额计算：汇总全年工作记录工时、全年"调休"类请假工时，
 /// 再交给 <see cref="CompLeaveCalculator"/> 结合节假日/补班日历算出余额。
@@ -25,6 +12,9 @@ public sealed record CompLeaveBalance(
 /// 说明：本服务会自行确保指定年份的节假日数据已加载（<c>LoadYearAsync</c> 幂等），
 /// 调用方无需重复加载；数据是否可用通过 <see cref="IsHolidayDataAvailable"/> 查询，
 /// 由调用方决定如何提示用户（保持本类不含 UI 依赖）。
+///
+/// 工时口径：填报工时与（回落后的）实际工时同时传入；**余额按填报工时算**（公司口径），
+/// 实际工时仅供展示，详见 <see cref="CompLeaveResult"/>。
 /// </summary>
 public class CompLeaveBalanceService
 {
@@ -44,7 +34,7 @@ public class CompLeaveBalanceService
     public bool IsHolidayDataAvailable(int year) => HolidayService.Instance.IsYearAvailable(year);
 
     /// <summary>计算指定年份的调休余额。</summary>
-    public async Task<CompLeaveBalance> CalculateAsync(int year)
+    public async Task<CompLeaveResult> CalculateAsync(int year)
     {
         var yearStart = $"{year:D4}-01-01";
         var yearEnd = $"{year:D4}-12-31";
@@ -52,13 +42,14 @@ public class CompLeaveBalanceService
         // 确保假日数据已加载（幂等，重复调用不会重复拉取）
         await HolidayService.Instance.LoadYearAsync(year);
 
-        // 1. 全年工作记录 → (日期, 工时) 序列，跳过日期无法解析的脏数据
+        // 1. 全年工作记录 → (日期, 填报工时, 实际工时) 序列，跳过日期无法解析的脏数据。
+        //    实际工时为 0（未单独填）时回落到填报工时，保证历史数据口径不变。
         var allRecords = await _recordRepo.GetByDateRangeAsync(yearStart, yearEnd);
-        var workTuples = new List<(DateTime Date, double Hours)>();
+        var workTuples = new List<(DateTime Date, double ReportHours, double ActualHours)>();
         foreach (var r in allRecords)
         {
             if (DateTime.TryParse(r.WorkDate, out var date))
-                workTuples.Add((date, r.Hours));
+                workTuples.Add((date, r.Hours, r.ActualHours));
         }
 
         // 2. 全年"调休"类请假工时
@@ -67,12 +58,10 @@ public class CompLeaveBalanceService
             .Select(l => l.Hours);
 
         // 3. 计算余额（节假日/补班判定走 HolidayService）
-        var (weekendOt, holidayOt, overtimeHours, compUsed, available) = CompLeaveCalculator.Compute(
+        return CompLeaveCalculator.Compute(
             workTuples,
             compHours,
             HolidayService.Instance.IsHoliday,
             HolidayService.Instance.IsMakeupWorkday);
-
-        return new CompLeaveBalance(weekendOt, holidayOt, overtimeHours, compUsed, available);
     }
 }

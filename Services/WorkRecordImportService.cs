@@ -86,6 +86,10 @@ public class WorkRecordImportService
             if (r.Progress < MinProgress || r.Progress > MaxProgress)
                 r.Progress = Math.Clamp(r.Progress, MinProgress, MaxProgress);
 
+            // 实际工时（越界视为未填写 → 归零后回落为填报工时）：不因为一个附加字段丢弃整条记录
+            if (r.ActualHours < MinHours || r.ActualHours > MaxHours)
+                r.ActualHours = 0;
+
             result.Valid.Add(r);
         }
 

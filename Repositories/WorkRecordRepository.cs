@@ -50,8 +50,8 @@ public class WorkRecordRepository : SqliteRepository
             if (string.IsNullOrWhiteSpace(record.UniqueId))
                 record.UniqueId = WorkRecordIdentityHelper.GenerateUniqueId(record);
             var id = await connection.QuerySingleAsync<int>(@"
-                INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, Progress, IsHighlight, HighlightNote, CreateTime, UniqueId)
-                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @Progress, @IsHighlight, @HighlightNote, @CreateTime, @UniqueId);
+                INSERT INTO WorkRecord (WorkDate, ProjectName, WorkType, Content, Achievement, Problem, Solution, Hours, ActualHours, Progress, IsHighlight, HighlightNote, CreateTime, UniqueId)
+                VALUES (@WorkDate, @ProjectName, @WorkType, @Content, @Achievement, @Problem, @Solution, @Hours, @ActualHours, @Progress, @IsHighlight, @HighlightNote, @CreateTime, @UniqueId);
                 SELECT last_insert_rowid();",
                 record);
             record.Id = id;
@@ -67,7 +67,7 @@ public class WorkRecordRepository : SqliteRepository
             return await connection.ExecuteAsync(@"
                 UPDATE WorkRecord SET WorkDate=@WorkDate, ProjectName=@ProjectName, WorkType=@WorkType,
                 Content=@Content, Achievement=@Achievement, Problem=@Problem, Solution=@Solution,
-                Hours=@Hours, Progress=@Progress, IsHighlight=@IsHighlight, HighlightNote=@HighlightNote,
+                Hours=@Hours, ActualHours=@ActualHours, Progress=@Progress, IsHighlight=@IsHighlight, HighlightNote=@HighlightNote,
                 UniqueId=@UniqueId WHERE Id=@Id",
                 record);
         });
@@ -299,7 +299,7 @@ public class WorkRecordRepository : SqliteRepository
     private static readonly HashSet<string> AllowedSortColumns = new(StringComparer.OrdinalIgnoreCase)
     {
         "WorkDate", "IsHighlight", "ProjectName", "WorkType", "Content",
-        "Achievement", "Hours", "Progress", "CreateTime"
+        "Achievement", "Hours", "ActualHours", "Progress", "CreateTime"
     };
 
     public async Task<(IEnumerable<WorkRecord> Records, int TotalCount, double TotalHours, int HighlightCount)>
