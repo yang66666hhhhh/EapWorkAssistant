@@ -691,6 +691,15 @@ if (DataContext is KnowledgeViewModel vm)
 - `OpenNewForm()` 已是「新增记录」按钮与 Ctrl+N 的**唯一入口**（`OpenForm_Click` 退化为 `=> OpenNewForm()`）；抽屉已开时只聚焦、不重置（避免清掉编辑态/未保存输入）。
 - ⚠️ **`ShortcutNewEnabled` 默认 true 但可能被用户关掉**：该开关关闭时 `AddBinding` 直接不注册，Ctrl+N 完全无反应（不是本功能 bug）。排查快捷键「没反应」先看 `config.json` 的 `EnableShortcuts` 与 `Shortcut*Enabled`。
 
+### 8.20 自绘标题栏（WindowChrome，2026-10-13 新增）
+- 结构：`MainWindow.xaml` 用 `shell:WindowChrome`（`CaptionHeight=40`、`ResizeBorderThickness=6`、`GlassFrameThickness=0`、`UseAeroCaptionButtons=False`）接管 OS 标题栏；Window 内容变为 `Grid x:Name="RootLayout"`（Row0 = 40px 标题栏，Row1 = 原侧边栏 + 内容区）。
+- 标题栏底色用 `SidebarBgBrush`：⚠️ 该色**运行时被 `ThemeService` 覆盖**（亮色 `#F0F4F8`、暗色 `#0F1726`），与侧边栏**无缝衔接**；标题文字用 `TextPrimaryBrush`（该组合已被侧边栏 Logo 文字验证过两套主题都可读）。
+- ⚠️ **caption 区域内的可交互控件必须设 `shell:WindowChrome.IsHitTestVisibleInChrome="True"`**，否则被当作拖拽区「点不动」。已封在 `WindowControlButton` / `WindowCloseButton` 样式里（`Resources/Styles.xaml`，同时 `Focusable=False` 不占 Tab 链）；关闭按钮悬停为 `DangerBrush` 红底 + 白色图标。
+- 标题栏左侧的品牌区设 `IsHitTestVisible="False"`，保证整条都是拖拽区；双击最大化 / 拖动 / 右边缘缩放由 WindowChrome 自动提供（无需手写）。
+- 最大化/还原图标切换：`StateChanged` → `UpdateMaxRestoreVisual()` 切 `IconMaximize`/`IconRestore` 的 `Visibility` 与 ToolTip。
+- ⚠️ **不要为「最大化裁切」加 Margin 补丁**：实测 WindowChrome 最大化时**窗口矩形**会外扩 `(SM_CXSIZEFRAME + SM_CXPADDEDBORDER)` = 7.2 DIP/边（本机 120 DPI），但**客户端矩形恰好等于工作区**（1920×1042 实测吻合），内容不会被裁。那 9px 只在 `PrintWindow` 截图里可见，真实屏幕上位于屏幕外。**加 Margin 反而会露出缝隙。**
+- 截图验证手法（可复用）：`PrintWindow(hwnd, hdc, 0x00000002 /*PW_RENDERFULLCONTENT*/)` 可捕获**非前台** WPF 窗口；`Add-Type` 需 `-ReferencedAssemblies 'System.Drawing'`。判定内容是否被裁：比较窗口矩形（`GetWindowRect`）与 `SystemParameters.WorkArea`，再看截图左右首个非底色像素的坐标。
+
 ---
 
 ## 9. AI 行为约束红线

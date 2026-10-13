@@ -6,6 +6,7 @@
         xmlns:vm="clr-namespace:EapWorkAssistant.ViewModels"
         xmlns:views="clr-namespace:EapWorkAssistant.Views"
         xmlns:svc="clr-namespace:EapWorkAssistant.Services"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="EAP Work Assistant" Height="800" Width="1320"
         Icon="pack://application:,,,/Resources/app.ico"
         WindowStartupLocation="CenterScreen"
@@ -14,13 +15,70 @@
         TextElement.Foreground="{DynamicResource TextPrimaryBrush}"
         ToolTipService.InitialShowDelay="150"
         ToolTipService.BetweenShowDelay="50">
+
+    <!-- 自绘标题栏：接管 OS 标题栏（CaptionHeight 定义顶部拖拽/双击最大化区域），
+         保留系统缩放边框（ResizeBorderThickness），不使用系统标题按钮。 -->
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                            ResizeBorderThickness="6"
+                            GlassFrameThickness="0"
+                            CornerRadius="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
     <Window.Resources>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="RootLayout">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== 自绘标题栏（与侧边栏同色，左侧无缝衔接） ===== -->
+        <Border Grid.Row="0" x:Name="TitleBar"
+                Background="{DynamicResource SidebarBgBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <!-- 空白区域即拖拽区 / 双击最大化，由 WindowChrome.CaptionHeight 自动处理 -->
+                <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center"
+                            IsHitTestVisible="False">
+                    <Image Source="pack://application:,,,/Resources/app.ico" Width="16" Height="16"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="EAP Work Assistant" Margin="8,0,0,0" FontSize="12.5" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+                    <Button x:Name="TitleBarMinimize" Style="{StaticResource WindowControlButton}"
+                            Click="TitleBarMinimize_Click" ToolTip="最小化">
+                        <Path Data="M0,0 H10" StrokeThickness="1"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Button>
+                    <Button x:Name="TitleBarMaxRestore" Style="{StaticResource WindowControlButton}"
+                            Click="TitleBarMaxRestore_Click" ToolTip="最大化">
+                        <Grid>
+                            <Path x:Name="IconMaximize" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" StrokeThickness="1"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                            <Path x:Name="IconRestore" Data="M2.5,0.5 H9.5 V7.5 H2.5 Z M0.5,2.5 H7.5 V9.5 H0.5 Z"
+                                  StrokeThickness="1" Visibility="Collapsed"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="TitleBarClose" Style="{StaticResource WindowCloseButton}"
+                            Click="TitleBarClose_Click" ToolTip="关闭">
+                        <Path Data="{StaticResource IconClose}" Width="10" Height="10" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===== 主体（原布局整体下移一行） ===== -->
+        <Grid Grid.Row="1">
         <Grid.ColumnDefinitions>
             <!-- 侧边栏宽度：展开 240（建议范围 220–280）、折叠 72（图标轨道）-->
             <ColumnDefinition x:Name="SidebarColumn" Width="240"/>
@@ -653,6 +711,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Border>
+        </Grid>
         </Grid>
     </Grid>
 </Window>

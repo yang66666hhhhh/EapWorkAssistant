@@ -33,6 +33,32 @@ public partial class MainWindow : Window
         RestoreWindowState();
         Loaded += MainWindow_Loaded;
         SizeChanged += MainWindow_SizeChanged;
+        StateChanged += MainWindow_StateChanged;
+        UpdateMaxRestoreVisual();
+    }
+
+    // ===== 自绘标题栏窗口按钮 =====
+
+    private void TitleBarMinimize_Click(object sender, RoutedEventArgs e)
+        => WindowState = WindowState.Minimized;
+
+    private void TitleBarMaxRestore_Click(object sender, RoutedEventArgs e)
+        => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+
+    private void TitleBarClose_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e) => UpdateMaxRestoreVisual();
+
+    /// <summary>切换右上角「最大化/还原」图标与提示文案。</summary>
+    private void UpdateMaxRestoreVisual()
+    {
+        var maximized = WindowState == WindowState.Maximized;
+        if (IconMaximize != null)
+            IconMaximize.Visibility = maximized ? Visibility.Collapsed : Visibility.Visible;
+        if (IconRestore != null)
+            IconRestore.Visibility = maximized ? Visibility.Visible : Visibility.Collapsed;
+        if (TitleBarMaxRestore != null)
+            TitleBarMaxRestore.ToolTip = maximized ? "向下还原" : "最大化";
     }
 
     /// <summary>
