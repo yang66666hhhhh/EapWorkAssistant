@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EapWorkAssistant.Views;
 
@@ -35,6 +36,7 @@ public partial class WorkRecordView : UserControl
             oldVm.PropertyChanged -= OnFilterPropertyChanged;
             oldVm.OpenLeaveDialogRequested -= OnOpenLeaveDialog;
             oldVm.EditLeaveRecordRequested -= OnEditLeaveRecord;
+            oldVm.OpenNewFormRequested -= OpenNewForm;
         }
         if (e.NewValue is WorkRecordViewModel newVm)
         {
@@ -44,6 +46,7 @@ public partial class WorkRecordView : UserControl
             newVm.PropertyChanged += OnFilterPropertyChanged;
             newVm.OpenLeaveDialogRequested += OnOpenLeaveDialog;
             newVm.EditLeaveRecordRequested += OnEditLeaveRecord;
+            newVm.OpenNewFormRequested += OpenNewForm;
         }
         SyncDateDisplay();
     }
@@ -193,9 +196,20 @@ public partial class WorkRecordView : UserControl
 
     // ===== 浮窗抽屉动画 =====
 
-    private void OpenForm_Click(object sender, RoutedEventArgs e)
+    private void OpenForm_Click(object sender, RoutedEventArgs e) => OpenNewForm();
+
+    /// <summary>
+    /// 打开「新增记录」抽屉并聚焦首个输入框。
+    /// 供「新增记录」按钮（Click）与 Ctrl+N 快捷键（VM 事件）共用。
+    /// </summary>
+    public void OpenNewForm()
     {
-        if (FormDrawer.IsOpen) return;
+        // 抽屉已打开：不重置已有输入（可能是编辑态或有未保存内容），仅把焦点移回输入框
+        if (FormDrawer.IsOpen)
+        {
+            FocusFirstInput();
+            return;
+        }
 
         // 新增模式：重置表单
         if (DataContext is WorkRecordViewModel vm)
@@ -205,6 +219,62 @@ public partial class WorkRecordView : UserControl
         }
 
         FormDrawer.IsOpen = true;
+        OfferDraftRestore();  // 模态询问会阻塞，返回后再聚焦，避免焦点被对话框抢走
+        FocusFirstInput();
+    }
+
+    /// <summary>把键盘焦点移到抽屉内首个文本输入框（工作内容）。等抽屉滑入布局完成后再聚焦。</summary>
+    private void FocusFirstInput()
+    {
+        // 抽屉内容（Drawer.Body）处在控件自身的命名域内，x:Name 取不到 → 走视觉树查找
+        Dispatcher.BeginInvoke(() =>
+        {
+            var box = FindFirstFocusableTextBox(FormDrawer);
+            if (box == null) return;
+            box.Focus();
+            Keyboard.Focus(box);
+        }, System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    /// <summary>在视觉树中深度优先查找第一个可聚焦的 TextBox（跳过只读/禁用项）。</summary>
+    private static TextBox? FindFirstFocusableTextBox(DependencyObject root)
+    {
+        if (root is TextBox tb && tb.IsEnabled && tb.Focusable && !tb.IsReadOnly)
+            return tb;
+
+        int count = VisualTreeHelper.GetChildrenCount(root);
+        for (int i = 0; i < count; i++)
+        {
+            var found = FindFirstFocusableTextBox(VisualTreeHelper.GetChild(root, i));
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    /// <summary>打开新建抽屉后：若存在上次未完成的草稿，询问是否继续编辑。</summary>
+    private void OfferDraftRestore()
+    {
+        if (DataContext is not WorkRecordViewModel vm) return;
+
+        var draft = DraftService.Instance.Get<WorkRecord>();
+        if (draft == null) return;
+
+        var savedAt = DraftService.Instance.GetSavedAt<WorkRecord>();
+        var summary = !string.IsNullOrWhiteSpace(draft.ProjectName)
+            ? $"{draft.ProjectName} · {draft.Content}"
+            : draft.Content;
+        if (string.IsNullOrWhiteSpace(summary)) summary = "（未填写内容）";
+
+        bool restore = ConfirmDialog.Show(
+            $"发现上次未完成的工作记录草稿（保存于 {savedAt}），是否继续编辑？\n\n{summary}",
+            "恢复草稿？",
+            ConfirmDialogType.Info,
+            "恢复", "放弃");
+        // 读取即消费：无论恢复与否都清掉，避免反复打扰。
+        DraftService.Instance.Clear<WorkRecord>();
+        if (!restore) return;
+
+        vm.RestoreDraft(draft);
     }
 
     private void EditRow_Click(object sender, RoutedEventArgs e)
@@ -335,10 +405,19 @@ public partial class WorkRecordView : UserControl
     {
         if (DataContext is WorkRecordViewModel vm)
         {
+            SaveDraftOnClose(vm);
             vm.IsDrawerOpen = false;
             vm.IsFormDirty = false;
             vm.NewRecordCommand.Execute(null);
         }
+    }
+
+    /// <summary>关闭抽屉时静默保留「新增」草稿，供下次打开新建时恢复。</summary>
+    private static void SaveDraftOnClose(WorkRecordViewModel vm)
+    {
+        if (vm.CurrentRecord.Id > 0) return;  // 编辑态数据本就在库中，不占草稿位
+        if (!vm.HasUnsavedInput()) return;    // 空表单 / 已自动保存成功 → 不写文件
+        DraftService.Instance.Save(vm.CurrentRecord);
     }
 
     /// <summary>工时输入验证：只允许数字和小数点</summary>

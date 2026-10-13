@@ -285,14 +285,19 @@ public partial class MainWindow : Window
             }
         });
 
-        // 新增记录
+        // 新增记录：切到工作记录页 → 打开「新增」抽屉 → 聚焦首个输入框
         AddBinding(cfg.ShortcutNew, Key.N, cfg.ShortcutNewEnabled, () =>
         {
-            if (DataContext is MainViewModel vm)
-            {
-                vm.NavigateToCommand.Execute(ViewNames.WorkRecord);
-                vm.WorkRecord.NewRecordCommand.Execute(null);
-            }
+            if (DataContext is not MainViewModel vm) return;
+
+            // NavigateTo 可能被「未保存确认」拦下（用户取消则留在原页），此时不应打开抽屉
+            vm.NavigateToCommand.Execute(ViewNames.WorkRecord);
+            if (!ReferenceEquals(vm.CurrentView, vm.WorkRecord)) return;
+
+            // 视图由 DataTemplate 在下一轮布局中重建，须等其 DataContextChanged 完成订阅后再发信号
+            Dispatcher.BeginInvoke(
+                vm.WorkRecord.RequestNewForm,
+                System.Windows.Threading.DispatcherPriority.Loaded);
         });
 
         // 保存记录

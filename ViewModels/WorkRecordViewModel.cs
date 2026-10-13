@@ -44,6 +44,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     /// <summary>请求打开请假对话框（编辑模式），参数为要编辑的记录</summary>
     public event Action<LeaveRecord>? EditLeaveRecordRequested;
 
+    /// <summary>请求打开「新增记录」抽屉（Ctrl+N 快捷键用）。View 订阅后执行打开抽屉 + 聚焦首个输入框。</summary>
+    public event Action? OpenNewFormRequested;
+
     [ObservableProperty]
     private ObservableCollection<WorkRecord> _records = new();
 
@@ -832,6 +835,30 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         SaveButtonText = "保存记录";
         SelectedDailyRecord = null;
         _suppressDirty = false;
+    }
+
+    /// <summary>
+    /// 请求打开「新增记录」抽屉（Ctrl+N 快捷键入口）。
+    /// 只负责发信号——抽屉的打开与聚焦属视图职责，由 WorkRecordView 订阅 <see cref="OpenNewFormRequested"/> 完成。
+    /// </summary>
+    public void RequestNewForm() => OpenNewFormRequested?.Invoke();
+
+    /// <summary>
+    /// 把「新建」草稿灌回表单并标记为脏（关闭时照常二次确认）。由 View 在用户选择恢复草稿时调用。
+    /// </summary>
+    public void RestoreDraft(WorkRecord draft)
+    {
+        if (draft == null) return;
+        _suppressDirty = true;
+        CurrentRecord = draft;
+        SelectedDailyRecord = null;
+        IsEditing = false;
+        FormTitle = "新增记录";
+        SaveButtonText = "保存记录";
+        _suppressDirty = false;
+        // 顺序关键：先灌 CurrentRecord 再设 HasProblem —— HasProblem=false 会清空 Problem/Solution
+        HasProblem = !string.IsNullOrWhiteSpace(draft.Problem);
+        IsFormDirty = true;
     }
 
     public void MarkDirty()

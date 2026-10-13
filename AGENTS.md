@@ -670,6 +670,27 @@ if (DataContext is KnowledgeViewModel vm)
 - 顺序：结果就绪后**默认高亮首项**（`SelectedSearchIndex = 0`），关键词一变即清 -1，避免"上一条结果的高亮"错位到新结果。
 - **位移规则唯一事实来源**：`Helpers/SearchNavigationHelper.Move(current, delta, count)`（纯静态、可单测，含环绕与边界），ViewModel 只做状态写入——与 `DayStatusRules` 同一范式，禁止在 View/VM 里另写取模逻辑。
 
+### 8.18 表单草稿恢复（2026-10-13 新增）
+- 服务：`Services/DraftService.cs`（`Instance` 单例）。泛型 API `Save<T> / Get<T> / Clear<T> / Has<T> / GetSavedAt<T>`，**键统一取 `typeof(T).Name`**（`Knowledge` / `Issue` / `WorkRecord`），调用方不维护字符串常量。构造可传自定义路径（`new DraftService(path)`）供单测隔离。
+- 路径：`%LOCALAPPDATA%\EapWorkAssistant\drafts.json`，结构 `{"<类型名>":{"Json":"<实体JSON>","SavedAt":"yyyy-MM-dd HH:mm:ss"}}`。
+- **只对新增态（`Id == 0`）存取草稿**：编辑态数据本就在库中，重开即可，不占草稿位。
+- 写时机：各 View 的 `FormDrawer_Closed` **首行**调 `SaveDraftOnClose(vm)`，条件 `CurrentItem.Id == 0 && vm.HasUnsavedInput()`。⚠️ **顺序不能反** —— 其后的代码会 `IsFormDirty = false` 并 `NewCommand.Execute(null)` 重置表单。保存成功路径 `IsFormDirty` 已为 false，天然不写草稿。
+- 读时机：各 View 的 `OpenForm_Click` 末尾调 `OfferDraftRestore()`（在 `FormDrawer.IsOpen = true` 之后）。**读取即消费**：`Get` 后立刻 `Clear`，无论用户选"恢复"还是"放弃"，避免反复打扰。
+- 恢复动作收在 VM：`KnowledgeViewModel.RestoreDraft` / `IssueViewModel.RestoreDraft` / `WorkRecordViewModel.RestoreDraft`（`_suppressDirty` 在 `WorkRecordViewModel` 是 **private**，View 不可直接写，必须走方法）。恢复后置 `IsFormDirty = true`，关闭时照常二次确认。
+- ⚠️ `WorkRecordViewModel.RestoreDraft` 中 **必须先灌 `CurrentRecord` 再设 `HasProblem`** —— `HasProblem = false` 的 `PropertyChanged` 处理会清空 `Problem/Solution`。
+- 容错：加载/解析失败一律吞异常 + `Logger.Error`；损坏的条目在 `Get` 时自动剔除并落盘。草稿是锦上添花，**绝不能成为新的崩溃点**。
+
+### 8.19 快捷键跨视图触发抽屉（Ctrl+N 打开「新增记录」，2026-10-13 新增）
+- **问题**：抽屉由 `WorkRecordView.OpenForm_Click` 打开，属视图职责；而 MainWindow 的 `InputBindings` 拿不到该视图实例，无法直接开抽屉。旧实现只 `NewRecordCommand.Execute(null)` 重置表单 —— 按了像没按。
+- **范式（VM 事件 + View 订阅，本页已有同类：`RecordSaved`/`OpenLeaveDialogRequested`）**：
+  1. `WorkRecordViewModel` 声明 `public event Action? OpenNewFormRequested;` + `public void RequestNewForm() => OpenNewFormRequested?.Invoke();`（C# 事件只能在声明类内 `Invoke`，故需方法转发）。
+  2. `WorkRecordView.OnDataContextChanged` **订阅/退订**该事件，处理器即 `OpenNewForm()`。
+  3. `MainWindow.RegisterAllShortcuts` 的 Ctrl+N：`NavigateToCommand.Execute(WorkRecord)` → 校验 `ReferenceEquals(vm.CurrentView, vm.WorkRecord)`（被「未保存确认」拦下则不开）→ **`Dispatcher.BeginInvoke(vm.WorkRecord.RequestNewForm, DispatcherPriority.Loaded)`**。
+- ⚠️ **必须延后到 `DispatcherPriority.Loaded`**：跨页时 `WorkRecordView` 由 `ContentControl` 的隐式 `DataTemplate` 在**下一轮布局（Render 优先级 7）**中才创建，其 `OnDataContextChanged`（订阅时机）也在此刻；而 `Loaded`(6) < `Render`(7)，故排队在 Loaded 的信号必然晚于订阅。**若在 `NavigateTo` 后立即 `Invoke`，事件无订阅者 → 静默失效。**（探针日志实证顺序：`queued @Loaded` → `View subscribed (IsLoaded=False)` → `OpenNewForm entered`。）
+- **抽屉内聚焦首个输入框**：⚠️ `Drawer.Body` 处于控件自身的**命名域**，内部 `x:Name` 会报 `MC3093`（已注册名称）且代码后置取不到 → 改用视觉树深度优先遍历 `FindFirstFocusableTextBox(FormDrawer)`（跳过只读/禁用）。聚焦须 `Dispatcher.BeginInvoke(..., DispatcherPriority.Input)`，等滑入动画布局完成；有草稿恢复时 `OfferDraftRestore()` 会模态阻塞，须在其**之后**聚焦，否则焦点被对话框抢走。
+- `OpenNewForm()` 已是「新增记录」按钮与 Ctrl+N 的**唯一入口**（`OpenForm_Click` 退化为 `=> OpenNewForm()`）；抽屉已开时只聚焦、不重置（避免清掉编辑态/未保存输入）。
+- ⚠️ **`ShortcutNewEnabled` 默认 true 但可能被用户关掉**：该开关关闭时 `AddBinding` 直接不注册，Ctrl+N 完全无反应（不是本功能 bug）。排查快捷键「没反应」先看 `config.json` 的 `EnableShortcuts` 与 `Shortcut*Enabled`。
+
 ---
 
 ## 9. AI 行为约束红线
