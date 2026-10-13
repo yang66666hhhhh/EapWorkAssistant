@@ -1,6 +1,7 @@
 using EapWorkAssistant.Controls;
 using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Models;
+using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,6 +49,29 @@ public partial class IssueView : UserControl
             vm._suppressDirty = false;
         }
         FormDrawer.IsOpen = true;
+        OfferDraftRestore();
+    }
+
+    /// <summary>打开新建抽屉后：若存在上次未完成的草稿，询问是否继续编辑。</summary>
+    private void OfferDraftRestore()
+    {
+        if (DataContext is not IssueViewModel vm) return;
+
+        var draft = DraftService.Instance.Get<Issue>();
+        if (draft == null) return;
+
+        var savedAt = DraftService.Instance.GetSavedAt<Issue>();
+        var title = string.IsNullOrWhiteSpace(draft.Title) ? "（未填写标题）" : draft.Title;
+        bool restore = ConfirmDialog.Show(
+            $"发现上次未完成的问题草稿（保存于 {savedAt}），是否继续编辑？\n\n标题：{title}",
+            "恢复草稿？",
+            ConfirmDialogType.Info,
+            "恢复", "放弃");
+        // 读取即消费：无论恢复与否都清掉，避免反复打扰。
+        DraftService.Instance.Clear<Issue>();
+        if (!restore) return;
+
+        vm.RestoreDraft(draft);
     }
 
     private void EditRow_Click(object sender, RoutedEventArgs e)
@@ -70,14 +94,23 @@ public partial class IssueView : UserControl
         }
     }
 
-    // 关闭完成后：重置脏标记并回到新增态（与原 CloseDrawer 回调一致）
+    // 关闭完成后：静默留存草稿 → 重置脏标记并回到新增态
     private void FormDrawer_Closed(object sender, RoutedEventArgs e)
     {
         if (DataContext is IssueViewModel vm)
         {
+            SaveDraftOnClose(vm);
             vm.IsFormDirty = false;
             vm.NewCommand.Execute(null);
         }
+    }
+
+    /// <summary>关闭抽屉时静默保留「新增」草稿，供下次打开新建时恢复。</summary>
+    private static void SaveDraftOnClose(IssueViewModel vm)
+    {
+        if (vm.CurrentItem.Id > 0) return;  // 编辑态数据本就在库中，不占草稿位
+        if (!vm.HasUnsavedInput()) return;  // 空表单不写文件
+        DraftService.Instance.Save(vm.CurrentItem);
     }
 
     // ===== 表格交互打磨：双击编辑 =====

@@ -236,6 +236,19 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
         _suppressDirty = false;
     }
 
+    /// <summary>
+    /// 把「新建」草稿灌回表单并标记为脏（关闭时照常二次确认）。由 View 在用户选择恢复草稿时调用。
+    /// </summary>
+    public void RestoreDraft(Knowledge draft)
+    {
+        if (draft == null) return;
+        _suppressDirty = true;
+        CurrentItem = draft;
+        SelectedItem = null;
+        _suppressDirty = false;
+        IsFormDirty = true;
+    }
+
     // ===== JSON 导出 / 导入 =====
     protected override string EmptyExportMessage => "没有可导出的知识";
     protected override string ExportSuccessMessage => "知识库已导出为 JSON";

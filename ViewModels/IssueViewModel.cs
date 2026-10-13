@@ -201,6 +201,18 @@ public partial class IssueViewModel : PagedCollectionViewModelBase<Issue>
         _suppressDirty = false;
     }
 
+    /// <summary>
+    /// 把「新建」草稿灌回表单并标记为脏（关闭时照常二次确认）。由 View 在用户选择恢复草稿时调用。
+    /// </summary>
+    public void RestoreDraft(Issue draft)
+    {
+        if (draft == null) return;
+        _suppressDirty = true;
+        CurrentItem = draft;
+        _suppressDirty = false;
+        IsFormDirty = true;
+    }
+
     // ===== JSON 导出 / 导入 =====
     protected override string EmptyExportMessage => "没有可导出的问题";
     protected override string ExportSuccessMessage => "问题库已导出为 JSON";
