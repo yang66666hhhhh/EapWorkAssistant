@@ -1,6 +1,7 @@
 using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Services;
 using EapWorkAssistant.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,6 +18,9 @@ public partial class MainWindow : Window
     // 响应式阈值：窄于 900 自动折叠，宽于 1200 自动展开
     private const double AutoCollapseBelow = 900;
     private const double AutoExpandAbove = 1200;
+    // 还原窗口几何时的最小可用尺寸（低于此值视为脏数据，回退默认尺寸）
+    private const double MinRestoreWidth = 960;
+    private const double MinRestoreHeight = 640;
 
     private readonly List<KeyBinding> _dynamicBindings = new();
     private bool _autoResponsive = true;
@@ -26,8 +30,81 @@ public partial class MainWindow : Window
         InitializeComponent();
         // 窗口入场：先置全透明，Loaded 后淡入，消除启动"硬切"的出现感
         Opacity = 0;
+        RestoreWindowState();
         Loaded += MainWindow_Loaded;
         SizeChanged += MainWindow_SizeChanged;
+    }
+
+    /// <summary>
+    /// 还原上次窗口尺寸/位置/最大化状态。
+    /// - 尺寸低于最小可用值或未记录 → 沿用 XAML 默认尺寸；
+    /// - 位置未记录或落在已拔掉的显示器上 → 沿用居中（WindowStartupLocation）；
+    /// - 最大化状态在构造期设置，避免显示后跳变。
+    /// </summary>
+    private void RestoreWindowState()
+    {
+        var cfg = ConfigService.Instance;
+
+        if (cfg.WindowWidth >= MinRestoreWidth && cfg.WindowHeight >= MinRestoreHeight)
+        {
+            Width = cfg.WindowWidth;
+            Height = cfg.WindowHeight;
+        }
+
+        if (cfg.WindowLeft.HasValue && cfg.WindowTop.HasValue
+            && IsWindowOnScreen(cfg.WindowLeft.Value, cfg.WindowTop.Value))
+        {
+            // 位置由配置决定，关闭 CenterScreen 自动居中
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = cfg.WindowLeft.Value;
+            Top = cfg.WindowTop.Value;
+        }
+
+        if (cfg.WindowMaximized)
+            WindowState = WindowState.Maximized;
+    }
+
+    /// <summary>
+    /// 校验还原坐标是否落在当前虚拟屏幕内（多屏/换显示器场景下窗口可能落在不存在的区域）。
+    /// 以窗口标题栏左侧一小片区域为探针，只要该点可见即可正常还原。
+    /// </summary>
+    private static bool IsWindowOnScreen(double left, double top)
+    {
+        var vl = SystemParameters.VirtualScreenLeft;
+        var vt = SystemParameters.VirtualScreenTop;
+        var vr = vl + SystemParameters.VirtualScreenWidth;
+        var vb = vt + SystemParameters.VirtualScreenHeight;
+
+        var probeX = left + 120;
+        var probeY = top + 20;
+        return probeX >= vl && probeX <= vr && probeY >= vt && probeY <= vb;
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        PersistWindowState();
+    }
+
+    /// <summary>
+    /// 关闭时保存窗口几何。最大化时 Left/Top/Width/Height 反映的是最大化尺寸，
+    /// 必须改用 RestoreBounds 才能记住"还原后"的位置与大小。
+    /// </summary>
+    private void PersistWindowState()
+    {
+        var maximized = WindowState == WindowState.Maximized;
+        var bounds = maximized
+            ? RestoreBounds
+            : new Rect(Left, Top, Width, Height);
+
+        // 未记录的极端情况（RestoreBounds 可能为 Empty）跳过，避免写入 0/NaN 脏值
+        if (bounds.IsEmpty
+            || double.IsNaN(bounds.Left) || double.IsNaN(bounds.Top)
+            || double.IsNaN(bounds.Width) || double.IsNaN(bounds.Height)
+            || bounds.Width < MinRestoreWidth || bounds.Height < MinRestoreHeight)
+            return;
+
+        ConfigService.Instance.SaveWindowState(bounds.Width, bounds.Height, bounds.Left, bounds.Top, maximized);
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -37,28 +114,38 @@ public partial class MainWindow : Window
 
         // 设置页修改快捷键后由自身重新注册（解耦 ViewModel 对 View 的直接引用）
         if (DataContext is MainViewModel vm)
+        {
             vm.Settings.ShortcutsChanged += RegisterAllShortcuts;
+
+            // 还原侧边栏折叠状态：窄屏优先自动折叠，否则尊重用户上次手动设置
+            var narrow = ActualWidth < AutoCollapseBelow;
+            if (narrow || ConfigService.Instance.SidebarCollapsed)
+            {
+                ApplyCollapsedVisuals();
+                vm.IsSidebarCollapsed = true;
+            }
+            // 用户显式保存了"宽屏下也折叠"的状态时，关闭响应式自动展开，避免启动即被还原
+            _autoResponsive = !(ConfigService.Instance.SidebarCollapsed && !narrow);
+        }
 
         // 应用当前字体大小缩放（Initialize 时窗口尚未就绪，需在此处补设）
         ApplyUIScale();
 
-        // 窄屏启动（如平板/小窗）默认折叠侧边栏，避免内容被挤压
-        if (DataContext is MainViewModel mvm && ActualWidth < AutoCollapseBelow)
-        {
-            SidebarColumn.Width = new GridLength(CollapsedSidebarWidth, GridUnitType.Pixel);
-            mvm.IsSidebarCollapsed = true;
-            // 折叠态：装饰环缩至消失，文字不可见，头像保持不变
-            if (ProfileRingScale != null)
-            {
-                ProfileRingScale.ScaleX = 0;
-                ProfileRingScale.ScaleY = 0;
-            }
-            if (ProfileCardRing != null) ProfileCardRing.Opacity = 0;
-            if (ProfileInfo != null) ProfileInfo.Opacity = 0;
-            if (ProfileMeta != null) ProfileMeta.Opacity = 0;
-        }
-
         PlayWindowEnterAnimation();
+    }
+
+    /// <summary>折叠态视觉：列宽收至图标轨道 + 底部个人卡片收缩至仅露头像（无动画，用于启动还原）。</summary>
+    private void ApplyCollapsedVisuals()
+    {
+        SidebarColumn.Width = new GridLength(CollapsedSidebarWidth, GridUnitType.Pixel);
+        if (ProfileRingScale != null)
+        {
+            ProfileRingScale.ScaleX = 0;
+            ProfileRingScale.ScaleY = 0;
+        }
+        if (ProfileCardRing != null) ProfileCardRing.Opacity = 0;
+        if (ProfileInfo != null) ProfileInfo.Opacity = 0;
+        if (ProfileMeta != null) ProfileMeta.Opacity = 0;
     }
 
     /// <summary>
@@ -98,6 +185,9 @@ public partial class MainWindow : Window
 
         // 底部卡片缩放收缩：以头像位置为原点缩小，卡片"缩进"头像里
         AnimateProfileScale(collapse);
+
+        // 折叠状态即时落盘（下次启动还原）
+        ConfigService.Instance.SidebarCollapsed = collapse;
     }
 
     /// <summary>装饰环收缩动画：以头像中心为原点，灰色卡片 Scale(1→0) + Opacity(1→0) 缩至消失，头像完全不动。</summary>
@@ -253,20 +343,47 @@ public partial class MainWindow : Window
 
     private void SearchBox_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape)
+        if (DataContext is not MainViewModel vm) return;
+
+        switch (e.Key)
         {
-            if (DataContext is MainViewModel vm)
-            {
+            case Key.Escape:
                 vm.CloseSearchCommand.Execute(null);
-            }
+                e.Handled = true;
+                break;
+
+            // ↑↓ 在结果列表内移动高亮（焦点保持在输入框，便于继续输入）
+            case Key.Down:
+                if (vm.ShowResults)
+                {
+                    vm.MoveSearchSelectionCommand.Execute(1);
+                    ScrollSelectedResultIntoView();
+                    e.Handled = true;
+                }
+                break;
+
+            case Key.Up:
+                if (vm.ShowResults)
+                {
+                    vm.MoveSearchSelectionCommand.Execute(-1);
+                    ScrollSelectedResultIntoView();
+                    e.Handled = true;
+                }
+                break;
+
+            // Enter 打开高亮项；无高亮（如仍在搜索中）时退回立即搜索
+            case Key.Enter:
+                vm.ActivateSelectedResultCommand.Execute(null);
+                e.Handled = true;
+                break;
         }
-        else if (e.Key == Key.Enter)
-        {
-            if (DataContext is MainViewModel vm)
-            {
-                vm.SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
-            }
-        }
+    }
+
+    /// <summary>把命令面板当前高亮项滚动进可视区（键盘移动时才需要）。</summary>
+    private void ScrollSelectedResultIntoView()
+    {
+        if (SearchResultsList?.SelectedItem == null) return;
+        SearchResultsList.ScrollIntoView(SearchResultsList.SelectedItem);
     }
 
     private void SearchResult_Click(object sender, MouseButtonEventArgs e)

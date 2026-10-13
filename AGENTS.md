@@ -367,6 +367,9 @@ refactor: 提取 ThemeService 统一管理主题逻辑
   - 备注：`{ get; init; }` 属性反射层面仍有 setter（`CanWrite=true`），因此**不会**触发该错误 —— 这也是为什么同一模板里 `Init` 属性绑定正常、紧邻的 `=>` 计算属性却报错的原因。
   - 更优做法：像 `WorkBadgeText` / `LeaveBadgeText` 那样，把文案在 Model 层合成好，绑到 `TextBlock.Text`，从根上避开。
 
+- **主表一律只读（`DataGridBase` 已默认 `IsReadOnly=true`）**：本项目所有表格都是「展示 + 操作列按钮 / 双击打开抽屉」模式，没有内联编辑需求。若保持可编辑（DataGrid 默认 `IsReadOnly=false`），双击行会在打开抽屉的同时**先进入单元格编辑模式**；带 `StringFormat` 的列（如工时 `{0:F1}h`）编辑器拿到格式化串，提交时 `ConvertBack` 解析失败 → **把源对象的字段静默回写成 0**（曾导致"编辑记录时工时显示 0"）。如需可编辑表，请显式写 `IsReadOnly="False"` 并**给该列绑定去掉 `StringFormat` 或改 `Mode=OneWay`**。
+  - 推论：VM 里任何"手工逐字段复制"的编辑入口（如 `WorkRecordViewModel.EditRecord` 的 `new WorkRecord { ... }`）**必须与实体字段保持同步**——新增字段（如 `ActualHours`）时极易漏，且编译期不报错。改实体字段时顺手 grep 一遍这类复制点。
+
 ### 5.3 主题系统
 
 - 主题管理统一由 `ThemeService` 处理。
@@ -653,6 +656,19 @@ if (DataContext is KnowledgeViewModel vm)
     vm.IsFormDirty = false;
 }
 ```
+
+### 8.16 窗口几何与侧边栏状态持久化（2026-10-13 新增）
+- 落点：`ConfigData.WindowWidth/WindowHeight/WindowLeft/WindowTop/WindowMaximized/SidebarCollapsed`，由 `ConfigService` 暴露。
+- **写入时机**：窗口几何**只在 `MainWindow.OnClosing` 写一次**（`ConfigService.SaveWindowState(...)`），**禁止挂在 `SizeChanged`/`LocationChanged` 上逐帧 `Save()`**（高频磁盘写）。侧边栏折叠态是用户单次动作，在 `AnimateSidebar` 内即时落盘，可直接用 `ConfigService.SidebarCollapsed` setter。
+- **最大化陷阱**：最大化时 `Window.Left/Top/Width/Height` 反映的是**最大化后**的值，必须改用 `RestoreBounds` 才是"还原后"的尺寸/位置；关闭前先判 `WindowState == WindowState.Maximized` 再取。
+- **启动还原校验**：还原前用 `MinRestoreWidth/Height`（960×640）过滤脏数据；位置要经 `IsWindowOnScreen`（基于 `SystemParameters.VirtualScreen*` 探针）校验，避免还原到已拔掉的显示器。位置生效需把 `WindowStartupLocation` 从 `CenterScreen` 切成 `Manual`，否则会被强制居中。
+- 侧边栏响应式（窄屏自动折叠）：**用户显式保存过折叠态时关闭 `_autoResponsive`**，防止窗口一显示就被自动展开覆盖用户选择。
+
+### 8.17 命令面板（Spotlight 搜索）键盘导航（2026-10-13 新增）
+- 结构：`MainWindow.xaml` 搜索结果用 **`ListBox`**（`SelectedIndex` 双向绑 `MainViewModel.SelectedSearchIndex`），选中高亮走 `ListBoxItem.IsSelected` 触发器（不要再用 `ItemsControl` + 手写 hover）。
+- 契约：`SearchBox_KeyDown` 里 **↑↓ → `MoveSearchSelectionCommand(±1)` + `ScrollIntoView`**（焦点**保留在输入框**，便于继续输入）；**Enter → `ActivateSelectedResultCommand`**（有高亮则打开选中项，无高亮退回立即搜索）；Esc 关闭。
+- 顺序：结果就绪后**默认高亮首项**（`SelectedSearchIndex = 0`），关键词一变即清 -1，避免"上一条结果的高亮"错位到新结果。
+- **位移规则唯一事实来源**：`Helpers/SearchNavigationHelper.Move(current, delta, count)`（纯静态、可单测，含环绕与边界），ViewModel 只做状态写入——与 `DayStatusRules` 同一范式，禁止在 View/VM 里另写取模逻辑。
 
 ---
 

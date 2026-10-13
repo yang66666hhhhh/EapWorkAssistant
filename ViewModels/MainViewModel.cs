@@ -45,6 +45,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<SearchResultItem> _searchResults = new();
 
+    /// <summary>命令面板当前高亮项索引（-1 = 无高亮）。由 View 的 ↑↓ 驱动，Enter 打开。</summary>
+    [ObservableProperty]
+    private int _selectedSearchIndex = -1;
+
     // 搜索结果分类计数（用于结果区顶部汇总）
     [ObservableProperty] private int _recordResultCount;
     [ObservableProperty] private int _knowledgeResultCount;
@@ -277,6 +281,7 @@ public partial class MainViewModel : ObservableObject
         IsSearchOpen = true;
         SearchKeyword = string.Empty;
         SearchResults.Clear();
+        SelectedSearchIndex = -1;
         ResetSearchStats();
         ShowInitial = true;
         ShowNoResults = false;
@@ -291,10 +296,37 @@ public partial class MainViewModel : ObservableObject
         IsSearchOpen = false;
         SearchKeyword = string.Empty;
         SearchResults.Clear();
+        SelectedSearchIndex = -1;
         ResetSearchStats();
         ShowInitial = true;
         ShowNoResults = false;
         ShowResults = false;
+    }
+
+    /// <summary>
+    /// 移动命令面板高亮项（delta = +1 下移 / -1 上移，环绕）。
+    /// 无高亮时：下移落到首项，上移落到末项。位移规则见 <see cref="SearchNavigationHelper"/>。
+    /// </summary>
+    [RelayCommand]
+    private void MoveSearchSelection(int delta)
+    {
+        if (!ShowResults || SearchResults.Count == 0 || delta == 0) return;
+        SelectedSearchIndex = SearchNavigationHelper.Move(SelectedSearchIndex, delta, SearchResults.Count);
+    }
+
+    /// <summary>
+    /// 打开当前高亮项；无高亮时退回"立即搜索"（兼容用户敲完关键词直接回车的习惯）。
+    /// </summary>
+    [RelayCommand]
+    private void ActivateSelectedResult()
+    {
+        if (ShowResults && SelectedSearchIndex >= 0 && SelectedSearchIndex < SearchResults.Count)
+        {
+            NavigateToResult(SearchResults[SelectedSearchIndex]);
+            return;
+        }
+
+        SearchCommand.ExecuteAsync(null).SafeFire("搜索失败");
     }
 
     [RelayCommand]
@@ -303,6 +335,7 @@ public partial class MainViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(SearchKeyword))
         {
             SearchResults.Clear();
+            SelectedSearchIndex = -1;
             ResetSearchStats();
             ShowInitial = true;
             ShowNoResults = false;
@@ -390,6 +423,9 @@ public partial class MainViewModel : ObservableObject
         SearchResults = new ObservableCollection<SearchResultItem>(results.Take(20));
         IsSearching = false;
 
+        // 结果就绪后默认高亮首项，Enter 即可直接打开（标准命令面板交互）
+        SelectedSearchIndex = SearchResults.Count > 0 ? 0 : -1;
+
         if (SearchResults.Any())
         {
             ShowResults = true;
@@ -439,6 +475,7 @@ public partial class MainViewModel : ObservableObject
         {
             _searchTimer.Stop();
             SearchResults.Clear();
+            SelectedSearchIndex = -1;
             ShowInitial = true;
             ShowNoResults = false;
             ShowResults = false;
@@ -446,6 +483,8 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
+            // 关键词变化时清掉旧高亮，待新结果就绪后重新落到首项
+            SelectedSearchIndex = -1;
             // 防抖：每次按键重启定时器，300ms 后自动搜索
             _searchTimer.Stop();
             _searchTimer.Start();

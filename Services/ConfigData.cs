@@ -53,6 +53,18 @@ public class ConfigData
     public string DefaultView { get; set; } = ViewNames.Dashboard;
     public int AutoSaveInterval { get; set; } = 5;  // 分钟
 
+    // ===== 窗口几何（记忆上次尺寸/位置/状态，下次启动还原）=====
+    // Width/Height 为 0 表示"从未记录"，启动时沿用 XAML 默认尺寸；
+    // Left/Top 为 null 表示"从未记录"，启动时沿用 WindowStartupLocation（居中）。
+    // ⚠️ 位置刻意用 double?（null）而非 double.NaN：System.Text.Json 默认无法序列化 NaN（会抛异常）。
+    public double WindowWidth { get; set; } = 0;
+    public double WindowHeight { get; set; } = 0;
+    public double? WindowLeft { get; set; } = null;
+    public double? WindowTop { get; set; } = null;
+    public bool WindowMaximized { get; set; } = false;
+    // 侧边栏折叠状态（用户手动折叠后记住）
+    public bool SidebarCollapsed { get; set; } = false;
+
     // ===== 休息日（0=周日, 1=周一, ..., 6=周六）=====
     public List<int> RestDays { get; set; } = new() { 0, 6 }; // 默认周六周日
 

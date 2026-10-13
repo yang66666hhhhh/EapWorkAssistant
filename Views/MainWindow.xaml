@@ -360,9 +360,8 @@
                             </Grid>
                         </Border>
 
-                        <!-- 搜索结果滚动区 -->
-                        <ScrollViewer x:Name="SearchResultsPanel" Grid.Row="1"
-                                      VerticalScrollBarVisibility="Auto" MaxHeight="380">
+                        <!-- 搜索结果区：改用 ListBox 承载（自带滚动 + 选中高亮），MaxHeight 限制弹层高度 -->
+                        <Grid x:Name="SearchResultsPanel" Grid.Row="1" MaxHeight="380">
                             <Grid>
                                 <!-- 搜索中状态 -->
                                 <Border Visibility="{Binding IsSearching, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
@@ -408,62 +407,84 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- 搜索结果列表 -->
-                                <ItemsControl ItemsSource="{Binding SearchResults}"
-                                              Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border CornerRadius="{DynamicResource RadiusSm}" Padding="14,10" Margin="8,3"
-                                                    Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
+                                <!-- 搜索结果列表：↑↓ 选择、Enter 打开选中项（高亮走 ListBoxItem.IsSelected） -->
+                                <ListBox x:Name="SearchResultsList"
+                                         ItemsSource="{Binding SearchResults}"
+                                         SelectedIndex="{Binding SelectedSearchIndex, Mode=TwoWay}"
+                                         SelectionMode="Single"
+                                         Background="Transparent" BorderThickness="0" Padding="0,4"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <!-- 高亮与点击都挂在容器上，模板只负责内容 -->
+                                                        <Border x:Name="Bd" CornerRadius="{DynamicResource RadiusSm}"
+                                                                Padding="14,10" Margin="8,3" Background="Transparent"
+                                                                Cursor="Hand" MouseLeftButtonDown="SearchResult_Click">
+                                                            <ContentPresenter/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
                                                             <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                                <Setter TargetName="Bd" Property="Background"
+                                                                        Value="{DynamicResource PrimaryLightBrush}"/>
                                                             </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="38"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Border Grid.Column="0" CornerRadius="{DynamicResource RadiusSm}" Width="38" Height="38">
-                                                        <Border.Background>
-                                                            <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
-                                                        </Border.Background>
-                                                        <TextBlock Text="{Binding Icon}" FontSize="15"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock FontSize="12" FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                       TextTrimming="CharacterEllipsis" MaxWidth="320"
-                                                                       local:Highlight.Text="{Binding Title}"
-                                                                       local:Highlight.Keyword="{Binding Keyword}"/>
-                                                            <Border CornerRadius="{DynamicResource RadiusXxs}" Padding="6,2" Margin="6,0,0,0">
-                                                                <Border.Background>
-                                                                    <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
-                                                                </Border.Background>
-                                                                <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
-                                                                           Foreground="{DynamicResource PrimaryBrush}"/>
-                                                            </Border>
-                                                        </StackPanel>
-                                                        <TextBlock FontSize="11"
-                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                   TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
-                                                                   local:Highlight.Text="{Binding Content}"
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background"
+                                                                        Value="{DynamicResource PrimaryLightBrush}"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="38"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" CornerRadius="{DynamicResource RadiusSm}" Width="38" Height="38">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.1"/>
+                                                    </Border.Background>
+                                                    <TextBlock Text="{Binding Icon}" FontSize="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="320"
+                                                                   local:Highlight.Text="{Binding Title}"
                                                                    local:Highlight.Keyword="{Binding Keyword}"/>
+                                                        <Border CornerRadius="{DynamicResource RadiusXxs}" Padding="6,2" Margin="6,0,0,0">
+                                                            <Border.Background>
+                                                                <SolidColorBrush Color="{DynamicResource Primary}" Opacity="0.08"/>
+                                                            </Border.Background>
+                                                            <TextBlock Text="{Binding Type}" FontSize="10" FontWeight="Medium"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                                                        </Border>
                                                     </StackPanel>
-                                                </Grid>
-                                            </Border>
+                                                    <TextBlock FontSize="11"
+                                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                                               TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
+                                                               local:Highlight.Text="{Binding Content}"
+                                                               local:Highlight.Keyword="{Binding Keyword}"/>
+                                                </StackPanel>
+                                            </Grid>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </Grid>
-                        </ScrollViewer>
+                        </Grid>
 
                         <!-- 底部提示栏 -->
                         <Border Grid.Row="2" Padding="16,8" BorderThickness="0,1,0,0"
@@ -483,8 +504,10 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                                             Visibility="{Binding ShowResults, Converter={x:Static local:BoolToVisibilityConverter.Instance}, ConverterParameter=Inverse}">
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text="Ctrl+F 打开 · "/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="↑↓"/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 选择 · "/>
                                     <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Enter"/>
-                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 立即搜索 · "/>
+                                    <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 打开 · "/>
                                     <TextBlock FontSize="11" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" Text="Esc"/>
                                     <TextBlock FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Text=" 关闭"/>
                                 </StackPanel>

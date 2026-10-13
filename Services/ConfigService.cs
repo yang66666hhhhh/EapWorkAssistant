@@ -101,6 +101,37 @@ public class ConfigService
     public string DefaultView { get => _data.DefaultView; set { _data.DefaultView = value; Save(); } }
     public int AutoSaveInterval { get => _data.AutoSaveInterval; set { _data.AutoSaveInterval = value; Save(); } }
 
+    // ===== 窗口几何（只读；写入走 SaveWindowState，避免 SizeChanged 高频落盘）=====
+    public double WindowWidth => _data.WindowWidth;
+    public double WindowHeight => _data.WindowHeight;
+    public double? WindowLeft => _data.WindowLeft;
+    public double? WindowTop => _data.WindowTop;
+    public bool WindowMaximized => _data.WindowMaximized;
+
+    /// <summary>侧边栏折叠状态（用户手动切换即落盘，下次启动还原）。</summary>
+    public bool SidebarCollapsed
+    {
+        get => _data.SidebarCollapsed;
+        set { _data.SidebarCollapsed = value; Save(); }
+    }
+
+    /// <summary>
+    /// 一次性写入窗口几何并落盘。窗口移动/缩放期间不逐帧保存，
+    /// 仅在关闭窗口（或最大化状态变化）时调用一次。
+    /// </summary>
+    public void SaveWindowState(double width, double height, double left, double top, bool maximized)
+    {
+        lock (_lock)
+        {
+            _data.WindowWidth = width;
+            _data.WindowHeight = height;
+            _data.WindowLeft = left;
+            _data.WindowTop = top;
+            _data.WindowMaximized = maximized;
+            Save();
+        }
+    }
+
     // ===== 休息日 =====
     public List<int> RestDays
     {
