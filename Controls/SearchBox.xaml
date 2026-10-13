@@ -16,7 +16,7 @@
 
             <!-- 搜索图标 -->
             <Path Grid.Column="0" Data="{StaticResource IconSearch}" Fill="{DynamicResource TextSecondaryBrush}"
-                  Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.5"/>
+                  Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.5"/>
 
             <!-- 输入框 -->
             <TextBox x:Name="InputBox" Grid.Column="1"
@@ -50,7 +50,7 @@
                     ToolTip="清空"
                     Visibility="{Binding Text, ElementName=Self, Converter={x:Static helpers:StringToVisibilityConverter.Instance}}">
                 <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
-                      Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
         </Grid>
     </Border>

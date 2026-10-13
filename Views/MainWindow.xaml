@@ -46,7 +46,7 @@
                 <!-- 空白区域即拖拽区 / 双击最大化，由 WindowChrome.CaptionHeight 自动处理 -->
                 <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center"
                             IsHitTestVisible="False">
-                    <Image Source="pack://application:,,,/Resources/app.ico" Width="16" Height="16"
+                    <Image Source="pack://application:,,,/Resources/app.ico" Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}"
                            RenderOptions.BitmapScalingMode="HighQuality"/>
                     <TextBlock Text="EAP Work Assistant" Margin="8,0,0,0" FontSize="12.5" FontWeight="SemiBold"
                                VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -70,7 +70,7 @@
                     </Button>
                     <Button x:Name="TitleBarClose" Style="{StaticResource WindowCloseButton}"
                             Click="TitleBarClose_Click" ToolTip="关闭">
-                        <Path Data="{StaticResource IconClose}" Width="10" Height="10" Stretch="Uniform"
+                        <Path Data="{StaticResource IconClose}" Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}" Stretch="Uniform"
                               Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                     </Button>
                 </StackPanel>
@@ -216,7 +216,7 @@
                                     Background="{DynamicResource AvatarOverlayBrush}" Visibility="Collapsed"
                                     IsHitTestVisible="False">
                                 <Path Data="{StaticResource IconPencil}" Fill="White"
-                                      Width="12" Height="12" Stretch="Uniform"
+                                      Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
@@ -390,7 +390,7 @@
                                 BorderBrush="{DynamicResource BorderBrush}">
                             <Grid>
                                 <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextSecondaryBrush}"
-                                      Width="16" Height="16" Stretch="Uniform" Opacity="0.4"
+                                      Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}" Stretch="Uniform" Opacity="0.4"
                                       VerticalAlignment="Center" HorizontalAlignment="Left"
                                       IsHitTestVisible="False"/>
                                 <TextBox x:Name="MainSearchBox"
@@ -426,7 +426,7 @@
                                         Padding="20,28">
                                     <StackPanel HorizontalAlignment="Center">
                                         <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextPrimaryBrush}"
-                                              Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
+                                              Width="{DynamicResource IconSizeLg}" Height="{DynamicResource IconSizeLg}" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
                                         <TextBlock Text="正在搜索..." FontSize="13"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"
                                                    HorizontalAlignment="Center" Margin="0,6,0,0"/>
@@ -438,7 +438,7 @@
                                         Padding="20,28">
                                     <StackPanel HorizontalAlignment="Center">
                                         <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextPrimaryBrush}"
-                                              Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
+                                              Width="{DynamicResource IconSizeLg}" Height="{DynamicResource IconSizeLg}" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
                                         <TextBlock Text="未找到相关内容" FontSize="13" FontWeight="Medium"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    HorizontalAlignment="Center" Margin="0,6,0,0"/>
@@ -453,7 +453,7 @@
                                         Padding="20,24">
                                     <StackPanel HorizontalAlignment="Center">
                                         <Path Data="{StaticResource IconKeyboard}" Fill="{DynamicResource TextPrimaryBrush}"
-                                              Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
+                                              Width="{DynamicResource IconSizeLg}" Height="{DynamicResource IconSizeLg}" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.3"/>
                                         <TextBlock Text="输入关键词，实时搜索全部内容" FontSize="13"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"
                                                    HorizontalAlignment="Center" Margin="0,6,0,0"/>
@@ -625,7 +625,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Path Width="14" Height="14" Stretch="Uniform"
+                                        <Path Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                               HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Path.Style>
                                                 <Style TargetType="Path">
@@ -670,7 +670,7 @@
                                             Command="{Binding Source={x:Static svc:ToastService.Instance}, Path=DismissCommand}"
                                             CommandParameter="{Binding}">
                                         <Path Data="{StaticResource IconClose}" Fill="{DynamicResource TextTertiaryBrush}"
-                                              Width="11" Height="11" Stretch="Uniform"/>
+                                              Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}" Stretch="Uniform"/>
                                     </Button>
                                 </Grid>
                             </Border>

@@ -121,7 +121,7 @@
                                       Style="{StaticResource BtnGhost}" Padding="8,5"
                                       ToolTip="多选模式" Cursor="Hand">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconSelectAll}" Width="14" Height="14" Stretch="Uniform"
+                                <Path Data="{StaticResource IconSelectAll}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                       Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                 <TextBlock Text="多选" FontSize="{StaticResource FontSizeSm}" Margin="5,0,0,0"
                                            Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
@@ -132,7 +132,7 @@
                                 Style="{StaticResource BtnGhost}" Padding="8,5"
                                 ToolTip="清空回收站" Cursor="Hand" Margin="8,0,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="{StaticResource IconTrash}" Width="14" Height="14" Stretch="Uniform"
+                                <Path Data="{StaticResource IconTrash}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                       Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
                                 <TextBlock Text="清空回收站" FontSize="{StaticResource FontSizeSm}" Margin="5,0,0,0"
                                            Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
@@ -150,7 +150,7 @@
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                                 Orientation="Horizontal" VerticalAlignment="Center"
                                 Margin="0,12,0,0">
-                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <Path Data="{StaticResource IconFilter}" Fill="{DynamicResource TextTertiaryBrush}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
 
                         <Button Command="{Binding SetFilterCommand}" CommandParameter="全部"
                                 Style="{StaticResource FilterTabAll}" Margin="3,0,0,0">
@@ -250,7 +250,7 @@
                             IsEnabled="{Binding HasSelection}" Padding="12,5" Margin="0,0,6,0"
                             ToolTip="批量恢复到原模块">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconRestore}" Width="13" Height="13" Stretch="Uniform"
+                            <Path Data="{StaticResource IconRestore}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                   Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <TextBlock Text="恢复选中" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
@@ -259,7 +259,7 @@
                     <Button Command="{Binding BatchPermanentDeleteCommand}" Style="{StaticResource BtnDanger}"
                             IsEnabled="{Binding HasSelection}" Padding="12,5" ToolTip="彻底删除选中项">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="{StaticResource IconDeleteForever}" Width="13" Height="13" Stretch="Uniform"
+                            <Path Data="{StaticResource IconDeleteForever}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                   Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <TextBlock Text="彻底删除" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
                         </StackPanel>
@@ -385,7 +385,7 @@
                                                     Foreground="{DynamicResource DangerBrush}"
                                                     Margin="8,0,0,0">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Path Data="{StaticResource IconTrashCan}" Width="13" Height="13" Stretch="Uniform"
+                                                    <Path Data="{StaticResource IconTrashCan}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                                           Fill="{DynamicResource DangerBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                                     <TextBlock Text="删除"/>
                                                 </StackPanel>

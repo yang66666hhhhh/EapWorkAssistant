@@ -228,7 +228,7 @@
                                 Style="{StaticResource Card}" IsHitTestVisible="False">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Path Data="{StaticResource IconSearch}" Fill="{DynamicResource TextPrimaryBrush}"
-                                      Width="40" Height="40" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
+                                      Width="{DynamicResource IconSizeHero}" Height="{DynamicResource IconSizeHero}" Stretch="Uniform" HorizontalAlignment="Center" Opacity="0.25"/>
                                 <TextBlock FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center" Margin="0,12,0,0" FontWeight="Medium">
                                     <Run Text="未找到与 "/><Run Text="{Binding SearchKeyword}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/><Run Text=" 相关的问题"/>

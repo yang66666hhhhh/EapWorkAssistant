@@ -263,4 +263,20 @@
     <sys:Double x:Key="PagerSize">32</sys:Double>
     <sys:Double x:Key="ToolTipMaxWidth">400</sys:Double>
 
+    <!-- ==================== 图标尺寸刻度（P1 ⑤） ==================== -->
+    <!-- 统一图标档位，像 Radius 刻度一样消除散落魔法数字（替换前散落 10/11/12/13/14/15/16/18/20/22/36/40/48 共 13 档）
+         引用规范：Path / Image 等图标元素统一写 Width/Height="{DynamicResource IconSizeXxx}"，禁止再写数值
+         档位语义：Xs = 行内微图标（按钮内 / 标签旁 / 标题栏）
+                  Sm = 默认行内图标（工具栏 / 表格行内，数量最多）
+                  Md = 区块标题 / 统计卡 / 菜单图标槽
+                  Lg = 浮层空态 / 按钮主图标 / 回到顶部
+                  Hero = 各页空态水印大图
+         刻意保留的例外：列头排序箭头（7×4 / 8×5）与 StatCard 趋势箭头（9×9）是随几何一并设计的
+         微型指示图形，拉伸到任何档位都会失真，维持原尺寸；容器类宽高（如 48×48 头像框）不是图标尺寸，不引用本刻度 -->
+    <sys:Double x:Key="IconSizeXs">12</sys:Double>
+    <sys:Double x:Key="IconSizeSm">14</sys:Double>
+    <sys:Double x:Key="IconSizeMd">16</sys:Double>
+    <sys:Double x:Key="IconSizeLg">20</sys:Double>
+    <sys:Double x:Key="IconSizeHero">40</sys:Double>
+
 </ResourceDictionary>

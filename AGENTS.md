@@ -219,7 +219,7 @@ refactor: 提取 ThemeService 统一管理主题逻辑
   - 间距 → `SpaceXxx` / `CellPad` / `GapTopXxs`
   - 密度（均为 `Thickness`）→ `DensityXxx`
   - 动效时长（可直接用于 `Duration=`）→ `DurationXxx`
-  - 尺寸 → `IconButtonSize` 等
+  - 尺寸 → `IconButtonSize` / `IconSizeXxx`（图标，见 8.21）等
 - **缺失令牌的处理**：先去 `DesignTokens.xaml` 补齐定义再使用，**禁止**在页面硬编码。
 
 #### 可用令牌速查
@@ -324,6 +324,18 @@ refactor: 提取 ThemeService 统一管理主题逻辑
 | `InputHeight` | 42 | `IllustrationSize` | 72 |
 | `SwitchTrackWidth` | 44 | `StatusDotSize` | 6 |
 | `SwitchTrackHeight` | 24 | | |
+
+**图标尺寸刻度（Path / Image 专用，详见 8.21）**
+
+| 令牌 | 值 | 语义 |
+|------|-----|------|
+| `IconSizeXs` | 12 | 行内微图标（按钮内 / 标签旁 / 标题栏） |
+| `IconSizeSm` | 14 | 默认行内图标（工具栏 / 表格行内） |
+| `IconSizeMd` | 16 | 区块标题 / 统计卡 / 菜单图标槽 |
+| `IconSizeLg` | 20 | 浮层空态 / 按钮主图标 |
+| `IconSizeHero` | 40 | 各页空态水印大图 |
+
+> 🚫 列头排序箭头（7×4 / 8×5）与 StatCard 趋势箭头（9×9）是随几何设计的微型指示图形，**不套用**本刻度；容器宽高（如 48×48 头像框）不是图标尺寸。
 
 ### 5.2 样式与资源引用规则
 
@@ -700,6 +712,19 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **不要为「最大化裁切」加 Margin 补丁**：实测 WindowChrome 最大化时**窗口矩形**会外扩 `(SM_CXSIZEFRAME + SM_CXPADDEDBORDER)` = 7.2 DIP/边（本机 120 DPI），但**客户端矩形恰好等于工作区**（1920×1042 实测吻合），内容不会被裁。那 9px 只在 `PrintWindow` 截图里可见，真实屏幕上位于屏幕外。**加 Margin 反而会露出缝隙。**
 - 截图验证手法（可复用）：`PrintWindow(hwnd, hdc, 0x00000002 /*PW_RENDERFULLCONTENT*/)` 可捕获**非前台** WPF 窗口；`Add-Type` 需 `-ReferencedAssemblies 'System.Drawing'`。判定内容是否被裁：比较窗口矩形（`GetWindowRect`）与 `SystemParameters.WorkArea`，再看截图左右首个非底色像素的坐标。
 
+### 8.21 图标尺寸刻度（IconSizeXs/Sm/Md/Lg/Hero，2026-10-13 新增）
+
+- **背景**：P1 ⑤。替换前图标尺寸散落 **13 档**（10/11/12/13/14/15/16/18/20/22/36/40/48），同语义的图标在不同页面差 1-4px，违反 5.1「尺寸禁止硬编码」。
+- **令牌**（`Resources/DesignTokens.xaml`，`sys:Double`）：`IconSizeXs`=12（行内微图标）/ `IconSizeSm`=14（默认行内，数量最多）/ `IconSizeMd`=16（区块标题/统计卡/菜单图标槽）/ `IconSizeLg`=20（浮层空态/按钮主图标）/ `IconSizeHero`=40（空态水印）。刻度语义对齐 Radius 体系：档位少、相邻差 2-4px、按使用场景命名。
+- **引用规范**：仅 `Path` / `Image`（及 `ContentPresenter x:Name="Icon"` 图标槽）写 `Width/Height="{DynamicResource IconSizeXxx}"`；与 Radius 一致用 `DynamicResource`。
+- **归并原则**：邻近值向最近档位收敛（11→12、13/15→14、18/22→20、36/48→40），**相邻档差 ≤2px 视觉无感**；空态水印 36/40/48 统一为 40（0.25 透明度下差异不可感知）。
+- ⚠️ **三类不套用**（改代码时勿"顺手"令牌化）：
+  1. **微型指示图形**：列头排序箭头（`IconSortAsc/Desc`，7×4 / 8×5）与 StatCard 趋势箭头（9×9）——几何按原画布设计，拉伸到任何档位都会失真；
+  2. **容器宽高**：头像框（48×48）、图标底座 Border（32×32 / 40×40）、清除按钮（18×18）等是**布局尺寸**不是图标尺寸，该用 `IconButtonSize` 等控件令牌或维持原值；
+  3. **状态圆点**（6px / 8px Ellipse）用 `StatusDotSize` 或维持原值。
+- **替换手法（可复用）**：全仓库扫 `Width="N" Height="N"` 等宽高配对 → 向前探测所在开始标签 → 仅 `Path`/`Image` 且 N∈刻度值才替换（脚本模式见交接记录；用正则 `Width="(\d+)" Height="(\d+)"` + 反向找 `<Tag`，**不要**用 sed 盲替，会误伤容器）。
+- **验证**：编译 0 错误 + 全量测试 138/138 + 启动冒烟 9s 无新 `error_*.log`（DynamicResource 漏键只在运行时暴露，冒烟必做）。
+
 ---
 
 ## 9. AI 行为约束红线
@@ -716,7 +741,7 @@ if (DataContext is KnowledgeViewModel vm)
 | 4 | 更改项目目标框架（当前 `net10.0-windows`） | 1 |
 | 5 | 破坏单例模式（改为依赖注入等） | 3.3 |
 | 6 | 在 ViewModel 中引入 WPF 命名空间 | 3.1 |
-| 7 | 硬编码颜色 / 圆角 / 字号 / 间距 / 动效时长 / 固定尺寸（图标等豁免除外） | 5.1 / 5.2 |
+| 7 | 硬编码颜色 / 圆角 / 字号 / 间距 / 动效时长 / 固定尺寸（含图标尺寸，见 8.21；排序箭头等微型指示图形除外） | 5.1 / 5.2 / 8.21 |
 | 8 | 在 Storyboard 中使用 DynamicResource | 5.2 |
 | 9 | 修改 XAML 时意外删除 Grid / ColumnDefinitions 等结构性标签 | 通用 |
 | 10 | 修改后不验证编译通过 | 9.6 |
@@ -739,7 +764,7 @@ if (DataContext is KnowledgeViewModel vm)
 
 ### 9.2 UI / 样式一致性（令牌以 DesignTokens.xaml 为准）
 - 禁止硬编码颜色值、圆角、字号、间距、动效时长。
-- 除图标、头像、状态圆点等**确需固定尺寸**的控件外，禁止在 XAML 写 `CornerRadius="8"`、`FontSize="14"`、`Margin="12"`、`Width="140"`、`Duration="200"` 等字面量。
+- 除头像、状态圆点、排序箭头等**随几何设计的微型图形**外，禁止在 XAML 写 `CornerRadius="8"`、`FontSize="14"`、`Margin="12"`、`Width="140"`、`Duration="200"` 等字面量；**图标尺寸必须引用 `IconSizeXs/Sm/Md/Lg/Hero`**（见 8.21，2026-10-13 起图标不再豁免）。
 - 所有值必须引用 `Resources/DesignTokens.xaml` 中的 `StaticResource`（见 5.1 完整令牌表）。
 - 若 `DesignTokens.xaml` 缺少所需令牌，应**先在该文件补齐定义再使用**，禁止在页面硬编码。
 - ⚠️ 不要臆造键名（如 `BackgroundBrush` / `CardBackgroundBrush` / `SpacingMd` / `FontSizeHero` 等均不存在）。

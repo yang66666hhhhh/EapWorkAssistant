@@ -31,7 +31,7 @@
                             Style="{StaticResource BtnGhost}" Padding="4" Click="CloseButton_Click"
                             IsCancel="True"
                             ToolTip="关闭（Esc）">
-                        <Path Data="{StaticResource IconClose}" Width="14" Height="14" Stretch="Uniform"
+                        <Path Data="{StaticResource IconClose}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                               Fill="{DynamicResource TextTertiaryBrush}"/>
                     </Button>
                 </Grid>
@@ -65,7 +65,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Button x:Name="PrevMonthBtn" Grid.Column="0" Style="{StaticResource BtnGhost}" Padding="8,2"
                                         Click="PrevMonth_Click" ToolTip="上个月">
-                                    <Path Data="{StaticResource IconChevronLeft}" Width="14" Height="14" Stretch="Uniform"
+                                    <Path Data="{StaticResource IconChevronLeft}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                           Fill="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                                 <TextBlock x:Name="MonthLabel" Grid.Column="1" FontSize="14" FontWeight="SemiBold"
@@ -73,7 +73,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 <Button x:Name="NextMonthBtn" Grid.Column="2" Style="{StaticResource BtnGhost}" Padding="8,2"
                                         Click="NextMonth_Click" ToolTip="下个月">
-                                    <Path Data="{StaticResource IconChevronRight}" Width="14" Height="14" Stretch="Uniform"
+                                    <Path Data="{StaticResource IconChevronRight}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                           Fill="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                             </Grid>
@@ -171,13 +171,13 @@
                                                         <Button Style="{StaticResource BtnGhost}" Padding="6"
                                                                 ToolTip="编辑" Click="EditLeave_Click"
                                                                 Tag="{Binding}">
-                                                            <Path Data="{StaticResource IconPencil}" Width="12" Height="12"
+                                                            <Path Data="{StaticResource IconPencil}" Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}"
                                                                   Stretch="Uniform" Fill="{DynamicResource PrimaryBrush}"/>
                                                         </Button>
                                                         <Button Style="{StaticResource BtnGhost}" Padding="6"
                                                                 ToolTip="删除" Click="DeleteLeave_Click"
                                                                 Tag="{Binding}">
-                                                            <Path Data="{StaticResource IconClose}" Width="12" Height="12"
+                                                            <Path Data="{StaticResource IconClose}" Width="{DynamicResource IconSizeXs}" Height="{DynamicResource IconSizeXs}"
                                                                   Stretch="Uniform" Fill="{DynamicResource DangerBrush}"/>
                                                         </Button>
                                                     </StackPanel>
@@ -251,7 +251,7 @@
                                     Margin="0,0,0,12" Click="DateBtn_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
-                                          Width="13" Height="13" Stretch="Uniform"
+                                          Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <TextBlock x:Name="DateBtnText" Text="选择日期" FontSize="13"
                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -306,7 +306,7 @@
                                             Click="RangeStartBtn_Click">
                                         <StackPanel Orientation="Horizontal">
                                             <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="13" Height="13" Stretch="Uniform"
+                                                  Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
                                             <TextBlock x:Name="RangeStartText" Text="开始日期" FontSize="13"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
@@ -321,7 +321,7 @@
                                             Click="RangeEndBtn_Click">
                                         <StackPanel Orientation="Horizontal">
                                             <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
-                                                  Width="13" Height="13" Stretch="Uniform"
+                                                  Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"
                                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
                                             <TextBlock x:Name="RangeEndText" Text="结束日期" FontSize="13"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"/>

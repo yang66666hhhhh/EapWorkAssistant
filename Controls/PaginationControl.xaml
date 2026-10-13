@@ -92,12 +92,12 @@
                 <Button Command="{Binding FirstPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         Style="{StaticResource PageNavButton}">
                     <Button.ToolTip><ToolTip Content="首页"/></Button.ToolTip>
-                    <Path Data="{StaticResource IconSkipFirst}" Fill="{DynamicResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform"/>
+                    <Path Data="{StaticResource IconSkipFirst}" Fill="{DynamicResource TextSecondaryBrush}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"/>
                 </Button>
                 <Button Command="{Binding PrevPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         Style="{StaticResource PageNavButton}" Margin="4,0,0,0">
                     <Button.ToolTip><ToolTip Content="上一页"/></Button.ToolTip>
-                    <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}" Width="16" Height="16" Stretch="Uniform"/>
+                    <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}" Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}" Stretch="Uniform"/>
                 </Button>
 
                 <!-- Simple 模式：当前页 / 总页数 -->
@@ -152,12 +152,12 @@
                 <Button Command="{Binding NextPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         Style="{StaticResource PageNavButton}" Margin="4,0,0,0">
                     <Button.ToolTip><ToolTip Content="下一页"/></Button.ToolTip>
-                    <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}" Width="16" Height="16" Stretch="Uniform"/>
+                    <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}" Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}" Stretch="Uniform"/>
                 </Button>
                 <Button Command="{Binding LastPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         Style="{StaticResource PageNavButton}">
                     <Button.ToolTip><ToolTip Content="末页"/></Button.ToolTip>
-                    <Path Data="{StaticResource IconSkipLast}" Fill="{DynamicResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform"/>
+                    <Path Data="{StaticResource IconSkipLast}" Fill="{DynamicResource TextSecondaryBrush}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"/>
                 </Button>
             </StackPanel>
 
