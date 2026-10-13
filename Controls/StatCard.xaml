@@ -79,6 +79,7 @@
                         </TextBlock>
                     </StackPanel>
                     <TextBlock Text="{Binding SubText, ElementName=Self}" FontSize="9.5" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,1,0,0"
+                               TextTrimming="CharacterEllipsis" ToolTip="{Binding SubText, ElementName=Self}"
                                Visibility="{Binding SubText, ElementName=Self, Converter={x:Static local:StringToVisibilityConverter.Instance}}"/>
 
                 <!-- 趋势胶囊：涨红跌绿（中国习惯），TrendText 为空时隐藏 -->

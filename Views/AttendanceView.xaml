@@ -1,0 +1,392 @@
+<UserControl x:Class="EapWorkAssistant.Views.AttendanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EapWorkAssistant.Helpers"
+             xmlns:controls="clr-namespace:EapWorkAssistant.Controls"
+             xmlns:models="clr-namespace:EapWorkAssistant.Models"
+             FontFamily="{StaticResource DefaultFont}">
+    <UserControl.Resources>
+        <!-- 工作侧徽标：正常上班/周末加班/假日加班 按 WorkKind 着色（与日历圆点同一套语义）；
+             「未填」「周末」「法定假日」共用默认中性灰（未填弱化，避免整月泛红） -->
+        <DataTemplate x:Key="WorkBadgeCell">
+            <Border CornerRadius="{DynamicResource RadiusPill}" Padding="8,2" HorizontalAlignment="Left"
+                    BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.Workday}">
+                                <Setter Property="Background" Value="{DynamicResource SuccessLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.WeekendOvertime}">
+                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource InfoBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.HolidayOvertime}">
+                                <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+                            </DataTrigger>
+                            <!-- 「未填」走默认中性灰（B3 弱化）：不再铺 DangerLight 底 + Danger 边框。
+                                 一个月 18 天未填整片泛红只会稀释告警；文案「未填」已自证语义，
+                                 红色只保留在「未填」统计卡上作为行动提示，行内 ToolTip 提示双击去补录。 -->
+                            <!-- 法定假日休息：紫系，与日历上的紫色圆点同一语义（区别于普通周末的中性灰）。
+                                 放在最后以确保优先级最高，但用 IsHolidayRest 排除了「假日加班」等有记录的假日 -->
+                            <DataTrigger Binding="{Binding IsHolidayRest}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentVioletBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding WorkBadgeText}" FontSize="11" FontWeight="Medium">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.Workday}">
+                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.WeekendOvertime}">
+                                    <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding WorkKind}" Value="{x:Static models:WorkKind.HolidayOvertime}">
+                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsHolidayRest}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentVioletBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+        </DataTemplate>
+
+        <!-- 请假徽标：颜色按请假类型（复用 LeaveTypeToBrushConverter）；无请假记录不渲染（法定假日/周末不贴请假标签） -->
+        <DataTemplate x:Key="LeaveBadgeCell">
+            <Border CornerRadius="{DynamicResource RadiusPill}" Padding="8,2" HorizontalAlignment="Left"
+                    Visibility="{Binding HasLeave, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{Binding LeaveType, Converter={x:Static local:LeaveTypeToBrushConverter.Instance}}"
+                    BorderThickness="1">
+                <!-- 文案由 LeaveBadgeText 统一给出；只读计算属性绑 Run.Text 必须 Mode=OneWay（Run.Text 默认 TwoWay） -->
+                <TextBlock Text="{Binding LeaveBadgeText, Mode=OneWay}" FontSize="11" FontWeight="Medium"
+                           Foreground="{Binding LeaveType, Converter={x:Static local:LeaveTypeToBrushConverter.Instance}}"/>
+            </Border>
+        </DataTemplate>
+
+        <!-- 可排序列头：文本 + 升降序箭头。复用工作记录/问题库同款 SortArrowConverter 方案，
+             页面局部定义以免污染全局主题；列头 Tag 即该列的 SortMemberPath -->
+        <Style x:Key="SortableHeader" TargetType="ContentControl">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContentControl">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                       VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IconSortAsc}" Width="8" Height="5" Stretch="Uniform"
+                                  Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                <Path.Visibility>
+                                    <MultiBinding Converter="{x:Static local:SortArrowConverter.AscInstance}">
+                                        <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                        <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                        <Binding Path="Tag" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </Path.Visibility>
+                            </Path>
+                            <Path Data="{StaticResource IconSortDesc}" Width="8" Height="5" Stretch="Uniform"
+                                  Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource PrimaryBrush}">
+                                <Path.Visibility>
+                                    <MultiBinding Converter="{x:Static local:SortArrowConverter.DescInstance}">
+                                        <Binding Path="DataContext.SortColumn" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                        <Binding Path="DataContext.SortAscending" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                        <Binding Path="Tag" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </Path.Visibility>
+                            </Path>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="{StaticResource PageMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== 标题 + 时间段切换 ===== -->
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="出勤总览" FontSize="18" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0"
+                           Text="一日一状态，双标记展示"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <RadioButton Content="本月" GroupName="RangeChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="14,6"
+                             IsChecked="{Binding RangePreset, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=本月, Mode=OneWay}"
+                             Command="{Binding SetRangeCommand}" CommandParameter="本月"/>
+                <RadioButton Content="本年" GroupName="RangeChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="14,6"
+                             IsChecked="{Binding RangePreset, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=本年, Mode=OneWay}"
+                             Command="{Binding SetRangeCommand}" CommandParameter="本年"/>
+                <RadioButton Content="近三个月" GroupName="RangeChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="14,6"
+                             IsChecked="{Binding RangePreset, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=近三个月, Mode=OneWay}"
+                             Command="{Binding SetRangeCommand}" CommandParameter="近三个月"/>
+                <RadioButton Content="自定义" GroupName="RangeChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="14,6"
+                             IsChecked="{Binding RangePreset, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=自定义, Mode=OneWay}"
+                             Command="{Binding SetRangeCommand}" CommandParameter="自定义"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                            Visibility="{Binding RangePreset, Converter={x:Static local:StringEqualsToVisibilityConverter.Instance}, ConverterParameter=自定义}">
+                    <DatePicker Style="{StaticResource ModernDatePicker}" Width="120"
+                                SelectedDate="{Binding StartDate, Mode=TwoWay}"/>
+                    <TextBlock Text="~" VerticalAlignment="Center" Margin="6,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <DatePicker Style="{StaticResource ModernDatePicker}" Width="120"
+                                SelectedDate="{Binding EndDate, Mode=TwoWay}"/>
+                    <Button Content="应用" Style="{StaticResource BtnPrimary}" Padding="12,6" Margin="8,0,0,0"
+                            Command="{Binding ApplyCustomRangeCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- ===== 汇总统计卡（点击下钻到对应筛选） ===== -->
+        <Grid Grid.Row="1" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <controls:StatCard Grid.Column="0" Title="正常上班" Margin="0,0,6,0"
+                               Value="{Binding NormalDays}" Unit="天"
+                               BarBrush="{DynamicResource SuccessBrush}"
+                               IconBackgroundBrush="{DynamicResource SuccessLightBrush}"
+                               IconForegroundBrush="{DynamicResource SuccessBrush}"
+                               IconPathData="{StaticResource IconCheck}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"
+                               Click="StatCard_Click">
+                <controls:StatCard.SubText>
+                    <MultiBinding StringFormat="填报 {0:F1} · 实际 {1:F1} h">
+                        <Binding Path="NormalHours"/>
+                        <Binding Path="ActualNormalHours"/>
+                    </MultiBinding>
+                </controls:StatCard.SubText>
+            </controls:StatCard>
+            <controls:StatCard Grid.Column="1" Title="周末加班" Margin="6,0,6,0"
+                               Value="{Binding WeekendOvertimeDays}" Unit="天"
+                               BarBrush="{DynamicResource InfoBrush}"
+                               IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                               IconForegroundBrush="{DynamicResource InfoBrush}"
+                               IconPathData="{StaticResource IconClock}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"
+                               Click="StatCard_Click">
+                <controls:StatCard.SubText>
+                    <MultiBinding StringFormat="填报 {0:F1} · 实际 {1:F1} h">
+                        <Binding Path="WeekendOvertimeHours"/>
+                        <Binding Path="ActualWeekendOvertimeHours"/>
+                    </MultiBinding>
+                </controls:StatCard.SubText>
+            </controls:StatCard>
+            <controls:StatCard Grid.Column="2" Title="假日加班" Margin="6,0,6,0"
+                               Value="{Binding HolidayOvertimeDays}" Unit="天"
+                               BarBrush="{DynamicResource WarningBrush}"
+                               IconBackgroundBrush="{DynamicResource WarningLightBrush}"
+                               IconForegroundBrush="{DynamicResource WarningBrush}"
+                               IconPathData="{StaticResource IconLightning}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"
+                               Click="StatCard_Click">
+                <controls:StatCard.SubText>
+                    <MultiBinding StringFormat="填报 {0:F1} · 实际 {1:F1} h">
+                        <Binding Path="HolidayOvertimeHours"/>
+                        <Binding Path="ActualHolidayOvertimeHours"/>
+                    </MultiBinding>
+                </controls:StatCard.SubText>
+            </controls:StatCard>
+            <controls:StatCard Grid.Column="3" Title="请假" Margin="6,0,6,0"
+                               Value="{Binding LeaveDays}" Unit="天"
+                               SubText="{Binding LeaveHours, StringFormat={}{0:F1} h}"
+                               BarBrush="{DynamicResource AccentVioletBrush}"
+                               IconBackgroundBrush="{DynamicResource PrimaryLightBrush}"
+                               IconForegroundBrush="{DynamicResource AccentVioletBrush}"
+                               IconPathData="{StaticResource IconCalendar}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"
+                               Click="StatCard_Click"/>
+            <controls:StatCard Grid.Column="4" Title="未填" Margin="6,0,6,0"
+                               Value="{Binding UnfilledDays}" Unit="天"
+                               SubText="应上班但无记录"
+                               BarBrush="{DynamicResource DangerBrush}"
+                               IconBackgroundBrush="{DynamicResource DangerLightBrush}"
+                               IconForegroundBrush="{DynamicResource DangerBrush}"
+                               IconPathData="{StaticResource IconInfo}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"
+                               Click="StatCard_Click"/>
+            <!-- 可调休余额：按**填报**工时算（公司认可口径）——实际工时通常更多，仅作参考。
+                 不参与下钻筛选（点击无对应列表），故不挂 Click -->
+            <controls:StatCard Grid.Column="5" Title="可调休" Margin="6,0,0,0"
+                               Value="{Binding CompLeaveAvailable, StringFormat={}{0:F1}}" Unit="h"
+                               SubText="{Binding CompLeaveSubText}"
+                               BarBrush="{DynamicResource InfoBrush}"
+                               IconBackgroundBrush="{DynamicResource InfoLightBrush}"
+                               IconForegroundBrush="{DynamicResource InfoBrush}"
+                               IconPathData="{StaticResource IconRefresh}"
+                               CardStyle="{StaticResource Card}" IsCompact="True"/>
+        </Grid>
+
+        <!-- ===== 筛选 chips + 搜索 + 结果说明 ===== -->
+        <Grid Grid.Row="2" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Content="全部" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=全部, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="全部"/>
+                <RadioButton Content="正常上班" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=正常上班, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="正常上班"/>
+                <RadioButton Content="周末加班" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=周末加班, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="周末加班"/>
+                <RadioButton Content="假日加班" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=假日加班, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="假日加班"/>
+                <RadioButton Content="请假" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=请假, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="请假"/>
+                <RadioButton Content="未填" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=未填, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="未填"/>
+                <RadioButton Content="休息日" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
+                             Margin="0,0,6,0" Padding="12,6"
+                             IsChecked="{Binding FilterTag, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=休息日, Mode=OneWay}"
+                             Command="{Binding SetFilterCommand}" CommandParameter="休息日"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <controls:SearchBox Text="{Binding SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Width="200" Margin="0,0,12,0"
+                                    Placeholder="搜索日期/内容/请假类型…"/>
+                <!-- C2：导出当前筛选结果为 CSV（所见即所得，跟 chips/时间段/关键词走） -->
+                <Button Content="导出" Command="{Binding ExportCsvCommand}"
+                        Style="{StaticResource BtnSecondary}" Padding="12,6" FontSize="12"
+                        VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <TextBlock Text="{Binding ResultSummary}" VerticalAlignment="Center"
+                           FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ===== 出勤明细列表 ===== -->
+        <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0">
+            <controls:DataGridBase x:Name="AttendanceGrid" ItemsSource="{Binding Items}"
+                                   TableKey="Attendance"
+                                   AutoGenerateColumns="False"
+                                   CanUserResizeColumns="True"
+                                   ClipboardCopyMode="IncludeHeader"
+                                   HeadersVisibility="Column"
+                                   IsReadOnly="True"
+                                   MouseDoubleClick="AttendanceGrid_MouseDoubleClick"
+                                   Sorting="AttendanceGrid_Sorting"
+                                   VerticalScrollBarVisibility="Auto"
+                                   HorizontalScrollBarVisibility="Disabled">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernGridColumnHeader}"/>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource ModernGridCell}"/>
+                </DataGrid.CellStyle>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernGridRow}">
+                        <Setter Property="ToolTip" Value="{Binding TooltipText}"/>
+                        <!-- C1：双击任一行跳到当天工作记录（未填行即「去补录」），手型光标给出可点提示 -->
+                        <Setter Property="Cursor" Value="Hand"/>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <!-- 日期：按真实 DateTime 排序（不按 "MM-dd" 字符串，跨月才正确） -->
+                    <DataGridTextColumn Binding="{Binding DateText}" Width="70">
+                        <DataGridTextColumn.SortMemberPath>Date</DataGridTextColumn.SortMemberPath>
+                        <DataGridTextColumn.Header>
+                            <ContentControl Content="日期" Tag="Date" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <!-- 星期：派生自日期，排序与日期列等价，故不提供排序（点它不会误触发） -->
+                    <DataGridTextColumn Header="星期" Binding="{Binding WeekdayText}" Width="56"/>
+                    <DataGridTemplateColumn Width="110" CellTemplate="{StaticResource WorkBadgeCell}">
+                        <DataGridTemplateColumn.SortMemberPath>WorkKind</DataGridTemplateColumn.SortMemberPath>
+                        <DataGridTemplateColumn.Header>
+                            <ContentControl Content="工作状态" Tag="WorkKind" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTemplateColumn.Header>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="110" CellTemplate="{StaticResource LeaveBadgeCell}">
+                        <DataGridTemplateColumn.SortMemberPath>LeaveType</DataGridTemplateColumn.SortMemberPath>
+                        <DataGridTemplateColumn.Header>
+                            <ContentControl Content="请假" Tag="LeaveType" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTemplateColumn.Header>
+                    </DataGridTemplateColumn>
+                    <!-- 工时双口径：填报（报公司）/ 实际（自己算账）。均按真值排序，不按 "8.0h" 字符串 -->
+                    <DataGridTextColumn Width="76" Binding="{Binding WorkHoursText}">
+                        <DataGridTextColumn.SortMemberPath>WorkHours</DataGridTextColumn.SortMemberPath>
+                        <DataGridTextColumn.Header>
+                            <ContentControl Content="填报工时" Tag="WorkHours" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTextColumn.Header>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Width="76" Binding="{Binding ActualHoursText}">
+                        <DataGridTextColumn.SortMemberPath>ActualHours</DataGridTextColumn.SortMemberPath>
+                        <DataGridTextColumn.Header>
+                            <ContentControl Content="实际工时" Tag="ActualHours" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTextColumn.Header>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                <!-- 实际与填报不一致（多干了没报）时用紫色点出来，方便自己核对 -->
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasHoursDiff}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentVioletBrush}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding ContentSummary}" Width="*">
+                        <DataGridTextColumn.SortMemberPath>ContentSummary</DataGridTextColumn.SortMemberPath>
+                        <DataGridTextColumn.Header>
+                            <ContentControl Content="内容摘要" Tag="ContentSummary" Style="{StaticResource SortableHeader}"/>
+                        </DataGridTextColumn.Header>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource GridTextTrim}"/>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </controls:DataGridBase>
+        </Border>
+
+        <!-- 空状态 -->
+        <controls:EmptyState Grid.Row="3"
+                             Visibility="{Binding IsEmpty, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                             IconPathData="{StaticResource IconCalendar}"
+                             Title="没有符合条件的记录"
+                             Description="切换筛选条件或时间段试试"/>
+    </Grid>
+</UserControl>

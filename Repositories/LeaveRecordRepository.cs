@@ -37,6 +37,12 @@ public class LeaveRecordRepository : SqliteRepository
             "SELECT Id, Date, LeaveType, Note, Hours FROM LeaveRecord WHERE IsDeleted = 0 AND strftime('%Y', Date) = @Year ORDER BY Date",
             new { Year = year.ToString() }));
 
+    /// <summary>获取日期区间内的请假记录（出勤总览用，已过滤软删除）</summary>
+    public Task<IEnumerable<LeaveRecord>> GetByDateRangeAsync(string startDate, string endDate)
+        => ExecuteAsync(c => c.QueryAsync<LeaveRecord>(
+            "SELECT Id, Date, LeaveType, Note, Hours FROM LeaveRecord WHERE IsDeleted = 0 AND Date BETWEEN @Start AND @End ORDER BY Date",
+            new { Start = startDate, End = endDate }));
+
     /// <summary>软删除（移入回收站）</summary>
     public Task<int> DeleteAsync(int id)
         => ExecuteAsync(c => c.ExecuteAsync(

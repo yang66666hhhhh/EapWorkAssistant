@@ -96,6 +96,9 @@ public static class ServiceContainer
         services.AddSingleton<WorkRecordImportService>();
         services.AddSingleton<CompLeaveBalanceService>();
 
+        // 出勤日状态服务（工作记录/请假/节假日三源合并，出勤总览页数据源）
+        services.AddSingleton<DayStatusService>();
+
         // 有状态业务服务
         // HolidayService 构造函数为 private，只能登记既有单例实例（按类型注册会在解析时才炸）
         services.AddSingleton(HolidayService.Instance);
@@ -117,6 +120,7 @@ public static class ServiceContainer
     {
         services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<WorkRecordViewModel>();
+        services.AddSingleton<AttendanceViewModel>();
         services.AddSingleton<KnowledgeViewModel>();
         services.AddSingleton<IssueViewModel>();
         services.AddSingleton<SettingsViewModel>();

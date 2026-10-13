@@ -191,6 +191,10 @@
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=1}"
                                      Content="工作记录" Tag="{StaticResource IconPencil}"/>
+                        <!-- 出勤总览：索引 6（追加，避免打乱既有索引映射） -->
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=6}"
+                                     Content="出勤总览" Tag="{StaticResource IconCalendar}"/>
                         <RadioButton Style="{StaticResource NavButton}"
                                      IsChecked="{Binding SelectedIndex, Converter={x:Static local:IndexToBoolConverter.Instance}, ConverterParameter=2}"
                                      Content="知识库" Tag="{StaticResource IconBook}"/>
@@ -223,6 +227,9 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:WorkRecordViewModel}">
                             <views:WorkRecordView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:AttendanceViewModel}">
+                            <views:AttendanceView/>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:KnowledgeViewModel}">
                             <views:KnowledgeView/>

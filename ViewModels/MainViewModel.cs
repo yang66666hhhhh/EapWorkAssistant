@@ -68,6 +68,7 @@ public partial class MainViewModel : ObservableObject
 
     public DashboardViewModel Dashboard { get; }
     public WorkRecordViewModel WorkRecord { get; }
+    public AttendanceViewModel Attendance { get; }
     public KnowledgeViewModel Knowledge { get; }
     public IssueViewModel Issue { get; }
     public SettingsViewModel Settings { get; }
@@ -94,6 +95,7 @@ public partial class MainViewModel : ObservableObject
         // 避免导航状态出现多份副本。
         Dashboard = ServiceContainer.Get<DashboardViewModel>();
         WorkRecord = ServiceContainer.Get<WorkRecordViewModel>();
+        Attendance = ServiceContainer.Get<AttendanceViewModel>();
         Knowledge = ServiceContainer.Get<KnowledgeViewModel>();
         Issue = ServiceContainer.Get<IssueViewModel>();
         Settings = ServiceContainer.Get<SettingsViewModel>();
@@ -111,6 +113,7 @@ public partial class MainViewModel : ObservableObject
         CurrentView = defaultView switch
         {
             ViewNames.WorkRecord => WorkRecord,
+            ViewNames.Attendance => Attendance,
             ViewNames.Knowledge => Knowledge,
             ViewNames.Issue => Issue,
             ViewNames.Settings => Settings,
@@ -120,6 +123,7 @@ public partial class MainViewModel : ObservableObject
         SelectedIndex = defaultView switch
         {
             ViewNames.WorkRecord => 1,
+            ViewNames.Attendance => 6,
             ViewNames.Knowledge => 2,
             ViewNames.Issue => 3,
             ViewNames.Settings => 4,
@@ -145,6 +149,14 @@ public partial class MainViewModel : ObservableObject
         {
             NavigateTo(page);
         };
+
+        // 出勤总览双击某天 → 跳到工作记录并预选该日期（未填行即「去补录」）
+        Attendance.NavigateToWorkRecord += (date) =>
+        {
+            WorkRecord.SelectedDate = date;
+            WorkRecord.SelectedTabIndex = 0;
+            NavigateTo(ViewNames.WorkRecord);
+        };
     }
 
     [RelayCommand]
@@ -153,6 +165,7 @@ public partial class MainViewModel : ObservableObject
         object? targetView = viewName switch
         {
             ViewNames.WorkRecord => WorkRecord,
+            ViewNames.Attendance => Attendance,
             ViewNames.Knowledge => Knowledge,
             ViewNames.Issue => Issue,
             ViewNames.Settings => Settings,
@@ -195,6 +208,7 @@ public partial class MainViewModel : ObservableObject
         var newIndex = viewName switch
         {
             ViewNames.WorkRecord => 1,
+            ViewNames.Attendance => 6,
             ViewNames.Knowledge => 2,
             ViewNames.Issue => 3,
             ViewNames.Settings => 4,
@@ -246,6 +260,7 @@ public partial class MainViewModel : ObservableObject
         var idx = CurrentView switch
         {
             WorkRecordViewModel => 1,
+            AttendanceViewModel => 6,
             KnowledgeViewModel => 2,
             IssueViewModel => 3,
             SettingsViewModel => 4,
@@ -439,8 +454,10 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedIndexChanged(int value)
     {
-        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings, ViewNames.RecycleBin };
-        if (value >= 0 && views.Length > value)
+        // 索引 → 视图名映射，必须与 SyncSelectedIndex 及侧边栏 ConverterParameter 保持一致；
+        // Attendance 固定为 6（追加制，插在中间会打乱既有索引）
+        var views = new[] { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings, ViewNames.RecycleBin, ViewNames.Attendance };
+        if (value >= 0 && value < views.Length)
             NavigateTo(views[value]);
     }
 }

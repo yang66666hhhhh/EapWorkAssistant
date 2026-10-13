@@ -126,13 +126,14 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private bool _isRestDay5; // 周五
     [ObservableProperty] private bool _isRestDay6; // 周六
 
-    public List<string> ViewOptions { get; } = new() { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
+    public List<string> ViewOptions { get; } = new() { ViewNames.Dashboard, ViewNames.WorkRecord, ViewNames.Attendance, ViewNames.Knowledge, ViewNames.Issue, ViewNames.Settings };
     public List<int> AutoSaveOptions { get; } = new() { 1, 3, 5, 10, 15, 30 };
 
     public string DefaultViewLabel => DefaultView switch
     {
         ViewNames.Dashboard => "工作台",
         ViewNames.WorkRecord => "工作记录",
+        ViewNames.Attendance => "出勤总览",
         ViewNames.Knowledge => "知识库",
         ViewNames.Issue => "问题跟踪",
         ViewNames.Settings => "设置",

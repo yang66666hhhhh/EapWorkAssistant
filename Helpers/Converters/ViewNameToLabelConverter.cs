@@ -14,6 +14,7 @@ public class ViewNameToLabelConverter : IValueConverter
     {
         [ViewNames.Dashboard]  = "工作台",
         [ViewNames.WorkRecord] = "工作记录",
+        [ViewNames.Attendance] = "出勤总览",
         [ViewNames.Knowledge]  = "知识库",
         [ViewNames.Issue]      = "问题跟踪",
         [ViewNames.Settings]   = "设置",

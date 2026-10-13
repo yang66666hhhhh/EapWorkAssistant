@@ -76,19 +76,65 @@ public static class ExportService
             // 添加BOM头，确保中文在Excel中正确显示
             sb.Append('\uFEFF');
             // CSV头（UniqueId 为首列，作为导入匹配键；列名与界面 DataGrid 表头保持一致）
-            sb.AppendLine("UniqueId,日期,任务,类型,内容,工作成果,工时,进度,是否亮点,问题描述,解决方案");
+            // 「工时」= 填报工时（报公司），「实际工时」= 真实投入（自己算调休用）
+            sb.AppendLine("UniqueId,日期,任务,类型,内容,工作成果,工时,实际工时,进度,是否亮点,问题描述,解决方案");
             // 数据行
             foreach (var r in records)
             {
                 var uid = string.IsNullOrWhiteSpace(r.UniqueId)
                     ? WorkRecordIdentityHelper.GenerateUniqueId(r)
                     : r.UniqueId;
-                sb.AppendLine($"{EscapeCsv(uid)},{EscapeCsv(r.WorkDate)},{EscapeCsv(r.ProjectName)},{EscapeCsv(r.WorkType)},{EscapeCsv(r.Content)},{EscapeCsv(r.Achievement)},{r.Hours},{r.Progress},{(r.IsHighlight == 1 ? "是" : "否")},{EscapeCsv(r.Problem)},{EscapeCsv(r.Solution)}");
+                sb.AppendLine($"{EscapeCsv(uid)},{EscapeCsv(r.WorkDate)},{EscapeCsv(r.ProjectName)},{EscapeCsv(r.WorkType)},{EscapeCsv(r.Content)},{EscapeCsv(r.Achievement)},{r.Hours},{r.ActualHours},{r.Progress},{(r.IsHighlight == 1 ? "是" : "否")},{EscapeCsv(r.Problem)},{EscapeCsv(r.Solution)}");
             }
             File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
             return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// 导出「出勤明细」为 CSV（列与出勤总览表格一致）。
+    /// 生成逻辑抽到 <see cref="BuildDayStatusCsv"/>，便于单测（本方法只负责弹窗与落盘）。
+    /// </summary>
+    public static bool ExportDayStatusToCsv(IEnumerable<DayStatusItem> items, string defaultName = "出勤明细")
+    {
+        var dialog = new SaveFileDialog
+        {
+            Filter = "CSV文件|*.csv",
+            FileName = $"{defaultName}_{DateTime.Now:yyyyMMdd}.csv"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            File.WriteAllText(dialog.FileName, BuildDayStatusCsv(items), Encoding.UTF8);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 生成出勤明细 CSV 文本（含 BOM，Excel 直接打开不乱码）。
+    /// 工作状态用徽标文案（正常上班/周末加班/假日加班/未填/法定假日/周末），与界面一致。
+    /// </summary>
+    internal static string BuildDayStatusCsv(IEnumerable<DayStatusItem> items)
+    {
+        var sb = new StringBuilder();
+        sb.Append('\uFEFF');
+        sb.AppendLine("日期,星期,工作状态,填报工时,实际工时,工作记录数,请假类型,请假工时,内容摘要");
+        foreach (var i in items)
+        {
+            sb.AppendLine(string.Join(',',
+                i.Date.ToString("yyyy-MM-dd"),
+                EscapeCsv(i.WeekdayText),
+                EscapeCsv(i.WorkBadgeText),
+                i.WorkHours.ToString("0.#"),
+                i.ActualHours.ToString("0.#"),
+                i.RecordCount,
+                EscapeCsv(i.LeaveType ?? ""),
+                i.LeaveHours.ToString("0.#"),
+                EscapeCsv(i.ContentSummary ?? "")));
+        }
+        return sb.ToString();
     }
 
     /// <summary>
@@ -163,10 +209,12 @@ public static class ExportService
                 {
                     record.Achievement = GetField(fields, off + 4, "工作成果");
                     record.Hours = double.TryParse(GetField(fields, off + 5, "工时"), out var h) ? h : 0;
-                    record.Progress = int.TryParse(GetField(fields, off + 6, "进度"), out var p) ? p : 0;
-                    record.IsHighlight = GetField(fields, off + 7, "是否亮点") == "是" ? 1 : 0;
-                    record.Problem = GetField(fields, off + 8, "问题描述");
-                    record.Solution = GetField(fields, off + 9, "解决方案");
+                    // 旧文件无「实际工时」列 → 取不到值 → 0 → 读取时回落为填报工时，语义不变
+                    record.ActualHours = double.TryParse(GetField(fields, off + 6, "实际工时"), out var ah) ? ah : 0;
+                    record.Progress = int.TryParse(GetField(fields, off + 7, "进度"), out var p) ? p : 0;
+                    record.IsHighlight = GetField(fields, off + 8, "是否亮点") == "是" ? 1 : 0;
+                    record.Problem = GetField(fields, off + 9, "问题描述");
+                    record.Solution = GetField(fields, off + 10, "解决方案");
                 }
                 else
                 {
