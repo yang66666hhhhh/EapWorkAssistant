@@ -806,6 +806,7 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             Problem = record.Problem,
             Solution = record.Solution,
             Hours = record.Hours,
+            ActualHours = record.ActualHours,
             Progress = record.Progress,
             IsHighlight = record.IsHighlight,
             HighlightNote = record.HighlightNote

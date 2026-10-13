@@ -24,6 +24,14 @@ public class DataGridBase : DataGrid
         CanUserResizeColumns = true;
         // 启用智能列宽校准 + 列宽记忆
         SmartColumns.SetEnable(this, true);
+
+        // ⚠️ 主表一律只读：本项目的表格都是「展示 + 操作列按钮 / 双击打开抽屉」模式，
+        // 没有内联编辑需求。若保持可编辑（DataGrid 默认 IsReadOnly=false），
+        // 「双击条目快速编辑」会先让 DataGrid 进入单元格编辑模式，而带 StringFormat 的列
+        // （如工时列的 `8.0h`）提交时 ConvertBack 解析失败，会把**源对象的字段静默写成 0**——
+        // 曾导致「编辑记录时工时显示 0」（行对象 Hours 被回写为 0，EditRecord 再复制该 0）。
+        // 如需可编辑表，请在该 DataGrid 上显式写 IsReadOnly="False"。
+        IsReadOnly = true;
     }
 
     public static readonly DependencyProperty TableKeyProperty =
