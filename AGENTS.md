@@ -751,6 +751,18 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **WPF ToolTip 无法用 PrintWindow 验证**：格子 tooltip 是标准 WPF `ToolTip`（独立 Popup 窗口），`PrintWindow(hwnd)` 只截主窗口、**抓不到弹窗**（图表 tooltip 是画在 Skia 画布内的，所以能截到）。验证热力图 tooltip 必须走 UIA：`AutomationElement.FromPoint(悬停坐标)` 读光标下元素 + `RootElement.FindAll(Descendants, ControlType=ToolTip)` 读弹窗文本。
 - **验证结论**（10 月 35 格全量 + 悬停实证）：区间外前置格灰、10/1 amber（假日加班）、10/2-5 purple（法定假日）、10/6-7 amber、10/8-9 green、**10/10 补班=green 而 10/11 周日=blue**（补班判定生效强证据）、10/13/15/16/19-23/26-30 red（未填）、10/14 年假、10/17 blue（周末加班）、周末列 gray；悬停 tooltip 经 UIA 读到 `2026-10-14 周三 · 请假·年假 8h`。
 
+### 8.24 列表多选批量操作（P2 ⑧，2026-10-15 新增）
+
+- **背景**：工作记录（「全部记录」页）、知识库、问题跟踪三个主列表支持「多选模式 → 批量软删除」。回收站早前的多选实现是范式来源，本轮把通用逻辑下沉、三模块对齐。
+- **通用框架**：`ViewModels/PagedCollectionViewModelBase<T>` 提供 `SelectedItems` / `IsMultiSelectMode` / `HasSelection` + `ToggleMultiSelectCommand` + `BatchDeleteCommand`；子类（Knowledge/Issue）只需实现两个钩子 `DeleteItemAsync` / `RestoreItemAsync`（各自接仓储的软删/恢复）。`ReloadPageAsync` 末尾统一清空选择——列表内容一变（翻页/搜索/筛选/删除），旧选择即失效。
+- **核心逻辑与 UI 编排分离**：`BatchDeleteCommand` 只负责「确认对话框 + Toast（含撤销）」，实际删除在 `internal DeleteItemsAsync(IReadOnlyList<T>)`，可被单测直接调用（绕过 `DialogService`）；撤销回调走 `RestoreItemsAsync`。
+- **工作记录是例外**：`WorkRecordViewModel` 不继承分页基类，故单独实现 `SelectedRecords` 套件（`ToggleMultiSelectCommand` + `BatchDeleteRecordsCommand` + `internal DeleteSelectedRecordsAsync` / `RestoreWorkRecordsAsync`），并额外刷新当日面板 / 日历 / 调休余额；当前页被删空时回退一页。
+- **View 侧零新增控件**：复用 `Helpers/SelectionModeConverter`（`IsMultiSelectMode` → `DataGridSelectionMode.Single/Extended`）+ `Helpers/DataGridHelper.SelectedItemsList`（把 `DataGrid.SelectedItems` 同步到 VM 集合）。二者与 `BoolToVis` 已在 `Resources/Styles.xaml` **全局注册**（键 `SelModeConv` / `BoolToVis`），新 View 直接 `StaticResource` 引用，无需各自声明。
+- ⚠️ **「多选」开关必须用 `BtnGhost`**：`BtnGhost` 的 `TargetType` 是 `ButtonBase`（Button 与 ToggleButton 通用）；`BtnPrimary/BtnSecondary/BtnDanger` 是 `TargetType="Button"`，**不能**套在 `ToggleButton` 上（编译期报错）。
+- ⚠️ **删除语义是软删除**（移入回收站），故批量按钮用 `BtnDanger`、但 Tooltip/提示须写明「可在回收站恢复」，避免误以为不可逆。
+- ⚠️ **多选模式下点击列头排序 / 翻页 / 改筛选都会清空选择**（`ReloadPageAsync` / `LoadAllRecordsAsync` 末尾清空）——这是刻意行为，不是 bug。
+- **验证**：`EapWorkAssistant.Tests/BatchSelectionTests.cs`（5 条）覆盖模式切换 + 退出清空 + `HasSelection` 联动 + `DeleteItemsAsync` 软删与列表刷新 + `RestoreItemsAsync` 撤销；测试基线 156 → **161**。
+
 ---
 
 ## 9. AI 行为约束红线
