@@ -738,6 +738,19 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **饼图 tooltip 防重复**：LiveCharts 自动在 tooltip 头部带系列名（含色点），`ToolTipLabelFormatter` 只输出数值 `$"{value:F1} h"`，不要再拼系列名。
 - **验证结论**（1320-1942px 窗口实证）：柱体=主题 accent #6366F1、顶/底圆角渐进收窄、横向网格 5 条 0.8f 淡线、竖向网格 0 条、hover 柱体半透明高亮 + 数据点圆环 + 白底 tooltip + 十字准星、饼图扇区外扩。截图定位用 PIL 按柱体/饼图调色板取色（UIA BoundingRectangle 在窗口 resize 期间会滞后，勿直接用于悬停坐标）。
 
+### 8.23 出勤月度热力图（AttendanceView 迷你日历，2026-10-15 新增）
+
+- **背景**：P1 ⑦。`AttendanceView` 顶部热力图面板（`HeatmapPanel`，Row 2）以 7×N 格子展示当月每天状态，复用日历圆点语义但改为**整格底色**表达。
+- **数据流**：`AttendanceViewModel.BuildHeatmap()`（区间变更时重建月份边界）→ `RefreshHeatmapCells()`（按 `HeatmapMonth` 生成 `HeatmapCells`）。`HeatmapCell` 定义在 `Models/DayStatus.cs`。
+- **格色判定**：`AttendanceViewModel.ToDotColor(DayStatusItem)`（`internal static`，供单测直调）与 `CustomCalendar.CreateDayItem` **共用同一套优先级**（amber 假日加班 → green 工作日已填 → 请假类型 → blue 周末加班 → red 应上班未填 → purple 法定假日 → gray 普通周末；**补班/假日判定先于周末**）。XAML 侧 `HeatmapCellTemplate` 用 `DataTrigger` 把 `DotColor` 映射到 `*LightBrush` 底色 + 对应实色描边。**禁止**在 View 里另写一套颜色判定。
+- ⚠️ **区外格**：格子按自然周对齐，会包含上月/次月的前后置格。这类格子 `Item=null` → `DotColor=""` → 无触发命中 → 落回默认 `SurfaceAltBrush` 灰底，且 `IsCurrentMonth=false` 令整体 `Opacity=0.35`；点击无 `Item` 不响应（`OpenHeatmapDay` 内判空）。**这不是缺陷**，勿当 bug 修。
+- ⚠️ **运行时色彩以 ThemeService 为准**：`ThemeService` 在启动/切换主题时用 `SetColor`/`UpdateBrush` **覆盖 DesignTokens** 的同名键。Indigo+Light 下实测：`PrimaryLight=#EEF2FF`（DesignTokens 写 #E9EEFF）、`SuccessLight=#D1FAE5`（写 #ECFDF5）、`DangerLight=#FEE2E2`（写 #FEF2F2）；而 `WarningLight=#FEF3C7`、`InfoLight=#DBEAFE`、`Leave*LightBrush` 未被覆盖。**做像素比对时必须用运行时值**，直接读 DesignTokens 会误判（曾把 green 误判成病假——二者恰好都是 #D1FAE5）。
+- **布局**：行 `MinHeight` 保底（小窗口不被挤扁），格子 `MinHeight=26` + 高度自适应（由 `UniformGrid` 行高决定，不写死 `Height`）。放热力图前先确认出勤页 `Grid.RowDefinitions` 各行分配（热力图行取 `Auto`，明细列表行取 `*`）。
+- **月份导航**：`PrevHeatmapMonthCommand`/`NextHeatmapMonthCommand` + `CanPrevMonth`/`CanNextMonth` 边界；月份范围取区间首月~末月，**默认展示「今天所在月」（在区间内时）**，避免「本年」模式默认落到 12 月空档。标题 `HeatmapTitle` 格式 `yyyy年M月`。
+- **点击**：`HeatmapCell_Click` → `OpenHeatmapDay(cell)` → `NavigateToWorkRecord` 事件（与列表双击同一事件，跨页切到工作记录并定位）。
+- ⚠️ **WPF ToolTip 无法用 PrintWindow 验证**：格子 tooltip 是标准 WPF `ToolTip`（独立 Popup 窗口），`PrintWindow(hwnd)` 只截主窗口、**抓不到弹窗**（图表 tooltip 是画在 Skia 画布内的，所以能截到）。验证热力图 tooltip 必须走 UIA：`AutomationElement.FromPoint(悬停坐标)` 读光标下元素 + `RootElement.FindAll(Descendants, ControlType=ToolTip)` 读弹窗文本。
+- **验证结论**（10 月 35 格全量 + 悬停实证）：区间外前置格灰、10/1 amber（假日加班）、10/2-5 purple（法定假日）、10/6-7 amber、10/8-9 green、**10/10 补班=green 而 10/11 周日=blue**（补班判定生效强证据）、10/13/15/16/19-23/26-30 red（未填）、10/14 年假、10/17 blue（周末加班）、周末列 gray；悬停 tooltip 经 UIA 读到 `2026-10-14 周三 · 请假·年假 8h`。
+
 ---
 
 ## 9. AI 行为约束红线
