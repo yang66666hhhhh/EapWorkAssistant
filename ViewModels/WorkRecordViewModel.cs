@@ -125,6 +125,19 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private WorkRecord? _selectedAllRecord;
 
+    // ===== 全部记录多选批量操作 =====
+    /// <summary>多选模式下选中的记录（由「全部记录」网格的 SelectedItems 同步）</summary>
+    [ObservableProperty]
+    private ObservableCollection<WorkRecord> _selectedRecords = new();
+
+    /// <summary>是否处于多选模式（驱动 DataGrid SelectionMode 与批量操作栏显隐）</summary>
+    [ObservableProperty]
+    private bool _isMultiSelectMode;
+
+    /// <summary>当前是否有选中项（驱动批量按钮可用性）</summary>
+    [ObservableProperty]
+    private bool _hasSelection;
+
     // ===== 全部记录 Tab =====
     [ObservableProperty]
     private int _selectedTabIndex;
@@ -302,6 +315,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
             }
         };
         StartAutoSaveTimer();
+
+        // 选择集变化 → 同步「是否有选中项」，驱动批量按钮可用性
+        SelectedRecords.CollectionChanged += (_, _) => HasSelection = SelectedRecords.Count > 0;
 
         PropertyChanged += WorkRecordViewModel_PropertyChanged;
     }
@@ -1094,6 +1110,9 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         UpdatePagination();
         // 搜索态且无结果 → 展示"未找到与 XXX 相关"的区分空态
         IsSearchEmpty = !string.IsNullOrWhiteSpace(SearchKeyword) && AllRecords.Count == 0;
+
+        // 列表内容已刷新（翻页/搜索/筛选/删除），旧的选中项不再指向当前可见数据 → 清空选择
+        if (SelectedRecords.Count > 0) SelectedRecords.Clear();
     }
 
     private void UpdatePagination()
@@ -1223,6 +1242,82 @@ public partial class WorkRecordViewModel : ObservableObject, IRefreshable
         // 不切换 Tab 和日期，直接在全部记录页打开编辑抽屉
         EditRecord(record);
         SelectedAllRecord = record;
+    }
+
+    // ===== 全部记录多选批量 =====
+
+    /// <summary>切换多选模式；退出多选时清空已有选择。</summary>
+    [RelayCommand]
+    private void ToggleMultiSelect()
+    {
+        IsMultiSelectMode = !IsMultiSelectMode;
+        if (!IsMultiSelectMode)
+            SelectedRecords.Clear();
+    }
+
+    /// <summary>
+    /// 批量软删除「全部记录」中选中的记录（移入回收站，可通过 Toast「撤销」或回收站恢复）。
+    /// 确认对话框 + Toast 属 UI 编排；核心删除逻辑抽到 <see cref="DeleteSelectedRecordsAsync"/>（可单测）。
+    /// </summary>
+    [RelayCommand]
+    private async Task BatchDeleteRecordsAsync()
+    {
+        var count = SelectedRecords.Count;
+        if (count == 0) return;
+        if (!DialogService.Instance.ShowConfirm(
+                $"确定要删除选中的 {count} 条记录吗？\n删除后可在「回收站」中恢复。",
+                "批量删除", ConfirmType.Danger))
+            return;
+
+        try
+        {
+            var deleted = SelectedRecords.ToList();
+            await DeleteSelectedRecordsAsync(deleted);
+            ToastService.WithAction($"已删除 {count} 条记录", "已删除", ToastType.Success, "撤销",
+                () => _ = RestoreWorkRecordsAsync(deleted));
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"批量删除失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>批量软删除并刷新所有相关视图（不含确认对话框，供命令与单元测试调用）。</summary>
+    internal async Task DeleteSelectedRecordsAsync(IReadOnlyList<WorkRecord> items)
+    {
+        if (items.Count == 0) return;
+        foreach (var r in items)
+            await _repo.DeleteAsync(r.Id);
+        SelectedRecords.Clear();
+
+        // 当前页若被删空，回退一页，避免落在空白页
+        if (AllRecords.Count <= items.Count && CurrentPage > 1)
+            CurrentPage--;
+
+        await LoadAllRecordsAsync();
+        await LoadRecordsAsync();
+        await LoadCalendarStatusAsync();
+        await LoadCompLeaveBalanceAsync();
+    }
+
+    /// <summary>批量恢复（撤销批量删除）。</summary>
+    internal async Task RestoreWorkRecordsAsync(IReadOnlyList<WorkRecord> items)
+    {
+        if (items.Count == 0) return;
+        try
+        {
+            foreach (var r in items)
+                await _repo.RestoreAsync(r.Id);
+            await LoadAllRecordsAsync();
+            await LoadRecordsAsync();
+            await LoadCalendarStatusAsync();
+            await LoadCompLeaveBalanceAsync();
+            ToastService.Success($"已恢复 {items.Count} 条记录");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"恢复失败：{ex.Message}");
+        }
     }
 
     [RelayCommand]

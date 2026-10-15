@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 using EapWorkAssistant.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace EapWorkAssistant.ViewModels;
@@ -42,6 +44,16 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     /// <summary>搜索了关键词但无匹配结果（用于展示"未找到与 XXX 相关"的区分空态）。</summary>
     [ObservableProperty] private bool _isSearchEmpty;
 
+    // ===== 多选批量操作 =====
+    /// <summary>多选模式下选中的条目（由 View 的 DataGrid.SelectedItems 同步过来）</summary>
+    [ObservableProperty] private ObservableCollection<T> _selectedItems = new();
+
+    /// <summary>是否处于多选模式（驱动 DataGrid SelectionMode 与批量操作栏显隐）</summary>
+    [ObservableProperty] private bool _isMultiSelectMode;
+
+    /// <summary>当前是否有选中项（驱动批量按钮可用性）</summary>
+    [ObservableProperty] private bool _hasSelection;
+
     protected PagedCollectionViewModelBase()
     {
         _statusTimer = new UiTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -53,6 +65,9 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
             _searchTimer.Stop();
             SearchAsync();
         };
+
+        // 选择集变化 → 同步「是否有选中项」，驱动批量按钮可用性
+        SelectedItems.CollectionChanged += (_, _) => HasSelection = SelectedItems.Count > 0;
     }
 
     partial void OnSearchKeywordChanged(string value)
@@ -78,6 +93,12 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
     protected abstract Task InsertAsync(T item);
     protected abstract string EmptyImportMessage { get; }
     protected abstract string ImportSuccessMessage { get; }
+
+    /// <summary>软删除单条（移入回收站），供批量删除复用。子类接各自的仓储。</summary>
+    protected abstract Task DeleteItemAsync(T item);
+
+    /// <summary>恢复单条软删除记录（撤销批量删除），供子类接各自仓储。</summary>
+    protected abstract Task RestoreItemAsync(T item);
 
     [RelayCommand]
     private void ClosePanel() => RequestPanelClose();
@@ -135,6 +156,9 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
 
         // 搜索态且无结果 → 区分空态；无关键词时归为通用"暂无数据"空态。
         IsSearchEmpty = !string.IsNullOrWhiteSpace(kw) && total == 0;
+
+        // 列表内容已刷新（翻页/搜索/筛选/删除），旧的选中项不再指向当前可见数据 → 清空选择
+        if (SelectedItems.Count > 0) SelectedItems.Clear();
     }
 
     private void UpdateVisiblePageNumbers()
@@ -224,6 +248,63 @@ public abstract partial class PagedCollectionViewModelBase<T> : ObservableObject
         {
             ToastService.Error($"导入失败：{ex.Message}");
         }
+    }
+
+    // ===== 多选批量操作 =====
+
+    /// <summary>切换多选模式；退出多选时清空已有选择。</summary>
+    [RelayCommand]
+    private void ToggleMultiSelect()
+    {
+        IsMultiSelectMode = !IsMultiSelectMode;
+        if (!IsMultiSelectMode)
+            SelectedItems.Clear();
+    }
+
+    /// <summary>
+    /// 批量软删除当前选中条目（移入回收站，可通过 Toast「撤销」或回收站恢复）。
+    /// 确认对话框 + Toast 属 UI 编排；核心删除逻辑抽到 <see cref="DeleteItemsAsync"/>（可单测）。
+    /// </summary>
+    [RelayCommand]
+    private async Task BatchDeleteAsync()
+    {
+        var count = SelectedItems.Count;
+        if (count == 0) return;
+        if (!DialogService.Instance.ShowConfirm(
+                $"确定要删除选中的 {count} 条内容吗？\n删除后可在「回收站」中恢复。",
+                "批量删除", ConfirmType.Danger))
+            return;
+
+        try
+        {
+            var deleted = SelectedItems.ToList();
+            await DeleteItemsAsync(deleted);
+            ToastService.WithAction($"已删除 {count} 条", "已删除", ToastType.Success, "撤销",
+                () => _ = RestoreItemsAsync(deleted));
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error($"批量删除失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>批量软删除并刷新列表（不含确认对话框，供命令与单元测试调用）。</summary>
+    internal async Task DeleteItemsAsync(IReadOnlyList<T> items)
+    {
+        if (items.Count == 0) return;
+        foreach (var item in items)
+            await DeleteItemAsync(item);
+        SelectedItems.Clear();
+        await LoadAsync();
+    }
+
+    /// <summary>批量恢复（撤销批量删除）。</summary>
+    internal async Task RestoreItemsAsync(IReadOnlyList<T> items)
+    {
+        if (items.Count == 0) return;
+        foreach (var item in items)
+            await RestoreItemAsync(item);
+        await LoadAsync();
     }
 
     public void MarkDirty()

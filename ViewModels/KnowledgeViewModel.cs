@@ -268,6 +268,14 @@ public partial class KnowledgeViewModel : PagedCollectionViewModelBase<Knowledge
     protected override async Task InsertAsync(Knowledge item)
         => await _repo.InsertAsync(item);
 
+    /// <summary>批量删除复用的单条软删除（移入回收站）。</summary>
+    protected override async Task DeleteItemAsync(Knowledge item)
+        => await _repo.DeleteAsync(item.Id);
+
+    /// <summary>撤销批量删除时的单条恢复。</summary>
+    protected override async Task RestoreItemAsync(Knowledge item)
+        => await _repo.RestoreAsync(item.Id);
+
     protected override string EmptyImportMessage => "文件为空，没有可导入的知识";
     protected override string ImportSuccessMessage => "已导入 {0} 条知识";
 

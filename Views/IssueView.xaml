@@ -87,6 +87,17 @@
                                 Style="{StaticResource BtnSecondary}" Margin="0,0,8,0" Padding="14,9" FontSize="12"/>
                         <Button Content="导入" Command="{Binding ImportJsonAsyncCommand}"
                                 Style="{StaticResource BtnSecondary}" Margin="0,0,8,0" Padding="14,9" FontSize="12"/>
+                        <!-- 多选模式切换（P2 ⑧） -->
+                        <ToggleButton IsChecked="{Binding IsMultiSelectMode}"
+                                      Style="{StaticResource BtnGhost}" Padding="10,8" Margin="0,0,8,0"
+                                      ToolTip="多选模式：批量删除" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconSelectAll}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}"
+                                      Stretch="Uniform" Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="多选" FontSize="12" Margin="5,0,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ToggleButton>
                         <controls:PrimaryActionButton x:Name="OpenFormBtn" Text="新增问题" Click="OpenForm_Click"/>
                     </StackPanel>
                 </Grid>
@@ -97,6 +108,31 @@
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0"
                     ClipToBounds="True">
                 <DockPanel LastChildFill="True">
+                    <!-- 批量操作栏（多选模式下显示，P2 ⑧） -->
+                    <Border DockPanel.Dock="Top"
+                            Visibility="{Binding IsMultiSelectMode, Converter={StaticResource BoolToVis}}"
+                            Background="{DynamicResource PrimarySoftBrush}" CornerRadius="{DynamicResource RadiusMd}"
+                            BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1"
+                            Margin="12,10,12,0" Padding="14,10">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource PrimaryBrush}"
+                                       FontWeight="SemiBold" VerticalAlignment="Center">
+                                <Run Text="已选 "/>
+                                <Run Text="{Binding SelectedItems.Count, Mode=OneWay}"/>
+                                <Run Text=" 项"/>
+                            </TextBlock>
+                            <Separator Style="{StaticResource Divider}" Margin="10,0" VerticalAlignment="Stretch"/>
+                            <Button Command="{Binding BatchDeleteCommand}" Style="{StaticResource BtnDanger}"
+                                    IsEnabled="{Binding HasSelection}" Padding="12,5"
+                                    ToolTip="删除选中问题（移入回收站，可恢复）">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource IconTrash}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}"
+                                          Stretch="Uniform" Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="删除选中" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
                     <controls:PaginationControl DockPanel.Dock="Bottom"
                                             CurrentPage="{Binding CurrentPage}"
                                             TotalPages="{Binding TotalPages}"
@@ -112,6 +148,8 @@
                                Foreground="{DynamicResource TextTertiaryBrush}" FontSize="11.5"/>
                     <Grid>
                         <controls:DataGridBase x:Name="ItemsGrid" ItemsSource="{Binding PagedItems}" SelectedItem="{Binding SelectedItem}" TableKey="Issue"
+                                  SelectionMode="{Binding IsMultiSelectMode, Converter={StaticResource SelModeConv}, FallbackValue=Single}"
+                                  local:DataGridHelper.SelectedItemsList="{Binding SelectedItems, Mode=OneWay}"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Auto"
                                   CanUserResizeColumns="True"

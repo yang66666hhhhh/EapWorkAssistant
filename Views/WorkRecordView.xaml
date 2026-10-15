@@ -475,6 +475,17 @@
                                                 Style="{StaticResource BtnGhost}" Padding="10,7" FontSize="12"
                                                 Foreground="{DynamicResource PrimaryBrush}"
                                                 Margin="5,0,0,0"/>
+                                        <!-- 多选模式切换（P2 ⑧） -->
+                                        <ToggleButton IsChecked="{Binding IsMultiSelectMode}"
+                                                      Style="{StaticResource BtnGhost}" Padding="10,7" Margin="5,0,0,0"
+                                                      ToolTip="多选模式：批量删除记录" Cursor="Hand">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Path Data="{StaticResource IconSelectAll}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}"
+                                                      Stretch="Uniform" Fill="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="多选" FontSize="12" Margin="5,0,0,0"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </ToggleButton>
                                     </StackPanel>
                                 </Grid>
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,10" Opacity="0.7"/>
@@ -623,6 +634,32 @@
                     <Border Grid.Row="2" Style="{StaticResource Card}"
                             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="0" ClipToBounds="True">
                         <DockPanel>
+                            <!-- 批量操作栏（多选模式下显示，P2 ⑧） -->
+                            <Border DockPanel.Dock="Top"
+                                    Visibility="{Binding IsMultiSelectMode, Converter={StaticResource BoolToVis}}"
+                                    Background="{DynamicResource PrimarySoftBrush}" CornerRadius="{DynamicResource RadiusMd}"
+                                    BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1"
+                                    Margin="12,10,12,0" Padding="14,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontSize="{StaticResource FontSizeMd}" Foreground="{DynamicResource PrimaryBrush}"
+                                               FontWeight="SemiBold" VerticalAlignment="Center">
+                                        <Run Text="已选 "/>
+                                        <Run Text="{Binding SelectedRecords.Count, Mode=OneWay}"/>
+                                        <Run Text=" 项"/>
+                                    </TextBlock>
+                                    <Separator Style="{StaticResource Divider}" Margin="10,0" VerticalAlignment="Stretch"/>
+                                    <Button Command="{Binding BatchDeleteRecordsCommand}" Style="{StaticResource BtnDanger}"
+                                            IsEnabled="{Binding HasSelection}" Padding="12,5"
+                                            ToolTip="删除选中记录（移入回收站，可恢复）">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="{StaticResource IconTrash}" Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}"
+                                                  Stretch="Uniform" Fill="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <TextBlock Text="删除选中" FontSize="{StaticResource FontSizeSm}" Foreground="{DynamicResource TextOnPrimaryBrush}"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
                             <!-- 分页控件 -->
                             <controls:PaginationControl DockPanel.Dock="Bottom"
                                                      DisplayMode="Numbered"
@@ -640,6 +677,8 @@
                             <Grid>
                             <controls:DataGridBase ItemsSource="{Binding AllRecords}" TableKey="WorkRecordAll"
                                       SelectedItem="{Binding SelectedAllRecord, Mode=TwoWay}"
+                                      SelectionMode="{Binding IsMultiSelectMode, Converter={StaticResource SelModeConv}, FallbackValue=Single}"
+                                      local:DataGridHelper.SelectedItemsList="{Binding SelectedRecords, Mode=OneWay}"
                                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                                       CanUserResizeColumns="True"
                                       ClipboardCopyMode="IncludeHeader"
