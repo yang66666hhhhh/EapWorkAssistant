@@ -52,6 +52,13 @@
     <SolidColorBrush x:Key="LeaveCompBrush" Color="#FFA78BFA"/>     <!-- 调休：紫罗兰 -->
     <SolidColorBrush x:Key="LeaveTravelBrush" Color="#FF3B82F6"/>   <!-- 出差：蓝色 -->
     <SolidColorBrush x:Key="LeaveMarriageBrush" Color="#FFEC4899"/> <!-- 婚假：粉色 -->
+    <!-- 假期类型淡色底（P1 ⑦ 出勤热力图格子底色；与上方实色一一对应，取 Tailwind 100 级） -->
+    <SolidColorBrush x:Key="LeaveAnnualLightBrush" Color="#FFCFFAFE"/>  <!-- 年假：青-100 -->
+    <SolidColorBrush x:Key="LeavePersonalLightBrush" Color="#FFFEF3C7"/> <!-- 事假：琥珀-100 -->
+    <SolidColorBrush x:Key="LeaveSickLightBrush" Color="#FFD1FAE5"/>    <!-- 病假：翠绿-100 -->
+    <SolidColorBrush x:Key="LeaveCompLightBrush" Color="#FFEDE9FE"/>    <!-- 调休：紫罗兰-100 -->
+    <SolidColorBrush x:Key="LeaveTravelLightBrush" Color="#FFDBEAFE"/>  <!-- 出差：蓝-100 -->
+    <SolidColorBrush x:Key="LeaveMarriageLightBrush" Color="#FFFCE7F3"/> <!-- 婚假：粉-100 -->
     <SolidColorBrush x:Key="SurfaceBrush" Color="{DynamicResource Surface}"/>
     <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{DynamicResource SurfaceHover}"/>
     <SolidColorBrush x:Key="SurfaceAltBrush" Color="{DynamicResource SurfaceAlt}"/>

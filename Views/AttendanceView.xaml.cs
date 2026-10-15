@@ -54,4 +54,15 @@ public partial class AttendanceView : UserControl
         if (DataContext is AttendanceViewModel vm && !string.IsNullOrEmpty(e.Column.SortMemberPath))
             vm.ToggleSort(e.Column.SortMemberPath);
     }
+
+    // ===== P1 ⑦ 热力图交互：点击格子 → 跳工作记录（未填日 = 去补录；区间外灰格无 Item 不响应）=====
+
+    private void HeatmapCell_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is AttendanceViewModel vm
+            && sender is FrameworkElement { DataContext: HeatmapCell cell })
+        {
+            vm.OpenHeatmapDay(cell);
+        }
+    }
 }

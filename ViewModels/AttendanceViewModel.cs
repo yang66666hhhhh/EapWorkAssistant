@@ -84,6 +84,32 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private string _resultSummary = string.Empty;
 
+    // ===== P1 ⑦ 月度热力图（总览不跟筛选 chips 走，只跟时间段区间走）=====
+
+    /// <summary>热力图格子（6 行 × 7 列，含首尾邻月补齐格）。</summary>
+    [ObservableProperty]
+    private ObservableCollection<HeatmapCell> _heatmapCells = new();
+
+    /// <summary>当前展示月份（当月 1 日）。</summary>
+    [ObservableProperty]
+    private DateTime _heatmapMonth = DateTime.Today;
+
+    /// <summary>热力图标题，如 "2026年10月"。</summary>
+    [ObservableProperty]
+    private string _heatmapTitle = string.Empty;
+
+    /// <summary>能否翻到上一月（受区间首月限制）。</summary>
+    [ObservableProperty]
+    private bool _canPrevMonth;
+
+    /// <summary>能否翻到下一月（受区间末月限制）。</summary>
+    [ObservableProperty]
+    private bool _canNextMonth;
+
+    /// <summary>区间首月 / 末月（当月 1 日），热力图月份导航的边界。</summary>
+    private DateTime _heatmapMinMonth = DateTime.Today;
+    private DateTime _heatmapMaxMonth = DateTime.Today;
+
     // ===== 排序（跟随工作记录/问题库的既有范式：View 的 Sorting 事件 → ToggleSort）=====
 
     /// <summary>当前排序列（对应列的 SortMemberPath），默认按日期倒序（最近的在最上面）。</summary>
@@ -173,6 +199,7 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
             }
 
             _allItems = await _service.GetRangeAsync(start, end);
+            BuildHeatmap();
             ApplySummary();
             ApplyFilter();
             await LoadCompLeaveAsync(end);
@@ -266,6 +293,130 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
         LeaveHours = s.LeaveHours;
         UnfilledDays = s.UnfilledDays;
         RestDays = s.RestDays;
+    }
+
+    // ===== P1 ⑦ 月度热力图构建 =====
+
+    /// <summary>
+    /// 按当前区间重建热力图：月份边界取区间覆盖的首末月。
+    /// 默认展示「今天所在月」（落在区间内时），否则退回区间末月——
+    /// 「本年」区间延伸到 12 月，直接取末月会默认展示无数据的未来月份。
+    /// </summary>
+    private void BuildHeatmap()
+    {
+        if (_allItems.Count > 0)
+        {
+            var min = _allItems.Min(i => i.Date);
+            var max = _allItems.Max(i => i.Date);
+            _heatmapMinMonth = new DateTime(min.Year, min.Month, 1);
+            _heatmapMaxMonth = new DateTime(max.Year, max.Month, 1);
+        }
+        else
+        {
+            var t = DateTime.Today;
+            _heatmapMinMonth = new DateTime(t.Year, t.Month, 1);
+            _heatmapMaxMonth = _heatmapMinMonth;
+        }
+
+        var todayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        HeatmapMonth = todayMonth >= _heatmapMinMonth && todayMonth <= _heatmapMaxMonth
+            ? todayMonth
+            : _heatmapMaxMonth;
+        RefreshHeatmapCells();
+    }
+
+    /// <summary>按 <see cref="HeatmapMonth"/> 重建 6 行 × 7 列格子（周日开头，首尾用邻月灰格补齐）。</summary>
+    private void RefreshHeatmapCells()
+    {
+        var first = new DateTime(HeatmapMonth.Year, HeatmapMonth.Month, 1);
+        var daysInMonth = DateTime.DaysInMonth(first.Year, first.Month);
+
+        // 区间日状态按日期索引（GetRangeAsync 补全区间内每天；重复日期 TryAdd 防御，不抛异常）
+        var map = new Dictionary<DateTime, DayStatusItem>();
+        foreach (var it in _allItems)
+            map.TryAdd(it.Date.Date, it);
+
+        var cells = new List<HeatmapCell>(42);
+
+        // 首部补齐：当月 1 日之前的上月末尾灰格（周日 = 0 开头）
+        int leading = (int)first.DayOfWeek;
+        for (int i = 0; i < leading; i++)
+        {
+            var d = first.AddDays(i - leading);
+            cells.Add(new HeatmapCell { Day = d.Day, Date = d, IsCurrentMonth = false });
+        }
+
+        for (int day = 1; day <= daysInMonth; day++)
+        {
+            var d = new DateTime(first.Year, first.Month, day);
+            map.TryGetValue(d, out var item);
+            cells.Add(new HeatmapCell
+            {
+                Day = day,
+                Date = d,
+                IsCurrentMonth = true,
+                IsToday = d == DateTime.Today,
+                DotColor = item is null ? "" : ToDotColor(item),
+                Tooltip = item?.TooltipText ?? $"{d:yyyy-MM-dd} {d:ddd} 无记录",
+                Item = item
+            });
+        }
+
+        // 尾部补齐到整周（42 格上限，任何月份都不会超）
+        var next = first.AddDays(daysInMonth);
+        while (cells.Count % 7 != 0 && cells.Count < 42)
+        {
+            cells.Add(new HeatmapCell { Day = next.Day, Date = next, IsCurrentMonth = false });
+            next = next.AddDays(1);
+        }
+
+        HeatmapCells = new ObservableCollection<HeatmapCell>(cells);
+        HeatmapTitle = $"{first:yyyy年M月}";
+        CanPrevMonth = HeatmapMonth > _heatmapMinMonth;
+        CanNextMonth = HeatmapMonth < _heatmapMaxMonth;
+    }
+
+    /// <summary>
+    /// 日状态 → 热力图/日历圆点色标识。与 <c>CustomCalendar.CreateDayItem</c> 保持同一套优先级
+    /// （ amber 假日加班 → green 工作日已填 → 请假类型 → blue 周末加班 → red 应上班未填 →
+    /// purple 法定假日 → gray 普通周末；补班/假日判定先于周末）。
+    /// internal 供单元测试直接覆盖（ExportService.BuildDayStatusCsv 同款约定）。
+    /// </summary>
+    internal static string ToDotColor(DayStatusItem i) => i.WorkKind switch
+    {
+        WorkKind.HolidayOvertime => "amber",
+        WorkKind.Workday => "green",
+        WorkKind.WeekendOvertime => i.HasLeave ? i.LeaveType! : "blue",
+        _ => i.HasLeave ? i.LeaveType!
+            : i.IsMakeupWorkday ? "red"
+            : i.IsHolidayDate ? "purple"
+            : i.IsWeekend ? "gray"
+            : "red"
+    };
+
+    /// <summary>热力图翻上一月（边界内才生效）。</summary>
+    [RelayCommand]
+    private void PrevHeatmapMonth()
+    {
+        if (!CanPrevMonth) return;
+        HeatmapMonth = HeatmapMonth.AddMonths(-1);
+        RefreshHeatmapCells();
+    }
+
+    /// <summary>热力图翻下一月（边界内才生效）。</summary>
+    [RelayCommand]
+    private void NextHeatmapMonth()
+    {
+        if (!CanNextMonth) return;
+        HeatmapMonth = HeatmapMonth.AddMonths(1);
+        RefreshHeatmapCells();
+    }
+
+    /// <summary>点击热力图格子 → 请求跳转工作记录（复用列表双击的同一事件；区间外灰格无 Item 不响应）。</summary>
+    public void OpenHeatmapDay(HeatmapCell? cell)
+    {
+        if (cell?.Item is { } item)
+            NavigateToWorkRecord?.Invoke(item.Date);
     }
 
     /// <summary>

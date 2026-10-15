@@ -112,12 +112,138 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- P1 ⑦ 月度热力图格子：淡色底 + 同色系边框/文字，语义与日历圆点完全一致
+             （amber 假日加班 / green 已填 / blue 周末加班 / red 未填 / purple 法定假日 / gray 周末 / 请假类型）。
+             非当月补齐格整体淡化；今天格子主色描边。点击 → 跳工作记录（见 code-behind）。 -->
+        <DataTemplate x:Key="HeatmapCellTemplate" DataType="{x:Type models:HeatmapCell}">
+            <!-- 高度不写死：由 UniformGrid 行高自适应（小窗口压缩、大窗口伸展），MinHeight 保底可读性 -->
+            <Border CornerRadius="{DynamicResource RadiusSm}" Margin="1.5" MinHeight="26"
+                    BorderThickness="1" Cursor="Hand" SnapsToDevicePixels="True"
+                    MouseLeftButtonUp="HeatmapCell_Click"
+                    ToolTip="{Binding Tooltip}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DotColor}" Value="green">
+                                <Setter Property="Background" Value="{DynamicResource SuccessLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="blue">
+                                <Setter Property="Background" Value="{DynamicResource InfoLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource InfoBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="amber">
+                                <Setter Property="Background" Value="{DynamicResource WarningLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="red">
+                                <Setter Property="Background" Value="{DynamicResource DangerLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="purple">
+                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentVioletBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="gray">
+                                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="年假">
+                                <Setter Property="Background" Value="{DynamicResource LeaveAnnualLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeaveAnnualBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="事假">
+                                <Setter Property="Background" Value="{DynamicResource LeavePersonalLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeavePersonalBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="病假">
+                                <Setter Property="Background" Value="{DynamicResource LeaveSickLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeaveSickBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="调休">
+                                <Setter Property="Background" Value="{DynamicResource LeaveCompLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeaveCompBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="出差">
+                                <Setter Property="Background" Value="{DynamicResource LeaveTravelLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeaveTravelBrush}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DotColor}" Value="婚假">
+                                <Setter Property="Background" Value="{DynamicResource LeaveMarriageLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LeaveMarriageBrush}"/>
+                            </DataTrigger>
+                            <!-- 今天：主色描边（放最后以覆盖状态色边框，底色不变） -->
+                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter Property="BorderThickness" Value="1.5"/>
+                            </DataTrigger>
+                            <!-- 非当月补齐格：整体淡化 -->
+                            <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding Day}" FontSize="11" FontWeight="Medium"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DotColor}" Value="green">
+                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="blue">
+                                    <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="amber">
+                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="red">
+                                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="purple">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentVioletBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="年假">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeaveAnnualBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="事假">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeavePersonalBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="病假">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeaveSickBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="调休">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeaveCompBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="出差">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeaveTravelBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DotColor}" Value="婚假">
+                                    <Setter Property="Foreground" Value="{DynamicResource LeaveMarriageBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="{StaticResource PageMargin}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <!-- 热力图行：Auto 按内容伸缩，MinHeight 保证小窗口（1320x800）下格子仍可读
+                 （出勤页总高超窗口时 Auto 行会被 Grid 压缩，无 MinHeight 时格子行高压到 19px） -->
+            <RowDefinition Height="Auto" MinHeight="252"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -246,8 +372,100 @@
                                CardStyle="{StaticResource Card}" IsCompact="True"/>
         </Grid>
 
+        <!-- ===== P1 ⑦ 月度出勤热力图（总览：只跟时间段区间走，不跟下方筛选 chips） ===== -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,14">
+            <DockPanel>
+                <!-- 头部：标题 + 当前月份 + 翻页（边界内才可点） -->
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="{StaticResource IconCalendar}" Fill="{DynamicResource TextSecondaryBrush}"
+                              Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}"
+                              Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="月度出勤热力图" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="HeatmapTitleText" Text="{Binding HeatmapTitle}" FontSize="12" Margin="8,1,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button x:Name="HeatmapPrevBtn" Style="{StaticResource BtnGhost}" Padding="6,4" Margin="0,0,4,0"
+                                IsEnabled="{Binding CanPrevMonth}" Command="{Binding PrevHeatmapMonthCommand}"
+                                ToolTip="上一月">
+                            <Path Data="{StaticResource IconChevronLeft}" Fill="{DynamicResource TextSecondaryBrush}"
+                                  Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"/>
+                        </Button>
+                        <Button x:Name="HeatmapNextBtn" Style="{StaticResource BtnGhost}" Padding="6,4"
+                                IsEnabled="{Binding CanNextMonth}" Command="{Binding NextHeatmapMonthCommand}"
+                                ToolTip="下一月">
+                            <Path Data="{StaticResource IconChevronRight}" Fill="{DynamicResource TextSecondaryBrush}"
+                                  Width="{DynamicResource IconSizeSm}" Height="{DynamicResource IconSizeSm}" Stretch="Uniform"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 图例（请假类型按类型着色，悬停格子查看） -->
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+                    <StackPanel.Resources>
+                        <Style TargetType="Border" x:Key="LegendDot">
+                            <Setter Property="Width" Value="10"/>
+                            <Setter Property="Height" Value="10"/>
+                            <Setter Property="CornerRadius" Value="3"/>
+                            <Setter Property="Margin" Value="0,0,5,0"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource SuccessBrush}"/>
+                    <TextBlock Text="已填" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource InfoBrush}"/>
+                    <TextBlock Text="周末加班" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource WarningBrush}"/>
+                    <TextBlock Text="假日加班" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource DangerBrush}"/>
+                    <TextBlock Text="未填" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource AccentVioletBrush}"/>
+                    <TextBlock Text="法定假日" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Text="周末" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,14,0"/>
+                    <TextBlock Text="请假按类型着色 · 悬停格子查看详情 · 点击跳转当天记录"
+                               FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"/>
+                </StackPanel>
+
+                <!-- 星期表头（周日开头，与 UniformGrid 列序一致） -->
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="日" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="1" Text="一" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="2" Text="二" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="3" Text="三" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="4" Text="四" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="5" Text="五" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                    <TextBlock Grid.Column="6" Text="六" FontSize="11" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                </Grid>
+
+                <!-- 6 行 × 7 列格子（UniformGrid 自动排布，最后子元素填满剩余空间） -->
+                <ItemsControl x:Name="HeatmapPanel" ItemsSource="{Binding HeatmapCells}"
+                              ItemTemplate="{StaticResource HeatmapCellTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </DockPanel>
+        </Border>
+
         <!-- ===== 筛选 chips + 搜索 + 结果说明 ===== -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
+        <Grid Grid.Row="3" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Content="全部" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
                              Margin="0,0,6,0" Padding="12,6"
@@ -292,7 +510,7 @@
         </Grid>
 
         <!-- ===== 出勤明细列表 ===== -->
-        <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0">
+        <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
             <controls:DataGridBase x:Name="AttendanceGrid" ItemsSource="{Binding Items}"
                                    TableKey="Attendance"
                                    AutoGenerateColumns="False"
@@ -383,7 +601,7 @@
         </Border>
 
         <!-- 空状态 -->
-        <controls:EmptyState Grid.Row="3"
+        <controls:EmptyState Grid.Row="4"
                              Visibility="{Binding IsEmpty, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                              IconPathData="{StaticResource IconCalendar}"
                              Title="没有符合条件的记录"

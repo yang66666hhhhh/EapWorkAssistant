@@ -138,6 +138,36 @@ public class DayStatusItem
 }
 
 /// <summary>
+/// 出勤月度热力图格子（P1 ⑦）。与 <see cref="CalendarDayItem"/> 共享同一套
+/// DotColor 语义（green/red/blue/amber/purple/gray/请假类型），由
+/// <see cref="AttendanceViewModel"/> 按与 CustomCalendar 一致的优先级推导。
+/// </summary>
+public class HeatmapCell
+{
+    /// <summary>日（1-31）；非当月补齐格为 0。</summary>
+    public int Day { get; init; }
+
+    public DateTime Date { get; init; }
+
+    /// <summary>是否属于当前展示月份（false = 首尾补齐的邻月灰格）。</summary>
+    public bool IsCurrentMonth { get; init; }
+
+    public bool IsToday { get; init; }
+
+    /// <summary>
+    /// 状态色标识：green 已填 / red 未填 / blue 周末加班 / amber 假日加班 /
+    /// purple 法定假日休息 / gray 普通周末 / 请假类型名；空 = 无状态（补齐格或区间外）。
+    /// </summary>
+    public string DotColor { get; init; } = "";
+
+    /// <summary>完整信息 ToolTip（复用 <see cref="DayStatusItem.TooltipText"/>；无数据时给出日期）。</summary>
+    public string Tooltip { get; init; } = "";
+
+    /// <summary>对应的日状态（区间外/无数据为 null）；点击格子时据此跳转工作记录。</summary>
+    public DayStatusItem? Item { get; init; }
+}
+
+/// <summary>
 /// 出勤汇总统计（统计卡数据源；同一天可同时计入「正常上班」与「请假」）。
 /// 工时按**填报 / 实际**双口径分别累计，供卡片展示两套数字。
 /// </summary>
