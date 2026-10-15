@@ -502,19 +502,22 @@ public class ThemeService : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// 获取图表（LiveCharts2 / SkiaSharp）在当前主题下的配色：轴文字色、网格线色、强调（柱图）主色。
+    /// 获取图表（LiveCharts2 / SkiaSharp）在当前主题下的配色：
+    /// 轴文字色、网格线色、强调（柱图）主色、卡片表面色（tooltip 底）、强文字色（tooltip 文字）。
     /// 图表使用 SkiaSharp 直接绘制，无法响应 DynamicResource，需由 ViewModel 经此取色后手动重绘。
     /// </summary>
-    public (SKColor Text, SKColor Grid, SKColor Accent) GetChartColors()
+    public (SKColor Text, SKColor Grid, SKColor Accent, SKColor Card, SKColor TextStrong) GetChartColors()
     {
         var res = Application.Current.Resources;
         // 资源可能在 ApplyThemeColors 之前被调用（极早期），或键缺失/类型不符。
         // 直接 (Color)res[...] 强转会抛 InvalidCastException（KeyNotFound / InvalidCast），
         // 这里用 TryGetColor 兜底，保证图表取色永不抛——即使主题未就绪也能画出可读配色。
         return (
-            ToSk(TryGetColor(res, "TextSecondary", Color.FromRgb(0x47, 0x55, 0x69))), // slate-600
-            ToSk(TryGetColor(res, "Border", Color.FromRgb(0xCB, 0xD5, 0xE1))),         // slate-300
-            ToSk(TryGetColor(res, "Primary", Color.FromRgb(0x63, 0x66, 0xF1)))        // indigo-500
+            ToSk(TryGetColor(res, "TextSecondary", Color.FromRgb(0x47, 0x55, 0x69))), // slate-600，轴标签
+            ToSk(TryGetColor(res, "Border", Color.FromRgb(0xCB, 0xD5, 0xE1))),         // slate-300，网格线
+            ToSk(TryGetColor(res, "Primary", Color.FromRgb(0x63, 0x66, 0xF1))),        // indigo-500，柱图主色
+            ToSk(TryGetColor(res, "CardColor", Color.FromRgb(0xFF, 0xFF, 0xFF))),      // 卡片表面色，tooltip 底
+            ToSk(TryGetColor(res, "TextPrimary", Color.FromRgb(0x0F, 0x17, 0x2A)))     // slate-900，tooltip 文字
         );
     }
 

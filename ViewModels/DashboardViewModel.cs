@@ -4,6 +4,7 @@ using EapWorkAssistant.Helpers;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using LiveChartsCore;
+using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -101,6 +102,12 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private ISeries[] _chartSeries = Array.Empty<ISeries>();
     [ObservableProperty] private Axis[] _chartXAxes = Array.Empty<Axis>();
     [ObservableProperty] private Axis[] _chartYAxes = Array.Empty<Axis>();
+
+    // tooltip 卡片化（P1 ⑥）：图表控件属性经 XAML 绑定。
+    // Skia 画布不响应 DynamicResource，故由 ApplyChartTheme 随主题重算后经属性通知推给图表。
+    [ObservableProperty] private SolidColorPaint? _tooltipTextPaint;
+    [ObservableProperty] private SolidColorPaint? _tooltipBackgroundPaint;
+    [ObservableProperty] private double _tooltipTextSize = ChartTooltipTextSize;
 
     // 项目分布饼图
     [ObservableProperty] private ISeries[] _projectPieSeries = Array.Empty<ISeries>();
@@ -353,23 +360,44 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         }
     }
 
+    // ===== 图表画布内度量（Skia 像素值，P1 ⑥） =====
+    // 这些值绘制在 SkiaSharp 画布上，不是 XAML 属性，无法引用 DesignTokens；
+    // 与字号令牌的对应关系写在注释里，改令牌时同步核对。
+    private const double ChartAxisTextSize = 11;            // 对齐 FontSizeXs
+    private const double ChartTooltipTextSize = 12;         // 对齐 FontSizeSm
+    private const float ChartGridStrokeThickness = 0.8f;    // 弱化后的横向网格线宽（SolidColorPaint.StrokeThickness 为 float）
+    private const float ChartCrosshairStrokeThickness = 1f; // 十字准星 / 零基线线宽
+    private const double PieHoverPushout = 10;              // 饼图 hover 扇区外扩像素
+
     /// <summary>
-    /// 让图表坐标轴文字/网格与柱图主色跟随当前主题与强调色。
+    /// 让图表坐标轴文字/网格、tooltip 卡片与柱图主色跟随当前主题与强调色。
     /// 在初次加载与主题切换时调用，并重赋值数组以触发 LiveCharts 重绘。
+    /// 图表画布由 SkiaSharp 直接绘制，无法响应 DynamicResource，全部配色在此手动同步（P1 ⑥）。
     /// </summary>
     private void ApplyChartTheme()
     {
         if (ChartXAxes.Length == 0 && ChartYAxes.Length == 0 && ChartSeries.Length == 0) return;
 
-        var (text, grid, accent) = ThemeService.Instance.GetChartColors();
+        var (text, grid, accent, card, textStrong) = ThemeService.Instance.GetChartColors();
         var textPaint = new SolidColorPaint(text);
-        var gridPaint = new SolidColorPaint(grid) { StrokeThickness = 1 };
+        var gridPaint = new SolidColorPaint(grid) { StrokeThickness = ChartGridStrokeThickness };
+        var crosshairPaint = new SolidColorPaint(grid) { StrokeThickness = ChartCrosshairStrokeThickness };
 
         ChartXAxes = ChartXAxes.Select(a =>
         {
             a.LabelsPaint = textPaint;
             a.NamePaint = textPaint;
             a.SeparatorsPaint = gridPaint;
+            a.ShowSeparatorLines = false;      // 去掉竖向网格（与柱列正交，是"粗网格"感的主要来源）
+            a.TicksPaint = null;               // 去掉轴端刻度小线
+            a.SubseparatorsCount = 0;          // 去掉次级网格
+            a.TextSize = ChartAxisTextSize;
+            // hover 十字准星：ColumnSeries 无原生 hover 放大能力（LiveChartsCore 2.0.4 已核实），
+            // 以准星 + tooltip 卡片化提供 hover 反馈
+            a.CrosshairPaint = crosshairPaint;
+            a.CrosshairSnapEnabled = true;
+            a.CrosshairLabelsPaint = textPaint;
+            a.CrosshairLabelsBackground = new LvcColor(card.Red, card.Green, card.Blue);
             return a;
         }).ToArray();
 
@@ -377,9 +405,19 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         {
             a.LabelsPaint = textPaint;
             a.NamePaint = textPaint;
-            a.SeparatorsPaint = gridPaint;
+            a.SeparatorsPaint = gridPaint;     // 仅保留横向网格并弱化
+            a.TicksPaint = null;
+            a.SubseparatorsCount = 0;
+            a.TextSize = ChartAxisTextSize;
+            a.NameTextSize = ChartAxisTextSize;
+            a.ZeroPaint = new SolidColorPaint(grid) { StrokeThickness = ChartCrosshairStrokeThickness };
             return a;
         }).ToArray();
+
+        // tooltip 卡片化：卡片表面色底 + 强文字色（默认 tooltip 本身即为圆角卡片）
+        TooltipTextPaint = new SolidColorPaint(textStrong);
+        TooltipBackgroundPaint = new SolidColorPaint(card);
+        TooltipTextSize = ChartTooltipTextSize;
 
         var series = ChartSeries.ToList();
         if (series.FirstOrDefault() is ColumnSeries<double> column)
@@ -423,8 +461,10 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
             {
                 Values = allDays.Values.ToArray(),
                 Fill = new SolidColorPaint(new SKColor(79, 70, 229)),
+                Name = "工时",
+                YToolTipLabelFormatter = p => $"{p.Coordinate.PrimaryValue:F1} h",
                 MaxBarWidth = 28,
-                Rx = 4,
+                Rx = 4,   // 柱圆角，对齐 RadiusXxs=4（P1 ⑥：柱圆角色令牌化对齐）
                 Ry = 4
             }
         };
@@ -503,6 +543,10 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 Name = (string)stat.ProjectName,
                 Fill = new SolidColorPaint(color),
                 Stroke = null,
+                // hover 时扇区向外外扩（LiveChartsCore 原生 hover 放大能力，P1 ⑥）
+                HoverPushout = PieHoverPushout,
+                // tooltip 头部已由 LiveCharts 自动带系列名（含色点），此处只输出数值，避免名称重复
+                ToolTipLabelFormatter = p => $"{p.Coordinate.PrimaryValue:F1} h",
             });
         }
 

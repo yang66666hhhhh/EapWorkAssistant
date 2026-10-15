@@ -20,6 +20,18 @@ public partial class DashboardView : UserControl
     public DashboardView()
     {
         InitializeComponent();
+
+        // 图表入场动画时长并入 Duration 令牌（P1 ⑥）：
+        // Duration 令牌是 WPF Duration 类型，ViewModel 不可引用（红线 6），故在视图层读取后赋给图表控件。
+        if (TryFindResource("DurationNormal") is Duration chartAnim)
+        {
+            TrendChart.AnimationsSpeed = chartAnim.TimeSpan;
+            ProjectPie.AnimationsSpeed = chartAnim.TimeSpan;
+        }
+        // 缓动与 DesignTokens 的 EaseStandard（CubicEase EaseOut：快出慢收、无回弹）保持一致
+        TrendChart.EasingFunction = t => (float)(1 - Math.Pow(1 - t, 3));
+        ProjectPie.EasingFunction = t => (float)(1 - Math.Pow(1 - t, 3));
+
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => SyncDates();
         CustomCal.SelectedDateChanged += OnCalendarDateChanged;

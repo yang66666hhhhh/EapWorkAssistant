@@ -336,9 +336,13 @@
                             </StackPanel>
                         </Grid>
                         <Grid>
-                            <lvc:CartesianChart Series="{Binding ChartSeries}"
+                            <lvc:CartesianChart x:Name="TrendChart" Series="{Binding ChartSeries}"
                                                 XAxes="{Binding ChartXAxes}"
                                                 YAxes="{Binding ChartYAxes}"
+                                                TooltipTextPaint="{Binding TooltipTextPaint}"
+                                                TooltipBackgroundPaint="{Binding TooltipBackgroundPaint}"
+                                                TooltipTextSize="{Binding TooltipTextSize}"
+                                                TooltipPosition="Top"
                                                 DataPointerDownCommand="{Binding ChartPointClickCommand}"
                                                 MinHeight="190" MaxHeight="210"/>
                             <Border Visibility="{Binding HasChartData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
@@ -371,7 +375,10 @@
                                        Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,3,0,0"/>
                         </StackPanel>
                         <Grid>
-                            <lvc:PieChart Series="{Binding ProjectPieSeries}"
+                            <lvc:PieChart x:Name="ProjectPie" Series="{Binding ProjectPieSeries}"
+                                          TooltipTextPaint="{Binding TooltipTextPaint}"
+                                          TooltipBackgroundPaint="{Binding TooltipBackgroundPaint}"
+                                          TooltipTextSize="{Binding TooltipTextSize}"
                                           DataPointerDownCommand="{Binding PieChartClickCommand}"
                                           MinHeight="190" MaxHeight="210"/>
                             <Border Visibility="{Binding HasPieData, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"
