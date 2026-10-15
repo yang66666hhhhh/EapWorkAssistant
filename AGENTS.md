@@ -725,6 +725,19 @@ if (DataContext is KnowledgeViewModel vm)
 - **替换手法（可复用）**：全仓库扫 `Width="N" Height="N"` 等宽高配对 → 向前探测所在开始标签 → 仅 `Path`/`Image` 且 N∈刻度值才替换（脚本模式见交接记录；用正则 `Width="(\d+)" Height="(\d+)"` + 反向找 `<Tag`，**不要**用 sed 盲替，会误伤容器）。
 - **验证**：编译 0 错误 + 全量测试 138/138 + 启动冒烟 9s 无新 `error_*.log`（DynamicResource 漏键只在运行时暴露，冒烟必做）。
 
+### 8.22 图表主题规范（LiveCharts2 Skia 画布，2026-10-15 新增）
+
+- **背景**：P1 ⑥。Dashboard 趋势图（`CartesianChart`）+ 项目饼图（`PieChart`）由 LiveChartsCore 2.0.4（SkiaSharpView.WPF）渲染，**绘制在 SkiaSharp 画布上，无法响应 DynamicResource**；配色/线宽/圆角全部由 VM 在加载与主题切换时手动同步。
+- **唯一同步入口**：`DashboardViewModel.ApplyChartTheme()`（初次加载 + 主题切换时调用），颜色源为 `ThemeService.GetChartColors()` → `(SKColor Text, Grid, Accent, Card, TextStrong)` 五元组。**禁止**在别处给图表写死配色；`LoadChartAsync` 里的初始 `Fill` 仅作首帧兜底，会被 ApplyChartTheme 覆盖。
+- **画布内度量常量**（Skia 像素值，非 XAML 属性，禁引用 DesignTokens，对应关系写注释）：`ChartAxisTextSize`=11（对齐 FontSizeXs）/ `ChartTooltipTextSize`=12（对齐 FontSizeSm）/ `ChartGridStrokeThickness`=**0.8f**（弱化网格，注意 `StrokeThickness` 是 float）/ `ChartCrosshairStrokeThickness`=1f / `PieHoverPushout`=10（饼图 hover 扇区外扩像素）。
+- **坐标轴**：X 轴 `ShowSeparatorLines=false`（去竖向网格，"粗网格"感主源）+ `TicksPaint=null` + `SubseparatorsCount=0`；Y 轴仅留横向网格（`SeparatorsPaint`=grid 色 0.8f）+ `ZeroPaint` 零基线；两侧 `TextSize` 统一 `ChartAxisTextSize`。
+- **hover 反馈**：X 轴 `CrosshairPaint` + `CrosshairSnapEnabled=true` + `CrosshairLabelsBackground`=卡片色；柱图无原生 hover 放大能力（2.0.4 已核实），以准星 + tooltip 提供反馈；饼图 `HoverPushout=PieHoverPushout`。hover 时柱体呈半透明高亮 + 数据点圆环标记（LiveCharts 原生行为）。
+- **tooltip 卡片化**：`TooltipTextPaint`=TextStrong、`TooltipBackgroundPaint`=Card、`TooltipTextSize`=ChartTooltipTextSize；XAML 侧两个图表绑定 VM 三个属性 + `TooltipPosition="Top"`。
+- **柱体圆角**：`ColumnSeries` 的 `Rx`/`Ry`（`BarSeries` 基类属性，单位像素）**顶/底两角同时生效**（Ry=4 对齐 RadiusXxs），配合 `MaxBarWidth=28`。
+- **动画**：`AnimationsSpeed`/`EasingFunction` 在 `DashboardView.xaml.cs` 构造期由 `DurationNormal` 令牌设置（ease-out cubic `1-(1-t)^3`）。
+- ⚠️ **饼图 tooltip 防重复**：LiveCharts 自动在 tooltip 头部带系列名（含色点），`ToolTipLabelFormatter` 只输出数值 `$"{value:F1} h"`，不要再拼系列名。
+- **验证结论**（1320-1942px 窗口实证）：柱体=主题 accent #6366F1、顶/底圆角渐进收窄、横向网格 5 条 0.8f 淡线、竖向网格 0 条、hover 柱体半透明高亮 + 数据点圆环 + 白底 tooltip + 十字准星、饼图扇区外扩。截图定位用 PIL 按柱体/饼图调色板取色（UIA BoundingRectangle 在窗口 resize 期间会滞后，勿直接用于悬停坐标）。
+
 ---
 
 ## 9. AI 行为约束红线

@@ -199,7 +199,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | # | 项 | 要点 | 状态 |
 |---|---|---|---|
 | ⑤ | **图标尺寸刻度 tokens** | 现状图标尺寸散落 `11/12/14/16/18/22/36` → 在 `DesignTokens.xaml` 加 `IconSizeXs/Sm/Md/Lg/Hero`，像 `Radius` 那样统一 | ✅ 已完成（`a25e18d`） |
-| ⑥ | **图表主题深化** | `DashboardViewModel.ApplyChartTheme()`（约 360 行）目前只「取色」→ 加柱圆角、弱化/去掉粗网格、tooltip 卡片化、hover 数据点放大、动画时长并入 `Duration` 令牌 | ⏳ 未开始 |
+| ⑥ | **图表主题深化** | `DashboardViewModel.ApplyChartTheme()`（约 360 行）目前只「取色」→ 加柱圆角、弱化/去掉粗网格、tooltip 卡片化、hover 数据点放大、动画时长并入 `Duration` 令牌 | ✅ 已完成（截图实证：柱体=主题 accent、顶/底圆角、横网格 0.8f 淡线、竖网格去除、hover 高亮+圆环+白底 tooltip+十字准星、饼图扇区外扩；详见 AGENTS.md §8.22） |
 | ⑦ | **出勤月度热力图** | `Views/AttendanceView.xaml` 加迷你日历/热力图，复用现有圆点语义（amber/green/blue/red/purple/gray） | ⏳ 未开始 |
 
 ### 5.2 P2（评审已列，未排期）
@@ -224,5 +224,5 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章本轮新增规范）+ `.workbuddy/memory/MEMORY.md`。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用。
 3. 跑一次全量测试确认基线仍是 **138/138**。
-4. 从 **P1 ⑥ 图表主题深化** 开始（⑤ 图标刻度已于 `a25e18d` 完成）；或按用户当次指令。
+4. 从 **P1 ⑦ 出勤月度热力图** 开始（⑥ 图表主题深化已完成并通过截图实证）；或按用户当次指令。
 5. 每个 P1 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
