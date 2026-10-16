@@ -1,8 +1,8 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-16 14:45（会话交接用）
-> 本轮主题：**P2 ⑨ 主动异常洞察 + 洞察规则③缺陷修正（应填工时须按当天请假扣减）**
-> 当前状态：**测试 187/187 全绿 · 工作区干净 · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
+> 生成时间：2026-10-16 15:05（会话交接用）
+> 本轮主题：**P2 ⑨ 主动异常洞察 + 洞察规则③两轮修正（应填工时按请假扣减 → 去归因、只陈述事实 + 按日期跳转）**
+> 当前状态：**测试 190/190 全绿 · 工作区干净 · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
 > 下一步：**P2 ⑩ 首启引导 + 搜索扩展**（⑩ → ⑪ 空态/骨架屏/count-up/Logo）
 
 ---
@@ -18,7 +18,7 @@
 | 主题 | 自定义 indigo 双主题 ResourceDictionary，运行时由 `ThemeService` 覆盖画刷 |
 | 仓库 | `C:\Users\Yang\Documents\EapWorkAssistant`（git，**仅本地 commit，不 push**） |
 | 应用数据 | `%LOCALAPPDATA%\EapWorkAssistant\`（`config.json` / `eapwork.db` / `drafts.json` / `logs\error_YYYYMMDD.log`） |
-| 测试基线 | **187 / 187**（`.sln` 不含测试项目，须显式指定测试 csproj） |
+| 测试基线 | **190 / 190**（`.sln` 不含测试项目，须显式指定测试 csproj） |
 
 ---
 
@@ -200,7 +200,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 - 判据：见到 `已成功生成` / 无 `error` 行。
 - ⚠️ `.sln` **不含测试项目**，测试命令必须显式指定 `EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj`。
 
-### 4.2 测试基线（当前 187/187）
+### 4.2 测试基线（当前 190/190）
 
 ```bash
 C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
@@ -208,7 +208,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
   dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -v:minimal
 ```
 
-- 基线：**187 / 187 全绿**（161 基线 + P2 ⑨ 洞察分析 20 条 + 规则③修正 6 条回归）。
+- 基线：**190 / 190 全绿**（161 基线 + P2 ⑨ 洞察分析 20 条 + 规则③修正 6 条 + 去归因/按日期跳转 3 条）。
 
 ### 4.3 可复用脚本（`%TEMP%`）
 
@@ -252,7 +252,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 |---|---|---|
 | ⑧ | **列表多选批量操作** ✅ 已完成（`ffa4bcc`；框架在分页基类，规范见 AGENTS.md §8.24） | 工作记录 / 知识库 / 问题；批量软删除 + 撤销 |
 | ⑨ | **主动异常洞察** ✅ 已完成（`fe17547`；纯静态 `InsightAnalyzer` + 仪表盘「需要留意」卡，规范见 AGENTS.md §8.25） | 调休余额临界 / 连续未填 / 填报偏离应填工时 → 仪表盘提示卡 |
-| ⑨′ | **洞察规则③缺陷修正** ✅ 已完成（应填工时 = 8h − 当天请假时长；文案带出涉及日期 + 处置建议；`2026-10-10` 调休半天场景已锁为回归用例） | 见 §5.3 c 与 AGENTS.md §8.25 |
+| ⑨′ | **洞察规则③两轮修正** ✅ 已完成（① 应填工时 = 8h − 当天请假时长；② **去归因**：标题只陈述事实、明细并列「漏报工时 / 未记请假」两条路，按钮「去核对」→ 工作记录页并**直接定位最早那天**） | 见 §5.3 c 与 AGENTS.md §8.25 |
 | ⑩ | **首启引导 + 搜索扩展** | 全局搜索扩展到设置 / 出勤 / 回收站 |
 | ⑪ | **观感打磨** | 空状态插画 + 列表骨架屏；StatCard 数值 count-up 动画；侧边栏 Logo 换矢量图标 |
 
@@ -262,7 +262,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 |---|---|---|
 | a | **DraftService 损坏加固** | `error_20261015.log` 存 24 行 `草稿解析失败（Knowledge）`（11:44，非本次引入）；`drafts.json` 损坏时静默丢弃。建议：损坏时**备份坏文件而非静默丢弃**。**待用户确认是否立项**。 |
 | b | **备份文件清理** | `%LOCALAPPDATA%\EapWorkAssistant\` 下 `config.json.bak_ctrln_test`、`config.json.bak_darktest`、`config.json.bak_chartverify`、`eapwork.db.pre_actualhours_20261013_144047` 等，待用户确认后清理。 |
-| c | **`2026-10-10` 已澄清，不是脏数据** | 用户确认当天**调休半天**（10-10 为补班日），填报 4.0h 是**正确值**（实际也是 4.0h）。**真正的缺口是该日没有请假记录**（`LeaveRecord` 最新只到 `2026-09-30`，7/31、8/03、8/31、9/28-30 都记了，唯独漏 10-10）→ 调休余额虚高 4h。**建议在请假模块补记 10-10 调休 4h**，补记后仪表盘提示自动消失、余额同步扣减。洞察规则③已修正：按「8h − 当天请假时长」比对，不再把调休半天误报成少报。 |
+| c | **`2026-10-10` 待用户核对（不是脏数据）** | 用户确认当天**调休半天**（10-10 为补班日），填报 4.0h 是**正确值**（实际也是 4.0h）。但 `LeaveRecord` 里**没有 10-10**（最新只到 `2026-09-30`）→ 调休余额虚高 4h（现显示 40.0h，补记后应为 36.0h）。**待用户拍板**：① 确属调休 → 在工作记录页点「+ 请假」补记 10-10 调休 4h；② 实际全天在岗、只是漏报 → 直接补报工时。两者都能消掉提示。洞察规则③已改为**不预设原因**（只陈述「填报低于应填工时」并并列两条路）。 |
 | d | **`ShortcutNewEnabled`** | 已被改为 `true`（为让 Ctrl+N 生效）。用户若想关闭：设置 → 快捷键 → 新增。 |
 
 ---
@@ -271,7 +271,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.23 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用。
-3. 跑一次全量测试确认基线（当前 **187/187**）。
+3. 跑一次全量测试确认基线（当前 **190/190**）。
 4. 从 **P2 队列**（⑧ 多选批量、⑨ 主动异常洞察 **均已完成**，接下来 ⑩ 首启引导 + 搜索扩展）开始；或按用户当次指令。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。

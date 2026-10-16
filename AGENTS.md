@@ -770,14 +770,16 @@ if (DataContext is KnowledgeViewModel vm)
 - **三条规则**（阈值均为 `public const`，单测直接引用，避免魔数漂移）：
   1. **调休余额**：余额 ≥ 8h 静默；0 < 余额 < 8h → Warning「不足 1 天」；余额为 0 且已用 > 周末加班 → Danger「已透支 Xh」，恰好用尽 → Warning「已用尽」（`KindCompLeaveLow/Overdrawn`）。
   2. **连续未填**：从最近的**应上班**日往前数连续「无记录且无请假」的天数，≥ 3 天 Warning、≥ 5 天 Danger（`KindConsecutiveUnfilled`）。
-  3. **本月填报偏离应填工时**：⚠️ 比对基数是 `ExpectedHours(day)` = **`max(0, 8h − 当天请假时长)`**，**不是固定 8h**。低于基数 → Warning（`KindMonthHoursShort`，可能漏报或忘了记请假），高于基数 → Info（`KindMonthHoursOver`，可能触碰现场 8h 填报上限）。文案须带出**涉及日期**（`FormatDates`，超 5 天截断为「等 N 天」）与处置建议。
+  3. **本月填报偏离应填工时**：⚠️ 比对基数是 `ExpectedHours(day)` = **`max(0, 8h − 当天请假时长)`**，**不是固定 8h**。低于基数 → Warning（`KindMonthHoursShort`），高于基数 → Info（`KindMonthHoursOver`）。文案须带出**涉及日期**（`FormatDates`，超 5 天截断为「等 N 天」）。
 - ⚠️ **规则 3 必须按「当天应填工时」比对，不能按固定 8h**：曾按固定 8h 判断，把「`2026-10-10` 补班日下午调休 4h、上午上班填 4h」误报成「少报 4h」（**真实事故**）。请假时长一律取 `DayStatusItem.LeaveHours`（由 `DayStatusService` 合并请假记录得出），分析器**不自查请假表**——与「不自判节假日」同一条设计红线。
+- ⚠️ **归因红线：只陈述可观测事实，不断言不可观测的原因**（用户反馈驱动）。用户追问「你怎么知道我一定是忘记录假，而不是漏报工时」——系统手里只有「填了 4h」+「无请假记录」两个事实，**两种解释都成立**，任何单边归因都是越界。故标题只写「填报低于应填工时」（事实），明细并列两条路：「若当天有调休/请假 → 补记请假记录（余额据此扣减）；若确实全天在岗 → 补报工时」。**写规则时先自问：这个结论是我观测到的，还是我猜的？**
+- **操作入口要落到「能改的地方」，并尽量带日期**：`InsightItem.ActionDate`（`DateTime?`）一旦设置，`DashboardViewModel.OpenInsight` 优先 `NavigateToWorkRecord(ActionDate)` → 工作记录页**选中那天**（补工时直接录、补请假点同页「+ 请假」）；未设置才退化为 `NavigateToPage(ActionTarget)`。多条日期聚合时取**最早那天**（与 `FormatDates` 的先后一致）；规则 2「去补录」同样带最早未填日。
 - ⚠️ **「应上班 / 加班」判定只信 `DayStatusItem`**（由 `DayStatusService` + `DayStatusRules` 产出），分析器**自身不做任何节假日判断**——否则又回到三处规则漂移的老问题。
 - ⚠️ **节假日日历不可用时整体降级**：`IsHolidayDataAvailable == false` 时只返回一条 Info「节假日日历未就绪」，不做任何未填 / 偏离判断。法定假日会被误当工作日，凭空造出「未填」假警报。该守卫必须在 `GetRangeAsync`（内部幂等触发 `LoadYearAsync`）**之后**判定。
 - ⚠️ **今天不计入「连续未填」**（当天没过完，未填不算漏），过滤条件为 `i.Date < today`；只数 `IsWorkdayDue` 的日期，周末 / 法定假日自然跳过、**不打断**连续段。
 - ⚠️ **配色用 `DataTrigger` + `{x:Static models:InsightSeverity.*}`**，不要写 `Value="Warning"` 字符串——`DataTrigger.Value` 是 `object` 直接 `Equals` 比较，字符串永远匹配不上枚举值。同理 **`Border` / `Path` 的 `Background`/`Fill`/`Data` 必须全部写成 Style Setter**：内联属性优先级高于 Trigger，会把严重度配色整块吃掉。
 - ⚠️ **`x:Name` 放在 `Border` 上不会成为 UIA `AutomationId`**：`Border` 无 `AutomationPeer`，UIA 树中根本不存在该元素（实测 `FindFirst(AutomationId='InsightPanel')` 恒为空）。做 UI 自动化验证请改用**文本锚点**（如 `Name='需要留意'` 定位标题 Text，再用 `BoundingRectangle` 反推卡片区域）；需要稳定锚点时把 `x:Name` 放到有 Peer 的控件上。
-- **验证**：`EapWorkAssistant.Tests/InsightAnalyzerTests.cs`（26 条）覆盖阈值边界、今天不计入、请假 / 有记录中断连续段、周末不打断、超出回溯窗口、只统计本月、假日数据降级、严重度降序，以及**规则 3 请假扣减回归**（调休半天填 4h 不误报 / 填 2h 仍算少报 / 填满 8h 算超填 / 全天请假应填归零 / `ExpectedHours` 下限 0 / 涉及日期超 5 天截断）；测试基线 161 → 181 → **187**。UI 侧用 UIA 实证：仪表盘读出条目文案（含涉及日期）与「查看出勤」按钮（`enabled=True`），点击后导航切到「出勤总览」。
+- **验证**：`EapWorkAssistant.Tests/InsightAnalyzerTests.cs`（29 条）覆盖阈值边界、今天不计入、请假 / 有记录中断连续段、周末不打断、超出回溯窗口、只统计本月、假日数据降级、严重度降序，以及**规则 3 回归**（调休半天填 4h 不误报 / 填 2h 仍少报 / 填满 8h 算超填 / 全天请假应填归零 / `ExpectedHours` 下限 0 / 涉及日期超 5 天截断 / **不预设原因的双路文案** / **动作跳最早那天**）；测试基线 161 → 181 → 187 → **190**。UI 侧 UIA 实证：仪表盘读出 `本月 1 天填报低于应填工时（差 4h）` + `无法判断…` 明细（旧归因「少报」与旧按钮「查看出勤」**零残留**），点「去核对」后**落到工作记录页且日期为 `2026-10-10`**（截图 `outputs/insight-review-dashboard.png`、`outputs/insight-review-workrecord.png`）。
 
 ---
 
