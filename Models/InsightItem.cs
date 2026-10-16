@@ -41,6 +41,15 @@ public class InsightItem
     /// <summary>操作跳转目标（<see cref="Helpers.ViewNames"/> 取值）；为空表示无跳转。</summary>
     public string? ActionTarget { get; init; }
 
+    /// <summary>
+    /// 需要定位到的具体日期（可空）。设置时点击操作会**直接跳到该日**（工作记录页选中当天），
+    /// 让用户不必自己翻找；多条日期聚合的洞察取**最早那天**（与 Detail 中日期列表的先后一致）。
+    /// </summary>
+    public DateTime? ActionDate { get; init; }
+
     /// <summary>是否提供跳转操作（供 View 控制按钮可见性）。</summary>
     public bool HasAction => !string.IsNullOrEmpty(ActionText) && !string.IsNullOrEmpty(ActionTarget);
+
+    /// <summary>是否可定位到具体日期（供测试与调试区分「按日定位」与「仅切页」）。</summary>
+    public bool HasActionDate => ActionDate.HasValue;
 }

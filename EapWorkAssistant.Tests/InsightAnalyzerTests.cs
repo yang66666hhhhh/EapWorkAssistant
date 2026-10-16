@@ -202,7 +202,25 @@ public class InsightAnalyzerTests
         Assert.Null(InsightAnalyzer.AnalyzeConsecutiveUnfilled(items, today));
     }
 
-    // ==================== 规则 3：本月填报偏离 8h ====================
+    [Fact]
+    public void AnalyzeConsecutiveUnfilled_操作跳工作记录页并定位最早未填日()
+    {
+        var today = new DateTime(2026, 10, 19); // 周一
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 14)), // 周三 未填（最早）
+            Day(new DateTime(2026, 10, 15)), // 周四 未填
+            Day(new DateTime(2026, 10, 16)), // 周五 未填
+        };
+
+        var item = InsightAnalyzer.AnalyzeConsecutiveUnfilled(items, today);
+
+        Assert.NotNull(item);
+        Assert.Equal(ViewNames.WorkRecord, item!.ActionTarget);
+        Assert.Equal(new DateTime(2026, 10, 14), item.ActionDate); // 按时间顺序往前补
+    }
+
+    // ==================== 规则 3：本月填报偏离应填工时 ====================
 
     [Fact]
     public void AnalyzeMonthHours_全部满八小时_不产出()
@@ -232,8 +250,48 @@ public class InsightAnalyzerTests
         var item = Assert.Single(results);
         Assert.Equal(InsightAnalyzer.KindMonthHoursShort, item.Kind);
         Assert.Equal(InsightSeverity.Warning, item.Severity);
-        Assert.Equal("本月 2 天填报不足，合计少报 3h", item.Title);
-        Assert.Contains("10-13", item.Detail); // 明细须带出具体日期，便于直接去补录/补请假
+        Assert.Equal("本月 2 天填报低于应填工时（差 3h）", item.Title);
+        Assert.Contains("10-13", item.Detail); // 明细须带出具体日期，便于直接去核对
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_只陈述事实不预设原因_两种可能并列()
+    {
+        // 设计红线：系统无法区分「漏报工时」与「忘了记请假」，故标题不得写死「少报」，
+        // 明细必须把两种可能、各自处置路径都摆出来，由用户核对（用户反馈驱动）。
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday, hours: 4),
+        };
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+
+        Assert.DoesNotContain("少报", item.Title);
+        Assert.Contains("无法判断", item.Detail);
+        Assert.Contains("补记请假记录", item.Detail);
+        Assert.Contains("补报工时", item.Detail);
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_操作跳工作记录页并定位最早那天()
+    {
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 14), kind: WorkKind.Workday, hours: 5),
+            Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday, hours: 5),
+        };
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+
+        // 两个动作（补报工时 / 点「+ 请假」补记请假）都在工作记录页，故跳那里；
+        // 日期取最早那天，与 Detail 里「10-13、10-14」的先后一致，用户不必自己翻找。
+        Assert.Equal("去核对", item.ActionText);
+        Assert.Equal(ViewNames.WorkRecord, item.ActionTarget);
+        Assert.Equal(new DateTime(2026, 10, 13), item.ActionDate);
+        Assert.True(item.HasAction);
+        Assert.True(item.HasActionDate);
     }
 
     [Fact]
@@ -251,7 +309,7 @@ public class InsightAnalyzerTests
         var item = Assert.Single(results);
         Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
         Assert.Equal(InsightSeverity.Info, item.Severity);
-        Assert.Equal("本月 1 天填报超过应填工时，合计多出 2h", item.Title);
+        Assert.Equal("本月 1 天填报超过应填工时（多 2h）", item.Title);
     }
 
     [Fact]
@@ -311,7 +369,7 @@ public class InsightAnalyzerTests
 
         var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
         Assert.Equal(InsightAnalyzer.KindMonthHoursShort, item.Kind);
-        Assert.Equal("本月 1 天填报不足，合计少报 2h", item.Title);
+        Assert.Equal("本月 1 天填报低于应填工时（差 2h）", item.Title);
     }
 
     [Fact]
@@ -327,7 +385,7 @@ public class InsightAnalyzerTests
         var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
         Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
         Assert.Equal(InsightSeverity.Info, item.Severity);
-        Assert.Equal("本月 1 天填报超过应填工时，合计多出 4h", item.Title);
+        Assert.Equal("本月 1 天填报超过应填工时（多 4h）", item.Title);
     }
 
     [Fact]
@@ -343,7 +401,7 @@ public class InsightAnalyzerTests
 
         var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
         Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
-        Assert.Equal("本月 1 天填报超过应填工时，合计多出 2h", item.Title);
+        Assert.Equal("本月 1 天填报超过应填工时（多 2h）", item.Title);
     }
 
     [Fact]

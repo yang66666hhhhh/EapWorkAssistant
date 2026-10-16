@@ -35,6 +35,8 @@ public sealed record InsightInput(
 ///     <see cref="DayStatusItem"/>，本类不自行判断节假日；
 ///   - 工时口径为**填报工时**（公司口径），与实际工时无关；
 ///   - 节假日日历不可用时**整体降级**为一条 Info 提示，而不是在错误日历上误报未填。
+///   - **归因红线**：只陈述**可观测事实**（「填报低于应填工时」），不替用户断言**不可观测的
+///     原因**（「你漏报了」/「你忘记录假了」）。歧义场景必须并列两种可能，并各给出一条处置路径。
 /// </summary>
 public static class InsightAnalyzer
 {
@@ -190,7 +192,8 @@ public static class InsightAnalyzer
             Title = $"连续 {streak.Count} 个工作日未填工作记录",
             Detail = $"{range} 期间无记录也无请假，补录后出勤与调休统计才准确。",
             ActionText = "去补录",
-            ActionTarget = ViewNames.WorkRecord
+            ActionTarget = ViewNames.WorkRecord,
+            ActionDate = streak.Min()   // 落到最早那天，按时间顺序往前补
         };
     }
 
@@ -229,11 +232,14 @@ public static class InsightAnalyzer
             {
                 Kind = KindMonthHoursShort,
                 Severity = InsightSeverity.Warning,
-                Title = $"本月 {shortDays.Count} 天填报不足，合计少报 {gap:0.#}h",
-                Detail = $"涉及 {FormatDates(shortDays)}。" +
-                         "当天若有请假请补记请假记录（调休余额据此扣减），否则请补报工时。",
-                ActionText = "查看出勤",
-                ActionTarget = ViewNames.Attendance
+                // ⚠️ 只陈述事实、不预设原因：「填报低于应填」可观测，而「漏报工时 / 忘了记请假」
+                //    不可观测——两种可能都摆出来，由用户核对，别替他下结论。
+                Title = $"本月 {shortDays.Count} 天填报低于应填工时（差 {gap:0.#}h）",
+                Detail = $"涉及 {FormatDates(shortDays)}。无法判断是漏报工时还是未记请假：" +
+                         "若当天有调休/请假，请补记请假记录（调休余额会据此扣减）；若确实全天在岗，请补报工时。",
+                ActionText = "去核对",
+                ActionTarget = ViewNames.WorkRecord,
+                ActionDate = shortDays.Min(i => i.Date).Date
             });
         }
 
@@ -247,11 +253,12 @@ public static class InsightAnalyzer
             {
                 Kind = KindMonthHoursOver,
                 Severity = InsightSeverity.Info,
-                Title = $"本月 {overDays.Count} 天填报超过应填工时，合计多出 {extra:0.#}h",
+                Title = $"本月 {overDays.Count} 天填报超过应填工时（多 {extra:0.#}h）",
                 Detail = $"涉及 {FormatDates(overDays)}。" +
-                         "若现场有每日 8h 填报上限，超填部分可能需调整。",
-                ActionText = "查看出勤",
-                ActionTarget = ViewNames.Attendance
+                         "若当天有请假（应从应填工时中扣减），或存在重复填报，请核对调整。",
+                ActionText = "去核对",
+                ActionTarget = ViewNames.WorkRecord,
+                ActionDate = overDays.Min(i => i.Date).Date
             });
         }
 

@@ -651,8 +651,18 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [RelayCommand]
     private void OpenInsight(InsightItem? insight)
     {
-        if (insight?.ActionTarget is not { Length: > 0 } target) return;
-        NavigateToPage?.Invoke(target);
+        if (insight is null) return;
+
+        // 带具体日期 → 直接落到那天的工作记录页（可补报工时，也可点「+ 请假」补记请假）；
+        // 没带日期时才退化为普通切页。
+        if (insight.ActionDate is { } date)
+        {
+            NavigateToWorkRecord?.Invoke(date);
+            return;
+        }
+
+        if (insight.ActionTarget is { Length: > 0 } target)
+            NavigateToPage?.Invoke(target);
     }
 
     [RelayCommand]
