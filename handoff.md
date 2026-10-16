@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-16 15:12（会话交接用）
-> 本轮主题：**P2 ⑨ 主动异常洞察 + 洞察规则③两轮修正（应填工时按请假扣减 → 去归因、只陈述事实 + 按日期跳转）**
-> 当前状态：**测试 190/190 全绿 · 工作区干净 · 本地领先 `origin/master` 4 笔（未 push，按约定由真实终端执行）**
-> 下一步：**P2 ⑩ 首启引导 + 搜索扩展**（⑩ → ⑪ 空态/骨架屏/count-up/Logo）
+> 生成时间：2026-10-16 16:30（会话交接用）
+> 本轮主题：**P2 ⑩ 命令面板静态源 + 首启引导（全局搜索扩展到页面/操作入口；4 步引导浮层 + 设置页重放）**
+> 当前状态：**测试 203/203 全绿 · 工作区干净 · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
+> 下一步：**P2 ⑪ 观感打磨**（⑪ → P3 队列）
 
 ---
 
@@ -19,13 +19,13 @@
 | 仓库 | `C:\Users\Yang\Documents\EapWorkAssistant`（git，**仅本地 commit，不 push**） |
 | 应用数据 | `%LOCALAPPDATA%\EapWorkAssistant\`（`config.json` / `eapwork.db` / `drafts.json` / `logs\error_YYYYMMDD.log`） |
 | 验证产物 | `C:\Users\Yang\Documents\EapWorkAssistant\outputs\`（**已在 `.gitignore`**，截图/报告不污染仓库） |
-| 测试基线 | **190 / 190**（`.sln` 不含测试项目，须显式指定测试 csproj） |
+| 测试基线 | **203 / 203**（`.sln` 不含测试项目，须显式指定测试 csproj） |
 
 ---
 
 ## 1. 本轮进度（已完成并提交）
 
-### 1.1 本会话新增 commit（14 笔，按时间正序）
+### 1.1 本会话新增 commit（15 笔，按时间正序）
 
 | commit | 主题 | 类别 |
 |---|---|---|
@@ -43,8 +43,9 @@
 | `f4f7b2a` | docs: AGENTS.md §8.25 补规则③请假扣减红线，handoff 澄清 `2026-10-10` 非脏数据 | 文档 |
 | `f3357d3` | **fix: 洞察③去归因**——只陈述事实并并列两条处置路径，操作改按日期定位到当天 | 代码 |
 | `2601033` | docs: AGENTS.md §8.25 增「归因红线」与按日期跳转约定，handoff 同步 190 基线 | 文档 |
+| `7b9f9de` | **feat: 命令面板静态源 + 首启引导（P2 ⑩）**——页面/操作入口进全局搜索并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放（10 文件 +518 行） | 代码 |
 
-> ⚠️ **推送状态**：以上 14 笔**均未 push**（`git rev-list --count origin/master..HEAD` = 4，指本会话最后 4 笔尚未推；更早的 10 笔在上一会话已随 `origin/master` 更新前的批次处理，开新窗口请以 `git log --oneline origin/master..HEAD` 为准）。本约定为「仅本地 commit，push 由用户真实终端执行」。
+> ⚠️ **推送状态**：以上**均未 push**（含 `7b9f9de`；更早的 ⑨ 批次笔数说明见上一版）。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口请以 `git log --oneline origin/master..HEAD` 为准。
 
 ### 1.2 上一批（承接上一会话，已提交）
 
@@ -106,6 +107,13 @@
 | 第 2 轮 | **态度错** | 标题写死「少报」、明细暗示「你忘记录假了」——把两种可能之一当成结论 | **去归因**：标题改「填报低于应填工时」（纯事实），明细并列两条路；按钮由「查看出勤」（死路）改「去核对」→ 工作记录页并**直接选中最早那天** |
 
 > 关键洞察（用户追问驱动）：「漏报工时」与「未记请假」**从数据上无法区分**，系统只有「填了 4h」+「无请假记录」两个事实 → 单边归因即越界。此原则已升格为项目红线（AGENTS.md §8.25、本文 §2.4 #21）。
+
+**⑩ 命令面板静态源 + 首启引导（P2）**
+- **静态源**：`Helpers/CommandPaletteProvider.cs`（纯静态可单测）产出 7 页面 + 1 操作条目；匹配 = 空白切分多关键词**全部命中**（大小写不敏感），范围含标题/别名/副标题。`SearchAsync` 里静态结果**置顶**；⚠️ 分类计数只算 DB 结果（操作项 NavigateTo 也是 WorkRecord，混入会算虚「工作 N」），有静态命中时摘要追加「功能 N」。
+- **操作项链路**：`SearchResultItem.OpenNewForm` → VM 抛 `RequestNewFormDeferred` 事件 → `MainWindow` 订阅后 `Dispatcher.BeginInvoke(WorkRecord.RequestNewForm, Loaded)`（与 Ctrl+N 同链路；VM 禁碰 Dispatcher）。
+- **首启引导**：`ConfigData.HasCompletedOnboarding`（默认 false；跳过/完成都置 true）；`MainWindow` 根布局浮层（`Grid.RowSpan=2`、`Panel.ZIndex=65`，盖标题栏、低于 Toast）4 步卡片；`Window.InputBindings` 注册 `Esc → CompleteOnboardingCommand`（命令体带未打开守卫）；设置页「启动与行为」有「重新显示引导」（命令经 `AncestorType=Window` 取 MainViewModel）。
+- **实证**（`outputs/`）：`onboarding-open.png`（第 1 步卡片完整渲染：徽章/标题/步骤/进度点/三按钮，翻页到第 4 步出现「开始使用」）、完成后 `config.json` 落盘 true、设置页重放正常、跳过后面板像素级消失且侧边栏恢复可点；命令面板搜「设置/回收/出勤」均置顶展示页面项 + 摘要 `功能 1`，Enter 打开高亮静态项成功落到回收站页；全程无新 `error_*.log`。
+- ⚠️ **UIA 假阴性（本轮实测）**：引导关闭后标题 Text 仍留在 UIA 树（`Opacity=0` 不产生 `IsOffscreen`），**文本存在性不能证明面板还开着**——必须截图看像素或断言交互恢复；`FindFirst(Edit)` 在设置页会命中 AI 输入框，定位搜索框用 `AutomationId='MainSearchBox'`。
 
 ---
 
@@ -178,6 +186,12 @@
 | `Models/InsightItem.cs` | **P2 ⑨** 洞察条目模型（`InsightSeverity` + `Kind`/`Title`/`Detail`/`ActionText`/`ActionTarget`/**`ActionDate`**/`HasAction`） |
 | `Services/InsightAnalyzer.cs` | **P2 ⑨** 纯静态分析器（三条规则 + 聚合入口 + 阈值 `public const` + `ExpectedHours()` + 假日数据降级） |
 | `Services/ConfigData.cs`·`ConfigService.cs`·`ViewModels/SettingsViewModel.cs` | **P2 ⑨** 新增 `ShowDashInsights` 开关（与既有 `ShowDash*` 完全同构） |
+| `Helpers/CommandPaletteProvider.cs` | **P2 ⑩** 静态命令源（7 页面 + 1 操作条目；纯匹配逻辑：空白切分多关键词全命中、大小写不敏感） |
+| `Models/OnboardingStep.cs` | **P2 ⑩** 引导单步 POCO（Icon/Title/Description） |
+| `Services/ConfigData.cs`·`ConfigService.cs` | **P2 ⑩** 新增 `HasCompletedOnboarding` 开关（默认 false；跳过/完成均落盘） |
+| `ViewModels/MainViewModel.cs` | **P2 ⑩** `SearchAsync` 合并静态源并置顶（计数只算 DB）+ `SearchResultItem.OpenNewForm` + `RequestNewFormDeferred` 事件 + 引导状态/命令（`IsOnboardingOpen`/`OnboardingSteps`/`Show·Next·Prev·CompleteOnboarding` 及 6 个计算属性） |
+| `Views/MainWindow.xaml` / `.xaml.cs` | **P2 ⑩** 根布局引导浮层（`Grid.RowSpan=2` + ZIndex=65 + DataTrigger 渐隐）+ `Esc → CompleteOnboardingCommand` 绑定 + `Loaded` 首启触发 + `RequestNewFormDeferred` 订阅 |
+| `Views/SettingsView.xaml` | **P2 ⑩** 「启动与行为」→ 新手引导行（「重新显示引导」按钮，命令经 `AncestorType=Window`） |
 
 ### 3.2 上一批（P0 / P1 ④⑤）关键文件
 
@@ -199,15 +213,16 @@
   - `AttendanceHeatmapTests.cs`（**18 条**，P1 ⑦）
   - `BatchSelectionTests.cs`（**5 条**，P2 ⑧）
   - `InsightAnalyzerTests.cs`（**29 条**，P2 ⑨ + 规则③修正 6 条回归 + 去归因/按日期跳转 3 条）
+  - `CommandPaletteProviderTests.cs`（**11 条**，P2 ⑩ 静态源匹配：空白关键词/标题/别名/副标题/大小写/多关键词全命中/全角空格/操作项标记/七页面齐全/一关键词多命中）
 - **上一批新增**：`SearchNavigationHelperTests` / `ConfigSerializationTests` / `DraftServiceTests` / `WorkRecordEditLoadTests`
 - **现有全部**：`AttendanceViewModelTests` / `CompLeaveCalculatorTests` / `CsvParserTests` / `DashboardAggregationTests` / `DatabaseMigrationTests` / `DateTimeHelperTests` / `DayStatusServiceTests` / `IssueRepositoryTests` / `KnowledgeRepositoryTests` / `PaginationCalculatorTests` / `TrendCalculatorTests` / `WorkRecordImportServiceTests` / `WorkRecordRepositoryTests` / `TestDb.cs`
 
 ### 3.4 文档
 
-- `AGENTS.md` — 工程规范；本轮新增 **8.22 图表主题 / 8.23 出勤热力图 / 8.24 列表多选批量 / 8.25 主动异常洞察**（含归因红线、规则③应填工时红线）
+- `AGENTS.md` — 工程规范；本轮新增 **8.22 图表主题 / 8.23 出勤热力图 / 8.24 列表多选批量 / 8.25 主动异常洞察**（含归因红线、规则③应填工时红线）**/ 8.26 命令面板静态源 + 首启引导**（含 UIA 两个假阴性陷阱）
 - `.workbuddy/memory/MEMORY.md` — 项目长期备忘
 - `.workbuddy/memory/2026-10-15.md` — P1 ⑥⑦ + P2 ⑧ 工作日志
-- `.workbuddy/memory/2026-10-16.md` — P2 ⑨ + 规则③两轮修正 工作日志
+- `.workbuddy/memory/2026-10-16.md` — P2 ⑨ + 规则③两轮修正 + P2 ⑩ 工作日志
 - `C:\Users\Yang\.workbuddy\skills\wpf-ui-automation-verify\SKILL.md` — WPF UIA 端到端验证技能（含 ToggleButton、Border 无 AutomationPeer、单测全绿≠规则正确 等元经验）
 
 ---
@@ -236,8 +251,8 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
   dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -v:minimal
 ```
 
-- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）。
-- 当前 **190 / 190 全绿**。
+- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）**→ 203**（P2 ⑩ 静态源 11 + 引导配置 2）。
+- 当前 **203 / 203 全绿**。
 
 ### 4.3 可复用脚本（`%TEMP%`）
 
@@ -289,7 +304,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | ⑧ | **列表多选批量操作** | ✅ `ffa4bcc` `accb234`；框架在分页基类，规范见 AGENTS.md §8.24 |
 | ⑨ | **主动异常洞察** | ✅ `fe17547` `ad06545`；纯静态 `InsightAnalyzer` + 仪表盘「需要留意」卡，规范见 AGENTS.md §8.25 |
 | ⑨′ | **洞察规则③两轮修正** | ✅ `6715b01` `f4f7b2a` `f3357d3` `2601033`；① 应填工时 = 8h − 当天请假时长；② 去归因 + 按日期跳转 |
-| ⑩ | **首启引导 + 搜索扩展** | ⏭️ 下一项；全局搜索扩展到设置 / 出勤 / 回收站 |
+| ⑩ | **首启引导 + 搜索扩展** | ✅ `7b9f9de`；`CommandPaletteProvider` 静态源（7 页面 + 新增记录操作）进命令面板并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放，规范见 AGENTS.md §8.26 |
 | ⑪ | **观感打磨** | ⏳ 待办；空状态插画 + 列表骨架屏；StatCard 数值 count-up 动画；侧边栏 Logo 换矢量图标 |
 
 ### 5.3 未决 / 需用户拍板
@@ -305,10 +320,10 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 ## 6. 开新窗口后的建议起手式
 
-1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.25 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
+1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.26 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用（`eap_dotnet_run.py` 缺失则先重建，见 §4.1）。
-3. 跑一次全量测试确认基线（当前 **190/190**）。
-4. 从 **P2 队列**（⑧ 多选批量、⑨ 主动异常洞察 **均已完成**，接下来 **⑩ 首启引导 + 搜索扩展**）开始；或按用户当次指令。
+3. 跑一次全量测试确认基线（当前 **203/203**）。
+4. 从 **P2 队列**（⑧ 多选批量、⑨ 主动异常洞察、⑩ 静态源+首启引导 **均已完成**，接下来 **⑪ 观感打磨**）开始；或按用户当次指令。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。
-7. 本轮验证产物（`outputs/`，未入库）：`batch-select-knowledge.png`（⑧）、`insight-review-dashboard.png` + `insight-review-workrecord.png`（⑨′）、`attendance-heatmap-*.png`（⑦）。
+7. 本轮验证产物（`outputs/`，未入库）：`batch-select-knowledge.png`（⑧）、`insight-review-dashboard.png` + `insight-review-workrecord.png`（⑨′）、`attendance-heatmap-*.png`（⑦）、`onboarding-open.png` + `search-palette-*.png` + `search-enter-recycle.png`（⑩）。

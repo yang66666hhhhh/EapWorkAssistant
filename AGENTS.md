@@ -781,6 +781,17 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **`x:Name` 放在 `Border` 上不会成为 UIA `AutomationId`**：`Border` 无 `AutomationPeer`，UIA 树中根本不存在该元素（实测 `FindFirst(AutomationId='InsightPanel')` 恒为空）。做 UI 自动化验证请改用**文本锚点**（如 `Name='需要留意'` 定位标题 Text，再用 `BoundingRectangle` 反推卡片区域）；需要稳定锚点时把 `x:Name` 放到有 Peer 的控件上。
 - **验证**：`EapWorkAssistant.Tests/InsightAnalyzerTests.cs`（29 条）覆盖阈值边界、今天不计入、请假 / 有记录中断连续段、周末不打断、超出回溯窗口、只统计本月、假日数据降级、严重度降序，以及**规则 3 回归**（调休半天填 4h 不误报 / 填 2h 仍少报 / 填满 8h 算超填 / 全天请假应填归零 / `ExpectedHours` 下限 0 / 涉及日期超 5 天截断 / **不预设原因的双路文案** / **动作跳最早那天**）；测试基线 161 → 181 → 187 → **190**。UI 侧 UIA 实证：仪表盘读出 `本月 1 天填报低于应填工时（差 4h）` + `无法判断…` 明细（旧归因「少报」与旧按钮「查看出勤」**零残留**），点「去核对」后**落到工作记录页且日期为 `2026-10-10`**（截图 `outputs/insight-review-dashboard.png`、`outputs/insight-review-workrecord.png`）。
 
+### 8.26 命令面板静态源 + 首启引导（P2 ⑩，2026-10-16 新增）
+
+- **静态命令源**：`Helpers/CommandPaletteProvider.cs` 与 `SearchNavigationHelper` 同定位——**纯静态、无 IO、无 WPF 依赖、可单测**。产出 7 个「页面」+ 1 个「操作」（新增工作记录）条目；每条含 `Title`/`Content`/`Icon`/`Type`/`NavigateTo`/`Aliases`，操作项另带 `OpenNewForm`。匹配规则：关键词按空白（半角/全角）切分，**每个词都必须命中**（大小写不敏感子串），命中范围 = 标题 + 别名 + 副标题。
+- **合并与计数**：`MainViewModel.SearchAsync` 里静态结果**置顶**（Spotlight 惯例，操作优先于内容），`commandResults.Concat(dbResults)`。⚠️ **分类计数只统计 `dbResults`**——操作项「新增工作记录」的 `NavigateTo` 也是 `WorkRecord`，混入会把「工作 N」算虚；摘要串在有静态命中时追加「功能 N」。
+- **操作项执行链路**：`SearchResultItem.OpenNewForm` 命中后，VM 只抛 `MainViewModel.RequestNewFormDeferred` 事件；`MainWindow` 订阅后做 `Dispatcher.BeginInvoke(WorkRecord.RequestNewForm, Loaded)`——与 Ctrl+N **完全同链路**（VM 禁引用 Dispatcher，红线 6；视图刚切换时 DataTemplate 未订阅，立即调用静默失效）。
+- **首启引导**：开关 `ConfigData.HasCompletedOnboarding`（默认 `false`，**「跳过」与「完成」都置 true**），经 `ConfigService.HasCompletedOnboarding` 属性落盘；`MainWindow_Loaded` 末尾未完成则 `ShowOnboardingCommand` 自动弹出。步骤数据在 `MainViewModel.OnboardingSteps`（`Models/OnboardingStep` 纯 POCO，4 步：欢迎 / 工作记录 / 出勤与洞察 / 命令面板）。
+- **引导 UI**：浮层挂在 `MainWindow` **根布局**（`Grid.RowSpan="2"` + `Panel.ZIndex="65"`——盖住自绘标题栏，高于搜索面板 50/60、低于 Toast 70）；`IsOnboardingOpen` 走与搜索面板同款的 `DataTrigger` + `Opacity` 渐隐动画；`Window.InputBindings` 注册 `Esc → CompleteOnboardingCommand`（命令体首行 `if (!IsOnboardingOpen) return;` 守卫，避免与搜索框 Esc 双触发）。底部「上一步」绑 `CanPrevOnboardingStep`，「下一步 / 开始使用」文案与进度点（●○）均为 VM 计算属性，随 `OnOnboardingStepChanged` 统一发通知。
+- **重放入口**：设置页「启动与行为」→「新手引导 / 重新显示引导」，命令经 `RelativeSource AncestorType=Window` 取 `MainViewModel.ShowOnboardingCommand`（设置页自身 DataContext 是 `SettingsViewModel`）。
+- ⚠️ **UIA 验证的两个假阴性陷阱**（本轮实测）：① 引导关闭后标题 Text **仍留在 UIA 树**（`Opacity=0` 不产生 `IsOffscreen`），用文本存在性断言「已关闭」会误判——必须**截图看像素**或改断言交互恢复（如关闭后侧边栏 RadioButton 可选中）；② `FindFirst(ControlType=Edit)` 在**设置页**会命中 AI 配置输入框而非侧边栏搜索框——按 `AutomationId='MainSearchBox'` 定位最稳。
+- **验证**：`EapWorkAssistant.Tests/CommandPaletteProviderTests.cs`（11 条：空白关键词 / 标题命中 / 别名 / 副标题参与 / 大小写 / 多关键词全命中否则落空 / 全角空格 / 操作项标记 / 七页面齐全且导航键唯一 / 一关键词多命中）；`ConfigSerializationTests` 补 2 条（默认未完成、完成后往返）。测试基线 190 → **203**。UI 实证（`outputs/`）：`onboarding-open.png`（第 1 步卡片：徽章 / 标题 / 步骤 / 进度点 / 三按钮）、`search-palette-settings.png`（「设置」页面项置顶 + 摘要 `功能 1`）、`search-palette-recycle.png`、`search-palette-attendance.png`、`search-enter-recycle.png`（Enter 打开高亮静态项 → 落到回收站页）；全流程无新 `error_*.log`。
+
 ---
 
 ## 9. AI 行为约束红线
