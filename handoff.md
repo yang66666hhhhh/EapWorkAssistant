@@ -2,7 +2,7 @@
 
 > 生成时间：2026-10-16 14:25（会话交接用）
 > 本轮主题：**P2 ⑨ 主动异常洞察（仪表盘提示卡：调休余额临界 / 连续未填 / 本月填报偏离 8h）**
-> 当前状态：**测试 181/181 全绿 · 工作区干净 · 分支 `master` 与 `origin/master` 无领先提交**
+> 当前状态：**测试 181/181 全绿 · 工作区干净 · 本地领先 `origin/master` 4 个提交（未 push，按约定由真实终端执行）**
 > 下一步：**P2 ⑩ 首启引导 + 搜索扩展**（⑩ → ⑪ 空态/骨架屏/count-up/Logo）
 
 ---
@@ -47,7 +47,7 @@
 | `882b205` | feat: 自绘标题栏（P1 ④） |
 | `a25e18d` | ui: 图标尺寸统一为 IconSize 五档刻度（P1 ⑤） |
 
-> ⚠️ **推送状态**：本地 `master` 与 `origin/master` 引用当前**一致（无领先提交）**。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口后请以真实终端 `git status` / `git log --oneline origin/master..HEAD` 复核是否需要 push。
+> ⚠️ **推送状态**：本地 `master` **领先 `origin/master` 4 个提交**（`ffa4bcc` P2 ⑧ 代码 / `accb234` P2 ⑧ 文档 / `fe17547` P2 ⑨ 代码 / `ad06545` P2 ⑨ 文档），**均未 push**。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口后请以真实终端 `git status` / `git log --oneline origin/master..HEAD` 复核。
 
 ### 1.3 各项交付要点
 
