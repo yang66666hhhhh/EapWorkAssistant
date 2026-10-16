@@ -147,7 +147,7 @@ public class DashboardAggregationTests
             // 项目统计中 P1 仅剩 8h、1 条（被删的 5h/1 条已排除）
             var stats = (await repo.GetProjectStatsAsync("2026-08-01", "2026-08-31"))
                 .ToDictionary(r => (string)r.ProjectName);
-            Assert.Equal(1, stats.Count);
+            Assert.Single(stats);
             Assert.Equal(8.0, Convert.ToDouble(stats["P1"].TotalHours), 3);
             Assert.Equal(1, Convert.ToInt32(stats["P1"].RecordCount));
         }

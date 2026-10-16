@@ -46,6 +46,7 @@ public class ConfigData
     public bool ShowDashCharts { get; set; } = true;
     public bool ShowDashHighlights { get; set; } = true;
     public bool ShowDashRecent { get; set; } = true;
+    public bool ShowDashInsights { get; set; } = true;
 
     // ===== 启动与行为 =====
     public bool AutoStart { get; set; } = false;

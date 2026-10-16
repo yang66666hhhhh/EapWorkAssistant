@@ -110,6 +110,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private bool _showDashCharts = true;
     [ObservableProperty] private bool _showDashHighlights = true;
     [ObservableProperty] private bool _showDashRecent = true;
+    [ObservableProperty] private bool _showDashInsights = true;
 
     // ===== 启动与行为 =====
     [ObservableProperty] private bool _autoStart;
@@ -228,6 +229,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ShowDashCharts = ConfigService.Instance.ShowDashCharts;
         ShowDashHighlights = ConfigService.Instance.ShowDashHighlights;
         ShowDashRecent = ConfigService.Instance.ShowDashRecent;
+        ShowDashInsights = ConfigService.Instance.ShowDashInsights;
 
         // 启动与行为
         AutoStart = ConfigService.Instance.AutoStart;
@@ -380,6 +382,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
     partial void OnShowDashChartsChanged(bool value) { ConfigService.Instance.ShowDashCharts = value; StatusMessage = value ? "图表区域已显示" : "图表区域已隐藏"; }
     partial void OnShowDashHighlightsChanged(bool value) { ConfigService.Instance.ShowDashHighlights = value; StatusMessage = value ? "工作亮点已显示" : "工作亮点已隐藏"; }
     partial void OnShowDashRecentChanged(bool value) { ConfigService.Instance.ShowDashRecent = value; StatusMessage = value ? "最近记录已显示" : "最近记录已隐藏"; }
+    partial void OnShowDashInsightsChanged(bool value) { ConfigService.Instance.ShowDashInsights = value; StatusMessage = value ? "异常洞察已显示" : "异常洞察已隐藏"; }
 
     // ===== 启动与行为 handlers =====
     partial void OnAutoStartChanged(bool value)
@@ -732,6 +735,7 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ShowDashCharts = true;
         ShowDashHighlights = true;
         ShowDashRecent = true;
+        ShowDashInsights = true;
         StatusMessage = "Dashboard 布局已重置为默认";
         ToastService.Success("Dashboard 布局已重置为默认");
     }

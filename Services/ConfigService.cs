@@ -94,6 +94,7 @@ public class ConfigService
     public bool ShowDashCharts { get => _data.ShowDashCharts; set { _data.ShowDashCharts = value; Save(); } }
     public bool ShowDashHighlights { get => _data.ShowDashHighlights; set { _data.ShowDashHighlights = value; Save(); } }
     public bool ShowDashRecent { get => _data.ShowDashRecent; set { _data.ShowDashRecent = value; Save(); } }
+    public bool ShowDashInsights { get => _data.ShowDashInsights; set { _data.ShowDashInsights = value; Save(); } }
 
     // ===== 启动与行为 =====
     public bool AutoStart { get => _data.AutoStart; set { _data.AutoStart = value; Save(); } }

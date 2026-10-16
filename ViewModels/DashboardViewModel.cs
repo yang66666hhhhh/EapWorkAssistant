@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EapWorkAssistant.Helpers;
+using EapWorkAssistant.Models;
 using EapWorkAssistant.Repositories;
 using EapWorkAssistant.Services;
 using LiveChartsCore;
@@ -22,20 +23,34 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     private readonly WorkRecordRepository _recordRepo;
     private readonly KnowledgeRepository _knowledgeRepo;
     private readonly IssueRepository _issueRepo;
+    private readonly CompLeaveBalanceService _compLeaveService;
+    private readonly DayStatusService _dayStatusService;
 
     /// <summary>无参构造：供 XAML / 容器默认解析，依赖从组合根取。</summary>
     public DashboardViewModel()
         : this(ServiceContainer.Get<WorkRecordRepository>(),
                ServiceContainer.Get<KnowledgeRepository>(),
-               ServiceContainer.Get<IssueRepository>())
+               ServiceContainer.Get<IssueRepository>(),
+               ServiceContainer.Get<CompLeaveBalanceService>(),
+               ServiceContainer.Get<DayStatusService>())
     { }
 
-    /// <summary>显式注入构造：供单元测试传入 Fake 仓储。</summary>
+    /// <summary>显式注入构造：供单元测试传入 Fake 仓储（洞察数据源从容器取）。</summary>
     public DashboardViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo, IssueRepository issueRepo)
+        : this(recordRepo, knowledgeRepo, issueRepo,
+               ServiceContainer.Get<CompLeaveBalanceService>(),
+               ServiceContainer.Get<DayStatusService>())
+    { }
+
+    /// <summary>完整注入构造：洞察所需的调休余额 / 出勤状态服务也可替换。</summary>
+    public DashboardViewModel(WorkRecordRepository recordRepo, KnowledgeRepository knowledgeRepo,
+        IssueRepository issueRepo, CompLeaveBalanceService compLeaveService, DayStatusService dayStatusService)
     {
         _recordRepo = recordRepo;
         _knowledgeRepo = knowledgeRepo;
         _issueRepo = issueRepo;
+        _compLeaveService = compLeaveService;
+        _dayStatusService = dayStatusService;
 
         // 图表用 SkiaSharp 直接绘制，无法响应 DynamicResource。
         // 订阅主题服务，明暗/强调色切换时手动重绘图表配色。
@@ -161,6 +176,15 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private string _coverageWarningText = string.Empty;
     [ObservableProperty] private bool _showCoverageWarning;
 
+    // ===== 主动异常洞察（P2 ⑨）=====
+    /// <summary>洞察条目（调休余额临界 / 连续未填 / 本月填报偏离 8h），由 InsightAnalyzer 产出。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasInsights))]
+    private ObservableCollection<InsightItem> _insights = new();
+
+    /// <summary>是否存在需要留意的洞察（控制整块卡片可见性）。</summary>
+    public bool HasInsights => Insights.Count > 0;
+
     // 身份类型
     public bool IsProbation => ProfileService.Instance.IsProbation;
 
@@ -171,6 +195,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     public bool ShowDashCharts => ConfigService.Instance.ShowDashCharts;
     public bool ShowDashHighlights => ConfigService.Instance.ShowDashHighlights;
     public bool ShowDashRecent => ConfigService.Instance.ShowDashRecent;
+    public bool ShowDashInsights => ConfigService.Instance.ShowDashInsights;
 
     public async Task RefreshAsync() => await LoadDashboardAsync();
 
@@ -185,6 +210,7 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
         OnPropertyChanged(nameof(ShowDashCharts));
         OnPropertyChanged(nameof(ShowDashHighlights));
         OnPropertyChanged(nameof(ShowDashRecent));
+        OnPropertyChanged(nameof(ShowDashInsights));
 
         var today = DateTime.Now.ToString("yyyy-MM-dd");
         var weekStart = Helpers.DateTimeHelper.GetWeekStart(DateTime.Now).ToString("yyyy-MM-dd");
@@ -286,6 +312,9 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
         // 亮点列表
         await LoadHighlightsAsync();
+
+        // 主动异常洞察（P2 ⑨）
+        await LoadInsightsAsync();
     }
 
     // ComputeTrend 已抽到 TrendCalculator（纯函数、可单测）。
@@ -571,6 +600,59 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
                 ProjectName = r.ProjectName,
                 Note = !string.IsNullOrWhiteSpace(r.HighlightNote) ? r.HighlightNote : r.Content
             }));
+    }
+
+    /// <summary>
+    /// 加载主动异常洞察（P2 ⑨）：调休余额临界 / 连续未填 / 本月填报偏离 8h。
+    ///
+    /// 取数范围 = 「本月」与「最近 30 天连续未填回溯窗口」的并集，一次 GetRangeAsync 两用。
+    /// 节假日日历是否就绪，在 GetRangeAsync（内部幂等触发 LoadYearAsync）之后判定：
+    /// 未就绪时分析器整体降级为一条提示，避免拿错误日历误报「未填」。
+    /// </summary>
+    private async Task LoadInsightsAsync()
+    {
+        try
+        {
+            var today = DateTime.Now.Date;
+            var monthStart = new DateTime(today.Year, today.Month, 1);
+            var lookbackStart = today.AddDays(-InsightAnalyzer.UnfilledLookbackDays);
+            var rangeStart = monthStart < lookbackStart ? monthStart : lookbackStart;
+
+            var dayStatus = await _dayStatusService.GetRangeAsync(rangeStart, today);
+            var holidayReady = _compLeaveService.IsHolidayDataAvailable(today.Year);
+
+            CompLeaveResult? comp = null;
+            if (holidayReady)
+            {
+                // 余额计算失败不应拖垮整个仪表盘：降级为"无余额数据"，其余洞察照常产出
+                try { comp = await _compLeaveService.CalculateAsync(today.Year); }
+                catch { comp = null; }
+            }
+
+            var input = new InsightInput(
+                holidayReady,
+                comp?.CompLeaveAvailable ?? 0,
+                comp?.CompLeaveUsed ?? 0,
+                comp?.WeekendOvertimeReportHours ?? 0,
+                dayStatus,
+                today);
+
+            Insights = new ObservableCollection<InsightItem>(InsightAnalyzer.Analyze(input));
+        }
+        catch (Exception ex)
+        {
+            // 洞察是"锦上添花"，任何异常都不应影响仪表盘主体数据展示
+            Insights = new ObservableCollection<InsightItem>();
+            Logger.Error("加载异常洞察失败", ex);
+        }
+    }
+
+    /// <summary>点击洞察条目的操作按钮：按 ActionTarget 跳转到对应页面（出勤 / 工作记录）。</summary>
+    [RelayCommand]
+    private void OpenInsight(InsightItem? insight)
+    {
+        if (insight?.ActionTarget is not { Length: > 0 } target) return;
+        NavigateToPage?.Invoke(target);
     }
 
     [RelayCommand]
