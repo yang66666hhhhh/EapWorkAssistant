@@ -54,6 +54,11 @@ public class ConfigData
     public string DefaultView { get; set; } = ViewNames.Dashboard;
     public int AutoSaveInterval { get; set; } = 5;  // 分钟
 
+    // ===== 首启引导 =====
+    // false = 尚未看过引导：下次启动自动弹出；「跳过」与「完成」都置 true。
+    // 设置页「重新显示引导」可随时重放（不改变此标记的最终语义）。
+    public bool HasCompletedOnboarding { get; set; } = false;
+
     // ===== 窗口几何（记忆上次尺寸/位置/状态，下次启动还原）=====
     // Width/Height 为 0 表示"从未记录"，启动时沿用 XAML 默认尺寸；
     // Left/Top 为 null 表示"从未记录"，启动时沿用 WindowStartupLocation（居中）。

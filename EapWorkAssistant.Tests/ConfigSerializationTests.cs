@@ -20,6 +20,27 @@ public class ConfigSerializationTests
     }
 
     [Fact]
+    public void 默认配置_首启引导标记为未完成()
+    {
+        // false = 首启要弹引导；一旦误默认 true，新用户将永远看不到引导
+        Assert.False(new ConfigData().HasCompletedOnboarding);
+
+        var back = JsonSerializer.Deserialize<ConfigData>(JsonSerializer.Serialize(new ConfigData()));
+        Assert.NotNull(back);
+        Assert.False(back!.HasCompletedOnboarding);
+    }
+
+    [Fact]
+    public void 首启引导标记_完成后往返一致()
+    {
+        var data = new ConfigData { HasCompletedOnboarding = true };
+        var back = JsonSerializer.Deserialize<ConfigData>(JsonSerializer.Serialize(data));
+
+        Assert.NotNull(back);
+        Assert.True(back!.HasCompletedOnboarding);
+    }
+
+    [Fact]
     public void 默认配置_往返后窗口位置仍为未记录()
     {
         var back = JsonSerializer.Deserialize<ConfigData>(JsonSerializer.Serialize(new ConfigData()));

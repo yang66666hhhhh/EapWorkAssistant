@@ -102,6 +102,13 @@ public class ConfigService
     public string DefaultView { get => _data.DefaultView; set { _data.DefaultView = value; Save(); } }
     public int AutoSaveInterval { get => _data.AutoSaveInterval; set { _data.AutoSaveInterval = value; Save(); } }
 
+    /// <summary>首启引导是否已完成（看过/跳过都算完成）。false 时下次启动自动弹出引导。</summary>
+    public bool HasCompletedOnboarding
+    {
+        get => _data.HasCompletedOnboarding;
+        set { _data.HasCompletedOnboarding = value; Save(); }
+    }
+
     // ===== 窗口几何（只读；写入走 SaveWindowState，避免 SizeChanged 高频落盘）=====
     public double WindowWidth => _data.WindowWidth;
     public double WindowHeight => _data.WindowHeight;

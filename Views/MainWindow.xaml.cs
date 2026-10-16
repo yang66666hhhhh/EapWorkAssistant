@@ -143,6 +143,11 @@ public partial class MainWindow : Window
         {
             vm.Settings.ShortcutsChanged += RegisterAllShortcuts;
 
+            // 命令面板「新增工作记录」操作项：VM 抛事件，View 负责延迟到布局完成后开抽屉
+            // （与 Ctrl+N 同链路：DataTemplate 重建后须等其订阅完成，Loaded 优先级必晚于订阅）
+            vm.RequestNewFormDeferred += () => Dispatcher.BeginInvoke(
+                vm.WorkRecord.RequestNewForm, System.Windows.Threading.DispatcherPriority.Loaded);
+
             // 还原侧边栏折叠状态：窄屏优先自动折叠，否则尊重用户上次手动设置
             var narrow = ActualWidth < AutoCollapseBelow;
             if (narrow || ConfigService.Instance.SidebarCollapsed)
@@ -152,6 +157,10 @@ public partial class MainWindow : Window
             }
             // 用户显式保存了"宽屏下也折叠"的状态时，关闭响应式自动展开，避免启动即被还原
             _autoResponsive = !(ConfigService.Instance.SidebarCollapsed && !narrow);
+
+            // 首启引导：从未完成过引导时自动弹出（设置页可手动重放，Esc/跳过均可关闭）
+            if (!ConfigService.Instance.HasCompletedOnboarding)
+                vm.ShowOnboardingCommand.Execute(null);
         }
 
         // 应用当前字体大小缩放（Initialize 时窗口尚未就绪，需在此处补设）

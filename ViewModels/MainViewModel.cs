@@ -70,6 +70,99 @@ public partial class MainViewModel : ObservableObject
         SearchSummary = string.Empty;
     }
 
+    // ===== 首启引导（首次启动自动弹出；设置页可手动重放）=====
+    [ObservableProperty]
+    private bool _isOnboardingOpen;
+
+    /// <summary>当前引导步骤索引（0 起）。</summary>
+    [ObservableProperty]
+    private int _onboardingStep;
+
+    /// <summary>引导步骤数据（纯展示，无交互逻辑）。</summary>
+    public ObservableCollection<OnboardingStep> OnboardingSteps { get; } = new()
+    {
+        new() { Icon = "👋", Title = "欢迎使用 EAP Work Assistant",
+                Description = "工时填报、出勤统计、问题跟踪、知识沉淀，一个桌面应用全部搞定。花 30 秒了解核心功能，随时可以跳过。" },
+        new() { Icon = "📝", Title = "工作记录 · Ctrl+N 随时记",
+                Description = "每天按 8h 填报工时（公司口径）；现场问题顺手记进「问题跟踪」，经验沉淀到「知识库」，月底复盘不再抓瞎。" },
+        new() { Icon = "📊", Title = "出勤总览与异常洞察",
+                Description = "「出勤总览」用月度热力图看全月补班 / 请假 / 加班；仪表盘「需要留意」会主动提醒连续未填、调休余额临界、填报偏离。" },
+        new() { Icon = "🔍", Title = "命令面板 · Ctrl+F 搜一切",
+                Description = "工作记录、知识库、问题，以及设置 / 出勤 / 回收站等页面入口一键直达；↑↓ 选择，Enter 打开，Esc 关闭。" },
+    };
+
+    public OnboardingStep? CurrentOnboardingStep =>
+        OnboardingStep >= 0 && OnboardingStep < OnboardingSteps.Count
+            ? OnboardingSteps[OnboardingStep]
+            : null;
+
+    public bool IsFirstOnboardingStep => OnboardingStep <= 0;
+
+    public bool IsLastOnboardingStep => OnboardingStep >= OnboardingSteps.Count - 1;
+
+    public bool CanPrevOnboardingStep => OnboardingStep > 0;
+
+    public string OnboardingStepText => $"第 {OnboardingStep + 1} 步 / 共 {OnboardingSteps.Count} 步";
+
+    /// <summary>底部「下一步 / 开始使用」按钮文案。</summary>
+    public string OnboardingNextButtonText => IsLastOnboardingStep ? "开始使用" : "下一步";
+
+    /// <summary>步骤进度点（●=当前，○=未到；单 TextBlock 渲染，避免每点一个绑定）。</summary>
+    public string OnboardingDots =>
+        string.Concat(Enumerable.Range(0, OnboardingSteps.Count).Select(i => i == OnboardingStep ? "●" : "○"));
+
+    partial void OnOnboardingStepChanged(int value)
+    {
+        OnPropertyChanged(nameof(CurrentOnboardingStep));
+        OnPropertyChanged(nameof(IsFirstOnboardingStep));
+        OnPropertyChanged(nameof(IsLastOnboardingStep));
+        OnPropertyChanged(nameof(CanPrevOnboardingStep));
+        OnPropertyChanged(nameof(OnboardingStepText));
+        OnPropertyChanged(nameof(OnboardingNextButtonText));
+        OnPropertyChanged(nameof(OnboardingDots));
+    }
+
+    /// <summary>打开引导（首启自动；设置页「重新显示引导」手动重放）。</summary>
+    [RelayCommand]
+    private void ShowOnboarding()
+    {
+        OnboardingStep = 0;
+        IsOnboardingOpen = true;
+    }
+
+    [RelayCommand]
+    private void NextOnboardingStep()
+    {
+        if (IsLastOnboardingStep)
+            CompleteOnboarding();
+        else
+            OnboardingStep++;
+    }
+
+    [RelayCommand]
+    private void PrevOnboardingStep()
+    {
+        if (CanPrevOnboardingStep) OnboardingStep--;
+    }
+
+    /// <summary>
+    /// 完成 / 跳过引导：关闭浮层并落盘（Esc 快捷键也走这里——未打开时是空操作）。
+    /// </summary>
+    [RelayCommand]
+    private void CompleteOnboarding()
+    {
+        if (!IsOnboardingOpen) return;
+        IsOnboardingOpen = false;
+        ConfigService.Instance.HasCompletedOnboarding = true;
+    }
+
+    /// <summary>
+    /// 命令面板操作项触发「打开新增记录抽屉」时由 VM 抛出，View 侧（MainWindow）负责
+    /// <c>Dispatcher.BeginInvoke(WorkRecord.RequestNewForm, Loaded)</c>——与 Ctrl+N 同链路。
+    /// VM 禁止引用 WPF / Dispatcher（红线 6），故延迟调度必须落在 View。
+    /// </summary>
+    public event Action? RequestNewFormDeferred;
+
     public DashboardViewModel Dashboard { get; }
     public WorkRecordViewModel WorkRecord { get; }
     public AttendanceViewModel Attendance { get; }
@@ -349,7 +442,7 @@ public partial class MainViewModel : ObservableObject
         ShowNoResults = false;
         ShowResults = false;
 
-        var results = new List<SearchResultItem>();
+        var dbResults = new List<SearchResultItem>();
         var keyword = SearchKeyword.Trim();
 
         try
@@ -359,7 +452,7 @@ public partial class MainViewModel : ObservableObject
             foreach (var r in records)
             {
                 var content = r.Content ?? "";
-                results.Add(new SearchResultItem
+                dbResults.Add(new SearchResultItem
                 {
                     Type = "工作记录",
                     Title = $"{r.ProjectName} - {r.WorkDate}",
@@ -375,7 +468,7 @@ public partial class MainViewModel : ObservableObject
             foreach (var k in knowledge)
             {
                 var content = k.Content ?? "";
-                results.Add(new SearchResultItem
+                dbResults.Add(new SearchResultItem
                 {
                     Type = "知识库",
                     Title = k.Title,
@@ -391,7 +484,7 @@ public partial class MainViewModel : ObservableObject
             foreach (var i in issues)
             {
                 var content = i.Description ?? "";
-                results.Add(new SearchResultItem
+                dbResults.Add(new SearchResultItem
                 {
                     Type = "问题跟踪",
                     Title = $"[{i.ProjectName}] {i.Title}",
@@ -408,16 +501,38 @@ public partial class MainViewModel : ObservableObject
             ToastService.Error($"搜索出错：{ex.Message}");
         }
 
+        // 静态命令源（页面 / 操作）置顶——Spotlight 惯例：操作优先于内容命中。
+        // ⚠️ 分类计数只统计 dbResults：操作项「新增工作记录」的 NavigateTo 也是 WorkRecord，
+        // 混进去会把「工作 N」算虚（曾在此翻车的类型：计数按显示文案/导航键错位）。
+        var commandResults = new List<SearchResultItem>();
+        foreach (var e in CommandPaletteProvider.Match(keyword))
+        {
+            commandResults.Add(new SearchResultItem
+            {
+                Type = e.Type,
+                Title = e.Title,
+                Content = e.Content,
+                Icon = e.Icon,
+                NavigateTo = e.NavigateTo,
+                OpenNewForm = e.OpenNewForm,
+                Keyword = keyword
+            });
+        }
+
+        var results = commandResults.Concat(dbResults).ToList();
+
         // 分类计数汇总（用于结果区顶部提示，并标识是否被截断）
         // 计数改用稳定的导航键 NavigateTo（ViewNames.* 常量），不依赖显示文案 Type——
         // 后者一旦在 UI 改文案，按文案计数就会静默算错。
-        RecordResultCount = results.Count(r => r.NavigateTo == ViewNames.WorkRecord);
-        KnowledgeResultCount = results.Count(r => r.NavigateTo == ViewNames.Knowledge);
-        IssueResultCount = results.Count(r => r.NavigateTo == ViewNames.Issue);
+        RecordResultCount = dbResults.Count(r => r.NavigateTo == ViewNames.WorkRecord);
+        KnowledgeResultCount = dbResults.Count(r => r.NavigateTo == ViewNames.Knowledge);
+        IssueResultCount = dbResults.Count(r => r.NavigateTo == ViewNames.Issue);
         TotalResultCount = results.Count;
         SearchTruncated = TotalResultCount > 20;
         SearchSummary = TotalResultCount > 0
-            ? $"工作 {RecordResultCount} · 知识 {KnowledgeResultCount} · 问题 {IssueResultCount}"
+            ? (commandResults.Count > 0
+                ? $"工作 {RecordResultCount} · 知识 {KnowledgeResultCount} · 问题 {IssueResultCount} · 功能 {commandResults.Count}"
+                : $"工作 {RecordResultCount} · 知识 {KnowledgeResultCount} · 问题 {IssueResultCount}")
             : string.Empty;
 
         SearchResults = new ObservableCollection<SearchResultItem>(results.Take(20));
@@ -456,6 +571,12 @@ public partial class MainViewModel : ObservableObject
         }
 
         NavigateTo(item.NavigateTo);
+
+        // 操作类结果（新增工作记录）：VM 不能引用 Dispatcher（红线 6），
+        // 只抛事件，由 MainWindow 延迟到布局完成后调用 WorkRecord.RequestNewForm——
+        // 与 Ctrl+N 完全同链路（视图刚切换时 DataTemplate 尚未订阅，立即调用会静默失效）。
+        if (item.OpenNewForm)
+            RequestNewFormDeferred?.Invoke();
 
         // 知识库/问题跟踪：导航后设置搜索关键词，OnSearchKeywordChanged 防抖定时器会自动触发搜索
         // 不再手动调用 SearchCommand，避免与防抖定时器竞态导致双重搜索
@@ -511,4 +632,7 @@ public class SearchResultItem
     public DateTime? TargetDate { get; set; }
     public int TargetId { get; set; }
     public string Keyword { get; set; } = string.Empty;
+
+    /// <summary>操作类结果：点击后除导航外，还要延迟打开「新增记录」抽屉（见 <see cref="MainViewModel.RequestNewFormDeferred"/>）。</summary>
+    public bool OpenNewForm { get; set; }
 }

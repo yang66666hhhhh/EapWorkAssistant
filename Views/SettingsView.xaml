@@ -382,6 +382,21 @@
                                       Cursor="Hand" SelectionChanged="AutoSaveInterval_Changed"/>
                         </Grid>
                     </Border>
+
+                    <!-- 新手引导（重放入口；引导浮层挂在 MainWindow 根布局，命令走 Window.DataContext） -->
+                    <Border  CornerRadius="{DynamicResource RadiusMd}" Padding="{DynamicResource DensityRowPad}" Style="{StaticResource SectionPanel}">
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="新手引导" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="重新播放首次启动的功能引导" FontSize="12"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Button Style="{StaticResource BtnGhost}" Content="重新显示引导"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Command="{Binding DataContext.ShowOnboardingCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </Expander>
 

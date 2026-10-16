@@ -32,6 +32,12 @@
     <Window.Resources>
     </Window.Resources>
 
+    <Window.InputBindings>
+        <!-- Esc 关闭首启引导（CompleteOnboarding 内部有"未打开则空操作"守卫；
+             搜索框自身的 Esc 由其 KeyDown 先行处理，两者不会互相打断） -->
+        <KeyBinding Key="Esc" Command="{Binding CompleteOnboardingCommand}"/>
+    </Window.InputBindings>
+
     <Grid x:Name="RootLayout">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -713,5 +719,86 @@
             </Border>
         </Grid>
         </Grid>
+
+        <!-- ===== 首启引导浮层（首次启动自动弹出；设置页可手动重放）=====
+             盖住整个窗口（含自绘标题栏），Esc / 跳过引导均可关闭；
+             ZIndex=65：高于搜索面板(50/60)，低于 Toast(70)，引导期间Toast 仍可浮于其上。 -->
+        <Border Grid.RowSpan="2" Panel.ZIndex="65" x:Name="OnboardingOverlay"
+                Background="{DynamicResource OverlayMaskBrush}" Opacity="0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsOnboardingOpen}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="{StaticResource DurationEnter}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="{StaticResource DurationFast}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                            <Setter Property="IsHitTestVisible" Value="True"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ContentControl Style="{StaticResource ModalDialogPanel}" Background="{DynamicResource CardBrush}" Padding="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 头部：图标徽章 + 标题 + 步骤指示 -->
+                        <StackPanel Margin="28,28,28,0">
+                            <Border Width="56" Height="56" CornerRadius="{DynamicResource RadiusLg}"
+                                    HorizontalAlignment="Left" Background="{DynamicResource PrimaryLightBrush}">
+                                <TextBlock Text="{Binding CurrentOnboardingStep.Icon}" FontSize="26"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="{Binding CurrentOnboardingStep.Title}" FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,14,0,0"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding OnboardingStepText}" FontSize="11"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                        <!-- 步骤描述 -->
+                        <TextBlock Grid.Row="1" Text="{Binding CurrentOnboardingStep.Description}"
+                                   FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
+                                   TextWrapping="Wrap" Margin="28,12,28,24" LineHeight="22"/>
+
+                        <!-- 底部：进度点 + 操作按钮 -->
+                        <Border Grid.Row="2" Padding="20,12" BorderThickness="0,1,0,0"
+                                BorderBrush="{DynamicResource BorderBrush}">
+                            <Grid>
+                                <TextBlock Text="{Binding OnboardingDots}" FontSize="10"
+                                           Foreground="{DynamicResource PrimaryBrush}"
+                                           VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource BtnGhost}" Content="跳过引导"
+                                            Command="{Binding CompleteOnboardingCommand}"/>
+                                    <Button Style="{StaticResource BtnGhost}" Content="上一步" Margin="8,0,0,0"
+                                            IsEnabled="{Binding CanPrevOnboardingStep}"
+                                            Command="{Binding PrevOnboardingStepCommand}"/>
+                                    <Button Style="{StaticResource BtnPrimary}" Margin="8,0,0,0" Padding="16,0"
+                                            Content="{Binding OnboardingNextButtonText}"
+                                            Command="{Binding NextOnboardingStepCommand}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ContentControl>
+            </Border>
+        </Border>
     </Grid>
 </Window>
