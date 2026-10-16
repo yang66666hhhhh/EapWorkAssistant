@@ -763,6 +763,21 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **多选模式下点击列头排序 / 翻页 / 改筛选都会清空选择**（`ReloadPageAsync` / `LoadAllRecordsAsync` 末尾清空）——这是刻意行为，不是 bug。
 - **验证**：`EapWorkAssistant.Tests/BatchSelectionTests.cs`（5 条）覆盖模式切换 + 退出清空 + `HasSelection` 联动 + `DeleteItemsAsync` 软删与列表刷新 + `RestoreItemsAsync` 撤销；测试基线 156 → **161**。
 
+### 8.25 主动异常洞察（P2 ⑨，2026-10-16 新增）
+
+- **背景**：仪表盘原先只被动陈列统计数字，用户得自己翻页才发现「调休快用完」「连续几天没填」「某天工时不对」。本轮把这三类判断前置到仪表盘，并给出可点击的处理入口。
+- **分层**：`Services/InsightAnalyzer.cs` 是**纯静态、无 IO** 的分析器；输入 `InsightInput` 只承载已取好的数据（调休余额三元组 + `DayStatusItem` 列表 + 今天）。`DashboardViewModel.LoadInsightsAsync` 仅负责「取数 → 调 `Analyze` → 赋给 `Insights`」。产出模型 `Models/InsightItem.cs`（`InsightSeverity` + `Kind`/`Title`/`Detail`/`ActionText`/`ActionTarget`）。
+- **三条规则**（阈值均为 `public const`，单测直接引用，避免魔数漂移）：
+  1. **调休余额**：余额 ≥ 8h 静默；0 < 余额 < 8h → Warning「不足 1 天」；余额为 0 且已用 > 周末加班 → Danger「已透支 Xh」，恰好用尽 → Warning「已用尽」（`KindCompLeaveLow/Overdrawn`）。
+  2. **连续未填**：从最近的**应上班**日往前数连续「无记录且无请假」的天数，≥ 3 天 Warning、≥ 5 天 Danger（`KindConsecutiveUnfilled`）。
+  3. **本月填报偏离 8h**：本月**已填的应上班工作日**中，不足 8h → Warning（少报会压低调休余额），超过 8h → Info（可能触碰现场 8h 填报上限）。
+- ⚠️ **「应上班 / 加班」判定只信 `DayStatusItem`**（由 `DayStatusService` + `DayStatusRules` 产出），分析器**自身不做任何节假日判断**——否则又回到三处规则漂移的老问题。
+- ⚠️ **节假日日历不可用时整体降级**：`IsHolidayDataAvailable == false` 时只返回一条 Info「节假日日历未就绪」，不做任何未填 / 偏离判断。法定假日会被误当工作日，凭空造出「未填」假警报。该守卫必须在 `GetRangeAsync`（内部幂等触发 `LoadYearAsync`）**之后**判定。
+- ⚠️ **今天不计入「连续未填」**（当天没过完，未填不算漏），过滤条件为 `i.Date < today`；只数 `IsWorkdayDue` 的日期，周末 / 法定假日自然跳过、**不打断**连续段。
+- ⚠️ **配色用 `DataTrigger` + `{x:Static models:InsightSeverity.*}`**，不要写 `Value="Warning"` 字符串——`DataTrigger.Value` 是 `object` 直接 `Equals` 比较，字符串永远匹配不上枚举值。同理 **`Border` / `Path` 的 `Background`/`Fill`/`Data` 必须全部写成 Style Setter**：内联属性优先级高于 Trigger，会把严重度配色整块吃掉。
+- ⚠️ **`x:Name` 放在 `Border` 上不会成为 UIA `AutomationId`**：`Border` 无 `AutomationPeer`，UIA 树中根本不存在该元素（实测 `FindFirst(AutomationId='InsightPanel')` 恒为空）。做 UI 自动化验证请改用**文本锚点**（如 `Name='需要留意'` 定位标题 Text，再用 `BoundingRectangle` 反推卡片区域）；需要稳定锚点时把 `x:Name` 放到有 Peer 的控件上。
+- **验证**：`EapWorkAssistant.Tests/InsightAnalyzerTests.cs`（20 条）覆盖阈值边界、今天不计入、请假 / 有记录中断连续段、周末不打断、超出回溯窗口、只统计本月、假日数据降级、严重度降序；测试基线 161 → **181**。UI 侧用 UIA 实证：仪表盘读出条目文案与「查看出勤」按钮（`enabled=True`），点击后导航切到「出勤总览」。
+
 ---
 
 ## 9. AI 行为约束红线

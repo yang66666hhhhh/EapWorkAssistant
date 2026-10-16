@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-15 18:00（会话交接用）
-> 本轮主题：**P1 ⑥⑦（图表主题深化 / 出勤热力图）+ P2 ⑧ 列表多选批量操作**
-> 当前状态：**测试 161/161 全绿 · 工作区干净 · 分支 `master` 与 `origin/master` 无领先提交**
-> 下一步：**P2 ⑨ 主动异常洞察**（⑨ → ⑩ 首启引导+搜索扩展 → ⑪ 空态/骨架屏/动效）
+> 生成时间：2026-10-16 14:25（会话交接用）
+> 本轮主题：**P2 ⑨ 主动异常洞察（仪表盘提示卡：调休余额临界 / 连续未填 / 本月填报偏离 8h）**
+> 当前状态：**测试 181/181 全绿 · 工作区干净 · 分支 `master` 与 `origin/master` 无领先提交**
+> 下一步：**P2 ⑩ 首启引导 + 搜索扩展**（⑩ → ⑪ 空态/骨架屏/count-up/Logo）
 
 ---
 
@@ -18,13 +18,13 @@
 | 主题 | 自定义 indigo 双主题 ResourceDictionary，运行时由 `ThemeService` 覆盖画刷 |
 | 仓库 | `C:\Users\Yang\Documents\EapWorkAssistant`（git，**仅本地 commit，不 push**） |
 | 应用数据 | `%LOCALAPPDATA%\EapWorkAssistant\`（`config.json` / `eapwork.db` / `drafts.json` / `logs\error_YYYYMMDD.log`） |
-| 测试基线 | **156 / 156**（`.sln` 不含测试项目，须显式指定测试 csproj） |
+| 测试基线 | **181 / 181**（`.sln` 不含测试项目，须显式指定测试 csproj） |
 
 ---
 
 ## 1. 本轮进度（已完成并提交）
 
-### 1.1 本会话新增 commit（P1 ⑥ / P1 ⑦ / P2 ⑧）
+### 1.1 本会话新增 commit（P1 ⑥ / P1 ⑦ / P2 ⑧ / P2 ⑨）
 
 | commit | 主题 | 关联 |
 |---|---|---|
@@ -33,6 +33,8 @@
 | `7ba9014` | **feat: 出勤月度热力图（P1 ⑦）**——迷你日历整格底色 + 月份导航 | feat 代码 |
 | `33b9966` | docs: AGENTS.md 增补 8.23 出勤热力图规范，handoff 标记 P1 ⑦ 完成 | 文档 |
 | `ffa4bcc` | **feat: 列表多选批量操作（P2 ⑧）**——分页基类通用框架 + 三模块批量软删除 | feat 代码 |
+| `fe17547` | **feat: 主动异常洞察（P2 ⑨）**——仪表盘提示卡（调休余额临界 / 连续未填 / 本月填报偏离 8h），9 文件 +825 行 | feat 代码 |
+| （随本次提交） | docs: AGENTS.md 增补 8.25 异常洞察规范，handoff 标记 P2 ⑨ 完成 | 文档 |
 
 ### 1.2 上一批（承接上一会话，已提交）
 
@@ -72,6 +74,15 @@
 - **View 零新增控件**：复用 `SelectionModeConverter`（`SelModeConv`）+ `DataGridHelper.SelectedItemsList`，二者与 `BoolToVis` 已**全局注册**到 `Resources/Styles.xaml`。
 - ⚠️ 坑：「多选」开关必须用 `BtnGhost`（`TargetType=ButtonBase`）；`BtnPrimary/BtnSecondary/BtnDanger` 是 `TargetType=Button`，**套在 ToggleButton 上会编译报错**。
 - **实证**（UIA 端到端，`outputs/batch-select-knowledge.png`）：切知识库 → 点「多选」→ ToggleState=On → `AddToSelection` 前两行均 `IsSelected=True`（证明已进 Extended 多选）→ 批量栏读到 `已选  2  项`（证明 `DataGridHelper` 同步链路通）→ 「删除选中」按钮 `IsEnabled=True`。
+
+**⑨ 主动异常洞察（P2）**
+- **分层**：`Services/InsightAnalyzer.cs` 纯静态无 IO（输入 `InsightInput` = 调休余额三元组 + `DayStatusItem` 列表 + 今天）→ 产出 `Models/InsightItem.cs`（`InsightSeverity` + `Kind`/`Title`/`Detail`/`ActionText`/`ActionTarget`）。`DashboardViewModel.LoadInsightsAsync` 只做「取数 → Analyze → 赋 `Insights`」。
+- **三条规则**：① 调休余额 <8h 告警 / 已用 > 周末加班 → 透支风险；② 连续未填应上班日 ≥3 告警、≥5 风险；③ 本月已填工作日偏离 8h（少报 Warning / 超填 Info）。阈值都是 `public const`。
+- ⚠️ 判定只信 `DayStatusItem`（`DayStatusService` + `DayStatusRules`），分析器**不自判节假日**；**今天不计入连续未填**（`i.Date < today`）。
+- ⚠️ **节假日日历不可用整体降级**：`IsHolidayDataAvailable=false` 只返回一条 Info 提示（守卫须在 `GetRangeAsync` 之后判定），否则法定假日被误当工作日 → 假「未填」警报。
+- ⚠️ 配色用 `DataTrigger` + `{x:Static models:InsightSeverity.*}`（字符串 `Value="Warning"` 匹配不上枚举）；`Border`/`Path` 的 `Background`/`Fill`/`Data` 必须**全部写成 Style Setter**（内联值优先级高于 Trigger）。
+- ⚠️ **`x:Name` 放 `Border` 上不会成为 UIA `AutomationId`**（无 `AutomationPeer`）→ UI 验证改用文本锚点（`Name='需要留意'`）。
+- **实证**（UIA 端到端，`outputs/insight-panel.png` / `insight-dashboard.png`）：仪表盘读出「需要留意」+ 条目 `本月 1 天填报不足 8h，合计少报 4h`（正是 `2026-10-10` 填报 4.0h 触发）+ 按钮「查看出勤」`enabled=True`；点击后导航切到「出勤总览」。
 
 ---
 
@@ -117,12 +128,13 @@
 | 17 | `outputs/` 已在 `.gitignore`，截图/产物不会污染仓库。 |
 | 18 | 每个 P 项收尾动作：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit。 |
 | 19 | **列表多选批量**：通用框架在 `PagedCollectionViewModelBase<T>`（AGENTS.md §8.24）；「多选」开关组件必须用 `BtnGhost`（`TargetType=ButtonBase`），批量删除是**软删除**（提示可在回收站恢复）。 |
+| 20 | **主动异常洞察**：规则集中在纯静态 `Services/InsightAnalyzer`（AGENTS.md §8.25）；出勤判定只信 `DayStatusItem`，**节假日数据不可用时整体降级不报**（否则假「未填」警报）；`InsightItem` 配色走 `DataTrigger` + `{x:Static models:InsightSeverity.*}`（字符串值匹配不上枚举）。 |
 
 ---
 
 ## 3. 关键文件路径
 
-### 3.1 本轮（P1 ⑥⑦ / P2 ⑧）新增 / 重点改动
+### 3.1 本轮（P1 ⑥⑦ / P2 ⑧ / P2 ⑨）新增 / 重点改动
 
 | 文件 | 作用 |
 |---|---|
@@ -138,6 +150,11 @@
 | `ViewModels/WorkRecordViewModel.cs` | **P2 ⑧** 独立多选套件（`SelectedRecords`/`BatchDeleteRecordsCommand`/`DeleteSelectedRecordsAsync`） |
 | `Views/{WorkRecord,Knowledge,Issue}View.xaml` | **P2 ⑧** 多选 ToggleButton + 批量操作栏 + DataGrid `SelectionMode`/`SelectedItemsList` 绑定 |
 | `Resources/Styles.xaml` | **P2 ⑧** 全局注册 `BoolToVis` / `SelModeConv` 转换器实例 |
+| `Models/InsightItem.cs` | **P2 ⑨** 洞察条目模型（`InsightSeverity` + `Kind`/`Title`/`Detail`/`ActionText`/`ActionTarget`/`HasAction`） |
+| `Services/InsightAnalyzer.cs` | **P2 ⑨** 纯静态分析器（三条规则 + 聚合入口 + 阈值常量 + 假日数据降级） |
+| `ViewModels/DashboardViewModel.cs` | **P2 ⑨** `Insights`/`HasInsights` + `LoadInsightsAsync`（取 45 天日状态 + 年度调休余额）+ `OpenInsightCommand`；构造注入 `CompLeaveBalanceService` + `DayStatusService` |
+| `Views/DashboardView.xaml` | **P2 ⑨** 「需要留意」洞察卡（`ItemsControl` + 严重度 `DataTrigger` 配色 + 操作按钮跳转） |
+| `Services/ConfigData.cs`·`ConfigService.cs`·`ViewModels/SettingsViewModel.cs` | **P2 ⑨** 新增 `ShowDashInsights` 开关（与既有 `ShowDash*` 完全同构） |
 
 ### 3.2 上一批（P0 / P1 ④⑤）关键文件
 
@@ -155,15 +172,16 @@
 
 ### 3.3 测试（`EapWorkAssistant.Tests/`）
 
-- 本轮新增：**`AttendanceHeatmapTests.cs`（18 条）** + **`BatchSelectionTests.cs`（5 条，P2 ⑧）**
+- 本轮新增：**`AttendanceHeatmapTests.cs`（18 条）** + **`BatchSelectionTests.cs`（5 条，P2 ⑧）** + **`InsightAnalyzerTests.cs`（20 条，P2 ⑨）**
 - 上一批新增：`SearchNavigationHelperTests` / `ConfigSerializationTests` / `DraftServiceTests` / `WorkRecordEditLoadTests`
 - 现有全部：`AttendanceViewModelTests` / `CompLeaveCalculatorTests` / `CsvParserTests` / `DashboardAggregationTests` / `DatabaseMigrationTests` / `DateTimeHelperTests` / `DayStatusServiceTests` / `IssueRepositoryTests` / `KnowledgeRepositoryTests` / `PaginationCalculatorTests` / `TrendCalculatorTests` / `WorkRecordImportServiceTests` / `WorkRecordRepositoryTests` / `TestDb.cs`
 
 ### 3.4 文档
 
-- `AGENTS.md` — 工程规范；本轮新增 **8.22 图表主题规范 / 8.23 出勤月度热力图**
+- `AGENTS.md` — 工程规范；本轮新增 **8.22 图表主题 / 8.23 出勤热力图 / 8.24 列表多选批量 / 8.25 主动异常洞察**
 - `.workbuddy/memory/MEMORY.md` — 项目长期备忘
-- `.workbuddy/memory/2026-10-15.md` — 当日工作日志（P1 ⑥ ⑦ 全过程 + 沙箱方法论）
+- `.workbuddy/memory/2026-10-15.md` — P1 ⑥⑦ + P2 ⑧ 工作日志
+- `.workbuddy/memory/2026-10-16.md` — P2 ⑨ 工作日志
 
 ---
 
@@ -182,7 +200,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 - 判据：见到 `已成功生成` / 无 `error` 行。
 - ⚠️ `.sln` **不含测试项目**，测试命令必须显式指定 `EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj`。
 
-### 4.2 测试基线（当前 161/161）
+### 4.2 测试基线（当前 181/181）
 
 ```bash
 C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
@@ -190,7 +208,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
   dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -v:minimal
 ```
 
-- 基线：**161 / 161 全绿**（156 基线 + P2 ⑧ 新增 5 条多选批量单测）。
+- 基线：**181 / 181 全绿**（161 基线 + P2 ⑨ 新增 20 条洞察分析单测）。
 
 ### 4.3 可复用脚本（`%TEMP%`）
 
@@ -233,7 +251,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | # | 项 | 参考要点 |
 |---|---|---|
 | ⑧ | **列表多选批量操作** ✅ 已完成（`ffa4bcc`；框架在分页基类，规范见 AGENTS.md §8.24） | 工作记录 / 知识库 / 问题；批量软删除 + 撤销 |
-| ⑨ | **主动异常洞察** | 调休余额临界 / 连续未填 / 填报偏离 8h → 仪表盘提示卡 |
+| ⑨ | **主动异常洞察** ✅ 已完成（`fe17547`；纯静态 `InsightAnalyzer` + 仪表盘「需要留意」卡，规范见 AGENTS.md §8.25） | 调休余额临界 / 连续未填 / 填报偏离 8h → 仪表盘提示卡 |
 | ⑩ | **首启引导 + 搜索扩展** | 全局搜索扩展到设置 / 出勤 / 回收站 |
 | ⑪ | **观感打磨** | 空状态插画 + 列表骨架屏；StatCard 数值 count-up 动画；侧边栏 Logo 换矢量图标 |
 
@@ -252,7 +270,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.23 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用。
-3. 跑一次全量测试确认基线（当前 **161/161**）。
-4. 从 **P2 队列**（⑧ 列表多选批量 **已完成**，接下来 ⑨ 主动异常洞察）开始；或按用户当次指令。
+3. 跑一次全量测试确认基线（当前 **181/181**）。
+4. 从 **P2 队列**（⑧ 多选批量、⑨ 主动异常洞察 **均已完成**，接下来 ⑩ 首启引导 + 搜索扩展）开始；或按用户当次指令。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。
