@@ -13,13 +13,17 @@ namespace EapWorkAssistant.Tests;
 /// </summary>
 public class InsightAnalyzerTests
 {
-    /// <summary>构造一条出勤日状态（只填本用例关心的字段）。</summary>
+    /// <summary>
+    /// 构造一条出勤日状态（只填本用例关心的字段）。
+    /// <paramref name="leaveHours"/> 省略时按全天 8h 计（仅为方便构造「整天请假」场景）。
+    /// </summary>
     private static DayStatusItem Day(
         DateTime date,
         bool workdayDue = true,
         WorkKind kind = WorkKind.NoRecord,
         double hours = 0,
-        string? leaveType = null)
+        string? leaveType = null,
+        double leaveHours = 0)
         => new()
         {
             Date = date,
@@ -27,7 +31,7 @@ public class InsightAnalyzerTests
             WorkKind = kind,
             WorkHours = hours,
             LeaveType = leaveType,
-            LeaveHours = leaveType is null ? 0 : 8
+            LeaveHours = leaveType is null ? 0 : leaveHours > 0 ? leaveHours : 8
         };
 
     // ==================== 规则 1：调休余额临界 / 透支 ====================
@@ -228,7 +232,8 @@ public class InsightAnalyzerTests
         var item = Assert.Single(results);
         Assert.Equal(InsightAnalyzer.KindMonthHoursShort, item.Kind);
         Assert.Equal(InsightSeverity.Warning, item.Severity);
-        Assert.Equal("本月 2 天填报不足 8h，合计少报 3h", item.Title);
+        Assert.Equal("本月 2 天填报不足，合计少报 3h", item.Title);
+        Assert.Contains("10-13", item.Detail); // 明细须带出具体日期，便于直接去补录/补请假
     }
 
     [Fact]
@@ -246,7 +251,7 @@ public class InsightAnalyzerTests
         var item = Assert.Single(results);
         Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
         Assert.Equal(InsightSeverity.Info, item.Severity);
-        Assert.Equal("本月 1 天填报超过 8h，合计多出 2h", item.Title);
+        Assert.Equal("本月 1 天填报超过应填工时，合计多出 2h", item.Title);
     }
 
     [Fact]
@@ -275,6 +280,91 @@ public class InsightAnalyzerTests
         };
 
         Assert.Empty(InsightAnalyzer.AnalyzeMonthHours(items, today));
+    }
+
+    // ---- 当天有请假 → 应填工时按 8h 扣减（2026-10-10 真实事故回归）----
+
+    [Fact]
+    public void AnalyzeMonthHours_当天调休半天只填4h属正常_不误报()
+    {
+        // 原始事故场景：2026-10-10 为补班日（正常工作日），下午调休 4h、上午上班填 4h。
+        // 按固定 8h 比对会误判「少报 4h」，故必须按 8h − 请假时长 比对。
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 10), kind: WorkKind.Workday, hours: 4,
+                leaveType: "调休", leaveHours: 4),
+        };
+
+        Assert.Empty(InsightAnalyzer.AnalyzeMonthHours(items, today));
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_当天调休半天填2h_仍算少报2h()
+    {
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday, hours: 2,
+                leaveType: "调休", leaveHours: 4),
+        };
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+        Assert.Equal(InsightAnalyzer.KindMonthHoursShort, item.Kind);
+        Assert.Equal("本月 1 天填报不足，合计少报 2h", item.Title);
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_当天调休半天却填满8h_算超填4h()
+    {
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday, hours: 8,
+                leaveType: "调休", leaveHours: 4),
+        };
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+        Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
+        Assert.Equal(InsightSeverity.Info, item.Severity);
+        Assert.Equal("本月 1 天填报超过应填工时，合计多出 4h", item.Title);
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_全天请假应填归零_不再按8h要求()
+    {
+        var today = new DateTime(2026, 10, 16);
+        var items = new[]
+        {
+            // 全天年假 8h 却仍填 2h：应填 0h → 记为超填 2h（提示可能重复填报）
+            Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday, hours: 2,
+                leaveType: "年假", leaveHours: 8),
+        };
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+        Assert.Equal(InsightAnalyzer.KindMonthHoursOver, item.Kind);
+        Assert.Equal("本月 1 天填报超过应填工时，合计多出 2h", item.Title);
+    }
+
+    [Fact]
+    public void ExpectedHours_请假时长超过8h_下限为0()
+    {
+        var day = Day(new DateTime(2026, 10, 13), kind: WorkKind.Workday,
+            leaveType: "调休", leaveHours: 10);
+
+        Assert.Equal(0, InsightAnalyzer.ExpectedHours(day));
+    }
+
+    [Fact]
+    public void AnalyzeMonthHours_涉及日期超过五天_截断显示()
+    {
+        var today = new DateTime(2026, 10, 16);
+        var items = Enumerable.Range(0, 7)
+            .Select(i => Day(new DateTime(2026, 10, 1).AddDays(i), kind: WorkKind.Workday, hours: 5))
+            .ToList();
+
+        var item = Assert.Single(InsightAnalyzer.AnalyzeMonthHours(items, today));
+        Assert.Contains("等 7 天", item.Detail);
     }
 
     // ==================== 聚合入口 ====================

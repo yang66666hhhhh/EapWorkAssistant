@@ -27,7 +27,8 @@ public sealed record InsightInput(
 /// 当前三条规则：
 ///   1. **调休余额临界/透支** —— 余额不足 1 天提醒，已用超过周末加班则告警；
 ///   2. **连续未填** —— 连续 N 个「应上班」工作日无记录无请假（漏填 → 出勤与调休统计不准）；
-///   3. **本月填报偏离 8h** —— 少报压低调休余额，超填可能触碰现场填报上限。
+///   3. **本月填报偏离应填工时** —— 应填工时 = 8h − 当天请假时长（请半天假本就该只填 4h），
+///      少报可能是漏报或忘了记请假，超填可能触碰现场填报上限。
 ///
 /// 设计约束（与项目红线一致）：
 ///   - 「应上班 / 加班」判定**只信** <see cref="DayStatusRules"/> 与 <c>DayStatusService</c> 产出的
@@ -194,8 +195,11 @@ public static class InsightAnalyzer
     }
 
     /// <summary>
-    /// 本月填报偏离 8h：统计本月内已填的「应上班」工作日里，填报工时不足 / 超过 8h 的天数。
-    /// 少报会压低调休余额（公司按填报口径计算），超填则可能触碰现场填报上限，故分开提示。
+    /// 本月填报偏离应填工时：统计本月内已填的「应上班」工作日里，填报工时低于 / 超过
+    /// <see cref="ExpectedHours"/> 的天数。
+    ///
+    /// ⚠️ **比对基数是「当天应填工时」而非固定 8h**：当天有请假（半天调休等）时，
+    /// 应填工时 = 8h − 请假时长。曾按固定 8h 比对，把「调休半天只填 4h」误报成少报（真实事故）。
     /// </summary>
     public static IReadOnlyList<InsightItem> AnalyzeMonthHours(
         IEnumerable<DayStatusItem> dayStatus, DateTime today)
@@ -216,39 +220,58 @@ public static class InsightAnalyzer
         var results = new List<InsightItem>();
 
         var shortDays = filled
-            .Where(i => i.WorkHours < StandardDailyHours - HoursTolerance)
+            .Where(i => i.WorkHours < ExpectedHours(i) - HoursTolerance)
             .ToList();
         if (shortDays.Count > 0)
         {
-            var gap = shortDays.Sum(i => StandardDailyHours - i.WorkHours);
+            var gap = shortDays.Sum(i => ExpectedHours(i) - i.WorkHours);
             results.Add(new InsightItem
             {
                 Kind = KindMonthHoursShort,
                 Severity = InsightSeverity.Warning,
-                Title = $"本月 {shortDays.Count} 天填报不足 8h，合计少报 {gap:0.#}h",
-                Detail = "调休余额按填报工时计算，少报会让余额偏低；若属实可忽略。",
+                Title = $"本月 {shortDays.Count} 天填报不足，合计少报 {gap:0.#}h",
+                Detail = $"涉及 {FormatDates(shortDays)}。" +
+                         "当天若有请假请补记请假记录（调休余额据此扣减），否则请补报工时。",
                 ActionText = "查看出勤",
                 ActionTarget = ViewNames.Attendance
             });
         }
 
         var overDays = filled
-            .Where(i => i.WorkHours > StandardDailyHours + HoursTolerance)
+            .Where(i => i.WorkHours > ExpectedHours(i) + HoursTolerance)
             .ToList();
         if (overDays.Count > 0)
         {
-            var extra = overDays.Sum(i => i.WorkHours - StandardDailyHours);
+            var extra = overDays.Sum(i => i.WorkHours - ExpectedHours(i));
             results.Add(new InsightItem
             {
                 Kind = KindMonthHoursOver,
                 Severity = InsightSeverity.Info,
-                Title = $"本月 {overDays.Count} 天填报超过 8h，合计多出 {extra:0.#}h",
-                Detail = "若现场有每日 8h 填报上限，超填部分可能需调整。",
+                Title = $"本月 {overDays.Count} 天填报超过应填工时，合计多出 {extra:0.#}h",
+                Detail = $"涉及 {FormatDates(overDays)}。" +
+                         "若现场有每日 8h 填报上限，超填部分可能需调整。",
                 ActionText = "查看出勤",
                 ActionTarget = ViewNames.Attendance
             });
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// 当天应填工时 = 标准 8h − 当天请假时长（下限 0）。
+    /// 请半天假 → 4h：这是**正常**填报值，不得判为少报。
+    /// </summary>
+    public static double ExpectedHours(DayStatusItem day)
+        => Math.Max(0, StandardDailyHours - day.LeaveHours);
+
+    /// <summary>把涉及日期格式化为「10-10、10-13」；超过 5 天截断为「10-10、… 等 7 天」。</summary>
+    private static string FormatDates(IReadOnlyList<DayStatusItem> days)
+    {
+        const int maxShown = 5;
+        var dates = days.OrderBy(d => d.Date).Select(d => d.Date.ToString("MM-dd")).ToList();
+        return dates.Count <= maxShown
+            ? string.Join("、", dates)
+            : string.Join("、", dates.Take(maxShown)) + $" 等 {dates.Count} 天";
     }
 }
