@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-16 16:30（会话交接用）
-> 本轮主题：**P2 ⑩ 命令面板静态源 + 首启引导（全局搜索扩展到页面/操作入口；4 步引导浮层 + 设置页重放）**
-> 当前状态：**测试 203/203 全绿 · 工作区干净 · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
-> 下一步：**P2 ⑪ 观感打磨**（⑪ → P3 队列）
+> 生成时间：2026-10-26 11:20（会话交接用）
+> 本轮主题：**P2 ⑪ 观感打磨（StatCard count-up + 仪表盘骨架屏 + EmptyState 插画修复增强 + 侧边栏 Logo 矢量化）**
+> 当前状态：**测试 203/203 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
+> 下一步：**P3 队列**（⑪ 是 P2 最后一项；§5.3 四项待拍板仍有效）
 
 ---
 
@@ -44,6 +44,7 @@
 | `f3357d3` | **fix: 洞察③去归因**——只陈述事实并并列两条处置路径，操作改按日期定位到当天 | 代码 |
 | `2601033` | docs: AGENTS.md §8.25 增「归因红线」与按日期跳转约定，handoff 同步 190 基线 | 文档 |
 | `7b9f9de` | **feat: 命令面板静态源 + 首启引导（P2 ⑩）**——页面/操作入口进全局搜索并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放（10 文件 +518 行） | 代码 |
+| `0aa066d` | docs: AGENTS.md 增补 8.26 命令面板/首启引导规范，handoff 标记 P2 ⑩ 完成 | 文档 |
 
 > ⚠️ **推送状态**：以上**均未 push**（含 `7b9f9de`；更早的 ⑨ 批次笔数说明见上一版）。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口请以 `git log --oneline origin/master..HEAD` 为准。
 
@@ -305,7 +306,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | ⑨ | **主动异常洞察** | ✅ `fe17547` `ad06545`；纯静态 `InsightAnalyzer` + 仪表盘「需要留意」卡，规范见 AGENTS.md §8.25 |
 | ⑨′ | **洞察规则③两轮修正** | ✅ `6715b01` `f4f7b2a` `f3357d3` `2601033`；① 应填工时 = 8h − 当天请假时长；② 去归因 + 按日期跳转 |
 | ⑩ | **首启引导 + 搜索扩展** | ✅ `7b9f9de`；`CommandPaletteProvider` 静态源（7 页面 + 新增记录操作）进命令面板并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放，规范见 AGENTS.md §8.26 |
-| ⑪ | **观感打磨** | ⏳ 待办；空状态插画 + 列表骨架屏；StatCard 数值 count-up 动画；侧边栏 Logo 换矢量图标 |
+| ⑪ | **观感打磨** | ✅ 已完成；count-up + 仪表盘骨架屏 + EmptyState 插画（含**修复插画从未渲染的既有 bug**）+ 三页搜索空态统一 + Logo 矢量化（AGENTS §8.27） |
 
 ### 5.3 未决 / 需用户拍板
 
@@ -323,7 +324,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.26 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用（`eap_dotnet_run.py` 缺失则先重建，见 §4.1）。
 3. 跑一次全量测试确认基线（当前 **203/203**）。
-4. 从 **P2 队列**（⑧ 多选批量、⑨ 主动异常洞察、⑩ 静态源+首启引导 **均已完成**，接下来 **⑪ 观感打磨**）开始；或按用户当次指令。
+4. 从 **P3 队列**开始（P2 ⑧⑨⑩⑪ **均已完成**，规范见 AGENTS §8.24~8.27）；或按用户当次指令；§5.3 四项待拍板仍有效。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。
 7. 本轮验证产物（`outputs/`，未入库）：`batch-select-knowledge.png`（⑧）、`insight-review-dashboard.png` + `insight-review-workrecord.png`（⑨′）、`attendance-heatmap-*.png`（⑦）、`onboarding-open.png` + `search-palette-*.png` + `search-enter-recycle.png`（⑩）。

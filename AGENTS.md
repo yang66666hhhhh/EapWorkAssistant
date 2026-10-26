@@ -792,6 +792,15 @@ if (DataContext is KnowledgeViewModel vm)
 - ⚠️ **UIA 验证的两个假阴性陷阱**（本轮实测）：① 引导关闭后标题 Text **仍留在 UIA 树**（`Opacity=0` 不产生 `IsOffscreen`），用文本存在性断言「已关闭」会误判——必须**截图看像素**或改断言交互恢复（如关闭后侧边栏 RadioButton 可选中）；② `FindFirst(ControlType=Edit)` 在**设置页**会命中 AI 配置输入框而非侧边栏搜索框——按 `AutomationId='MainSearchBox'` 定位最稳。
 - **验证**：`EapWorkAssistant.Tests/CommandPaletteProviderTests.cs`（11 条：空白关键词 / 标题命中 / 别名 / 副标题参与 / 大小写 / 多关键词全命中否则落空 / 全角空格 / 操作项标记 / 七页面齐全且导航键唯一 / 一关键词多命中）；`ConfigSerializationTests` 补 2 条（默认未完成、完成后往返）。测试基线 190 → **203**。UI 实证（`outputs/`）：`onboarding-open.png`（第 1 步卡片：徽章 / 标题 / 步骤 / 进度点 / 三按钮）、`search-palette-settings.png`（「设置」页面项置顶 + 摘要 `功能 1`）、`search-palette-recycle.png`、`search-palette-attendance.png`、`search-enter-recycle.png`（Enter 打开高亮静态项 → 落到回收站页）；全流程无新 `error_*.log`。
 
+### 8.27 观感打磨：count-up / 骨架屏 / 插画 / Logo（P2 ⑪，2026-10-26 新增）
+
+- **StatCard 数值滚动（count-up）**：`Value`（string）仍是唯一数据源；控件内部经 `TryAnimateTo` 过渡到只读 `DisplayValue`，XAML 数值 TextBlock 绑 `DisplayValue`。规则：目标文本可解析为数字（CurrentCulture 优先、Invariant 兜底）→ `DoubleAnimation`（时长读 `DurationNormal` 令牌 + CubicEase EaseOut，`FillBehavior.Stop`）；非数字（「—」/ 空）直接透传。小数位数由目标文本推断（`"12.5"` → F1）。⚠️ **内部驱动属性 `AnimValue` 必须注册为非 nullable `double`**——WPF 动画不支持 `Nullable<T>` 属性，`double?` 会在运行时逐卡报「不可动画」Toast（编译期零提示）。续滚：`_isAnimating` 标志（Completed 置 false）决定起点取当前插值还是上一次目标值；首载从 0 滚起。⚠️ 透传分支不要记 `_currentNumeric`（否则 Loaded 前绑定已推送初值时，首载滚动会被吞掉）。
+- **骨架屏**：样式级方案（不新增控件）——`Styles.xaml` 的 `SkeletonBar`（Height=12 / RadiusXs / SurfaceHoverBrush，`EventTrigger Loaded` 起呼吸动画 0.45↔1）+ `SkeletonCard`（模拟统计卡容器）。接入点**只在仪表盘统计卡行**（首屏最重的页面）：`DashboardViewModel.IsDashboardLoading`（`LoadDashboardAsync` 开头置 true / finally 置 false，**兼作加载防重守卫**），骨架 Grid 与卡片 Grid 按 `BoolToVisibilityConverter`（+`ConverterParameter=Inverse`）互斥切换，**两者同构 4 列**避免加载完成时布局跳动。列表页（本地 SQLite 毫秒级）**刻意不做**骨架屏——会一闪而过徒增复杂度。
+- **EmptyState 插画**：装饰层 = 外扩淡圆环（Ellipse 94px 溢出 72px 容器形成光环，`Opacity=0.12` 描边）+ 右上小圆点（`Opacity=0.3`），均绑 `InverseBoolToVisibilityConverter`（紧凑态隐藏）。⚠️ **修复既有 bug**：插画容器的可见性原来绑 `StringToVisibilityConverter`——`IconPathData` 是 **Geometry**，`value as string` 恒 null → **插画从未渲染过**。可见性判定改 `DataTrigger Binding={IconPathData} Value={x:Null}` → Collapsed。凡「非 string 类型的存在性判定」禁止复用 String 转换器。
+- **搜索无结果空态统一**：三列表页（Knowledge / Issue / WorkRecord）的「未找到与 xxx 相关…」裸 StackPanel 全部替换为 `controls:EmptyState`（IconSearch + 固定文案「未找到相关结果」）——关键词动态回显舍弃（搜索框内本就可见），插画装饰随之上效果。
+- **侧边栏 Logo 矢量化**：展开 / 折叠两处渐变圆角方块内的「EAP」文字替换为矢量图形（两道接入弧 + 底部节点，隐喻设备接入；Path Stroke=White 圆帽）。**窗口 `Icon`（app.ico）不变**——那是任务栏 / 标题栏资源位，与侧边栏品牌区是两回事。
+- **验证**：测试基线 203 无回归（count-up 为纯控件内行为，无可单测纯函数）；冒烟 9s 零新 error log；截图实证 `outputs/p11-final.png`（Logo 矢量 + 统计卡数值终态 + **修复前 Toast 错误**）、`p11-empty-state.png`（插画底色 / 圆点 / 统一文案）。
+
 ---
 
 ## 9. AI 行为约束红线
