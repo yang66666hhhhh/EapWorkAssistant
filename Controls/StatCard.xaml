@@ -48,7 +48,8 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        <TextBlock Text="{Binding Value, ElementName=Self}" FontWeight="Bold"
+                        <!-- 数值滚动（P2 ⑪）：绑 DisplayValue（动画插值），Value 为数据源经 code-behind 过渡 -->
+                        <TextBlock Text="{Binding DisplayValue, ElementName=Self, Mode=OneWay}" FontWeight="Bold"
                                    Foreground="{Binding BarBrush, ElementName=Self}"
                                    Typography.NumeralAlignment="Tabular">
                             <TextBlock.Style>

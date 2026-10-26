@@ -1690,6 +1690,35 @@
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
 
+    <!-- ===== 骨架条（P2 ⑪）：加载中占位，加载完成后由 Visible/Hidden 切换；Loaded 起呼吸动画 ===== -->
+    <!-- 用法：<Border Style="{StaticResource SkeletonBar}" Width="64"/>；高度/圆角内置，宽度按需覆盖 -->
+    <Style x:Key="SkeletonBar" TargetType="Border">
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusXs}"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Border.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0.45" To="1"
+                                         Duration="{StaticResource DurationSlow}"
+                                         AutoReverse="True" RepeatBehavior="Forever"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 骨架卡片容器：模拟统计卡结构（标题条 + 数值条 + 图标块），配合 SkeletonBar 使用 -->
+    <Style x:Key="SkeletonCard" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}"/>
+        <Setter Property="Padding" Value="18,14"/>
+    </Style>
+
     <!-- 右侧滑入表单面板 -->
     <Style x:Key="SidePanel" TargetType="Border">
         <Setter Property="HorizontalAlignment" Value="Right"/>

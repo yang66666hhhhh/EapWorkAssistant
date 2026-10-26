@@ -110,9 +110,17 @@
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.25"/>
                         </Border.Effect>
-                        <TextBlock Text="EAP" FontSize="13" FontWeight="Bold" Foreground="White"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   FontFamily="{StaticResource MonoFont}"/>
+                        <!-- Logo 矢量（P2 ⑪）：两道接入弧 + 底部节点，隐喻设备接入 EAP -->
+                        <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Stroke="White" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Data="M7.2,12.8 A6.8,6.8 0 0 1 16.8,12.8"/>
+                            <Path Stroke="White" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Data="M9.8,15.6 A3.1,3.1 0 0 1 14.2,15.6"/>
+                            <Ellipse Width="4" Height="4" Fill="White"
+                                     HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,3.4"/>
+                        </Grid>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,8,0">
                         <TextBlock Text="EAP Work" FontSize="17" FontWeight="Bold"
@@ -135,9 +143,17 @@
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.25"/>
                         </Border.Effect>
-                        <TextBlock Text="EAP" FontSize="13" FontWeight="Bold" Foreground="White"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   FontFamily="{StaticResource MonoFont}"/>
+                        <!-- Logo 矢量（P2 ⑪）：与展开态同款 -->
+                        <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Stroke="White" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Data="M7.2,12.8 A6.8,6.8 0 0 1 16.8,12.8"/>
+                            <Path Stroke="White" StrokeThickness="2.2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Data="M9.8,15.6 A3.1,3.1 0 0 1 14.2,15.6"/>
+                            <Ellipse Width="4" Height="4" Fill="White"
+                                     HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,3.4"/>
+                        </Grid>
                     </Border>
                     <Button Style="{StaticResource SidebarToggleButton}"
                             Click="SidebarToggle_Click" HorizontalAlignment="Center" Margin="0,14,0,0"/>

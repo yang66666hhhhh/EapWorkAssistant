@@ -19,15 +19,20 @@
         </StackPanel.Style>
 
         <!-- 插画容器：默认 IllustrationSize，紧凑态缩小到 32px -->
+        <!-- 装饰层（P2 ⑪）：底部淡圆环 + 右上小圆点，增加插画层次；紧凑态隐藏保持克制 -->
+        <!-- ⚠️ 可见性不能走 StringToVisibilityConverter（IconPathData 是 Geometry，as string 恒 null → 永远 Collapsed），
+             改用 DataTrigger 判 {x:Null}（修复既有 bug：此前插画从未显示过） -->
         <Border Background="{DynamicResource PrimarySoftBrush}"
-                HorizontalAlignment="Center"
-                Visibility="{Binding IconPathData, ElementName=Self, Converter={x:Static local:StringToVisibilityConverter.Instance}}">
+                HorizontalAlignment="Center">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Width" Value="{DynamicResource IllustrationSize}"/>
                     <Setter Property="Height" Value="{DynamicResource IllustrationSize}"/>
                     <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}"/>
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding IconPathData, ElementName=Self}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
                             <Setter Property="Width" Value="32"/>
                             <Setter Property="Height" Value="32"/>
@@ -36,22 +41,33 @@
                     </Style.Triggers>
                 </Style>
             </Border.Style>
-            <Path Data="{Binding IconPathData, ElementName=Self}"
-                  Fill="{DynamicResource PrimaryBrush}"
-                  Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Path.Style>
-                    <Style TargetType="Path">
-                        <Setter Property="Width" Value="34"/>
-                        <Setter Property="Height" Value="34"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
-                                <Setter Property="Width" Value="18"/>
-                                <Setter Property="Height" Value="18"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Path.Style>
-            </Path>
+            <Grid>
+                <!-- 装饰：外扩淡圆环（溢出容器形成光环，紧凑态隐藏） -->
+                <Ellipse Width="94" Height="94" Stroke="{DynamicResource PrimaryBrush}" StrokeThickness="1.5"
+                         Opacity="0.12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Visibility="{Binding IsCompact, ElementName=Self, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"/>
+                <!-- 装饰：右上小圆点 -->
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource PrimaryBrush}" Opacity="0.3"
+                         HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0"
+                         Visibility="{Binding IsCompact, ElementName=Self, Converter={x:Static local:InverseBoolToVisibilityConverter.Instance}}"/>
+
+                <Path Data="{Binding IconPathData, ElementName=Self}"
+                      Fill="{DynamicResource PrimaryBrush}"
+                      Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Width" Value="34"/>
+                            <Setter Property="Height" Value="34"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCompact, ElementName=Self}" Value="True">
+                                    <Setter Property="Width" Value="18"/>
+                                    <Setter Property="Height" Value="18"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+            </Grid>
         </Border>
 
         <TextBlock Text="{Binding Title, ElementName=Self}"

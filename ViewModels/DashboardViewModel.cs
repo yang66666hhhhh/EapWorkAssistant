@@ -75,6 +75,9 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
     [ObservableProperty] private int _totalIssues;
     [ObservableProperty] private int _totalKnowledge;
 
+    /// <summary>仪表盘加载中（P2 ⑪ 骨架屏开关 + 加载防重守卫）。</summary>
+    [ObservableProperty] private bool _isDashboardLoading;
+
     // 统计卡片环比趋势（涨红跌绿，遵循中国习惯；TrendText 为空表示不显示胶囊）
     [ObservableProperty] private string _todayTrendText = string.Empty;
     [ObservableProperty] private bool _todayTrendUp = true;
@@ -201,6 +204,20 @@ public partial class DashboardViewModel : ObservableObject, IRefreshable
 
     [RelayCommand]
     public async Task LoadDashboardAsync()
+    {
+        if (IsDashboardLoading) return; // 防重：加载未完成时忽略重复触发
+        IsDashboardLoading = true;
+        try
+        {
+            await LoadDashboardCoreAsync();
+        }
+        finally
+        {
+            IsDashboardLoading = false;
+        }
+    }
+
+    private async Task LoadDashboardCoreAsync()
     {
         CurrentDate = DateTime.Now.ToString("yyyy-MM-dd dddd");
         OnPropertyChanged(nameof(IsProbation));

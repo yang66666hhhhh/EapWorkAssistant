@@ -56,9 +56,52 @@
                 </Grid>
             </Border>
 
-            <!-- ===== 统计卡片行 ===== -->
+            <!-- ===== 统计卡片行（加载中显示骨架，P2 ⑪）===== -->
             <Grid Margin="0,0,0,14"
                   Visibility="{Binding ShowDashStats, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                <!-- 骨架态：结构与卡片行同构（4 列），避免加载完成时布局跳动 -->
+                <Grid Visibility="{Binding IsDashboardLoading, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{StaticResource SkeletonCard}">
+                        <StackPanel>
+                            <Border Style="{StaticResource SkeletonBar}" Width="52" Height="11"/>
+                            <Border Style="{StaticResource SkeletonBar}" Width="84" Height="24" Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource SkeletonCard}">
+                        <StackPanel>
+                            <Border Style="{StaticResource SkeletonBar}" Width="64" Height="11"/>
+                            <Border Style="{StaticResource SkeletonBar}" Width="76" Height="24" Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="4" Style="{StaticResource SkeletonCard}">
+                        <StackPanel>
+                            <Border Style="{StaticResource SkeletonBar}" Width="64" Height="11"/>
+                            <Border Style="{StaticResource SkeletonBar}" Width="90" Height="24" Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="6" Style="{StaticResource SkeletonCard}">
+                        <StackPanel>
+                            <Border Style="{StaticResource SkeletonBar}" Width="46" Height="11"/>
+                            <Border Style="{StaticResource SkeletonBar}" Width="58" Height="24" Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 内容态：加载完成（或该区域非加载场景）时显示 -->
+                <Grid Visibility="{Binding IsDashboardLoading, Converter={x:Static local:BoolToVisibilityConverter.Instance}, ConverterParameter=Inverse}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
@@ -108,6 +151,7 @@
                                 TrendText="{Binding RecordsTrendText}"
                                 TrendUp="{Binding RecordsTrendUp}"
                                 Cursor="Hand" Click="StatCard_Records_Click"/>
+                </Grid>
             </Grid>
 
             <!-- ===== 今日提醒 ===== -->
