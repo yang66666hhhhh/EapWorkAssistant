@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-27 11:45（会话交接用）
-> 本轮主题：**P3 #8 Helper 目录归类（`DataGridCopyHelper` 拆分为 `Helpers/Copy/` 5 文件）+ §5.3-a 草稿损坏加固（先备份再清理）**
-> 当前状态：**测试 206/206 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
-> 下一步：**P2/P3 队列已清空**；§5.3 剩 b 备份清理 / c 10-10 调休补记 / e 表格复制接线，均待用户拍板
+> 生成时间：2026-10-27 11:50（会话交接用）
+> 本轮主题：**设置页「数据管理」区块（本地数据位置可视 + 打开文件夹 + 立即备份）；§5.3-b 备份清理收官**
+> 当前状态：**测试 220/220 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
+> 下一步：**P2/P3 队列已清空**；§5.3 剩 c 10-10 调休补记 / e 表格复制接线，待用户拍板
 
 ---
 
@@ -19,7 +19,7 @@
 | 仓库 | `C:\Users\Yang\Documents\EapWorkAssistant`（git，**仅本地 commit，不 push**） |
 | 应用数据 | `%LOCALAPPDATA%\EapWorkAssistant\`（`config.json` / `eapwork.db` / `drafts.json` / `logs\error_YYYYMMDD.log`） |
 | 验证产物 | `C:\Users\Yang\Documents\EapWorkAssistant\outputs\`（**已在 `.gitignore`**，截图/报告不污染仓库） |
-| 测试基线 | **206 / 206**（`.sln` 不含测试项目，须显式指定测试 csproj） |
+| 测试基线 | **220 / 220**（`.sln` 不含测试项目，须显式指定测试 csproj） |
 
 ---
 
@@ -48,6 +48,24 @@
 | `b75aacb` | **feat: 观感打磨（P2 ⑪）**——StatCard count-up / 仪表盘骨架屏 / EmptyState 插画（修复从未渲染的既有 bug）/ 三页搜索空态统一 / Logo 矢量 | 代码 |
 | `63691ac` | docs: AGENTS.md 增补 8.27 观感打磨规范，handoff 标记 P2 ⑪ 完成 | 文档 |
 | `a5937f1` | **refactor: 拆分 DataGridCopyHelper 为 Helpers/Copy/ 五文件（P3 #8）**——抽出 CopyVisuals 共享层解除两个附加属性耦合，零行为变更 | 代码 |
+| `d6a911b` | docs: AGENTS.md 增补 8.28 Helper 目录归类规范，handoff 标记 P3 队列完成 | 文档 |
+| `92480c4` | **fix: 草稿损坏先备份再清理，不再静默丢数据（§5.3-a）**——顶层/单条损坏均先落 `.corrupt-<ts>.bak`，保留最近 10 个 | 代码 |
+| `9899096` | docs: AGENTS.md 增补 8.29 草稿损坏备份规范，handoff 关闭 §5.3-a 并同步 206 基线 | 文档 |
+| `ffd48f9` | docs: handoff 关闭 §5.3-b 备份清理（117 MB → 1.8 MB，10 个文件进回收站） | 文档 |
+| `84b6d54` | **feat: 设置页「数据管理」区块**——`LocalDataService` 统一数据路径 + 数据库大小/备份摘要 + 打开目录 + 立即备份；`DatabaseBackupService` 路径改为引用同一来源（10 文件 +458 行） | 功能 |
+
+### 1.1.1 本轮新增功能：设置页「数据管理」（`84b6d54`）
+
+用户反馈「看不到数据库在本地哪里」→ 设置页末尾新增 Expander，数据源统一为 `Services/LocalDataService.cs`：
+
+| 展示项 | 来源 | 实测值（UI 验证） |
+|---|---|---|
+| 数据存放位置 | `LocalDataService.DataDirectory` | `C:\Users\Yang\AppData\Local\EapWorkAssistant` |
+| 数据库文件/大小/修改时间 | `GetSnapshot(DatabasePath)` | `eapwork.db` · `168 KB` · `最后修改 2026-10-16 10:05` |
+| 本地备份份数/最近时间 | `GetBackupSummary()` | `6 份 · 最近 10-27 11:16`（点「立即备份」后 → `7 份`，Toast 报出完整文件名） |
+
+三个动作：打开数据目录、打开备份目录、立即备份（另存 `eapwork_manual_yyyyMMdd_HHmmss_fff.db`）。复制路径在 code-behind（VM 不碰 `System.Windows`）。
+规范见 **AGENTS.md §8.30**；测试 206 → **220**（`LocalDataServiceTests` 14 条）。
 
 > ⚠️ **推送状态**：以上**均未 push**（含 `7b9f9de`；更早的 ⑨ 批次笔数说明见上一版）。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口请以 `git log --oneline origin/master..HEAD` 为准。
 
@@ -255,8 +273,8 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
   dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -v:minimal
 ```
 
-- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）**→ 203**（P2 ⑩ 静态源 11 + 引导配置 2）**→ 206**（§5.3-a 草稿损坏备份 3）。
-- 当前 **206 / 206 全绿**。
+- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）**→ 203**（P2 ⑩ 静态源 11 + 引导配置 2）**→ 206**（§5.3-a 草稿损坏备份 3）**→ 220**（数据管理 LocalDataService 14）。
+- 当前 **220 / 220 全绿**。
 
 ### 4.3 可复用脚本（`%TEMP%`）
 
@@ -340,7 +358,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.26 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用（`eap_dotnet_run.py` 缺失则先重建，见 §4.1）。
-3. 跑一次全量测试确认基线（当前 **206/206**）。
+3. 跑一次全量测试确认基线（当前 **220/220**）。
 4. **P2 / P3 队列均已全部完成**（规范见 AGENTS §8.24~8.28）→ 当前无既定队列，优先处理 §5.3 待拍板项（a 草稿加固 / c 10-10 调休补记 / e 表格复制接线），或按用户当次指令开新功能。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。

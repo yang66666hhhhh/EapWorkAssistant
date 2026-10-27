@@ -837,6 +837,33 @@ if (DataContext is KnowledgeViewModel vm)
 
 ---
 
+### 8.30 数据管理：本地数据位置与手动备份（2026-10-27 新增）
+
+设置页末尾「数据管理」Expander 的唯一数据来源是 `Services/LocalDataService.cs`（纯静态，只读查询 + 两个动作）。
+
+**路径单一事实来源**
+- `LocalDataService` 暴露 `DataDirectory` / `DatabasePath` / `BackupDirectory` / `LogDirectory`（均 `Path.Combine(..., "EapWorkAssistant")`）。
+- ⚠️ **`DatabaseBackupService` 的 `DbPath` / `BackupDir` 改为引用 `LocalDataService`，不得各拼一份**——两处独立拼接时一旦有人只改一处，设置页显示的位置与实际备份位置就会静默分叉。
+- ⚠️ 日志在 `DataDirectory\logs\` **子目录**，别在根目录找（清理脚本踩过：6 个日志全部 SKIP）。
+
+**职责边界**
+- 只读查询 + 打开资源管理器 + 手动备份，**不做任何删除**。清理属用户自己的决定，程序不代替。
+- `GetSnapshot` 对不存在文件返回 **null**（而不是 0 字节快照）→ 界面显示「未创建」，避免被误读成「空数据库」。同理 `GetBackupSummary` 目录不存在 = 0 份，不是错误。
+- `OpenFolder` 目录不存在直接返回 false，**不代为创建**（创建空目录只会让用户更困惑）；`BackupNow` 成功后自己建 backups 目录。
+
+**手动备份命名**
+- `eapwork_manual_yyyyMMdd_HHmmss_fff.db`——带**毫秒**，同日连点两次不会互相覆盖；仍以 `eapwork_` 开头，因此同样受 30 天保留策略（`CleanupOldBackups`）约束。
+- 备份是同步 IO（WAL checkpoint + `BackupDatabase`），本地库百 KB 级，直接在主线程完成，完成后立刻刷新摘要。
+
+**界面约定**
+- 路径用只读展示 + 「复制路径」按钮，**剪贴板写入放 code-behind**（`Clipboard` 属 `System.Windows`，VM 禁碰），且必须 try/catch——剪贴板被其他程序占用时 `SetText` 会抛。
+- 「刷新」「立即备份」「打开备份目录」走 VM 命令；`[RelayCommand] private void RefreshDataInfo()` 生成 `RefreshDataInfoCommand`（⚠️ 方法名别再带 `Command` 后缀，否则生成 `RefreshDataInfoCommandCommand`）。
+- 数据区信息在 `SettingsViewModel.RefreshAsync()` 末尾刷新，进页面即最新。
+
+**验证**：`LocalDataServiceTests` 206 → **220**（FormatSize 8 组边界含 1023B/1KB/1.5KB/168KB、负数返回「—」、快照大小与 mtime、文件不存在返回 null、四个路径常量父子关系、备份与日志目录互不嵌套、打开不存在目录返回 false）。UI 实证（UIA 读文本）：路径 `C:\Users\Yang\AppData\Local\EapWorkAssistant`、`eapwork.db` `168 KB` `最后修改 2026-10-16 10:05`、点击「立即备份」后份数 `6 份 → 7 份 · 最近 10-27 11:42` 并弹「已备份到 backups\eapwork_manual_...db」，全程无新 `error_*.log`。
+
+---
+
 ## 9. AI 行为约束红线
 
 > 本节是 AI 生成 / 修改代码的硬性规则，与前面各节冲突时以本节为准。本节整合了原「AI 操作红线（20 条）」与「EAP 适配版 10 条」，去重并核对真实代码库。前面各节已详述的技术细节，此处仅列规则并交叉引用，避免重复。
