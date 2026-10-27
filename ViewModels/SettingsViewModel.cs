@@ -257,6 +257,9 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         AiTimeoutSeconds = aiSettings.TimeoutSeconds;
         _isSavingAiSettings = false;
 
+        // 数据管理：路径 / 数据库大小 / 备份份数（只读查询，进页面即刷新）
+        RefreshDataInfo();
+
         return Task.CompletedTask;
     }
 
@@ -738,6 +741,83 @@ public partial class SettingsViewModel : ObservableObject, IRefreshable
         ShowDashInsights = true;
         StatusMessage = "Dashboard 布局已重置为默认";
         ToastService.Success("Dashboard 布局已重置为默认");
+    }
+
+    // ===== 数据管理（本地数据位置 / 备份）=====
+
+    /// <summary>数据根目录（完整路径，供展示与复制）。</summary>
+    [ObservableProperty] private string _dataDirectoryPath = LocalDataService.DataDirectory;
+
+    /// <summary>数据库文件名（不含目录，便于大写标题下小字展示）。</summary>
+    [ObservableProperty] private string _databaseFileName = "eapwork.db";
+
+    /// <summary>数据库大小，如「168 KB」；文件未创建时为「未创建」。</summary>
+    [ObservableProperty] private string _databaseSizeText = "—";
+
+    /// <summary>数据库最后修改时间；未创建时为空。</summary>
+    [ObservableProperty] private string _databaseUpdatedText = string.Empty;
+
+    /// <summary>备份摘要，如「7 份 · 最近 10-27 11:16」。</summary>
+    [ObservableProperty] private string _backupSummaryText = "暂无备份";
+
+    /// <summary>数据库文件是否存在（false 时隐藏大小/时间行，只提示未创建）。</summary>
+    [ObservableProperty] private bool _hasDatabase;
+
+    /// <summary>
+    /// 刷新数据区信息。只读查询，任何异常都在服务内吞掉并记日志，不打断设置页加载。
+    /// 同时对外暴露为命令（「刷新」按钮）。
+    /// </summary>
+    [RelayCommand]
+    private void RefreshDataInfo()
+    {
+        DataDirectoryPath = LocalDataService.DataDirectory;
+        DatabaseFileName = System.IO.Path.GetFileName(LocalDataService.DatabasePath);
+
+        var db = LocalDataService.GetSnapshot(LocalDataService.DatabasePath);
+        HasDatabase = db != null;
+        DatabaseSizeText = db == null ? "未创建" : LocalDataService.FormatSize(db.SizeBytes);
+        DatabaseUpdatedText = db == null ? string.Empty : $"最后修改 {db.LastWriteTime:yyyy-MM-dd HH:mm}";
+
+        var backups = LocalDataService.GetBackupSummary();
+        BackupSummaryText = backups.Count == 0
+            ? "暂无备份"
+            : $"{backups.Count} 份 · 最近 {backups.Latest:MM-dd HH:mm}";
+    }
+
+    [RelayCommand]
+    private void OpenDataFolder()
+    {
+        if (LocalDataService.OpenFolder(LocalDataService.DataDirectory))
+            ToastService.Info("已在资源管理器中打开数据目录");
+        else
+            ToastService.Warning("数据目录不存在，可能尚未产生任何数据");
+    }
+
+    [RelayCommand]
+    private void OpenBackupFolder()
+    {
+        if (LocalDataService.OpenFolder(LocalDataService.BackupDirectory))
+            ToastService.Info("已打开备份目录");
+        else
+            ToastService.Warning("备份目录还不存在，可先点「立即备份」");
+    }
+
+    /// <summary>
+    /// 立即备份。备份是同步 IO（SQLite backup API），本地库仅百 KB 级，直接在主线程完成；
+    /// 完成后刷新摘要，让用户立刻看到份数变化。
+    /// </summary>
+    [RelayCommand]
+    private void BackupNow()
+    {
+        var file = DatabaseBackupService.BackupNow();
+        if (file == null)
+        {
+            ToastService.Error("备份失败，请稍后重试");
+            return;
+        }
+
+        RefreshDataInfo();
+        ToastService.Success($"已备份到 backups\\{System.IO.Path.GetFileName(file)}", "数据安全");
     }
 }
 

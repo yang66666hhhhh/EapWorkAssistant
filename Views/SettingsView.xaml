@@ -1198,6 +1198,103 @@
                 </Grid>
             </Expander>
 
+            <!-- ===== 数据管理（本地数据位置 / 备份）===== -->
+            <Expander Style="{StaticResource SectionExpander}" IsExpanded="True" Margin="{DynamicResource DensitySectionMargin}">
+                <Expander.Header>
+                    <Grid Margin="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconFolder}" Fill="{DynamicResource TextPrimaryBrush}"
+                                      Width="{DynamicResource IconSizeMd}" Height="{DynamicResource IconSizeMd}"
+                                      Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="数据管理" Style="{StaticResource Heading3}"/>
+                            </StackPanel>
+                            <TextBlock Text="数据只存在本机，可随时打开文件夹或手动备份" FontSize="12"
+                                       Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="刷新" Style="{StaticResource BtnGhost}"
+                                Padding="12,6" FontSize="12" VerticalAlignment="Center"
+                                Command="{Binding RefreshDataInfoCommand}"/>
+                    </Grid>
+                </Expander.Header>
+                <StackPanel>
+                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12" Opacity="0.5"/>
+
+                    <!-- 存放位置：完整路径 + 打开/复制 -->
+                    <TextBlock Text="数据存放位置" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Text="配置文件、数据库和日志都在这个文件夹，不联网、不上传。"
+                               FontSize="12" Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,4,0,8"/>
+                    <Border Background="{DynamicResource SurfaceHoverBrush}" CornerRadius="{DynamicResource RadiusSm}"
+                            Padding="10,8">
+                        <TextBlock Text="{Binding DataDirectoryPath}" FontFamily="{StaticResource MonoFont}"
+                                   FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding DataDirectoryPath}"/>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="打开文件夹" Style="{StaticResource BtnSecondary}"
+                                Padding="14,7" FontSize="12"
+                                Command="{Binding OpenDataFolderCommand}"/>
+                        <Button Content="复制路径" Style="{StaticResource BtnGhost}"
+                                Padding="12,7" FontSize="12" Margin="8,0,0,0"
+                                Click="CopyDataPath_Click"/>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,14,0,10" Opacity="0.5"/>
+
+                    <!-- 数据库 / 备份 两行摘要 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="数据库" FontSize="12"
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   VerticalAlignment="Center" Margin="0,0,18,0"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DatabaseFileName}" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <TextBlock Text="{Binding DatabaseSizeText}" FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding DatabaseUpdatedText}" FontSize="11" Margin="10,0,0,0"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="本地备份" FontSize="12"
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   VerticalAlignment="Center" Margin="0,14,18,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BackupSummaryText}"
+                                   FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" Margin="0,14,0,0"/>
+                        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal"
+                                    VerticalAlignment="Center" Margin="12,14,0,0">
+                            <Button Content="立即备份" Style="{StaticResource BtnSecondary}"
+                                    Padding="14,7" FontSize="12"
+                                    Command="{Binding BackupNowCommand}"/>
+                            <Button Content="打开备份目录" Style="{StaticResource BtnGhost}"
+                                    Padding="12,7" FontSize="12" Margin="8,0,0,0"
+                                    Command="{Binding OpenBackupFolderCommand}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="备份按天自动创建，保留最近 30 天；「立即备份」会另存一份带时间戳的副本。"
+                               FontSize="11" FontStyle="Italic" Margin="0,12,0,0"
+                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                </StackPanel>
+            </Expander>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

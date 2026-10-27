@@ -339,4 +339,24 @@ public partial class SettingsView
             VM.EnableReminder = newVal;
         }
     }
+
+    /// <summary>
+    /// 复制数据目录路径。剪贴板属界面层职责（ViewModel 不引用 System.Windows），
+    /// 故走 code-behind；剪贴板被其他程序占用时 SetText 会抛，需兜住。
+    /// </summary>
+    private void CopyDataPath_Click(object sender, RoutedEventArgs e)
+    {
+        if (VM == null) return;
+
+        try
+        {
+            Clipboard.SetText(VM.DataDirectoryPath);
+            ToastService.Success("路径已复制到剪贴板");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Error("复制失败，剪贴板可能被其他程序占用");
+            Helpers.Logger.Error("复制数据目录路径失败", ex);
+        }
+    }
 }
