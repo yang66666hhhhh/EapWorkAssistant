@@ -1,5 +1,6 @@
 using EapWorkAssistant.Helpers;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace EapWorkAssistant.Services;
@@ -12,9 +13,14 @@ namespace EapWorkAssistant.Services;
 /// - 键：取实体类型名（Knowledge / Issue / WorkRecord），调用方无需维护字符串常量。
 /// - 只保存「新增」草稿；编辑态（Id &gt; 0）数据本就在库中，重开即可，不占草稿位。
 /// - 所有 IO 与反序列化失败都吞掉并写日志，草稿能力绝不能影响主流程。
+/// - 损坏内容**先备份再清理**（P3 §5.3-a）：顶层文件损坏 → 备份整个文件；
+///   单条草稿损坏 → 备份该条原始 JSON。备份失败也不阻断，退化为原来的「丢弃 + 记日志」。
 /// </summary>
 public sealed class DraftService
 {
+    /// <summary>损坏备份保留上限（按前缀计数），超出删除最旧的，避免长期运行堆积。</summary>
+    private const int MaxCorruptBackups = 10;
+
     private static readonly string DraftDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "EapWorkAssistant");
@@ -86,9 +92,14 @@ public sealed class DraftService
             }
             catch (Exception ex)
             {
-                Logger.Error($"草稿解析失败（{KeyOf<T>()}），已丢弃", ex);
+                // 先备份该条原始 JSON，再从内存移出——否则 Persist 会把它永久写没
+                var backup = BackupCorrupt(entry.Json, KeyOf<T>());
                 _entries.Remove(KeyOf<T>());
                 Persist();
+                Logger.Error(
+                    $"草稿解析失败（{KeyOf<T>()}），已移出"
+                    + (backup != null ? $"，原始内容备份至 {backup}" : "（备份失败，内容已丢失）"),
+                    ex);
                 return null;
             }
         }
@@ -119,6 +130,56 @@ public sealed class DraftService
 
     // ===== IO（调用方已持锁）=====
 
+    /// <summary>备份文件名前缀：与草稿文件同目录，便于按前缀计数与批量清理。</summary>
+    private string BackupPrefix => Path.GetFileNameWithoutExtension(_path) + ".corrupt-";
+
+    /// <summary>
+    /// 把损坏内容原样落盘备份，返回备份路径；任何失败返回 null 且**不抛**。
+    /// <paramref name="rawJson"/> 非空 → 备份这段字符串（单条草稿损坏）；
+    /// 为 null → 复制整个草稿文件（顶层文件损坏）。
+    /// </summary>
+    private string? BackupCorrupt(string? rawJson, string? entryKey = null)
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(_path);
+            if (string.IsNullOrEmpty(dir)) dir = ".";
+            Directory.CreateDirectory(dir);
+
+            var tag = string.IsNullOrEmpty(entryKey) ? "file" : entryKey;
+            // 带毫秒，避免同一秒内多次损坏互相覆盖
+            var target = Path.Combine(dir, $"{BackupPrefix}{DateTime.Now:yyyyMMdd_HHmmss_fff}.{tag}.bak");
+
+            if (rawJson != null)
+                File.WriteAllText(target, rawJson);
+            else if (File.Exists(_path))
+                File.Copy(_path, target, overwrite: true);
+            else
+                return null;
+
+            PruneCorruptBackups(dir);
+            return target;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("备份损坏草稿失败（不影响主流程）", ex);
+            return null;
+        }
+    }
+
+    /// <summary>只保留最近 <see cref="MaxCorruptBackups"/> 个损坏备份，删除更旧的。</summary>
+    private void PruneCorruptBackups(string dir)
+    {
+        try
+        {
+            var stale = Directory.GetFiles(dir, BackupPrefix + "*")
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .Skip(MaxCorruptBackups);
+            foreach (var file in stale) File.Delete(file);
+        }
+        catch { /* 清理失败无害，下次备份时再试 */ }
+    }
+
     private void Load()
     {
         try
@@ -130,9 +191,14 @@ public sealed class DraftService
         }
         catch (Exception ex)
         {
-            // 文件损坏不应阻断启动：重置为空并记录
+            // 文件损坏不应阻断启动：先备份坏文件（人工仍可抢救内容），再重置为空。
+            // ⚠️ 必须在任何 Persist 之前备份——后续 Save/Clear 会覆盖原文件。
+            var backup = BackupCorrupt(rawJson: null);
             _entries = new Dictionary<string, DraftEntry>();
-            Logger.Error("加载表单草稿失败，已重置", ex);
+            Logger.Error(
+                "加载表单草稿失败，已重置"
+                + (backup != null ? $"，坏文件已备份至 {backup}" : "（备份失败，原文件将在下次保存时被覆盖）"),
+                ex);
         }
     }
 

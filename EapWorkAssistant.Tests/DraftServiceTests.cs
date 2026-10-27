@@ -14,6 +14,12 @@ public class DraftServiceTests : IDisposable
     private readonly string _path;
     private readonly DraftService _draft;
 
+    /// <summary>草稿文件所在目录（测试隔离目录，%TEMP%）。</summary>
+    private string Dir => Path.GetDirectoryName(_path)!;
+
+    /// <summary>损坏备份前缀，与 DraftService.BackupPrefix 同构。</summary>
+    private string CorruptPrefix => Path.GetFileNameWithoutExtension(_path) + ".corrupt-";
+
     public DraftServiceTests()
     {
         _path = Path.Combine(Path.GetTempPath(), $"eap_draft_{Guid.NewGuid():N}.json");
@@ -23,6 +29,12 @@ public class DraftServiceTests : IDisposable
     public void Dispose()
     {
         try { if (File.Exists(_path)) File.Delete(_path); } catch { /* ignore */ }
+        try
+        {
+            foreach (var f in Directory.GetFiles(Dir, CorruptPrefix + "*"))
+                File.Delete(f);
+        }
+        catch { /* ignore */ }
     }
 
     [Fact]
@@ -123,6 +135,19 @@ public class DraftServiceTests : IDisposable
     }
 
     [Fact]
+    public void 顶层文件损坏_重置前备份坏文件()
+    {
+        const string broken = "{ 这不是合法 JSON";
+        File.WriteAllText(_path, broken);
+
+        _ = new DraftService(_path); // 触发 Load 失败分支
+
+        var backup = Assert.Single(Directory.GetFiles(Dir, CorruptPrefix + "*"));
+        Assert.Equal(broken, File.ReadAllText(backup));      // 原样保留，人工可抢救
+        Assert.Contains(".file.bak", backup);                // 顶层文件标记为 file
+    }
+
+    [Fact]
     public void 单条草稿内容损坏_读回为null并自动清理该键()
     {
         // 顶层合法、内层 JSON 非法：模拟手工改坏或版本更迭导致的脏条目
@@ -133,6 +158,42 @@ public class DraftServiceTests : IDisposable
         Assert.True(service.Has<Knowledge>());      // 条目仍在（尚未解析）
         Assert.Null(service.Get<Knowledge>());      // 解析失败 → 返回 null
         Assert.False(service.Has<Knowledge>());     // 且顺手清理，避免下次再踩
+    }
+
+    [Fact]
+    public void 单条草稿损坏_移出前备份该条原始内容()
+    {
+        File.WriteAllText(_path, "{\"Knowledge\":{\"Json\":\"{ 坏掉的负载\",\"SavedAt\":\"2026-10-13 10:00:00\"}}");
+
+        var service = new DraftService(_path);
+        Assert.Null(service.Get<Knowledge>());
+
+        var backup = Assert.Single(Directory.GetFiles(Dir, CorruptPrefix + "*"));
+        Assert.Equal("{ 坏掉的负载", File.ReadAllText(backup));  // 原始负载原样落盘
+        Assert.Contains(".Knowledge.bak", backup);               // 标记来自哪个键
+
+        // 清理已落盘：重开后该键不存在，文件仍是合法 JSON
+        Assert.False(new DraftService(_path).Has<Knowledge>());
+    }
+
+    [Fact]
+    public void 损坏备份_超出上限时保留最近的()
+    {
+        // 预置 12 个"很久以前"的备份，再触发一次真实备份 → 总数应被截到 10
+        for (int i = 0; i < 12; i++)
+        {
+            var old = Path.Combine(Dir, $"{CorruptPrefix}20200101_0000{i:D2}_000.old.bak");
+            File.WriteAllText(old, "old");
+            File.SetLastWriteTimeUtc(old, new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        }
+        const string broken = "{ 坏";
+        File.WriteAllText(_path, broken);
+
+        _ = new DraftService(_path);
+
+        var backups = Directory.GetFiles(Dir, CorruptPrefix + "*");
+        Assert.Equal(10, backups.Length);
+        Assert.Contains(backups, f => File.ReadAllText(f) == broken); // 最新那条没被误删
     }
 
     [Fact]
