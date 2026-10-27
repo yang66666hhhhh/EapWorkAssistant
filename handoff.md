@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-26 11:20（会话交接用）
-> 本轮主题：**P2 ⑪ 观感打磨（StatCard count-up + 仪表盘骨架屏 + EmptyState 插画修复增强 + 侧边栏 Logo 矢量化）**
+> 生成时间：2026-10-27 11:40（会话交接用）
+> 本轮主题：**P3 #8 Helper 目录归类——`DataGridCopyHelper` 785 行单文件按类型拆为 `Helpers/Copy/` 5 文件**
 > 当前状态：**测试 203/203 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
-> 下一步：**P3 队列**（⑪ 是 P2 最后一项；§5.3 四项待拍板仍有效）
+> 下一步：**P3 已全部核实完成**（#9/#10/#11 早已存在），可转入 §5.4 待拍板项或新一轮功能
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## 1. 本轮进度（已完成并提交）
 
-### 1.1 本会话新增 commit（15 笔，按时间正序）
+### 1.1 本会话新增 commit（18 笔，按时间正序）
 
 | commit | 主题 | 类别 |
 |---|---|---|
@@ -45,6 +45,9 @@
 | `2601033` | docs: AGENTS.md §8.25 增「归因红线」与按日期跳转约定，handoff 同步 190 基线 | 文档 |
 | `7b9f9de` | **feat: 命令面板静态源 + 首启引导（P2 ⑩）**——页面/操作入口进全局搜索并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放（10 文件 +518 行） | 代码 |
 | `0aa066d` | docs: AGENTS.md 增补 8.26 命令面板/首启引导规范，handoff 标记 P2 ⑩ 完成 | 文档 |
+| `b75aacb` | **feat: 观感打磨（P2 ⑪）**——StatCard count-up / 仪表盘骨架屏 / EmptyState 插画（修复从未渲染的既有 bug）/ 三页搜索空态统一 / Logo 矢量 | 代码 |
+| `63691ac` | docs: AGENTS.md 增补 8.27 观感打磨规范，handoff 标记 P2 ⑪ 完成 | 文档 |
+| `a5937f1` | **refactor: 拆分 DataGridCopyHelper 为 Helpers/Copy/ 五文件（P3 #8）**——抽出 CopyVisuals 共享层解除两个附加属性耦合，零行为变更 | 代码 |
 
 > ⚠️ **推送状态**：以上**均未 push**（含 `7b9f9de`；更早的 ⑨ 批次笔数说明见上一版）。本约定为「仅本地 commit，push 由用户真实终端执行」——开新窗口请以 `git log --oneline origin/master..HEAD` 为准。
 
@@ -298,7 +301,9 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 > ①②③ 属更早批次（出勤模块、工时双口径、保存后关抽屉等），见 §1.2 与 `git log`。
 
-### 5.2 P2（进行中）
+### 5.2 P2 / P3 队列
+
+#### P2（✅ 全部完成）
 
 | # | 项 | 状态 / 参考要点 |
 |---|---|---|
@@ -306,7 +311,18 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | ⑨ | **主动异常洞察** | ✅ `fe17547` `ad06545`；纯静态 `InsightAnalyzer` + 仪表盘「需要留意」卡，规范见 AGENTS.md §8.25 |
 | ⑨′ | **洞察规则③两轮修正** | ✅ `6715b01` `f4f7b2a` `f3357d3` `2601033`；① 应填工时 = 8h − 当天请假时长；② 去归因 + 按日期跳转 |
 | ⑩ | **首启引导 + 搜索扩展** | ✅ `7b9f9de`；`CommandPaletteProvider` 静态源（7 页面 + 新增记录操作）进命令面板并置顶；`HasCompletedOnboarding` 开关 + 4 步引导浮层 + 设置页重放，规范见 AGENTS.md §8.26 |
-| ⑪ | **观感打磨** | ✅ 已完成；count-up + 仪表盘骨架屏 + EmptyState 插画（含**修复插画从未渲染的既有 bug**）+ 三页搜索空态统一 + Logo 矢量化（AGENTS §8.27） |
+| ⑪ | **观感打磨** | ✅ `b75aacb` `63691ac`；count-up + 仪表盘骨架屏 + EmptyState 插画（含**修复插画从未渲染的既有 bug**）+ 三页搜索空态统一 + Logo 矢量化（AGENTS §8.27） |
+
+#### P3 工程规范（评审报告 §三，2026-10-27 逐项核实）
+
+| # | 项 | 状态 |
+|---|---|---|
+| 8 | **`DataGridCopyHelper` 785 行拆分** | ✅ 本轮完成；拆为 `Helpers/Copy/` 5 文件（CopyVisuals 142 / DataGridCopyHelper 220 / ListBoxCopyHelper 150 / CopyButton 138 / PreviewPopup 168），规范见 AGENTS.md §8.28。⚠️ 拆分中发现 `DataGridCopyHelper` **从未接线**（`ModernGrid` 无 EnableCopy Setter，悬停浮窗曾于 `d06dbd8` 主动回退）→ 处置待拍板，见 §5.3-e |
+| 9 | **Repository 模板抽象** | ✅ 早已完成：`Repositories/SqliteRepository.cs`（36 行）存在且被 4 个 Repository 继承 |
+| 10 | **`ThemeService.GetChartColors` 强转保护** | ✅ 早已完成：`TryGetColor(res, key, fallback)` 兜底，键缺失/类型不符返回默认色，永不抛 |
+| 11 | **`.editorconfig` / Helper 目录归类** | ✅ 早已完成：`.editorconfig` 在根目录；27 个转换器已归入 `Helpers/Converters/`；本次补 `Helpers/Copy/` |
+
+> 结论：**评审报告的 P3 四项仅 #8 属实待办**，其余三项在后续迭代中已顺手完成。
 
 ### 5.3 未决 / 需用户拍板
 
@@ -316,6 +332,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 | b | **备份文件清理** | `%LOCALAPPDATA%\EapWorkAssistant\` 下现存：`config.json.bak_chartverify`、`config.json.bak_ctrln_test`、`config.json.bak_darktest`、`config.json.bak_persist_test`、`eapwork.db.bak_20260818_142448`、`eapwork.db.pre_actualhours_20261013_144047`、`eapwork.db.pre_undo_20260818_144246`（另 `backups/` 目录）。**待用户确认后清理**。 |
 | c | **`2026-10-10` 待用户核对（不是脏数据）** | 用户确认当天**调休半天**（10-10 为补班日），填报 4.0h 是**正确值**（实际也是 4.0h）。但 `LeaveRecord` 里**没有 10-10**（最新只到 `2026-09-30`）→ 调休余额虚高 4h（现显示 40.0h，补记后应为 36.0h）。**待用户拍板**：① 确属调休 → 工作记录页点「+ 请假」补记 10-10 调休 4h；② 实际全天在岗、只是漏报 → 直接补报工时。两者都能消掉洞察提示。规则③已改为**不预设原因**（只陈述「填报低于应填工时」并并列两条路）。 |
 | d | **`ShortcutNewEnabled`** | 已被改为 `true`（为让 Ctrl+N 生效）。用户若想关闭：设置 → 快捷键 → 新增。 |
+| e | **`DataGridCopyHelper` 死代码处置**（本轮新发现） | 该附加属性（悬停 300ms 浮窗预览 + 右键复制单元格/整行，约 220 行）**全项目从未接线**：`ModernGrid` 样式没有 `EnableCopy` Setter，只有 `ModernListBox` 用了 ListBox 版。历史 `d06dbd8`「回退表格悬浮浮窗并恢复稳定提示」证实表格浮窗是**主动回退**（密集网格里频繁弹出干扰，改用单元格 ToolTip）。**三选一待拍板**：① 维持现状（代码留档、不接线）；② 只启用右键菜单（需拆 `OnPropertyChanged` 的事件订阅，去掉悬停部分，先解决与既有 ToolTip 的双重提示）；③ 连同 ListBox 版一起废掉，改用 DataGrid/ListBox 原生 Ctrl+C。 |
 
 ---
 
@@ -324,7 +341,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.26 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用（`eap_dotnet_run.py` 缺失则先重建，见 §4.1）。
 3. 跑一次全量测试确认基线（当前 **203/203**）。
-4. 从 **P3 队列**开始（P2 ⑧⑨⑩⑪ **均已完成**，规范见 AGENTS §8.24~8.27）；或按用户当次指令；§5.3 四项待拍板仍有效。
+4. **P2 / P3 队列均已全部完成**（规范见 AGENTS §8.24~8.28）→ 当前无既定队列，优先处理 §5.3 待拍板项（a 草稿加固 / c 10-10 调休补记 / e 表格复制接线），或按用户当次指令开新功能。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。
 7. 本轮验证产物（`outputs/`，未入库）：`batch-select-knowledge.png`（⑧）、`insight-review-dashboard.png` + `insight-review-workrecord.png`（⑨′）、`attendance-heatmap-*.png`（⑦）、`onboarding-open.png` + `search-palette-*.png` + `search-enter-recycle.png`（⑩）。

@@ -803,6 +803,24 @@ if (DataContext is KnowledgeViewModel vm)
 
 ---
 
+### 8.28 Helper 目录归类：Copy 复制族拆分（P3 #8，2026-10-27 新增）
+
+- **目录约定**：`Helpers/` 根目录只放跨模块的小工具（Logger / ViewNames / MotionTokens 等）；成组的功能按子领域建子目录——已有 `Helpers/Converters/`（27 个转换器），本次新增 `Helpers/Copy/`。**命名空间一律保持 `EapWorkAssistant.Helpers`**（XAML 的 `xmlns:local="clr-namespace:EapWorkAssistant.Helpers"` 依赖它，改命名空间会波及大量 XAML）。
+- **拆分结果**（原 `Helpers/DataGridCopyHelper.cs` 785 行 → 818 行 / 5 文件，含共享工具与注释）：
+  | 文件 | 行数 | 职责 |
+  |---|---|---|
+  | `Copy/CopyVisuals.cs` | 142 | **internal static**：视觉树遍历（`FindVisualParent/Child/AllVisualChildren`）、文本提取（`ExtractCellText`/`ExtractTextBlockText`）、菜单样式套用、剪贴板写入、反射取值/格式化 |
+  | `Copy/DataGridCopyHelper.cs` | 220 | DataGrid 附加属性：悬停预览 + 右键复制单元格/整行 + 整行文本拼接 |
+  | `Copy/ListBoxCopyHelper.cs` | 150 | ListBox 附加属性：悬停预览 + 右键复制点击文本/整条 |
+  | `Copy/CopyButton.cs` | 138 | 复制按钮控件（文字链风格 + 已复制反馈） |
+  | `Copy/PreviewPopup.cs` | 168 | 悬停预览单例浮层（Popup + 多层阴影 + 淡出） |
+- **解耦要点**：拆前 `ListBoxCopyHelper` 直接调用 `DataGridCopyHelper.FindVisualParent` 等 **internal 成员**（两个本不相关的附加属性互相耦合）。抽到 `CopyVisuals` 后两者平级、互不引用；`CopyToClipboard` 两处重复实现合并为 `CopyVisuals.CopyMenuItemText`。
+- ⚠️ **`DataGridCopyHelper` 当前未接线**：全项目只有 `ModernListBox` 样式的 `EnableCopy` Setter，`ModernGrid` 没有。悬停浮窗曾于 `d06dbd8` 从 Styles.xaml **主动回退**（表格改用单元格 ToolTip，原因是浮窗在密集网格中频繁弹出干扰阅读）。该 220 行属「已实现但有意停用」，**不是遗漏**；若要恢复建议只启用右键菜单（需拆分 `OnPropertyChanged` 的事件订阅），并先评估与既有 ToolTip 的双重提示。文件头注释已写明此上下文。
+- **重构纪律**：纯搬移**零行为变更**——本次不启用任何未接线功能、不改任何交互时序。发现死代码先记录待拍板（handoff §5.3-e），不在重构提交里夹带行为变更。
+- **验证**：编译 0 错误（既有 3 条 NU1701 与本次无关）；测试 **203/203** 无回归；冒烟 9s 零新 `error_*.log`。
+
+---
+
 ## 9. AI 行为约束红线
 
 > 本节是 AI 生成 / 修改代码的硬性规则，与前面各节冲突时以本节为准。本节整合了原「AI 操作红线（20 条）」与「EAP 适配版 10 条」，去重并核对真实代码库。前面各节已详述的技术细节，此处仅列规则并交叉引用，避免重复。
