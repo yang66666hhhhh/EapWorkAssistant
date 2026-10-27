@@ -821,6 +821,22 @@ if (DataContext is KnowledgeViewModel vm)
 
 ---
 
+### 8.29 草稿损坏加固：先备份再清理（§5.3-a，2026-10-27 新增）
+
+- **问题（两处都会永久丢数据）**：① `DraftService.Load()` 反序列化失败 → `_entries` 重置为空，下一次 `Save/Clear` 触发 `Persist()` 就把坏文件**整份覆盖**；② `Get<T>()` 单条反序列化失败 → 直接 `Remove` + `Persist()`，坏条目被写没。原实现只记日志「已丢弃」，用户无从抢救（`error_20261015.log` 曾积 24 行同类记录）。
+- **方案**：统一走 `BackupCorrupt(rawJson, entryKey)`：
+  | 场景 | 备份方式 | 文件名 |
+  |---|---|---|
+  | 顶层文件损坏 | `File.Copy` 整份 | `<草稿名>.corrupt-yyyyMMdd_HHmmss_fff.file.bak` |
+  | 单条损坏 | 把 `entry.Json` 原始串写入 | `<草稿名>.corrupt-...<Key>.bak` |
+- ⚠️ **必须在 `Persist()` 之前备份**；`Load()` 分支里更要在任何 `_entries` 变更与后续 Save 之前（否则原文件已被覆盖）。
+- 备份动作整体包在 `try/catch` 中，失败返回 null 并记日志 → 退化为「丢弃 + 日志」。**草稿是锦上添花，绝不能因加固反而成为崩溃点**。
+- **保留上限** `MaxCorruptBackups = 10`：按 `BackupPrefix`（`Path.GetFileNameWithoutExtension(_path) + ".corrupt-"`）计数，`OrderByDescending(LastWriteTimeUtc).Skip(10)` 删最旧。文件名带**毫秒**，避免同一秒内多次损坏互相覆盖。
+- **落盘位置**：与草稿文件**同目录**（不另建 backups 子目录）——单测用隔离临时路径时天然隔离不污染真实目录，用户查找也直观。
+- **验证**：`DraftServiceTests` 203 → **206**（新增 3 条：顶层损坏备份内容原样 + `.file.bak` 标记；单条损坏备份原始负载 + `.Knowledge.bak` 标记 + 清理后文件仍合法可读；预置 12 个旧备份 → 触发一次真实备份后总数截到 10 且最新那条未被误删）。冒烟 9s 零新 `error_*.log`。
+
+---
+
 ## 9. AI 行为约束红线
 
 > 本节是 AI 生成 / 修改代码的硬性规则，与前面各节冲突时以本节为准。本节整合了原「AI 操作红线（20 条）」与「EAP 适配版 10 条」，去重并核对真实代码库。前面各节已详述的技术细节，此处仅列规则并交叉引用，避免重复。

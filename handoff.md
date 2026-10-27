@@ -1,9 +1,9 @@
 # EAP Work Assistant — 交接摘要
 
-> 生成时间：2026-10-27 11:40（会话交接用）
-> 本轮主题：**P3 #8 Helper 目录归类——`DataGridCopyHelper` 785 行单文件按类型拆为 `Helpers/Copy/` 5 文件**
-> 当前状态：**测试 203/203 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
-> 下一步：**P3 已全部核实完成**（#9/#10/#11 早已存在），可转入 §5.4 待拍板项或新一轮功能
+> 生成时间：2026-10-27 11:45（会话交接用）
+> 本轮主题：**P3 #8 Helper 目录归类（`DataGridCopyHelper` 拆分为 `Helpers/Copy/` 5 文件）+ §5.3-a 草稿损坏加固（先备份再清理）**
+> 当前状态：**测试 206/206 全绿 · 工作区待 commit · 本地领先 `origin/master`（多笔未 push，按约定由真实终端执行）**
+> 下一步：**P2/P3 队列已清空**；§5.3 剩 b 备份清理 / c 10-10 调休补记 / e 表格复制接线，均待用户拍板
 
 ---
 
@@ -19,7 +19,7 @@
 | 仓库 | `C:\Users\Yang\Documents\EapWorkAssistant`（git，**仅本地 commit，不 push**） |
 | 应用数据 | `%LOCALAPPDATA%\EapWorkAssistant\`（`config.json` / `eapwork.db` / `drafts.json` / `logs\error_YYYYMMDD.log`） |
 | 验证产物 | `C:\Users\Yang\Documents\EapWorkAssistant\outputs\`（**已在 `.gitignore`**，截图/报告不污染仓库） |
-| 测试基线 | **203 / 203**（`.sln` 不含测试项目，须显式指定测试 csproj） |
+| 测试基线 | **206 / 206**（`.sln` 不含测试项目，须显式指定测试 csproj） |
 
 ---
 
@@ -255,8 +255,8 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
   dotnet test EapWorkAssistant.Tests/EapWorkAssistant.Tests.csproj -c Debug -v:minimal
 ```
 
-- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）**→ 203**（P2 ⑩ 静态源 11 + 引导配置 2）。
-- 当前 **203 / 203 全绿**。
+- 基线演进：**138 → 156**（P1 ⑦ 热力图 18）**→ 161**（P2 ⑧ 多选 5）**→ 181**（P2 ⑨ 洞察 20）**→ 187**（规则③修正 6）**→ 190**（去归因 + 按日期跳转 3）**→ 203**（P2 ⑩ 静态源 11 + 引导配置 2）**→ 206**（§5.3-a 草稿损坏备份 3）。
+- 当前 **206 / 206 全绿**。
 
 ### 4.3 可复用脚本（`%TEMP%`）
 
@@ -328,7 +328,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 | # | 事项 | 说明 |
 |---|---|---|
-| a | **DraftService 损坏加固** | `error_20261015.log` 曾存 24 行 `草稿解析失败（Knowledge）`（11:44，非某轮引入）；`drafts.json` 损坏时**静默丢弃**。建议：损坏时**备份坏文件而非静默丢弃**。**待用户确认是否立项**。 |
+| a | **DraftService 损坏加固** | ✅ **已完成（2026-10-27）**：`BackupCorrupt` 统一入口——顶层文件损坏整份复制为 `*.corrupt-<ts>.file.bak`，单条损坏把 `entry.Json` 原始串落为 `*.corrupt-<ts>.<Key>.bak`，**均在 Persist 之前**；保留最近 10 个（`MaxCorruptBackups`）；备份失败退化为原「丢弃 + 日志」不阻断主流程。测试 203 → **206**，规范见 AGENTS.md §8.29。背景：`error_20261015.log` 曾积 24 行 `草稿解析失败（Knowledge）`，原实现静默丢弃。 |
 | b | **备份文件清理** | `%LOCALAPPDATA%\EapWorkAssistant\` 下现存：`config.json.bak_chartverify`、`config.json.bak_ctrln_test`、`config.json.bak_darktest`、`config.json.bak_persist_test`、`eapwork.db.bak_20260818_142448`、`eapwork.db.pre_actualhours_20261013_144047`、`eapwork.db.pre_undo_20260818_144246`（另 `backups/` 目录）。**待用户确认后清理**。 |
 | c | **`2026-10-10` 待用户核对（不是脏数据）** | 用户确认当天**调休半天**（10-10 为补班日），填报 4.0h 是**正确值**（实际也是 4.0h）。但 `LeaveRecord` 里**没有 10-10**（最新只到 `2026-09-30`）→ 调休余额虚高 4h（现显示 40.0h，补记后应为 36.0h）。**待用户拍板**：① 确属调休 → 工作记录页点「+ 请假」补记 10-10 调休 4h；② 实际全天在岗、只是漏报 → 直接补报工时。两者都能消掉洞察提示。规则③已改为**不预设原因**（只陈述「填报低于应填工时」并并列两条路）。 |
 | d | **`ShortcutNewEnabled`** | 已被改为 `true`（为让 Ctrl+N 生效）。用户若想关闭：设置 → 快捷键 → 新增。 |
@@ -340,7 +340,7 @@ C:/Users/Yang/.workbuddy/binaries/python/versions/3.13.12/python.exe \
 
 1. 先读 `AGENTS.md`（第 9 章红线 + 第 8 章 8.21~8.26 近期规范）+ `.workbuddy/memory/MEMORY.md` + 本文件。
 2. 自检环境：跑一次 `eap_dotnet_run.py dotnet --version`，确认编译链可用（`eap_dotnet_run.py` 缺失则先重建，见 §4.1）。
-3. 跑一次全量测试确认基线（当前 **203/203**）。
+3. 跑一次全量测试确认基线（当前 **206/206**）。
 4. **P2 / P3 队列均已全部完成**（规范见 AGENTS §8.24~8.28）→ 当前无既定队列，优先处理 §5.3 待拍板项（a 草稿加固 / c 10-10 调休补记 / e 表格复制接线），或按用户当次指令开新功能。
 5. 每个 P 项完成后：编译 → 全量测试 → 必要时 UI/截图验证 → 更新 `AGENTS.md` → 按主题 commit（不 push）。
 6. 真实终端复核推送状态：`git status` + `git log --oneline origin/master..HEAD`。
