@@ -256,7 +256,8 @@
                 <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0"
                            Text="一日一状态，双标记展示"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                 <RadioButton Content="本月" GroupName="RangeChip" Style="{StaticResource ToggleChip}"
                              Margin="0,0,6,0" Padding="14,6"
                              IsChecked="{Binding RangePreset, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter=本月, Mode=OneWay}"
@@ -288,7 +289,8 @@
         </Grid>
 
         <!-- ===== 汇总统计卡（点击下钻到对应筛选） ===== -->
-        <Grid Grid.Row="1" Margin="0,0,0,14">
+        <Grid Grid.Row="1" Margin="0,0,0,14"
+              Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -373,7 +375,8 @@
         </Grid>
 
         <!-- ===== P1 ⑦ 月度出勤热力图（总览：只跟时间段区间走，不跟下方筛选 chips） ===== -->
-        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,14">
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,14"
+                Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
             <DockPanel>
                 <!-- 头部：标题 + 当前月份 + 翻页（边界内才可点） -->
                 <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
@@ -465,7 +468,8 @@
         </Border>
 
         <!-- ===== 筛选 chips + 搜索 + 结果说明 ===== -->
-        <Grid Grid.Row="3" Margin="0,0,0,12">
+        <Grid Grid.Row="3" Margin="0,0,0,12"
+              Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Content="全部" GroupName="FilterChip" Style="{StaticResource ToggleChip}"
                              Margin="0,0,6,0" Padding="12,6"
@@ -510,7 +514,8 @@
         </Grid>
 
         <!-- ===== 出勤明细列表 ===== -->
-        <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
+        <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0"
+                Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
             <controls:DataGridBase x:Name="AttendanceGrid" ItemsSource="{Binding Items}"
                                    TableKey="Attendance"
                                    AutoGenerateColumns="False"
@@ -600,11 +605,25 @@
             </controls:DataGridBase>
         </Border>
 
-        <!-- 空状态 -->
-        <controls:EmptyState Grid.Row="4"
-                             Visibility="{Binding IsEmpty, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+        <!-- 空状态：筛选后无命中（库里有数据才可能走到这里） -->
+        <Grid Grid.Row="4"
+              Visibility="{Binding HasContent, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
+            <controls:EmptyState
+                                 Visibility="{Binding IsEmpty, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
+                                 IconPathData="{StaticResource IconCalendar}"
+                                 Title="没有符合条件的记录"
+                                 Description="切换筛选条件或时间段试试"/>
+        </Grid>
+
+        <!-- 引导空状态：库里一条工作记录都没有（全新用户）。
+             不渲染统计卡/热力图/明细，避免「18 天未填」满屏泛红被误认为历史脏数据。
+             横跨第 1~4 行（标题行保留），整块区域垂直居中。 -->
+        <controls:EmptyState Grid.Row="1" Grid.RowSpan="4"
+                             Visibility="{Binding IsNeverUsed, Converter={x:Static local:BoolToVisibilityConverter.Instance}}"
                              IconPathData="{StaticResource IconCalendar}"
-                             Title="没有符合条件的记录"
-                             Description="切换筛选条件或时间段试试"/>
+                             Title="还没有任何工作记录"
+                             Description="记录第一天的工作后，这里会自动生成出勤热力图、工时统计与调休余额"
+                             ActionContent="去记录今天"
+                             ActionCommand="{Binding GoRecordTodayCommand}"/>
     </Grid>
 </UserControl>

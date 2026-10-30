@@ -35,6 +35,19 @@ public class DayStatusService
     public bool IsHolidayDataAvailable(int year) => HolidayService.Instance.IsYearAvailable(year);
 
     /// <summary>
+    /// 库里是否存在**任何**工作记录或请假记录（不限当前区间，含历史）。
+    /// 出勤总览用它区分两种「空」：
+    ///   - 全新用户（无任何记录）→ 显示引导空状态，而不是让 18 个「未填」红格把人淹掉；
+    ///   - 已在使用但本月没填 → 保留「未填」提醒，这才是有效告警。
+    /// </summary>
+    public async Task<bool> HasAnyRecordAsync()
+    {
+        if (await _recordRepo.GetTotalCountAsync() > 0)
+            return true;
+        return await _leaveRepo.GetTotalCountAsync() > 0;
+    }
+
+    /// <summary>
     /// 获取 [start, end] 闭区间内每一天的出勤状态（含无记录的休息日/未填日）。
     /// </summary>
     public async Task<List<DayStatusItem>> GetRangeAsync(DateTime start, DateTime end)

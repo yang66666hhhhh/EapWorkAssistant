@@ -10,6 +10,12 @@ namespace EapWorkAssistant.Repositories;
 /// </summary>
 public class LeaveRecordRepository : SqliteRepository
 {
+    /// <summary>请假记录总数（已过滤软删除）；与 <see cref="WorkRecordRepository.GetTotalCountAsync"/> 对称，
+    /// 供出勤总览判断「是不是一条数据都没有的全新用户」。</summary>
+    public Task<int> GetTotalCountAsync()
+        => ExecuteAsync(c => c.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM LeaveRecord WHERE IsDeleted = 0"));
+
     /// <summary>获取指定月份的请假记录（已过滤软删除）</summary>
     public Task<IEnumerable<LeaveRecord>> GetByMonthAsync(int year, int month)
     {

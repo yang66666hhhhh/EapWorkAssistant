@@ -52,6 +52,19 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
     [ObservableProperty]
     private bool _isEmpty;
 
+    /// <summary>
+    /// 库里从来没有过任何工作记录 / 请假记录（全新用户）。
+    /// 为 true 时统计卡、热力图、筛选条、明细列表全部不渲染，改显示引导空状态——
+    /// 否则新用户一进来就是「18 天未填」满屏告警，看着像历史脏数据。
+    /// 一旦有任意一条记录（哪怕是去年的），立即回到正常视图。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasContent))]
+    private bool _isNeverUsed;
+
+    /// <summary>是否渲染统计卡/热力图/筛选条/明细（<see cref="IsNeverUsed"/> 的反面，供 XAML 绑定）。</summary>
+    public bool HasContent => !IsNeverUsed;
+
     // ===== 汇总统计（统计卡）=====
     [ObservableProperty] private int _normalDays;
     [ObservableProperty] private double _normalHours;
@@ -161,6 +174,10 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
             NavigateToWorkRecord?.Invoke(item.Date);
     }
 
+    /// <summary>空状态按钮：去工作记录页记录今天（预选今天日期）。</summary>
+    [RelayCommand]
+    private void GoRecordToday() => NavigateToWorkRecord?.Invoke(DateTime.Today);
+
     /// <summary>进入页面 / 外部刷新时调用（IRefreshable）。</summary>
     public async Task RefreshAsync()
     {
@@ -232,6 +249,8 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
         }
 
         _allItems = await _service.GetRangeAsync(start, end);
+        // 「全新用户」判定：库里一条记录都没有时不摆满屏红格，改显示引导空状态
+        IsNeverUsed = !await _service.HasAnyRecordAsync();
         BuildHeatmap();
         ApplySummary();
         ApplyFilter();
