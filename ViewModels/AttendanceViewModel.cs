@@ -167,42 +167,33 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
         await LoadAsync();
     }
 
+    /// <summary>
+    /// 加载期间又被触发刷新的标记：**不丢弃**，等本轮结束后补刷一次。
+    /// 原先 `if (IsLoading) return;` 会把快速切页产生的刷新请求静默吞掉，
+    /// 页面就停在上一次结果上（用户感知的「数据不实时」）。
+    /// </summary>
+    private bool _reloadPending;
+
     /// <summary>按当前预设加载数据；自定义模式使用 StartDate/EndDate。</summary>
     [RelayCommand]
     private async Task LoadAsync()
     {
-        if (IsLoading) return; // 防重：连点预设不重复加载
+        if (IsLoading)
+        {
+            _reloadPending = true; // 正在加载：登记一次补刷，而不是直接 return
+            return;
+        }
+
         IsLoading = true;
         try
         {
-            var today = DateTime.Today;
-            DateTime start;
-            DateTime end;
-
-            if (RangePreset == "自定义" && StartDate is { } s && EndDate is { } e)
+            // 本轮加载期间若又收到刷新请求 → 循环再刷一次，保证**最后一次**请求一定被处理
+            do
             {
-                start = s.Date;
-                end = e.Date;
+                _reloadPending = false;
+                await LoadCoreAsync();
             }
-            else
-            {
-                (start, end) = RangePreset switch
-                {
-                    "本年" => (new DateTime(today.Year, 1, 1), new DateTime(today.Year, 12, 31)),
-                    "近三个月" => (today.AddMonths(-3), today),
-                    _ => (new DateTime(today.Year, today.Month, 1),
-                          new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)))
-                };
-                // 预设模式下同步日期框，保持三者（预设/起/止）一致
-                StartDate = start;
-                EndDate = end;
-            }
-
-            _allItems = await _service.GetRangeAsync(start, end);
-            BuildHeatmap();
-            ApplySummary();
-            ApplyFilter();
-            await LoadCompLeaveAsync(end);
+            while (_reloadPending);
         }
         catch (Exception ex)
         {
@@ -212,6 +203,39 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
         {
             IsLoading = false;
         }
+    }
+
+    /// <summary>单次取数 + 重建视图（只管干活，不含防重与异常兜底）。</summary>
+    private async Task LoadCoreAsync()
+    {
+        var today = DateTime.Today;
+        DateTime start;
+        DateTime end;
+
+        if (RangePreset == "自定义" && StartDate is { } s && EndDate is { } e)
+        {
+            start = s.Date;
+            end = e.Date;
+        }
+        else
+        {
+            (start, end) = RangePreset switch
+            {
+                "本年" => (new DateTime(today.Year, 1, 1), new DateTime(today.Year, 12, 31)),
+                "近三个月" => (today.AddMonths(-3), today),
+                _ => (new DateTime(today.Year, today.Month, 1),
+                      new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)))
+            };
+            // 预设模式下同步日期框，保持三者（预设/起/止）一致
+            StartDate = start;
+            EndDate = end;
+        }
+
+        _allItems = await _service.GetRangeAsync(start, end);
+        BuildHeatmap();
+        ApplySummary();
+        ApplyFilter();
+        await LoadCompLeaveAsync(end);
     }
 
     /// <summary>切换时间段预设（由 View 的 chips 调用）。</summary>
@@ -299,8 +323,9 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
 
     /// <summary>
     /// 按当前区间重建热力图：月份边界取区间覆盖的首末月。
-    /// 默认展示「今天所在月」（落在区间内时），否则退回区间末月——
-    /// 「本年」区间延伸到 12 月，直接取末月会默认展示无数据的未来月份。
+    /// **保留用户已翻到的月份**（仍落在新区间内就沿用）——原先每次重建都强制回到
+    /// 「今天所在月」，翻到 9 月后再触发一次刷新就跳回 10 月，看着像数据错乱。
+    /// 仅当用户所在月已不在区间内时，才退回「今天所在月」（在区间内）或区间末月。
     /// </summary>
     private void BuildHeatmap()
     {
@@ -318,10 +343,16 @@ public partial class AttendanceViewModel : ObservableObject, IRefreshable
             _heatmapMaxMonth = _heatmapMinMonth;
         }
 
-        var todayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        HeatmapMonth = todayMonth >= _heatmapMinMonth && todayMonth <= _heatmapMaxMonth
-            ? todayMonth
-            : _heatmapMaxMonth;
+        var current = new DateTime(HeatmapMonth.Year, HeatmapMonth.Month, 1);
+        if (current < _heatmapMinMonth || current > _heatmapMaxMonth)
+        {
+            var todayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            current = todayMonth >= _heatmapMinMonth && todayMonth <= _heatmapMaxMonth
+                ? todayMonth
+                : _heatmapMaxMonth;
+        }
+
+        HeatmapMonth = current;
         RefreshHeatmapCells();
     }
 
