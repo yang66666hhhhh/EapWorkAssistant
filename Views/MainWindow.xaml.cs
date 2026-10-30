@@ -158,9 +158,21 @@ public partial class MainWindow : Window
             // 用户显式保存了"宽屏下也折叠"的状态时，关闭响应式自动展开，避免启动即被还原
             _autoResponsive = !(ConfigService.Instance.SidebarCollapsed && !narrow);
 
-            // 首启引导：从未完成过引导时自动弹出（设置页可手动重放，Esc/跳过均可关闭）
-            if (!ConfigService.Instance.HasCompletedOnboarding)
-                vm.ShowOnboardingCommand.Execute(null);
+            // 首启顺序：先补个人资料（为空时只提示一次），再放功能引导。
+            // 延迟到空闲期：等窗口完成布局，ProfileDialog 才能按 Owner 尺寸正确铺满遮罩。
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (ProfileService.Instance.NeedsPrompt)
+                {
+                    // 无论用户填没填都先置位——只提示一次，不反复打扰
+                    ProfileService.Instance.MarkPrompted();
+                    ProfileDialog.ShowFirstRun();
+                }
+
+                // 首启引导：从未完成过引导时自动弹出（设置页可手动重放，Esc/跳过均可关闭）
+                if (!ConfigService.Instance.HasCompletedOnboarding)
+                    vm.ShowOnboardingCommand.Execute(null);
+            }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
 
         // 应用当前字体大小缩放（Initialize 时窗口尚未就绪，需在此处补设）

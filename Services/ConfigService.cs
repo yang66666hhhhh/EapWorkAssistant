@@ -109,6 +109,13 @@ public class ConfigService
         set { _data.HasCompletedOnboarding = value; Save(); }
     }
 
+    /// <summary>启动时是否已提示过补全个人资料（只提示一次，填没填都算提示过）。</summary>
+    public bool HasPromptedProfile
+    {
+        get => _data.HasPromptedProfile;
+        set { _data.HasPromptedProfile = value; Save(); }
+    }
+
     // ===== 窗口几何（只读；写入走 SaveWindowState，避免 SizeChanged 高频落盘）=====
     public double WindowWidth => _data.WindowWidth;
     public double WindowHeight => _data.WindowHeight;

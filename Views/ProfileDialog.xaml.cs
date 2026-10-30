@@ -8,10 +8,19 @@ namespace EapWorkAssistant.Views;
 
 public partial class ProfileDialog : Window
 {
-    public ProfileDialog()
+    /// <param name="isFirstRun">首次启动的资料引导：换一套更客气的文案，并明确可以稍后再说</param>
+    public ProfileDialog(bool isFirstRun = false)
     {
         InitializeComponent();
         var p = ProfileService.Instance;
+
+        if (isFirstRun)
+        {
+            Title = "完善个人资料";
+            HeaderTitle.Text = "先简单介绍一下自己";
+            HeaderSubtitle.Text = "侧边栏名片、工作总结与报告都会用到这里的资料；不想填可以点「取消」，随时点头像回来补";
+        }
+
         NameInput.Text = p.Name;
         RoleInput.Text = p.Role;
         IndustryInput.Text = p.Industry;
@@ -39,9 +48,16 @@ public partial class ProfileDialog : Window
     /// <summary>
     /// 快捷方法：显示个人信息编辑对话框（全屏遮罩 + 居中卡片）
     /// </summary>
-    public static new bool Show()
+    public static new bool Show() => ShowCore(isFirstRun: false);
+
+    /// <summary>
+    /// 首次启动的资料引导（文案不同，只在资料为空且未提示过时调用一次）
+    /// </summary>
+    public static bool ShowFirstRun() => ShowCore(isFirstRun: true);
+
+    private static bool ShowCore(bool isFirstRun)
     {
-        var dialog = new ProfileDialog { Owner = Application.Current.MainWindow };
+        var dialog = new ProfileDialog(isFirstRun) { Owner = Application.Current.MainWindow };
         return dialog.ShowDialog() == true;
     }
 

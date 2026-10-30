@@ -54,9 +54,9 @@
                             </Grid>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="个人信息" FontSize="16" FontWeight="Bold"
+                            <TextBlock x:Name="HeaderTitle" Text="个人信息" FontSize="16" FontWeight="Bold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="设置您的个人资料，点击侧边栏头像可随时修改"
+                            <TextBlock x:Name="HeaderSubtitle" Text="设置您的个人资料，点击侧边栏头像可随时修改"
                                        FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
                                        Margin="0,2,0,0"/>
                         </StackPanel>

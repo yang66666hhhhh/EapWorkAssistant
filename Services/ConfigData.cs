@@ -59,6 +59,12 @@ public class ConfigData
     // 设置页「重新显示引导」可随时重放（不改变此标记的最终语义）。
     public bool HasCompletedOnboarding { get; set; } = false;
 
+    /// <summary>
+    /// 是否已在启动时提示过「补全个人资料」。
+    /// false → 下次启动若资料仍为空，弹一次资料引导；提示过（无论填没填）即置 true，只提示一次。
+    /// </summary>
+    public bool HasPromptedProfile { get; set; } = false;
+
     // ===== 窗口几何（记忆上次尺寸/位置/状态，下次启动还原）=====
     // Width/Height 为 0 表示"从未记录"，启动时沿用 XAML 默认尺寸；
     // Left/Top 为 null 表示"从未记录"，启动时沿用 WindowStartupLocation（居中）。
